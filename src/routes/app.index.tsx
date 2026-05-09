@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { jogos, ranking, times } from "@/lib/mock-data";
-import { ArrowUp, ArrowDown, Minus, Sparkles, TrendingUp, Trophy } from "lucide-react";
+import { Sparkles, TrendingUp, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Início — Bolão da Galera" }] }),
@@ -111,5 +111,3 @@ function SectionHeader({ title, link }: { title: string; link: string }) {
   );
 }
 
-// helpers re-export para evitar warnings
-export { ArrowUp, ArrowDown, Minus };
