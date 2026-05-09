@@ -9,38 +9,103 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppRankingRouteImport } from './routes/app.ranking'
+import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
+import { Route as AppJogosRouteImport } from './routes/app.jogos'
 
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRankingRoute = AppRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPalpitesRoute = AppPalpitesRouteImport.update({
+  id: '/palpites',
+  path: '/palpites',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJogosRoute = AppJogosRouteImport.update({
+  id: '/jogos',
+  path: '/jogos',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/jogos': typeof AppJogosRoute
+  '/app/palpites': typeof AppPalpitesRoute
+  '/app/ranking': typeof AppRankingRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/jogos': typeof AppJogosRoute
+  '/app/palpites': typeof AppPalpitesRoute
+  '/app/ranking': typeof AppRankingRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/jogos': typeof AppJogosRoute
+  '/app/palpites': typeof AppPalpitesRoute
+  '/app/ranking': typeof AppRankingRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/app/jogos'
+    | '/app/palpites'
+    | '/app/ranking'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/app/jogos' | '/app/palpites' | '/app/ranking' | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/app/jogos'
+    | '/app/palpites'
+    | '/app/ranking'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +113,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/ranking': {
+      id: '/app/ranking'
+      path: '/ranking'
+      fullPath: '/app/ranking'
+      preLoaderRoute: typeof AppRankingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/palpites': {
+      id: '/app/palpites'
+      path: '/palpites'
+      fullPath: '/app/palpites'
+      preLoaderRoute: typeof AppPalpitesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/jogos': {
+      id: '/app/jogos'
+      path: '/jogos'
+      fullPath: '/app/jogos'
+      preLoaderRoute: typeof AppJogosRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppJogosRoute: typeof AppJogosRoute
+  AppPalpitesRoute: typeof AppPalpitesRoute
+  AppRankingRoute: typeof AppRankingRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppJogosRoute: AppJogosRoute,
+  AppPalpitesRoute: AppPalpitesRoute,
+  AppRankingRoute: AppRankingRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
