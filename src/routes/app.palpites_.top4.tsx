@@ -17,8 +17,16 @@ function Top4() {
   const custo = Math.round((100 - ativa.eficacia) * 4);
 
   const setPos = (i: number, v: string) => {
+    const idxAntigo = picks.indexOf(v);
     const next = [...picks];
-    next[i] = v;
+    if (idxAntigo !== -1 && idxAntigo !== i) {
+      // troca automática
+      next[idxAntigo] = picks[i];
+      next[i] = v;
+      toast.info(`Trocado com a ${idxAntigo + 1}ª posição.`);
+    } else {
+      next[i] = v;
+    }
     setPicks(next);
   };
 
@@ -36,14 +44,6 @@ function Top4() {
             <p className="font-display font-bold">Janela atual: {ativa.fase}</p>
             <p className="text-xs">Eficácia agora: <span className="font-bold">{ativa.eficacia}%</span></p>
           </div>
-        </div>
-        <div className="mt-3 grid grid-cols-4 gap-1 text-center text-[10px]">
-          {janelasTop4.map((j) => (
-            <div key={j.fase} className={`rounded-lg px-2 py-1 ${j.ativa ? "bg-gold-foreground/20 font-bold" : "opacity-60"}`}>
-              {j.fase}
-              <p className="text-[9px]">{j.eficacia}%</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -65,16 +65,29 @@ function Top4() {
               onChange={(e) => setPos(i, e.target.value)}
               className="flex-1 rounded-2xl border border-border bg-secondary px-3 py-2 font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
-              {candidatos.map((c) => (
-                <option key={c} value={c}>{times[c]?.nome}</option>
-              ))}
+              {candidatos.map((c) => {
+                const usadoEm = picks.indexOf(c);
+                const desabilitado = usadoEm !== -1 && usadoEm !== i;
+                return (
+                  <option key={c} value={c} disabled={desabilitado}>
+                    {times[c]?.nome}{desabilitado ? ` (na ${usadoEm + 1}ª)` : ""}
+                  </option>
+                );
+              })}
             </select>
           </div>
         ))}
       </div>
 
       <button
-        onClick={() => toast.success("Top 4 salvo. Boa sorte, perebada!")}
+        onClick={() => {
+          const unicos = new Set(picks);
+          if (unicos.size !== picks.length) {
+            toast.error("Cada time só pode aparecer uma vez no Top 4");
+            return;
+          }
+          toast.success("Top 4 salvo. Boa sorte, perebada!");
+        }}
         className="w-full rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow"
       >
         Salvar palpite Top 4

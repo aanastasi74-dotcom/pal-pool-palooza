@@ -86,8 +86,8 @@ export function AppShell() {
                 {isAdmin && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem disabled>
-                      <ShieldCheck className="mr-2 h-4 w-4" /> Painel admin (em breve)
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/admin" })}>
+                      <ShieldCheck className="mr-2 h-4 w-4" /> Painel admin
                     </DropdownMenuItem>
                   </>
                 )}
