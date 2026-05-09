@@ -1,20 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { jogos, ranking, times } from "@/lib/mock-data";
-import { Sparkles, TrendingUp, Trophy } from "lucide-react";
+import { jogos, ranking, times, boletimDoDia, currentUser, perfis } from "@/lib/mock-data";
+import { Sparkles, TrendingUp, Trophy, Pencil } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { BoletimEditor } from "@/components/boletim-editor";
 
 export const Route = createFileRoute("/app/")({
-  head: () => ({ meta: [{ title: "Início — Bolão da Galera" }] }),
+  head: () => ({ meta: [{ title: "Início — Bolão dos Perebas" }] }),
   component: Home,
 });
 
 function Home() {
   const proximos = jogos.filter((j) => j.status !== "encerrado").slice(0, 3);
   const top3 = ranking.slice(0, 3);
+  const isAdmin = currentUser.role === "admin";
+  const [boletim, setBoletim] = useState(boletimDoDia.conteudo);
+  const [editing, setEditing] = useState(false);
+
+  const compartilharWhats = () => {
+    const texto = encodeURIComponent(`📰 Boletim dos Perebas\n\n${boletim}`);
+    window.open(`https://wa.me/?text=${texto}`, "_blank");
+  };
+
   return (
     <div className="space-y-8">
       <section className="relative overflow-hidden rounded-3xl bg-hero p-6 text-primary-foreground shadow-glow md:p-10">
         <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-accent/30 blur-3xl" />
-        <p className="text-xs uppercase tracking-widest opacity-80">Sua posição</p>
+        <p className="text-xs uppercase tracking-widest opacity-80">Sua posição na perebada</p>
         <div className="mt-2 flex items-end gap-4">
           <p className="font-display text-6xl font-black">2º</p>
           <div className="pb-2">
@@ -57,7 +69,7 @@ function Home() {
           {top3.map((p, i) => (
             <div key={p.id} className={`rounded-2xl border p-5 shadow-card ${i === 0 ? "border-accent bg-gold text-gold-foreground" : "border-border bg-card"}`}>
               <div className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-full font-bold" style={{ background: p.cor, color: "#fff" }}>
+                <div className="grid h-10 w-10 place-items-center rounded-full font-bold text-white" style={{ background: p.cor }}>
                   {p.apelido}
                 </div>
                 <div>
@@ -80,15 +92,45 @@ function Home() {
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent text-accent-foreground">
             <Sparkles className="h-6 w-6" />
           </div>
-          <div>
-            <h3 className="font-display text-lg font-bold">Boletim do dia</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              "Carla disparou na liderança após cravar o placar de Brasil x Portugal. Rafael caiu duas posições e já promete revanche. Diego segue investindo em quotas — agora são 4!"
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-lg font-bold">Boletim do dia · pra perebada saber</h3>
+              {isAdmin && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">admin</span>}
+            </div>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{boletim}</p>
+            <p className="mt-3 text-[10px] uppercase tracking-widest text-muted-foreground">
+              Perfis lidos: {perfis.slice(0, 3).map((p) => p.apelido_principal).join(" · ")}
             </p>
-            <button className="mt-4 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">Compartilhar no WhatsApp</button>
+            {isAdmin ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button onClick={compartilharWhats} className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
+                  Compartilhar no WhatsApp
+                </button>
+                <button onClick={() => setEditing(true)} className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold">
+                  <Pencil className="h-3 w-3" /> Editar antes de publicar
+                </button>
+                <Link to="/app/boletins" className="rounded-full border border-border px-4 py-2 text-xs font-bold">
+                  Histórico
+                </Link>
+              </div>
+            ) : (
+              <p className="mt-4 text-xs text-muted-foreground">Em modo leitura — só admins publicam.</p>
+            )}
           </div>
         </div>
       </section>
+
+      <BoletimEditor
+        open={editing}
+        onOpenChange={setEditing}
+        initial={boletim}
+        onPublish={(final, original) => {
+          setBoletim(final);
+          // mock: salvaria { original, final } como exemplo few-shot
+          toast.message("Versão original salva pra próxima geração aprender.");
+          console.log("[boletim] original:", original, "→ final:", final);
+        }}
+      />
     </div>
   );
 }
@@ -110,4 +152,3 @@ function SectionHeader({ title, link }: { title: string; link: string }) {
     </div>
   );
 }
-
