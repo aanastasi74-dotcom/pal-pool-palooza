@@ -21,8 +21,18 @@ import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
 import { Route as AppJogosRouteImport } from './routes/app.jogos'
 import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
+import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
 import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4'
 import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
+import { Route as AppAdminRelatoriosRouteImport } from './routes/app.admin.relatorios'
+import { Route as AppAdminPremiacaoRouteImport } from './routes/app.admin.premiacao'
+import { Route as AppAdminPerfisRouteImport } from './routes/app.admin.perfis'
+import { Route as AppAdminPagamentosRouteImport } from './routes/app.admin.pagamentos'
+import { Route as AppAdminJogosRouteImport } from './routes/app.admin.jogos'
+import { Route as AppAdminConvitesRouteImport } from './routes/app.admin.convites'
+import { Route as AppAdminConfiguracoesRouteImport } from './routes/app.admin.configuracoes'
+import { Route as AppAdminBoletinsRouteImport } from './routes/app.admin.boletins'
+import { Route as AppAdminAuditoriaRouteImport } from './routes/app.admin.auditoria'
 
 const AppRoute = AppRouteImport.update({
   id: '/app',
@@ -84,6 +94,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppPalpitesTop4Route = AppPalpitesTop4RouteImport.update({
   id: '/palpites_/top4',
   path: '/palpites/top4',
@@ -94,11 +109,56 @@ const AppPagamentoQuota_idRoute = AppPagamentoQuota_idRouteImport.update({
   path: '/pagamento/$quota_id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminRelatoriosRoute = AppAdminRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminPremiacaoRoute = AppAdminPremiacaoRouteImport.update({
+  id: '/premiacao',
+  path: '/premiacao',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminPerfisRoute = AppAdminPerfisRouteImport.update({
+  id: '/perfis',
+  path: '/perfis',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminPagamentosRoute = AppAdminPagamentosRouteImport.update({
+  id: '/pagamentos',
+  path: '/pagamentos',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminJogosRoute = AppAdminJogosRouteImport.update({
+  id: '/jogos',
+  path: '/jogos',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminConvitesRoute = AppAdminConvitesRouteImport.update({
+  id: '/convites',
+  path: '/convites',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminConfiguracoesRoute = AppAdminConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminBoletinsRoute = AppAdminBoletinsRouteImport.update({
+  id: '/boletins',
+  path: '/boletins',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminAuditoriaRoute = AppAdminAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/app/admin': typeof AppAdminRoute
+  '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -108,12 +168,21 @@ export interface FileRoutesByFullPath {
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
   '/app/': typeof AppIndexRoute
+  '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
+  '/app/admin/boletins': typeof AppAdminBoletinsRoute
+  '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
+  '/app/admin/convites': typeof AppAdminConvitesRoute
+  '/app/admin/jogos': typeof AppAdminJogosRoute
+  '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
+  '/app/admin/perfis': typeof AppAdminPerfisRoute
+  '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
+  '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
+  '/app/admin/': typeof AppAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app/admin': typeof AppAdminRoute
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -123,14 +192,24 @@ export interface FileRoutesByTo {
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
   '/app': typeof AppIndexRoute
+  '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
+  '/app/admin/boletins': typeof AppAdminBoletinsRoute
+  '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
+  '/app/admin/convites': typeof AppAdminConvitesRoute
+  '/app/admin/jogos': typeof AppAdminJogosRoute
+  '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
+  '/app/admin/perfis': typeof AppAdminPerfisRoute
+  '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
+  '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
+  '/app/admin': typeof AppAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/app/admin': typeof AppAdminRoute
+  '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -140,8 +219,18 @@ export interface FileRoutesById {
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
   '/app/': typeof AppIndexRoute
+  '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
+  '/app/admin/boletins': typeof AppAdminBoletinsRoute
+  '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
+  '/app/admin/convites': typeof AppAdminConvitesRoute
+  '/app/admin/jogos': typeof AppAdminJogosRoute
+  '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
+  '/app/admin/perfis': typeof AppAdminPerfisRoute
+  '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
+  '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites_/top4': typeof AppPalpitesTop4Route
+  '/app/admin/': typeof AppAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -158,12 +247,21 @@ export interface FileRouteTypes {
     | '/app/ranking'
     | '/app/simulador'
     | '/app/'
+    | '/app/admin/auditoria'
+    | '/app/admin/boletins'
+    | '/app/admin/configuracoes'
+    | '/app/admin/convites'
+    | '/app/admin/jogos'
+    | '/app/admin/pagamentos'
+    | '/app/admin/perfis'
+    | '/app/admin/premiacao'
+    | '/app/admin/relatorios'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
+    | '/app/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/app/admin'
     | '/app/boletins'
     | '/app/jogos'
     | '/app/palpites'
@@ -173,8 +271,18 @@ export interface FileRouteTypes {
     | '/app/ranking'
     | '/app/simulador'
     | '/app'
+    | '/app/admin/auditoria'
+    | '/app/admin/boletins'
+    | '/app/admin/configuracoes'
+    | '/app/admin/convites'
+    | '/app/admin/jogos'
+    | '/app/admin/pagamentos'
+    | '/app/admin/perfis'
+    | '/app/admin/premiacao'
+    | '/app/admin/relatorios'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
+    | '/app/admin'
   id:
     | '__root__'
     | '/'
@@ -189,8 +297,18 @@ export interface FileRouteTypes {
     | '/app/ranking'
     | '/app/simulador'
     | '/app/'
+    | '/app/admin/auditoria'
+    | '/app/admin/boletins'
+    | '/app/admin/configuracoes'
+    | '/app/admin/convites'
+    | '/app/admin/jogos'
+    | '/app/admin/pagamentos'
+    | '/app/admin/perfis'
+    | '/app/admin/premiacao'
+    | '/app/admin/relatorios'
     | '/app/pagamento/$quota_id'
     | '/app/palpites_/top4'
+    | '/app/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -284,6 +402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin/': {
+      id: '/app/admin/'
+      path: '/'
+      fullPath: '/app/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/palpites_/top4': {
       id: '/app/palpites_/top4'
       path: '/palpites/top4'
@@ -298,11 +423,104 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPagamentoQuota_idRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin/relatorios': {
+      id: '/app/admin/relatorios'
+      path: '/relatorios'
+      fullPath: '/app/admin/relatorios'
+      preLoaderRoute: typeof AppAdminRelatoriosRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/premiacao': {
+      id: '/app/admin/premiacao'
+      path: '/premiacao'
+      fullPath: '/app/admin/premiacao'
+      preLoaderRoute: typeof AppAdminPremiacaoRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/perfis': {
+      id: '/app/admin/perfis'
+      path: '/perfis'
+      fullPath: '/app/admin/perfis'
+      preLoaderRoute: typeof AppAdminPerfisRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/pagamentos': {
+      id: '/app/admin/pagamentos'
+      path: '/pagamentos'
+      fullPath: '/app/admin/pagamentos'
+      preLoaderRoute: typeof AppAdminPagamentosRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/jogos': {
+      id: '/app/admin/jogos'
+      path: '/jogos'
+      fullPath: '/app/admin/jogos'
+      preLoaderRoute: typeof AppAdminJogosRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/convites': {
+      id: '/app/admin/convites'
+      path: '/convites'
+      fullPath: '/app/admin/convites'
+      preLoaderRoute: typeof AppAdminConvitesRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/configuracoes': {
+      id: '/app/admin/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/app/admin/configuracoes'
+      preLoaderRoute: typeof AppAdminConfiguracoesRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/boletins': {
+      id: '/app/admin/boletins'
+      path: '/boletins'
+      fullPath: '/app/admin/boletins'
+      preLoaderRoute: typeof AppAdminBoletinsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/auditoria': {
+      id: '/app/admin/auditoria'
+      path: '/auditoria'
+      fullPath: '/app/admin/auditoria'
+      preLoaderRoute: typeof AppAdminAuditoriaRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
   }
 }
 
+interface AppAdminRouteChildren {
+  AppAdminAuditoriaRoute: typeof AppAdminAuditoriaRoute
+  AppAdminBoletinsRoute: typeof AppAdminBoletinsRoute
+  AppAdminConfiguracoesRoute: typeof AppAdminConfiguracoesRoute
+  AppAdminConvitesRoute: typeof AppAdminConvitesRoute
+  AppAdminJogosRoute: typeof AppAdminJogosRoute
+  AppAdminPagamentosRoute: typeof AppAdminPagamentosRoute
+  AppAdminPerfisRoute: typeof AppAdminPerfisRoute
+  AppAdminPremiacaoRoute: typeof AppAdminPremiacaoRoute
+  AppAdminRelatoriosRoute: typeof AppAdminRelatoriosRoute
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
+}
+
+const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminAuditoriaRoute: AppAdminAuditoriaRoute,
+  AppAdminBoletinsRoute: AppAdminBoletinsRoute,
+  AppAdminConfiguracoesRoute: AppAdminConfiguracoesRoute,
+  AppAdminConvitesRoute: AppAdminConvitesRoute,
+  AppAdminJogosRoute: AppAdminJogosRoute,
+  AppAdminPagamentosRoute: AppAdminPagamentosRoute,
+  AppAdminPerfisRoute: AppAdminPerfisRoute,
+  AppAdminPremiacaoRoute: AppAdminPremiacaoRoute,
+  AppAdminRelatoriosRoute: AppAdminRelatoriosRoute,
+  AppAdminIndexRoute: AppAdminIndexRoute,
+}
+
+const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
+  AppAdminRouteChildren,
+)
+
 interface AppRouteChildren {
-  AppAdminRoute: typeof AppAdminRoute
+  AppAdminRoute: typeof AppAdminRouteWithChildren
   AppBoletinsRoute: typeof AppBoletinsRoute
   AppJogosRoute: typeof AppJogosRoute
   AppPalpitesRoute: typeof AppPalpitesRoute
@@ -317,7 +535,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAdminRoute: AppAdminRoute,
+  AppAdminRoute: AppAdminRouteWithChildren,
   AppBoletinsRoute: AppBoletinsRoute,
   AppJogosRoute: AppJogosRoute,
   AppPalpitesRoute: AppPalpitesRoute,
