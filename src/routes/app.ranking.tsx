@@ -1,18 +1,51 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { ranking } from "@/lib/mock-data";
-import { ArrowDown, ArrowUp, Minus, Trophy } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, Trophy, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/app/ranking")({
-  head: () => ({ meta: [{ title: "Ranking — Bolão da Galera" }] }),
+  head: () => ({ meta: [{ title: "Ranking — Bolão dos Perebas" }] }),
   component: Ranking,
 });
 
 function Ranking() {
+  const [filtroQuota, setFiltroQuota] = useState<string>("todos");
+
+  const lista = filtroQuota === "todos" ? ranking : ranking.filter((p) => p.id === filtroQuota);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-extrabold">Ranking geral</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Atualizado em tempo real após cada partida</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl font-extrabold">Ranking da perebada</h1>
+          <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+            Atualizado em tempo real após cada partida
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger><Info className="h-3.5 w-3.5" /></TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Critérios de desempate:</p>
+                  <ol className="mt-1 list-decimal pl-4 text-xs">
+                    <li>Mais placares exatos</li>
+                    <li>Mais resultados certos</li>
+                    <li>Ordem alfabética</li>
+                  </ol>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </p>
+        </div>
+        <select
+          value={filtroQuota}
+          onChange={(e) => setFiltroQuota(e.target.value)}
+          className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold shadow-card"
+        >
+          <option value="todos">Ver quotas de… todos</option>
+          {ranking.map((p) => (
+            <option key={p.id} value={p.id}>{p.nome}</option>
+          ))}
+        </select>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -29,7 +62,7 @@ function Ranking() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-        {ranking.map((p, i) => {
+        {lista.map((p, i) => {
           const isMe = p.nome === "Você";
           return (
             <div
@@ -49,9 +82,13 @@ function Ranking() {
                 {p.apelido}
               </div>
               <div className="flex-1">
-                <p className="font-display font-bold">{p.nome} {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}</p>
+                <p className="font-display font-bold">
+                  {p.nome}
+                  {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
+                </p>
                 <p className="text-xs text-muted-foreground">{p.quotas} quota{p.quotas > 1 ? "s" : ""} · {p.exatos} exatos</p>
               </div>
+              {isMe && p.evolucao && <Sparkline values={p.evolucao} />}
               <div className="text-right">
                 <p className="font-display text-lg font-bold">{p.pontos.toLocaleString("pt-BR")}</p>
                 <Variacao v={p.variacao} />
@@ -61,6 +98,21 @@ function Ranking() {
         })}
       </div>
     </div>
+  );
+}
+
+function Sparkline({ values }: { values: number[] }) {
+  // valores são posições (menor = melhor). Inverte pra desenhar
+  const max = Math.max(...values);
+  const w = 60, h = 24;
+  const step = w / (values.length - 1);
+  const points = values
+    .map((v, i) => `${i * step},${h - ((max - v) / (max || 1)) * h}`)
+    .join(" ");
+  return (
+    <svg width={w} height={h} className="hidden text-primary sm:block">
+      <polyline points={points} fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
   );
 }
 

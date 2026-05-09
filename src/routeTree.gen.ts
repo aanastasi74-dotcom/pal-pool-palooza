@@ -12,9 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppSimuladorRouteImport } from './routes/app.simulador'
 import { Route as AppRankingRouteImport } from './routes/app.ranking'
+import { Route as AppQuotasRouteImport } from './routes/app.quotas'
+import { Route as AppPremioRouteImport } from './routes/app.premio'
+import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
 import { Route as AppJogosRouteImport } from './routes/app.jogos'
+import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
+import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4'
+import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
 
 const AppRoute = AppRouteImport.update({
   id: '/app',
@@ -31,9 +38,29 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSimuladorRoute = AppSimuladorRouteImport.update({
+  id: '/simulador',
+  path: '/simulador',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppRankingRoute = AppRankingRouteImport.update({
   id: '/ranking',
   path: '/ranking',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppQuotasRoute = AppQuotasRouteImport.update({
+  id: '/quotas',
+  path: '/quotas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPremioRoute = AppPremioRouteImport.update({
+  id: '/premio',
+  path: '/premio',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPerfilRoute = AppPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPalpitesRoute = AppPalpitesRouteImport.update({
@@ -46,50 +73,112 @@ const AppJogosRoute = AppJogosRouteImport.update({
   path: '/jogos',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBoletinsRoute = AppBoletinsRouteImport.update({
+  id: '/boletins',
+  path: '/boletins',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPalpitesTop4Route = AppPalpitesTop4RouteImport.update({
+  id: '/palpites_/top4',
+  path: '/palpites/top4',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPagamentoQuota_idRoute = AppPagamentoQuota_idRouteImport.update({
+  id: '/pagamento/$quota_id',
+  path: '/pagamento/$quota_id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
+  '/app/perfil': typeof AppPerfilRoute
+  '/app/premio': typeof AppPremioRoute
+  '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
+  '/app/simulador': typeof AppSimuladorRoute
   '/app/': typeof AppIndexRoute
+  '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
+  '/app/palpites/top4': typeof AppPalpitesTop4Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
+  '/app/perfil': typeof AppPerfilRoute
+  '/app/premio': typeof AppPremioRoute
+  '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
+  '/app/simulador': typeof AppSimuladorRoute
   '/app': typeof AppIndexRoute
+  '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
+  '/app/palpites/top4': typeof AppPalpitesTop4Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
+  '/app/perfil': typeof AppPerfilRoute
+  '/app/premio': typeof AppPremioRoute
+  '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
+  '/app/simulador': typeof AppSimuladorRoute
   '/app/': typeof AppIndexRoute
+  '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
+  '/app/palpites_/top4': typeof AppPalpitesTop4Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/app'
+    | '/app/boletins'
     | '/app/jogos'
     | '/app/palpites'
+    | '/app/perfil'
+    | '/app/premio'
+    | '/app/quotas'
     | '/app/ranking'
+    | '/app/simulador'
     | '/app/'
+    | '/app/pagamento/$quota_id'
+    | '/app/palpites/top4'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app/jogos' | '/app/palpites' | '/app/ranking' | '/app'
+  to:
+    | '/'
+    | '/app/boletins'
+    | '/app/jogos'
+    | '/app/palpites'
+    | '/app/perfil'
+    | '/app/premio'
+    | '/app/quotas'
+    | '/app/ranking'
+    | '/app/simulador'
+    | '/app'
+    | '/app/pagamento/$quota_id'
+    | '/app/palpites/top4'
   id:
     | '__root__'
     | '/'
     | '/app'
+    | '/app/boletins'
     | '/app/jogos'
     | '/app/palpites'
+    | '/app/perfil'
+    | '/app/premio'
+    | '/app/quotas'
     | '/app/ranking'
+    | '/app/simulador'
     | '/app/'
+    | '/app/pagamento/$quota_id'
+    | '/app/palpites_/top4'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -120,11 +209,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/simulador': {
+      id: '/app/simulador'
+      path: '/simulador'
+      fullPath: '/app/simulador'
+      preLoaderRoute: typeof AppSimuladorRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/ranking': {
       id: '/app/ranking'
       path: '/ranking'
       fullPath: '/app/ranking'
       preLoaderRoute: typeof AppRankingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/quotas': {
+      id: '/app/quotas'
+      path: '/quotas'
+      fullPath: '/app/quotas'
+      preLoaderRoute: typeof AppQuotasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/premio': {
+      id: '/app/premio'
+      path: '/premio'
+      fullPath: '/app/premio'
+      preLoaderRoute: typeof AppPremioRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/perfil': {
+      id: '/app/perfil'
+      path: '/perfil'
+      fullPath: '/app/perfil'
+      preLoaderRoute: typeof AppPerfilRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/palpites': {
@@ -141,21 +258,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppJogosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/boletins': {
+      id: '/app/boletins'
+      path: '/boletins'
+      fullPath: '/app/boletins'
+      preLoaderRoute: typeof AppBoletinsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/palpites_/top4': {
+      id: '/app/palpites_/top4'
+      path: '/palpites/top4'
+      fullPath: '/app/palpites/top4'
+      preLoaderRoute: typeof AppPalpitesTop4RouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pagamento/$quota_id': {
+      id: '/app/pagamento/$quota_id'
+      path: '/pagamento/$quota_id'
+      fullPath: '/app/pagamento/$quota_id'
+      preLoaderRoute: typeof AppPagamentoQuota_idRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppBoletinsRoute: typeof AppBoletinsRoute
   AppJogosRoute: typeof AppJogosRoute
   AppPalpitesRoute: typeof AppPalpitesRoute
+  AppPerfilRoute: typeof AppPerfilRoute
+  AppPremioRoute: typeof AppPremioRoute
+  AppQuotasRoute: typeof AppQuotasRoute
   AppRankingRoute: typeof AppRankingRoute
+  AppSimuladorRoute: typeof AppSimuladorRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppPagamentoQuota_idRoute: typeof AppPagamentoQuota_idRoute
+  AppPalpitesTop4Route: typeof AppPalpitesTop4Route
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppBoletinsRoute: AppBoletinsRoute,
   AppJogosRoute: AppJogosRoute,
   AppPalpitesRoute: AppPalpitesRoute,
+  AppPerfilRoute: AppPerfilRoute,
+  AppPremioRoute: AppPremioRoute,
+  AppQuotasRoute: AppQuotasRoute,
   AppRankingRoute: AppRankingRoute,
+  AppSimuladorRoute: AppSimuladorRoute,
   AppIndexRoute: AppIndexRoute,
+  AppPagamentoQuota_idRoute: AppPagamentoQuota_idRoute,
+  AppPalpitesTop4Route: AppPalpitesTop4Route,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -167,3 +319,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
