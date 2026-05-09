@@ -35,8 +35,9 @@ const items = [
 function NavList({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
   return (
     <nav className="flex flex-col gap-1 p-3">
-      {items.map(({ to, label, icon: Icon, exact }) => {
-        const exact = "exact" in item ? item.exact : false;
+      {items.map((item) => {
+        const { to, label, icon: Icon } = item;
+        const exact = "exact" in item && item.exact === true;
         const active = exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
         return (
           <Link
