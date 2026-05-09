@@ -3,6 +3,7 @@ import { useState } from "react";
 import { boletins, currentUser, type Boletim } from "@/lib/mock-data";
 import { Pencil, Eye } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/app/boletins")({
   head: () => ({
@@ -54,16 +55,22 @@ function BoletinsPage() {
         ))}
       </div>
 
-      {aberto && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-background/80 p-4 backdrop-blur" onClick={() => setAberto(null)}>
-          <div className="max-w-lg rounded-3xl border border-border bg-card p-6 shadow-glow" onClick={(e) => e.stopPropagation()}>
-            <p className="text-xs text-muted-foreground">{aberto.data}</p>
-            <h3 className="mt-1 font-display text-xl font-bold">{aberto.titulo}</h3>
-            <p className="mt-3 whitespace-pre-line text-sm">{aberto.conteudo}</p>
-            <button onClick={() => setAberto(null)} className="mt-5 rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground">Fechar</button>
-          </div>
-        </div>
-      )}
+      <Dialog open={!!aberto} onOpenChange={(v) => !v && setAberto(null)}>
+        <DialogContent className="max-w-lg">
+          {aberto && (
+            <>
+              <DialogHeader>
+                <p className="text-xs text-muted-foreground">{aberto.data}</p>
+                <DialogTitle className="font-display text-xl">{aberto.titulo}</DialogTitle>
+              </DialogHeader>
+              <p className="whitespace-pre-line text-sm">{aberto.conteudo}</p>
+              <DialogFooter>
+                <button onClick={() => setAberto(null)} className="rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground">Fechar</button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
