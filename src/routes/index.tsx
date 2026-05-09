@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
       { title: "Bolão dos Perebas — Copa do Mundo 2026" },
       { name: "description", content: "Bolão privado da Copa 2026 entre amigos: palpites, ranking automático, controle de quotas e muita zoeira." },
       { property: "og:title", content: "Bolão dos Perebas — Copa 2026" },
-      { property: "og:description", content: "Palpite, acompanhe o ranking e dispute com a galera durante toda a Copa do Mundo 2026." },
+      { property: "og:description", content: "Palpite, acompanhe o ranking e dispute com a perebada durante toda a Copa do Mundo 2026." },
     ],
   }),
   component: Landing,
@@ -51,7 +51,7 @@ function Landing() {
               O bolão mais <span className="text-accent">divertido</span> da Copa do Mundo 2026.
             </h1>
             <p className="mt-5 max-w-lg text-base text-white/85 md:text-lg">
-              Palpite jogo a jogo, compre quantas quotas quiser e dispute o topo do ranking com a galera. Pontuação avançada, peso progressivo e até simulador da Copa.
+              Palpite jogo a jogo, compre quantas quotas quiser e dispute o topo do ranking com a perebada. Pontuação avançada, peso progressivo e até simulador da Copa.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
