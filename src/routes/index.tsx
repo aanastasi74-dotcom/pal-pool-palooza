@@ -5,9 +5,9 @@ import { Trophy, Users, Wallet, Sparkles, Calendar, ListOrdered, ShieldCheck, Sm
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Bolão da Galera — Copa do Mundo 2026" },
+      { title: "Bolão dos Perebas — Copa do Mundo 2026" },
       { name: "description", content: "Bolão privado da Copa 2026 entre amigos: palpites, ranking automático, controle de quotas e muita zoeira." },
-      { property: "og:title", content: "Bolão da Galera — Copa 2026" },
+      { property: "og:title", content: "Bolão dos Perebas — Copa 2026" },
       { property: "og:description", content: "Palpite, acompanhe o ranking e dispute com a galera durante toda a Copa do Mundo 2026." },
     ],
   }),
@@ -24,7 +24,7 @@ function Landing() {
               <Trophy className="h-5 w-5" />
             </div>
             <div className="leading-tight">
-              <p className="font-display text-sm font-bold">Bolão da Galera</p>
+              <p className="font-display text-sm font-bold">Bolão dos Perebas</p>
               <p className="text-[10px] uppercase tracking-widest opacity-80">Copa 2026</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ function Landing() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-bold uppercase tracking-widest text-primary">Tudo num só lugar</p>
           <h2 className="mt-3 font-display text-3xl font-extrabold text-balance md:text-4xl">
-            Feito pra deixar o bolão da galera moderno e justo.
+            Feito pra deixar o bolão dos Perebas moderno e justo.
           </h2>
         </div>
         <div className="mt-14 grid gap-5 md:grid-cols-3">
@@ -168,7 +168,7 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        © 2026 Bolão da Galera · Feito com 💛💚 pra Copa do Mundo
+        © 2026 Bolão dos Perebas · Feito com 💛💚 pra Copa do Mundo
       </footer>
     </div>
   );
@@ -184,7 +184,7 @@ function TeamBadge({ flag, name, right }: { flag: string; name: string; right?: 
 }
 
 const features = [
-  { icon: Users, title: "Acesso por convite", desc: "Site privado: só entra quem é da galera. Múltiplas quotas por pessoa, cada uma com palpites e ranking próprios." },
+  { icon: Users, title: "Acesso por convite", desc: "Site privado: só entra quem é dos Perebas. Múltiplas quotas por pessoa, cada uma com palpites e ranking próprios." },
   { icon: Wallet, title: "Pix integrado", desc: "Quota a R$ 50 com QR Code, comprovante e aprovação manual pelos administradores." },
   { icon: Calendar, title: "Jogos automáticos", desc: "Importação por CSV, fases gerais geradas sozinhas — oitavas, quartas, semis e final." },
   { icon: ListOrdered, title: "Ranking em tempo real", desc: "Geral, diário, por fase e evolução de posições. Veja quem subiu e quem despencou." },
