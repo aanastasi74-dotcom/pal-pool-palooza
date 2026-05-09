@@ -4,7 +4,7 @@ import { times, janelasTop4 } from "@/lib/mock-data";
 import { Sparkles, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/app/palpites/top4")({
+export const Route = createFileRoute("/app/palpites_/top4")({
   head: () => ({ meta: [{ title: "Top 4 — Bolão dos Perebas" }] }),
   component: Top4,
 });
