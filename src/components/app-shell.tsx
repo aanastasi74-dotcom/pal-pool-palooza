@@ -12,13 +12,13 @@ import { PrizeBanner } from "./prize-banner";
 import { ThemeToggle } from "./theme-toggle";
 import { currentUser, minhasQuotas } from "@/lib/mock-data";
 
-const nav: { to: string; label: string; icon: typeof Trophy; exact?: boolean }[] = [
+const nav = [
   { to: "/app", label: "Início", icon: Trophy, exact: true },
-  { to: "/app/jogos", label: "Jogos", icon: CalendarDays },
-  { to: "/app/palpites", label: "Palpites", icon: Sparkles },
-  { to: "/app/ranking", label: "Ranking", icon: ListOrdered },
-  { to: "/app/premio", label: "Prêmio", icon: Coins },
-];
+  { to: "/app/jogos", label: "Jogos", icon: CalendarDays, exact: false },
+  { to: "/app/palpites", label: "Palpites", icon: Sparkles, exact: false },
+  { to: "/app/ranking", label: "Ranking", icon: ListOrdered, exact: false },
+  { to: "/app/premio", label: "Prêmio", icon: Coins, exact: false },
+] as const;
 
 export function AppShell() {
   const { pathname } = useLocation();
