@@ -138,6 +138,7 @@ function Landing() {
               <li>· Palpite trava 5 minutos antes da partida</li>
               <li>· Bônus de até 4.000 pts pelos 4 primeiros colocados da Copa</li>
               <li>· Ranking geral, diário e por fase atualizados em tempo real</li>
+              <li>· Prêmio: 60% / 25% / 10% pro pódio · 5% pro lanterninha que palpitou até o fim</li>
             </ul>
           </div>
           <div className="grid grid-cols-2 gap-3">
