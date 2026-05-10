@@ -49,7 +49,7 @@ function Palpites() {
 
   const handleChange = (matchId: string, field: "casa" | "fora", raw: string) => {
     if (!quotaId) return;
-    const value = raw === "" ? null : Math.max(0, Math.min(99, Number(raw)));
+    const value = raw === "" ? null : Math.max(0, Math.min(9, Number(raw)));
     const pred = predMap.get(matchId);
     const placar_casa = field === "casa" ? value : pred?.placar_casa ?? null;
     const placar_fora = field === "fora" ? value : pred?.placar_fora ?? null;
