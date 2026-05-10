@@ -46,6 +46,8 @@ function Relatorios() {
           </div>
         ))}
       </div>
+
+      <FechamentoCopa />
     </div>
   );
 }
