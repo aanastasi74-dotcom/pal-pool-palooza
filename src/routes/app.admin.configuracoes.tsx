@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import * as mock from "@/lib/mock-data";
+import { auditoria } from "@/lib/mock-data";
 import { useMaintenanceMode, setReadOnly, setMaintenance, setAutoBackup } from "@/hooks/use-maintenance";
 import { Download } from "lucide-react";
 
@@ -12,15 +13,72 @@ export const Route = createFileRoute("/app/admin/configuracoes")({
   component: Configuracoes,
 });
 
+const STORAGE_KEY = "perebas:config";
+
+const defaults = {
+  pixKey: "bolaodosperebas@pix.com",
+  pixBanco: "Banco da Perebada (777)",
+  pixTitular: "Bolão dos Perebas",
+  pixInstrucoes: "Mande o comprovante no app, não no WhatsApp.",
+  ptExato: "12",
+  ptResultado: "4",
+  ptGolsVencedor: "2",
+  ptDifGols: "2",
+  ptGolsTime: "1",
+  pesoInicial: "10",
+  incrementoDia: "1",
+  pesoFinal: "50",
+  top4Antes: "100",
+  top4Grupos: "50",
+  top4Oitavas: "25",
+  top4Quartas: "12.5",
+  top4Semis: "6.25",
+  top4Final: "0",
+  boletimHora: "22:00",
+  autoBoletim: true,
+};
+
+type Cfg = typeof defaults;
+
 function Configuracoes() {
-  const [autoBoletim, setAutoBoletim] = useState(true);
+  const [cfg, setCfg] = useState<Cfg>(defaults);
+  const [original, setOriginal] = useState<Cfg>(defaults);
 
   const flags = useMaintenanceMode();
-  const readOnly = flags.readOnly;
-  const maintenance = flags.maintenance;
-  const autoBackup = flags.autoBackup;
 
-  const salvar = () => toast.success("Configurações salvas, peraba-admin.");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = { ...defaults, ...JSON.parse(raw) } as Cfg;
+        setCfg(saved);
+        setOriginal(saved);
+      }
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  const set = <K extends keyof Cfg>(k: K, v: Cfg[K]) => setCfg((c) => ({ ...c, [k]: v }));
+
+  const salvar = () => {
+    const alterados = (Object.keys(cfg) as (keyof Cfg)[]).filter((k) => cfg[k] !== original[k]).length;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+    } catch { /* noop */ }
+    auditoria.unshift({
+      id: `a${Date.now()}`,
+      ator: "Você",
+      acao: "atualizou_configuracoes",
+      entidade: "config",
+      entidade_id: "geral",
+      payload: { campos_alterados: alterados },
+      data: new Date().toLocaleString("pt-BR"),
+    });
+    setOriginal(cfg);
+    toast.success(`${alterados} campo(s) atualizado(s), peraba-admin.`);
+  };
 
   const snapshot = () => {
     const dump = {
@@ -36,6 +94,7 @@ function Configuracoes() {
       usuarios: mock.usuariosAdmin,
       auditoria: mock.auditoria,
       premiacao: mock.premiacaoConfig,
+      config: cfg,
     };
     const blob = new Blob([JSON.stringify(dump, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -59,46 +118,46 @@ function Configuracoes() {
           <AccordionItem value="pix">
             <AccordionTrigger>Pix</AccordionTrigger>
             <AccordionContent className="space-y-3">
-              <Field label="Chave Pix" defaultValue="bolaodosperebas@pix.com" />
-              <Field label="Banco" defaultValue="Banco da Perebada (777)" />
-              <Field label="Titular" defaultValue="Bolão dos Perebas" />
-              <Field label="Instruções extras" defaultValue="Mande o comprovante no app, não no WhatsApp." textarea />
+              <Field label="Chave Pix" value={cfg.pixKey} onChange={(v) => set("pixKey", v)} />
+              <Field label="Banco" value={cfg.pixBanco} onChange={(v) => set("pixBanco", v)} />
+              <Field label="Titular" value={cfg.pixTitular} onChange={(v) => set("pixTitular", v)} />
+              <Field label="Instruções extras" value={cfg.pixInstrucoes} onChange={(v) => set("pixInstrucoes", v)} textarea />
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="pontuacao">
             <AccordionTrigger>Regras de pontuação</AccordionTrigger>
             <AccordionContent className="grid gap-3 md:grid-cols-2">
-              <Field label="Placar exato" defaultValue="12" type="number" />
-              <Field label="Resultado certo" defaultValue="4" type="number" />
-              <Field label="Gols do vencedor" defaultValue="2" type="number" />
-              <Field label="Diferença de gols" defaultValue="2" type="number" />
-              <Field label="Gols de um time" defaultValue="1" type="number" />
-              <Field label="Peso inicial" defaultValue="10" type="number" />
-              <Field label="Incremento por dia" defaultValue="1" type="number" />
-              <Field label="Peso da final" defaultValue="50" type="number" />
+              <Field label="Placar exato" value={cfg.ptExato} onChange={(v) => set("ptExato", v)} type="number" />
+              <Field label="Resultado certo" value={cfg.ptResultado} onChange={(v) => set("ptResultado", v)} type="number" />
+              <Field label="Gols do vencedor" value={cfg.ptGolsVencedor} onChange={(v) => set("ptGolsVencedor", v)} type="number" />
+              <Field label="Diferença de gols" value={cfg.ptDifGols} onChange={(v) => set("ptDifGols", v)} type="number" />
+              <Field label="Gols de um time" value={cfg.ptGolsTime} onChange={(v) => set("ptGolsTime", v)} type="number" />
+              <Field label="Peso inicial" value={cfg.pesoInicial} onChange={(v) => set("pesoInicial", v)} type="number" />
+              <Field label="Incremento por dia" value={cfg.incrementoDia} onChange={(v) => set("incrementoDia", v)} type="number" />
+              <Field label="Peso da final" value={cfg.pesoFinal} onChange={(v) => set("pesoFinal", v)} type="number" />
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="top4">
             <AccordionTrigger>Top 4 — janelas de eficácia</AccordionTrigger>
             <AccordionContent className="grid gap-3 md:grid-cols-2">
-              <Field label="Antes da Copa (%)" defaultValue="100" type="number" />
-              <Field label="Fase de grupos (%)" defaultValue="50" type="number" />
-              <Field label="Oitavas (%)" defaultValue="25" type="number" />
-              <Field label="Quartas (%)" defaultValue="12.5" type="number" />
-              <Field label="Semis (%)" defaultValue="6.25" type="number" />
-              <Field label="Final (%)" defaultValue="0" type="number" />
+              <Field label="Antes da Copa (%)" value={cfg.top4Antes} onChange={(v) => set("top4Antes", v)} type="number" />
+              <Field label="Fase de grupos (%)" value={cfg.top4Grupos} onChange={(v) => set("top4Grupos", v)} type="number" />
+              <Field label="Oitavas (%)" value={cfg.top4Oitavas} onChange={(v) => set("top4Oitavas", v)} type="number" />
+              <Field label="Quartas (%)" value={cfg.top4Quartas} onChange={(v) => set("top4Quartas", v)} type="number" />
+              <Field label="Semis (%)" value={cfg.top4Semis} onChange={(v) => set("top4Semis", v)} type="number" />
+              <Field label="Final (%)" value={cfg.top4Final} onChange={(v) => set("top4Final", v)} type="number" />
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="boletim">
             <AccordionTrigger>Boletim</AccordionTrigger>
             <AccordionContent className="space-y-3">
-              <Field label="Hora de envio diário" defaultValue="22:00" />
+              <Field label="Hora de envio diário" value={cfg.boletimHora} onChange={(v) => set("boletimHora", v)} />
               <div className="flex items-center justify-between">
                 <span className="text-sm">Geração automática</span>
-                <Switch checked={autoBoletim} onCheckedChange={setAutoBoletim} />
+                <Switch checked={cfg.autoBoletim} onCheckedChange={(v) => set("autoBoletim", v)} />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -107,9 +166,8 @@ function Configuracoes() {
             <AccordionTrigger>Backup e snapshot</AccordionTrigger>
             <AccordionContent className="space-y-3">
               <p className="text-xs text-muted-foreground">
-                Em produção, um cron job diário exporta as tabelas críticas para um repositório paralelo
-                (Supabase PITR ou GitHub privado). O snapshot manual fica como cinto de segurança antes
-                de qualquer ação destrutiva.
+                Em produção, um cron job diário exporta as tabelas críticas para um repositório paralelo.
+                O snapshot manual fica como cinto de segurança antes de qualquer ação destrutiva.
               </p>
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 p-3">
                 <div>
@@ -122,7 +180,7 @@ function Configuracoes() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Backup automático diário</span>
-                <Switch checked={autoBackup} onCheckedChange={(v) => { setAutoBackup(v); toast.success(v ? "Backup automático ativado." : "Backup automático desativado."); }} />
+                <Switch checked={flags.autoBackup} onCheckedChange={(v) => { setAutoBackup(v); toast.success(v ? "Backup automático ativado." : "Backup automático desativado."); }} />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -133,16 +191,16 @@ function Configuracoes() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold">Modo somente leitura</p>
-                  <p className="text-[11px] text-muted-foreground">Participantes veem o banner e não conseguem enviar palpites/pagamentos. Admin segue operando.</p>
+                  <p className="text-[11px] text-muted-foreground">Participantes veem o banner e não conseguem enviar palpites/pagamentos.</p>
                 </div>
-                <Switch checked={readOnly} onCheckedChange={(v) => { setReadOnly(v); toast.success(v ? "Modo somente leitura ON." : "Modo somente leitura OFF."); }} />
+                <Switch checked={flags.readOnly} onCheckedChange={(v) => { setReadOnly(v); toast.success(v ? "Modo somente leitura ON." : "Modo somente leitura OFF."); }} />
               </div>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold">Modo manutenção total</p>
                   <p className="text-[11px] text-muted-foreground">Redireciona /app/* (exceto admin) para /manutencao.</p>
                 </div>
-                <Switch checked={maintenance} onCheckedChange={(v) => { setMaintenance(v); toast.success(v ? "Manutenção total ON." : "Manutenção total OFF."); }} />
+                <Switch checked={flags.maintenance} onCheckedChange={(v) => { setMaintenance(v); toast.success(v ? "Manutenção total ON." : "Manutenção total OFF."); }} />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -156,14 +214,26 @@ function Configuracoes() {
   );
 }
 
-function Field({ label, defaultValue, type = "text", textarea }: { label: string; defaultValue: string; type?: string; textarea?: boolean }) {
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+  textarea,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  textarea?: boolean;
+}) {
   return (
     <div>
       <label className="text-xs font-bold">{label}</label>
       {textarea ? (
-        <textarea defaultValue={defaultValue} rows={3} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={3} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
       ) : (
-        <input type={type} defaultValue={defaultValue} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
       )}
     </div>
   );

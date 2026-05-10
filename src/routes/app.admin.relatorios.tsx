@@ -35,10 +35,10 @@ function Relatorios() {
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <button onClick={() => toast.success("CSV gerado.")} className="flex flex-1 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-bold">
+              <button onClick={() => toast.success(`${c.title} — CSV gerado, peraba!`)} className="flex flex-1 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-bold">
                 <Download className="h-3 w-3" /> CSV
               </button>
-              <button onClick={() => toast.success("PDF gerado.")} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">
+              <button onClick={() => toast.success(`${c.title} — PDF gerado, peraba!`)} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">
                 <Download className="h-3 w-3" /> PDF
               </button>
             </div>

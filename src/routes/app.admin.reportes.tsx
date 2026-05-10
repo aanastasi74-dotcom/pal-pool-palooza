@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { reportes, type Reporte } from "@/lib/mock-data";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { DataTablePagination } from "@/components/data-table-pagination";
 
 export const Route = createFileRoute("/app/admin/reportes")({
   head: () => ({ meta: [{ title: "Admin — Reportes" }] }),
@@ -23,12 +25,13 @@ const stColor: Record<Reporte["status"], string> = {
 };
 
 function ReportesAdmin() {
-  const [q, setQ] = useState("");
   const [, force] = useState(0);
 
-  const filtrados = reportes.filter((r) =>
-    [r.descricao, r.autor, r.url].join(" ").toLowerCase().includes(q.toLowerCase()),
+  const predicate = useCallback(
+    (r: Reporte, q: string) => !q || [r.descricao, r.autor, r.url].join(" ").toLowerCase().includes(q),
+    [],
   );
+  const { query, setQuery, page, setPage, totalPages, slice, total, pageSize } = usePaginatedList(reportes, predicate, 20);
 
   const setStatus = (id: string, status: Reporte["status"]) => {
     const r = reportes.find((x) => x.id === id);
@@ -48,7 +51,8 @@ function ReportesAdmin() {
         </p>
       </div>
 
-      <Input placeholder="Buscar por descrição, autor ou URL…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-md" />
+      <Input placeholder="Buscar por descrição, autor ou URL…" value={query} onChange={(e) => setQuery(e.target.value)} className="max-w-md" />
+      <p className="text-xs text-muted-foreground">{total} resultado(s) · página {page} de {totalPages}</p>
 
       <div className="rounded-2xl border border-border bg-card p-3 shadow-card">
         <Table>
@@ -62,7 +66,7 @@ function ReportesAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtrados.map((r) => (
+            {slice.map((r) => (
               <TableRow key={r.id}>
                 <TableCell className="max-w-xs">
                   <p className="font-medium">{r.descricao}</p>
@@ -88,7 +92,7 @@ function ReportesAdmin() {
                 </TableCell>
               </TableRow>
             ))}
-            {filtrados.length === 0 && (
+            {slice.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
                   Sem reportes por aqui — perebada tá feliz.
@@ -98,6 +102,7 @@ function ReportesAdmin() {
           </TableBody>
         </Table>
       </div>
+      <DataTablePagination total={total} page={page} totalPages={totalPages} pageSize={pageSize} onPageChange={setPage} />
     </div>
   );
 }

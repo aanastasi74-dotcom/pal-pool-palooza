@@ -1,27 +1,48 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { auditoria } from "@/lib/mock-data";
+import { useCallback, useState } from "react";
+import { auditoria, type AuditoriaItem } from "@/lib/mock-data";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { DataTablePagination } from "@/components/data-table-pagination";
 
 export const Route = createFileRoute("/app/admin/auditoria")({
   head: () => ({ meta: [{ title: "Admin — Auditoria" }] }),
   component: Auditoria,
 });
 
+function parseDataBr(s: string): Date {
+  const [d, hora] = s.split(" ");
+  const [dd, mm, yy] = d.split("/").map(Number);
+  const [hh = 0, mi = 0] = (hora ?? "00:00").split(":").map(Number);
+  return new Date(yy, (mm ?? 1) - 1, dd ?? 1, hh, mi);
+}
+
 function Auditoria() {
   const [filtroAtor, setFiltroAtor] = useState("todos");
   const [filtroAcao, setFiltroAcao] = useState("todas");
+  const [dataIni, setDataIni] = useState("");
+  const [dataFim, setDataFim] = useState("");
   const [expandido, setExpandido] = useState<string | null>(null);
 
   const atores = Array.from(new Set(auditoria.map((a) => a.ator)));
   const acoes = Array.from(new Set(auditoria.map((a) => a.acao)));
 
-  const filtrados = auditoria.filter((a) => {
-    if (filtroAtor !== "todos" && a.ator !== filtroAtor) return false;
-    if (filtroAcao !== "todas" && a.acao !== filtroAcao) return false;
-    return true;
-  });
+  const predicate = useCallback(
+    (a: AuditoriaItem) => {
+      if (filtroAtor !== "todos" && a.ator !== filtroAtor) return false;
+      if (filtroAcao !== "todas" && a.acao !== filtroAcao) return false;
+      if (dataIni || dataFim) {
+        const d = parseDataBr(a.data);
+        if (dataIni && d < new Date(dataIni)) return false;
+        if (dataFim && d > new Date(dataFim + "T23:59:59")) return false;
+      }
+      return true;
+    },
+    [filtroAtor, filtroAcao, dataIni, dataFim],
+  );
+
+  const { page, setPage, totalPages, slice, total, pageSize } = usePaginatedList(auditoria, predicate, 25);
 
   return (
     <div className="space-y-5">
@@ -44,14 +65,17 @@ function Auditoria() {
           <option value="todas">Todas as ações</option>
           {acoes.map((a) => <option key={a} value={a}>{a}</option>)}
         </select>
-        <span className="text-xs text-muted-foreground">{filtrados.length} registros</span>
+        <input type="date" value={dataIni} onChange={(e) => setDataIni(e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs" />
+        <span className="text-xs text-muted-foreground">até</span>
+        <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs" />
+        <span className="ml-auto text-xs text-muted-foreground">{total} registro(s) · página {page} de {totalPages}</span>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Data/hora</th><th className="p-2 text-left">Ator</th><th className="p-2 text-left">Ação</th><th className="p-2 text-left">Entidade</th><th className="p-2 text-left">ID</th><th className="p-2 text-left">Payload</th></tr></thead>
           <tbody>
-            {filtrados.map((a) => (
+            {slice.map((a) => (
               <tr key={a.id} className="border-t border-border hover:bg-muted/30">
                 <td className="p-2 text-xs">{a.data}</td>
                 <td className="p-2 font-medium">{a.ator}</td>
@@ -72,6 +96,7 @@ function Auditoria() {
           </tbody>
         </table>
       </div>
+      <DataTablePagination total={total} page={page} totalPages={totalPages} pageSize={pageSize} onPageChange={setPage} />
     </div>
   );
 }
