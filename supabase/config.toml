@@ -2,3 +2,9 @@ project_id = "sngdtpwpxpjfmkmqnuyi"
 
 [functions.send-convite-email]
 verify_jwt = true
+
+[functions.send-pagamento-aprovado-email]
+verify_jwt = true
+
+[functions.send-pagamento-rejeitado-email]
+verify_jwt = true

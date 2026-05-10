@@ -51,7 +51,8 @@ Deno.serve(async (req) => {
     const invite = rows[0];
     if (!invite) return json({ error: "Invite not found" }, 404);
 
-    const origin = req.headers.get("origin") ?? "https://bolao-perebas.lovable.app";
+    const SITE_URL = Deno.env.get("SITE_URL") ?? "";
+    const origin = req.headers.get("origin") ?? SITE_URL;
     const link = `${origin}/cadastro/${invite.token}`;
     const expira = new Date(invite.expira_em).toLocaleDateString("pt-BR");
     const firstName = invite.nome.split(" ")[0];
