@@ -14,13 +14,557 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_log: {
+        Row: {
+          acao: string
+          ator_id: string | null
+          ator_nome: string | null
+          created_at: string | null
+          entidade: string
+          entidade_id: string | null
+          id: string
+          payload: Json | null
+        }
+        Insert: {
+          acao: string
+          ator_id?: string | null
+          ator_nome?: string | null
+          created_at?: string | null
+          entidade: string
+          entidade_id?: string | null
+          id?: string
+          payload?: Json | null
+        }
+        Update: {
+          acao?: string
+          ator_id?: string | null
+          ator_nome?: string | null
+          created_at?: string | null
+          entidade?: string
+          entidade_id?: string | null
+          id?: string
+          payload?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_ator_id_fkey"
+            columns: ["ator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bulletins: {
+        Row: {
+          agendado_para: string | null
+          conteudo: string
+          conteudo_original: string | null
+          created_at: string | null
+          data: string
+          id: string
+          publicado_em: string | null
+          publicado_por: string | null
+          status: string
+          titulo: string
+        }
+        Insert: {
+          agendado_para?: string | null
+          conteudo: string
+          conteudo_original?: string | null
+          created_at?: string | null
+          data: string
+          id?: string
+          publicado_em?: string | null
+          publicado_por?: string | null
+          status?: string
+          titulo: string
+        }
+        Update: {
+          agendado_para?: string | null
+          conteudo?: string
+          conteudo_original?: string | null
+          created_at?: string | null
+          data?: string
+          id?: string
+          publicado_em?: string | null
+          publicado_por?: string | null
+          status?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulletins_publicado_por_fkey"
+            columns: ["publicado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invites: {
+        Row: {
+          criado_por: string | null
+          email: string
+          enviado_em: string | null
+          expira_em: string
+          id: string
+          mensagem: string | null
+          nome: string
+          status: string
+          token: string
+          usado_em: string | null
+        }
+        Insert: {
+          criado_por?: string | null
+          email: string
+          enviado_em?: string | null
+          expira_em?: string
+          id?: string
+          mensagem?: string | null
+          nome: string
+          status?: string
+          token?: string
+          usado_em?: string | null
+        }
+        Update: {
+          criado_por?: string | null
+          email?: string
+          enviado_em?: string | null
+          expira_em?: string
+          id?: string
+          mensagem?: string | null
+          nome?: string
+          status?: string
+          token?: string
+          usado_em?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          casa: string
+          cidade: string | null
+          created_at: string | null
+          data_jogo: string
+          estadio: string | null
+          fase: string
+          fora: string
+          id: string
+          peso: number
+          placar_casa: number | null
+          placar_fora: number | null
+          status: string
+          travado_em: string | null
+        }
+        Insert: {
+          casa: string
+          cidade?: string | null
+          created_at?: string | null
+          data_jogo: string
+          estadio?: string | null
+          fase: string
+          fora: string
+          id?: string
+          peso?: number
+          placar_casa?: number | null
+          placar_fora?: number | null
+          status?: string
+          travado_em?: string | null
+        }
+        Update: {
+          casa?: string
+          cidade?: string | null
+          created_at?: string | null
+          data_jogo?: string
+          estadio?: string | null
+          fase?: string
+          fora?: string
+          id?: string
+          peso?: number
+          placar_casa?: number | null
+          placar_fora?: number | null
+          status?: string
+          travado_em?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          aprovado_em: string | null
+          aprovado_por: string | null
+          comprovante_path: string | null
+          created_at: string | null
+          id: string
+          motivo_rejeicao: string | null
+          quota_id: string | null
+          status: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          comprovante_path?: string | null
+          created_at?: string | null
+          id?: string
+          motivo_rejeicao?: string | null
+          quota_id?: string | null
+          status?: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          comprovante_path?: string | null
+          created_at?: string | null
+          id?: string
+          motivo_rejeicao?: string | null
+          quota_id?: string | null
+          status?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_aprovado_por_fkey"
+            columns: ["aprovado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      personality_profiles: {
+        Row: {
+          apelido_principal: string
+          apelidos_alternativos: string[] | null
+          created_at: string | null
+          id: string
+          observacoes_admin: string | null
+          participante_id: string | null
+          tags: string[] | null
+          tracos: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          apelido_principal: string
+          apelidos_alternativos?: string[] | null
+          created_at?: string | null
+          id?: string
+          observacoes_admin?: string | null
+          participante_id?: string | null
+          tags?: string[] | null
+          tracos?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          apelido_principal?: string
+          apelidos_alternativos?: string[] | null
+          created_at?: string | null
+          id?: string
+          observacoes_admin?: string | null
+          participante_id?: string | null
+          tags?: string[] | null
+          tracos?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personality_profiles_participante_id_fkey"
+            columns: ["participante_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictions: {
+        Row: {
+          created_at: string | null
+          id: string
+          match_id: string
+          placar_casa: number | null
+          placar_fora: number | null
+          pontos_calculados: number | null
+          quota_id: string
+          submetido_em: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          match_id: string
+          placar_casa?: number | null
+          placar_fora?: number | null
+          pontos_calculados?: number | null
+          quota_id: string
+          submetido_em?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          match_id?: string
+          placar_casa?: number | null
+          placar_fora?: number | null
+          pontos_calculados?: number | null
+          quota_id?: string
+          submetido_em?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predictions_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          apelido: string
+          ativo: boolean
+          cor: string | null
+          created_at: string | null
+          email: string
+          id: string
+          nome: string
+          notificacoes: Json | null
+          role: string
+          ultimo_acesso: string | null
+        }
+        Insert: {
+          apelido: string
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string | null
+          email: string
+          id: string
+          nome: string
+          notificacoes?: Json | null
+          role?: string
+          ultimo_acesso?: string | null
+        }
+        Update: {
+          apelido?: string
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          notificacoes?: Json | null
+          role?: string
+          ultimo_acesso?: string | null
+        }
+        Relationships: []
+      }
+      quotas: {
+        Row: {
+          apelido: string | null
+          created_at: string | null
+          elegivel_lanterna: boolean | null
+          id: string
+          numero: number
+          paga_em: string | null
+          palpites_possiveis: number | null
+          palpites_validos: number | null
+          pontos: number | null
+          posicao: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          apelido?: string | null
+          created_at?: string | null
+          elegivel_lanterna?: boolean | null
+          id?: string
+          numero: number
+          paga_em?: string | null
+          palpites_possiveis?: number | null
+          palpites_validos?: number | null
+          pontos?: number | null
+          posicao?: number | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          apelido?: string | null
+          created_at?: string | null
+          elegivel_lanterna?: boolean | null
+          id?: string
+          numero?: number
+          paga_em?: string | null
+          palpites_possiveis?: number | null
+          palpites_validos?: number | null
+          pontos?: number | null
+          posicao?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          autor_id: string | null
+          autor_nome: string | null
+          created_at: string | null
+          descricao: string
+          id: string
+          severidade: string
+          status: string
+          url: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          autor_id?: string | null
+          autor_nome?: string | null
+          created_at?: string | null
+          descricao: string
+          id?: string
+          severidade: string
+          status?: string
+          url?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          autor_id?: string | null
+          autor_nome?: string | null
+          created_at?: string | null
+          descricao?: string
+          id?: string
+          severidade?: string
+          status?: string
+          url?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      top4_predictions: {
+        Row: {
+          alterado_em: string | null
+          fase_alteracao: string | null
+          id: string
+          posicao_1: string | null
+          posicao_2: string | null
+          posicao_3: string | null
+          posicao_4: string | null
+          quota_id: string
+        }
+        Insert: {
+          alterado_em?: string | null
+          fase_alteracao?: string | null
+          id?: string
+          posicao_1?: string | null
+          posicao_2?: string | null
+          posicao_3?: string | null
+          posicao_4?: string | null
+          quota_id: string
+        }
+        Update: {
+          alterado_em?: string | null
+          fase_alteracao?: string | null
+          id?: string
+          posicao_1?: string | null
+          posicao_2?: string | null
+          posicao_3?: string | null
+          posicao_4?: string | null
+          quota_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "top4_predictions_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: true
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
