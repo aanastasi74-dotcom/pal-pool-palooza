@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ranking } from "@/lib/mock-data";
-import { ArrowDown, ArrowUp, Minus, Trophy, Info } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, Trophy, Info, Users } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRanking } from "@/lib/queries/profiles";
+import { useAuth } from "@/lib/auth-context";
+import { EmptyState } from "@/components/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/ranking")({
   head: () => ({ meta: [{ title: "Ranking — Bolão dos Perebas" }] }),
@@ -10,14 +13,22 @@ export const Route = createFileRoute("/app/ranking")({
 });
 
 function Ranking() {
+  const { user } = useAuth();
+  const { data: ranking = [], isLoading } = useRanking();
   const [filtroQuota, setFiltroQuota] = useState<string>("todos");
   const [busca, setBusca] = useState("");
 
-  const lista = ranking.filter((p) => {
-    if (filtroQuota !== "todos" && p.id !== filtroQuota) return false;
-    if (busca && !p.nome.toLowerCase().includes(busca.toLowerCase())) return false;
+  type Row = { id: string; user_id: string; pontos: number; numero: number; profile?: { nome?: string; apelido?: string; cor?: string } | null };
+  const rows = ranking as Row[];
+
+  const lista = rows.filter((p) => {
+    const nome = p.profile?.nome ?? "";
+    if (filtroQuota !== "todos" && p.user_id !== filtroQuota) return false;
+    if (busca && !nome.toLowerCase().includes(busca.toLowerCase())) return false;
     return true;
   });
+
+  const usuariosUnicos = Array.from(new Map(rows.map((r) => [r.user_id, r.profile?.nome ?? "—"])).entries());
 
   return (
     <div className="space-y-6">
@@ -54,13 +65,13 @@ function Ranking() {
             className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold shadow-card"
           >
             <option value="todos">Ver quotas de… todos</option>
-            {ranking.map((p) => (
-              <option key={p.id} value={p.id}>{p.nome}</option>
+            {usuariosUnicos.map(([uid, nome]) => (
+              <option key={uid} value={uid}>{nome}</option>
             ))}
           </select>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">{lista.length} de {ranking.length} perebas</p>
+      <p className="text-xs text-muted-foreground">{lista.length} de {rows.length} quotas</p>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         {["Geral", "Diário", "Fase de grupos", "Mata-mata"].map((f, i) => (
@@ -75,48 +86,56 @@ function Ranking() {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-        {lista.map((p, i) => {
-          const isMe = p.nome === "Você";
-          return (
-            <div
-              key={p.id}
-              className={`flex items-center gap-4 border-b border-border px-4 py-4 last:border-0 ${
-                isMe ? "bg-secondary" : ""
-              }`}
-            >
-              <div className="w-8 text-center">
-                {i < 3 ? (
-                  <Trophy className={`mx-auto h-5 w-5 ${i === 0 ? "text-accent" : i === 1 ? "text-muted-foreground" : "text-amber-700"}`} />
-                ) : (
-                  <span className="font-display font-bold text-muted-foreground">{i + 1}</span>
-                )}
+      {isLoading ? (
+        <Skeleton className="h-64 w-full" />
+      ) : rows.length === 0 ? (
+        <EmptyState icon={Users} title="Ranking ainda vazio" description="Ninguém na perebada palpitou ainda. Vamos lá." />
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+          {lista.map((p, i) => {
+            const isMe = p.user_id === user?.id;
+            const nome = p.profile?.nome ?? "—";
+            const apelido = p.profile?.apelido ?? "??";
+            const cor = p.profile?.cor ?? "oklch(0.6 0.16 200)";
+            return (
+              <div
+                key={p.id}
+                className={`flex items-center gap-4 border-b border-border px-4 py-4 last:border-0 ${
+                  isMe ? "bg-secondary" : ""
+                }`}
+              >
+                <div className="w-8 text-center">
+                  {i < 3 ? (
+                    <Trophy className={`mx-auto h-5 w-5 ${i === 0 ? "text-accent" : i === 1 ? "text-muted-foreground" : "text-amber-700"}`} />
+                  ) : (
+                    <span className="font-display font-bold text-muted-foreground">{i + 1}</span>
+                  )}
+                </div>
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold text-white" style={{ background: cor }}>
+                  {apelido}
+                </div>
+                <div className="flex-1">
+                  <p className="font-display font-bold">
+                    {nome}
+                    {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Quota #{p.numero}</p>
+                </div>
+                {isMe && <Sparkline values={[3, 3, 3, 3, 3]} />}
+                <div className="text-right">
+                  <p className="font-display text-lg font-bold">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
+                  <Variacao v={0} />
+                </div>
               </div>
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold text-white" style={{ background: p.cor }}>
-                {p.apelido}
-              </div>
-              <div className="flex-1">
-                <p className="font-display font-bold">
-                  {p.nome}
-                  {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
-                </p>
-                <p className="text-xs text-muted-foreground">{p.quotas} quota{p.quotas > 1 ? "s" : ""} · {p.exatos} exatos</p>
-              </div>
-              {isMe && p.evolucao && <Sparkline values={p.evolucao} />}
-              <div className="text-right">
-                <p className="font-display text-lg font-bold">{p.pontos.toLocaleString("pt-BR")}</p>
-                <Variacao v={p.variacao} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
 
 function Sparkline({ values }: { values: number[] }) {
-  // valores são posições (menor = melhor). Inverte pra desenhar
   const max = Math.max(...values);
   const w = 60, h = 24;
   const step = w / (values.length - 1);
