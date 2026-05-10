@@ -86,7 +86,17 @@ function Premio() {
                 </div>
                 <p className="mt-3 font-display text-3xl font-black">{d.pct}%</p>
                 <p className="mt-1 text-xs opacity-80">≈ {fmtBRL((potencial * d.pct) / 100)}</p>
-                {isLanterna && <p className="mt-2 text-[11px] italic opacity-80">Prêmio de consolação — pra perebada não sair só com a vergonha.</p>}
+                {isLanterna && (
+                  <>
+                    <p className="mt-2 text-[11px] italic opacity-80">Vale 5% — para quem palpitou direito até o fim.</p>
+                    <button
+                      onClick={() => setOpenRegra(true)}
+                      className="mt-1 text-[11px] font-semibold text-primary hover:underline"
+                    >
+                      Ver regra completa
+                    </button>
+                  </>
+                )}
               </div>
             );
           })}
