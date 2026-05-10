@@ -1,29 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { boletins, gerarBoletimMock, type Boletim } from "@/lib/mock-data";
+import { useBulletins, useCreateBulletin, useUpdateBulletin, useDeleteBulletin } from "@/lib/queries/bulletins";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Plus, Sparkles, Send, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EmptyState } from "@/components/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/admin/boletins")({
   head: () => ({ meta: [{ title: "Admin — Boletins" }] }),
   component: BoletinsAdmin,
 });
 
-const statusColor: Record<Boletim["status"], string> = {
+type BoletimRow = any;
+
+const statusColor: Record<string, string> = {
   publicado: "bg-success/15 text-success",
   rascunho: "bg-muted text-muted-foreground",
   agendado: "bg-accent/15 text-accent",
 };
 
 function BoletinsAdmin() {
-  const [editando, setEditando] = useState<Boletim | null>(null);
-  const [excluir, setExcluir] = useState<Boletim | null>(null);
+  const { data: boletins, isLoading } = useBulletins();
+  const del = useDeleteBulletin();
+
+  const [editando, setEditando] = useState<BoletimRow | null>(null);
+  const [excluir, setExcluir] = useState<BoletimRow | null>(null);
 
   const novo = () =>
-    setEditando({ id: "", data: new Date().toLocaleDateString("pt-BR"), titulo: "", conteudo: "", status: "rascunho" });
+    setEditando({ id: "", data: new Date().toISOString().slice(0, 10), titulo: "", conteudo: "", status: "rascunho" });
 
   return (
     <div className="space-y-5">
@@ -37,25 +44,34 @@ function BoletinsAdmin() {
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Data</th><th className="p-2 text-left">Título</th><th className="p-2 text-left">Status</th><th className="p-2 text-left">Publicado em</th><th className="p-2"></th></tr></thead>
-          <tbody>
-            {boletins.map((b) => (
-              <tr key={b.id} onClick={() => setEditando(b)} className="cursor-pointer border-t border-border hover:bg-muted/30">
-                <td className="p-2 text-xs">{b.data}</td>
-                <td className="p-2 font-medium">{b.titulo}</td>
-                <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[b.status]}`}>{b.status}</span></td>
-                <td className="p-2 text-xs text-muted-foreground">{b.publicado_em ?? b.agendado_para ?? "—"}</td>
-                <td className="p-2 text-right">
-                  <button onClick={(e) => { e.stopPropagation(); setEditando(b); }} className="mr-1 rounded p-1 hover:bg-muted"><Pencil className="h-3 w-3" /></button>
-                  <button onClick={(e) => { e.stopPropagation(); setExcluir(b); }} className="rounded p-1 hover:bg-muted"><Trash2 className="h-3 w-3" /></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {isLoading ? (
+        <Skeleton className="h-64" />
+      ) : (boletins ?? []).length === 0 ? (
+        <EmptyState title="Sem boletins por aqui" description="Que tal escrever o primeiro?" />
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Data</th><th className="p-2 text-left">Título</th><th className="p-2 text-left">Status</th><th className="p-2 text-left">Publicado em</th><th className="p-2"></th></tr></thead>
+            <tbody>
+              {(boletins ?? []).map((b: any) => (
+                <tr key={b.id} onClick={() => setEditando(b)} className="cursor-pointer border-t border-border hover:bg-muted/30">
+                  <td className="p-2 text-xs">{new Date(b.data).toLocaleDateString("pt-BR")}</td>
+                  <td className="p-2 font-medium">{b.titulo}</td>
+                  <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[b.status] ?? statusColor.rascunho}`}>{b.status}</span></td>
+                  <td className="p-2 text-xs text-muted-foreground">
+                    {b.publicado_em ? new Date(b.publicado_em).toLocaleString("pt-BR") :
+                      b.agendado_para ? `→ ${new Date(b.agendado_para).toLocaleString("pt-BR")}` : "—"}
+                  </td>
+                  <td className="p-2 text-right">
+                    <button onClick={(e) => { e.stopPropagation(); setEditando(b); }} className="mr-1 rounded p-1 hover:bg-muted"><Pencil className="h-3 w-3" /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setExcluir(b); }} className="rounded p-1 hover:bg-muted"><Trash2 className="h-3 w-3" /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {editando && <BoletimDialog key={editando.id || "novo"} boletim={editando} onClose={() => setEditando(null)} />}
 
@@ -65,25 +81,56 @@ function BoletinsAdmin() {
         title="Excluir boletim?"
         description={`O boletim "${excluir?.titulo}" será removido. Esta ação não pode ser desfeita.`}
         confirmLabel="Excluir"
-        onConfirm={() => { toast.success("Boletim excluído."); setExcluir(null); }}
+        destructive
+        onConfirm={async () => { if (excluir) { await del.mutateAsync(excluir.id); toast.success("Boletim excluído."); } setExcluir(null); }}
       />
     </div>
   );
 }
 
-function BoletimDialog({ boletim, onClose }: { boletim: Boletim; onClose: () => void }) {
-  const [titulo, setTitulo] = useState(boletim.titulo);
-  const [conteudo, setConteudo] = useState(boletim.conteudo);
+function BoletimDialog({ boletim, onClose }: { boletim: BoletimRow; onClose: () => void }) {
+  const create = useCreateBulletin();
+  const update = useUpdateBulletin();
+
+  const [titulo, setTitulo] = useState(boletim.titulo ?? "");
+  const [conteudo, setConteudo] = useState(boletim.conteudo ?? "");
+  const [agendadoPara, setAgendadoPara] = useState<string>(boletim.agendado_para ? new Date(boletim.agendado_para).toISOString().slice(0, 16) : "");
   const isNovo = !boletim.id;
 
   const gerarIA = () => {
-    const g = gerarBoletimMock();
-    setTitulo(g.titulo);
-    setConteudo(g.conteudo);
+    // mock até a Rodada F
+    setTitulo(titulo || "Boletim do dia");
+    setConteudo(conteudo + "\n\n[Gerado pela IA — placeholder até a Rodada F]");
     toast.success("Boletim gerado pela IA — revise e publique.");
   };
 
-  const publicar = () => {
+  const baseFields = () => ({
+    titulo,
+    conteudo,
+    data: boletim.data ?? new Date().toISOString().slice(0, 10),
+  });
+
+  const salvarRascunho = async () => {
+    const fields = { ...baseFields(), status: "rascunho", agendado_para: null, publicado_em: null };
+    if (isNovo) await create.mutateAsync(fields);
+    else await update.mutateAsync({ id: boletim.id, ...fields });
+    toast.info("Salvo como rascunho.");
+    onClose();
+  };
+
+  const agendar = async () => {
+    if (!agendadoPara) { toast.error("Defina a data/hora."); return; }
+    const fields = { ...baseFields(), status: "agendado", agendado_para: new Date(agendadoPara).toISOString(), publicado_em: null };
+    if (isNovo) await create.mutateAsync(fields);
+    else await update.mutateAsync({ id: boletim.id, ...fields });
+    toast.success("Boletim agendado.");
+    onClose();
+  };
+
+  const publicar = async () => {
+    const fields = { ...baseFields(), status: "publicado", publicado_em: new Date().toISOString() };
+    if (isNovo) await create.mutateAsync(fields);
+    else await update.mutateAsync({ id: boletim.id, ...fields });
     toast.success("Boletim publicado pra perebada!");
     onClose();
   };
@@ -113,9 +160,13 @@ function BoletimDialog({ boletim, onClose }: { boletim: Boletim; onClose: () => 
             </div>
           </TabsContent>
         </Tabs>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-bold">Agendar para</label>
+          <input type="datetime-local" value={agendadoPara} onChange={(e) => setAgendadoPara(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+        </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => { toast.info("Salvo como rascunho."); onClose(); }} className="flex-1 rounded-full border border-border px-4 py-2 text-xs font-bold">Salvar rascunho</button>
-          <button onClick={() => { toast.success("Boletim agendado."); onClose(); }} className="flex-1 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold text-accent">Agendar</button>
+          <button onClick={salvarRascunho} className="flex-1 rounded-full border border-border px-4 py-2 text-xs font-bold">Salvar rascunho</button>
+          <button onClick={agendar} className="flex-1 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold text-accent">Agendar</button>
           <button onClick={publicar} className="flex-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
             <Send className="mr-1 inline h-3 w-3" /> Publicar
           </button>

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FileText, Users, Wallet, Trophy, Download, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
-import { ranking } from "@/lib/mock-data";
+import { useRanking } from "@/lib/queries/profiles";
 import { isElegivelLanterna, distribuicaoSemLanterna } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/admin/relatorios")({
@@ -36,10 +36,10 @@ function Relatorios() {
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <button onClick={() => toast.success(`${c.title} — CSV gerado, peraba!`)} className="flex flex-1 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-bold">
+              <button onClick={() => toast.info(`${c.title} — em breve (Rodada G).`)} className="flex flex-1 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-bold">
                 <Download className="h-3 w-3" /> CSV
               </button>
-              <button onClick={() => toast.success(`${c.title} — PDF gerado, peraba!`)} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">
+              <button onClick={() => toast.info(`${c.title} — em breve (Rodada G).`)} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">
                 <Download className="h-3 w-3" /> PDF
               </button>
             </div>
@@ -53,10 +53,18 @@ function Relatorios() {
 }
 
 function FechamentoCopa() {
-  const ordenado = [...ranking].sort((a, b) => a.pontos - b.pontos);
+  const { data: ranking } = useRanking();
+  const list = (ranking ?? []).map((q: any) => ({
+    id: q.id,
+    nome: q.profile?.nome ?? "—",
+    pontos: q.pontos ?? 0,
+    palpites_validos: q.palpites_validos ?? 0,
+    palpites_possiveis: q.palpites_possiveis ?? 0,
+  }));
+  const ordenado = [...list].sort((a, b) => a.pontos - b.pontos);
   const ultimo = ordenado[0];
   const primeiroElegivel = ordenado.find((p) => isElegivelLanterna(p));
-  const ninguemElegivel = !primeiroElegivel;
+  const ninguemElegivel = list.length > 0 && !primeiroElegivel;
   const dist = ninguemElegivel ? distribuicaoSemLanterna() : null;
 
   return (
@@ -75,7 +83,9 @@ function FechamentoCopa() {
         <div className="flex items-center gap-2 font-semibold">
           <Lightbulb className="h-3.5 w-3.5 rotate-180" /> Decisão da regra do lanterninha
         </div>
-        {ninguemElegivel ? (
+        {list.length === 0 ? (
+          <p className="text-muted-foreground">Sem dados de ranking ainda.</p>
+        ) : ninguemElegivel ? (
           <p className="text-muted-foreground">
             Nenhuma quota atendeu aos critérios. Os 5% serão redistribuídos: 1º {dist!.primeiro}% · 2º {dist!.segundo}% · 3º {dist!.terceiro}%.
           </p>
@@ -91,10 +101,10 @@ function FechamentoCopa() {
       </div>
 
       <div className="mt-4 flex gap-2">
-        <button onClick={() => toast.success("Fechamento da Copa — CSV gerado, peraba!")} className="flex flex-1 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-bold">
+        <button onClick={() => toast.info("Fechamento da Copa — em breve (Rodada G).")} className="flex flex-1 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-bold">
           <Download className="h-3 w-3" /> CSV
         </button>
-        <button onClick={() => toast.success("Fechamento da Copa — PDF gerado com a decisão do lanterninha documentada.")} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">
+        <button onClick={() => toast.info("Fechamento da Copa — em breve (Rodada G).")} className="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">
           <Download className="h-3 w-3" /> PDF
         </button>
       </div>
