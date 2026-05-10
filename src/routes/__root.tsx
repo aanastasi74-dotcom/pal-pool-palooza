@@ -79,10 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Bolão privado da Copa 2026 da turma dos Perebas: palpites, ranking e zoeira." },
       { name: "author", content: "Perebas" },
       { property: "og:title", content: "Bolão dos Perebas — Copa 2026" },
-      { property: "og:description", content: "Palpite, acompanhe o ranking e dispute com a perebada." },
+      { property: "og:description", content: "Bolão privado da Copa 2026 da turma dos Perebas: palpites, ranking e zoeira." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Bolão dos Perebas — Copa 2026" },
+      { name: "twitter:description", content: "Bolão privado da Copa 2026 da turma dos Perebas: palpites, ranking e zoeira." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f21b50a0-2620-40a8-b0b8-c53523a339ac/id-preview-b909317a--d2542e6f-e12f-4f5a-ab79-515d408edde1.lovable.app-1778443281974.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f21b50a0-2620-40a8-b0b8-c53523a339ac/id-preview-b909317a--d2542e6f-e12f-4f5a-ab79-515d408edde1.lovable.app-1778443281974.png" },
     ],
     links: [
       {
