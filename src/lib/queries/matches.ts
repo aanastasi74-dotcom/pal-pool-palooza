@@ -42,9 +42,21 @@ export function useUpdateMatch() {
     mutationFn: async ({ id, ...patch }: any) => {
       const { data, error } = await supabase.from("matches").update(patch).eq("id", id).select().single();
       if (error) throw error;
+      if (data?.status === "encerrado" && data.placar_casa != null && data.placar_fora != null) {
+        try {
+          await supabase.functions.invoke("calcular-pontos", { body: { match_id: id } });
+        } catch (e) {
+          console.warn("calcular-pontos failed:", e);
+        }
+      }
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["matches"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["matches"] });
+      qc.invalidateQueries({ queryKey: ["ranking"] });
+      qc.invalidateQueries({ queryKey: ["quotas"] });
+      qc.invalidateQueries({ queryKey: ["payments"] });
+    },
   });
 }
 
