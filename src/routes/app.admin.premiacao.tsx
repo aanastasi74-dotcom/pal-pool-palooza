@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { premiacaoConfig, premio, ranking } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
+import { useSetting, useUpdateSetting } from "@/lib/queries/settings";
+import { usePremio } from "@/lib/queries/premio";
+import { useRanking } from "@/lib/queries/profiles";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
@@ -13,19 +15,42 @@ export const Route = createFileRoute("/app/admin/premiacao")({
 
 const fmt = (n: number) => `R$ ${Math.round(n).toLocaleString("pt-BR")}`;
 
-function PremiacaoAdmin() {
-  const [meta, setMeta] = useState(premiacaoConfig.meta);
-  const [custos, setCustos] = useState(premiacaoConfig.custos_operacionais);
-  const [pcts, setPcts] = useState(premiacaoConfig.distribuicao.map((d) => d.pct));
-  const labels = premiacaoConfig.distribuicao.map((d) => d.label);
-  const soma = pcts.reduce((a, b) => a + b, 0);
-  const liquido = Math.max(0, premio.total_confirmado - custos);
+type PrizeDistribution = {
+  meta_arrecadacao?: number;
+  custos?: number;
+  campeao_pct?: number;
+  vice_pct?: number;
+  terceiro_pct?: number;
+  lanterninha_pct?: number;
+};
 
-  const salvar = () => {
-    if (soma !== 100) {
-      toast.error(`Distribuição precisa somar 100% (atual: ${soma}%)`);
-      return;
-    }
+const labels = ["1º lugar", "2º lugar", "3º lugar", "Lanterninha"];
+
+function PremiacaoAdmin() {
+  const { data: dist } = useSetting<PrizeDistribution>("prize_distribution");
+  const { data: premio } = usePremio();
+  const update = useUpdateSetting();
+
+  const [meta, setMeta] = useState(5000);
+  const [custos, setCustos] = useState(0);
+  const [pcts, setPcts] = useState<number[]>([60, 25, 10, 5]);
+
+  useEffect(() => {
+    if (!dist) return;
+    setMeta(dist.meta_arrecadacao ?? 5000);
+    setCustos(dist.custos ?? 0);
+    setPcts([dist.campeao_pct ?? 60, dist.vice_pct ?? 25, dist.terceiro_pct ?? 10, dist.lanterninha_pct ?? 5]);
+  }, [dist]);
+
+  const soma = pcts.reduce((a, b) => a + b, 0);
+  const liquido = Math.max(0, (premio?.total_confirmado ?? 0) - custos);
+
+  const salvar = async () => {
+    if (soma !== 100) { toast.error(`Distribuição precisa somar 100% (atual: ${soma}%)`); return; }
+    await update.mutateAsync({
+      key: "prize_distribution",
+      value: { meta_arrecadacao: meta, custos, campeao_pct: pcts[0], vice_pct: pcts[1], terceiro_pct: pcts[2], lanterninha_pct: pcts[3] },
+    });
     toast.success("Configurações salvas, peraba-admin.");
   };
 
@@ -65,12 +90,7 @@ function PremiacaoAdmin() {
                 <span className="font-semibold">{labels[i]}</span>
                 <span className="font-display font-bold">{p}% · {fmt((liquido * p) / 100)}</span>
               </div>
-              <Slider
-                value={[p]}
-                onValueChange={(v) => setPcts(pcts.map((x, j) => (j === i ? v[0] : x)))}
-                max={100}
-                step={1}
-              />
+              <Slider value={[p]} onValueChange={(v) => setPcts(pcts.map((x, j) => (j === i ? v[0] : x)))} max={100} step={1} />
             </div>
           ))}
         </div>
@@ -86,11 +106,19 @@ function PremiacaoAdmin() {
 }
 
 function PainelLanterna() {
-  const ordenado = [...ranking].sort((a, b) => a.pontos - b.pontos);
+  const { data: ranking } = useRanking();
+  const list = (ranking ?? []).map((q: any) => ({
+    id: q.id,
+    nome: q.profile?.nome ?? "—",
+    pontos: q.pontos ?? 0,
+    palpites_validos: q.palpites_validos ?? 0,
+    palpites_possiveis: q.palpites_possiveis ?? 0,
+  }));
+  const ordenado = [...list].sort((a, b) => a.pontos - b.pontos);
   const ultimo = ordenado[0];
   const primeiroElegivel = ordenado.find((p) => isElegivelLanterna(p));
-  const elegiveis = ranking.filter((p) => isElegivelLanterna(p)).length;
-  const naoElegiveis = ranking.length - elegiveis;
+  const elegiveis = list.filter((p) => isElegivelLanterna(p)).length;
+  const naoElegiveis = list.length - elegiveis;
   const lanternaCoincide = ultimo && primeiroElegivel && ultimo.id === primeiroElegivel.id;
 
   return (
@@ -99,9 +127,7 @@ function PainelLanterna() {
         <Lightbulb className="h-4 w-4 rotate-180 text-accent-foreground" />
         <h3 className="font-display font-bold">Regra do lanterninha · 5%</h3>
       </div>
-      <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
-        {REGRA_LANTERNINHA}
-      </p>
+      <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{REGRA_LANTERNINHA}</p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-xl bg-success/10 p-3">
@@ -117,11 +143,7 @@ function PainelLanterna() {
       <div className="mt-4 overflow-hidden rounded-xl border border-border">
         <table className="w-full text-xs">
           <thead className="bg-secondary text-left">
-            <tr>
-              <th className="px-3 py-2">Cenário</th>
-              <th className="px-3 py-2">Participante</th>
-              <th className="px-3 py-2">Status</th>
-            </tr>
+            <tr><th className="px-3 py-2">Cenário</th><th className="px-3 py-2">Participante</th><th className="px-3 py-2">Status</th></tr>
           </thead>
           <tbody className="divide-y divide-border">
             <tr>
