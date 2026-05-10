@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { premio } from "@/lib/mock-data";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { CountUp } from "@/components/count-up";
-import { Trophy } from "lucide-react";
+import { Trophy, Lightbulb } from "lucide-react";
 
 export const Route = createFileRoute("/app/premio")({
   head: () => ({
@@ -59,18 +59,33 @@ function Premio() {
 
       <section>
         <h2 className="font-display text-lg font-bold">Distribuição por colocação</h2>
-        <p className="text-xs text-muted-foreground">Pra perebada saber quanto cada lugar leva.</p>
+        <p className="text-xs text-muted-foreground">Pódio leva o caldeirão e o lanterninha leva um afago — pra perebada não sair só com a vergonha.</p>
         <div className="mt-4 grid gap-3 md:grid-cols-4">
-          {premio.distribuicao.map((d) => (
-            <div key={d.posicao} className={`rounded-2xl border p-5 shadow-card ${d.posicao === 1 ? "border-accent bg-gold text-gold-foreground" : "border-border bg-card"}`}>
-              <div className="flex items-center gap-2">
-                <Trophy className="h-4 w-4" />
-                <p className="text-xs font-semibold uppercase tracking-widest">{d.posicao}º lugar</p>
+          {premio.distribuicao.map((d) => {
+            const isPrimeiro = d.id === "primeiro";
+            const isLanterna = d.id === "lanterna";
+            const Icon = isLanterna ? Lightbulb : Trophy;
+            return (
+              <div
+                key={d.id}
+                className={`rounded-2xl border p-5 shadow-card ${
+                  isPrimeiro
+                    ? "border-accent bg-gold text-gold-foreground"
+                    : isLanterna
+                      ? "border-dashed border-muted-foreground/40 bg-muted/40"
+                      : "border-border bg-card"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className={`h-4 w-4 ${isLanterna ? "rotate-180" : ""}`} />
+                  <p className="text-xs font-semibold uppercase tracking-widest">{d.label}</p>
+                </div>
+                <p className="mt-3 font-display text-3xl font-black">{d.pct}%</p>
+                <p className="mt-1 text-xs opacity-80">≈ {fmtBRL((potencial * d.pct) / 100)}</p>
+                {isLanterna && <p className="mt-2 text-[11px] italic opacity-80">Prêmio de consolação — pra perebada não sair só com a vergonha.</p>}
               </div>
-              <p className="mt-3 font-display text-3xl font-black">{d.pct}%</p>
-              <p className="mt-1 text-xs opacity-80">≈ {fmtBRL((potencial * d.pct) / 100)}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
