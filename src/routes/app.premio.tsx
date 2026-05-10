@@ -3,6 +3,9 @@ import { premio } from "@/lib/mock-data";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { CountUp } from "@/components/count-up";
 import { Trophy, Lightbulb } from "lucide-react";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { REGRA_LANTERNINHA } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/premio")({
   head: () => ({
