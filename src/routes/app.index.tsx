@@ -106,7 +106,7 @@ function Home() {
             </div>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{boletim}</p>
             <p className="mt-3 text-[10px] uppercase tracking-widest text-muted-foreground">
-              Perfis lidos: {perfis.slice(0, 3).map((p) => p.apelido_principal).join(" · ")}
+              Perfis lidos: {perfisLidos.length ? perfisLidos.join(" · ") : "ninguém com perfil hoje"}
             </p>
             {isAdmin ? (
               <div className="mt-4 flex flex-wrap gap-2">
