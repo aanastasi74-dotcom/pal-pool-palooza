@@ -3,6 +3,9 @@ import { useState } from "react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import * as mock from "@/lib/mock-data";
+import { useMaintenanceMode, setReadOnly, setMaintenance, setAutoBackup } from "@/hooks/use-maintenance";
+import { Download } from "lucide-react";
 
 export const Route = createFileRoute("/app/admin/configuracoes")({
   head: () => ({ meta: [{ title: "Admin — Configurações" }] }),
