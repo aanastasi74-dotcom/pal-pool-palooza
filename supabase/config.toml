@@ -8,3 +8,12 @@ verify_jwt = true
 
 [functions.send-pagamento-rejeitado-email]
 verify_jwt = true
+
+[functions.calcular-pontos]
+verify_jwt = true
+
+[functions.gerar-boletim-diario]
+verify_jwt = false
+
+[functions.lembrete-palpite]
+verify_jwt = false
