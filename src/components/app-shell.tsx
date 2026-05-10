@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, useLocation, useNavigate, Navigate } from "@tanstack/react-router";
 import { Trophy, CalendarDays, ListOrdered, Sparkles, Coins, ChevronDown, User, Wallet, ShieldCheck, LogOut } from "lucide-react";
 import {
   DropdownMenu,
@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PrizeBanner } from "./prize-banner";
 import { ThemeToggle } from "./theme-toggle";
+import { BugReportFAB } from "./bug-report-fab";
+import { MaintenanceBanner } from "./maintenance-banner";
+import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { currentUser, minhasQuotas } from "@/lib/mock-data";
 
 const nav = [
@@ -24,9 +27,15 @@ export function AppShell() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isAdmin = currentUser.role === "admin";
+  const { maintenance } = useMaintenanceMode();
+
+  if (maintenance && !pathname.startsWith("/app/admin")) {
+    return <Navigate to="/manutencao" />;
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
+      <MaintenanceBanner />
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
