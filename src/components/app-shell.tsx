@@ -135,6 +135,8 @@ export function AppShell() {
           })}
         </div>
       </nav>
+
+      <BugReportFAB />
     </div>
   );
 }
