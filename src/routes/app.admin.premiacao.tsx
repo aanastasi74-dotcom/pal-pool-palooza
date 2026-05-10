@@ -15,6 +15,7 @@ function PremiacaoAdmin() {
   const [meta, setMeta] = useState(premiacaoConfig.meta);
   const [custos, setCustos] = useState(premiacaoConfig.custos_operacionais);
   const [pcts, setPcts] = useState(premiacaoConfig.distribuicao.map((d) => d.pct));
+  const labels = premiacaoConfig.distribuicao.map((d) => d.label);
   const soma = pcts.reduce((a, b) => a + b, 0);
   const liquido = Math.max(0, premio.total_confirmado - custos);
 
@@ -59,7 +60,7 @@ function PremiacaoAdmin() {
           {pcts.map((p, i) => (
             <div key={i}>
               <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="font-semibold">{i + 1}º lugar</span>
+                <span className="font-semibold">{labels[i]}</span>
                 <span className="font-display font-bold">{p}% · {fmt((liquido * p) / 100)}</span>
               </div>
               <Slider

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ManutencaoRouteImport } from './routes/manutencao'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -24,6 +25,8 @@ import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
 import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4'
 import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
+import { Route as AppAdminSaudeRouteImport } from './routes/app.admin.saude'
+import { Route as AppAdminReportesRouteImport } from './routes/app.admin.reportes'
 import { Route as AppAdminRelatoriosRouteImport } from './routes/app.admin.relatorios'
 import { Route as AppAdminPremiacaoRouteImport } from './routes/app.admin.premiacao'
 import { Route as AppAdminPerfisRouteImport } from './routes/app.admin.perfis'
@@ -34,6 +37,11 @@ import { Route as AppAdminConfiguracoesRouteImport } from './routes/app.admin.co
 import { Route as AppAdminBoletinsRouteImport } from './routes/app.admin.boletins'
 import { Route as AppAdminAuditoriaRouteImport } from './routes/app.admin.auditoria'
 
+const ManutencaoRoute = ManutencaoRouteImport.update({
+  id: '/manutencao',
+  path: '/manutencao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -109,6 +117,16 @@ const AppPagamentoQuota_idRoute = AppPagamentoQuota_idRouteImport.update({
   path: '/pagamento/$quota_id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminSaudeRoute = AppAdminSaudeRouteImport.update({
+  id: '/saude',
+  path: '/saude',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminReportesRoute = AppAdminReportesRouteImport.update({
+  id: '/reportes',
+  path: '/reportes',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminRelatoriosRoute = AppAdminRelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
@@ -158,6 +176,7 @@ const AppAdminAuditoriaRoute = AppAdminAuditoriaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/manutencao': typeof ManutencaoRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
@@ -177,12 +196,15 @@ export interface FileRoutesByFullPath {
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
+  '/app/admin/reportes': typeof AppAdminReportesRoute
+  '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
   '/app/admin/': typeof AppAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/manutencao': typeof ManutencaoRoute
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -201,6 +223,8 @@ export interface FileRoutesByTo {
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
+  '/app/admin/reportes': typeof AppAdminReportesRoute
+  '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
   '/app/admin': typeof AppAdminIndexRoute
@@ -209,6 +233,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/manutencao': typeof ManutencaoRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
@@ -228,6 +253,8 @@ export interface FileRoutesById {
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
+  '/app/admin/reportes': typeof AppAdminReportesRoute
+  '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites_/top4': typeof AppPalpitesTop4Route
   '/app/admin/': typeof AppAdminIndexRoute
@@ -237,6 +264,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/manutencao'
     | '/app/admin'
     | '/app/boletins'
     | '/app/jogos'
@@ -256,12 +284,15 @@ export interface FileRouteTypes {
     | '/app/admin/perfis'
     | '/app/admin/premiacao'
     | '/app/admin/relatorios'
+    | '/app/admin/reportes'
+    | '/app/admin/saude'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
     | '/app/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/manutencao'
     | '/app/boletins'
     | '/app/jogos'
     | '/app/palpites'
@@ -280,6 +311,8 @@ export interface FileRouteTypes {
     | '/app/admin/perfis'
     | '/app/admin/premiacao'
     | '/app/admin/relatorios'
+    | '/app/admin/reportes'
+    | '/app/admin/saude'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
     | '/app/admin'
@@ -287,6 +320,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/manutencao'
     | '/app/admin'
     | '/app/boletins'
     | '/app/jogos'
@@ -306,6 +340,8 @@ export interface FileRouteTypes {
     | '/app/admin/perfis'
     | '/app/admin/premiacao'
     | '/app/admin/relatorios'
+    | '/app/admin/reportes'
+    | '/app/admin/saude'
     | '/app/pagamento/$quota_id'
     | '/app/palpites_/top4'
     | '/app/admin/'
@@ -314,10 +350,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ManutencaoRoute: typeof ManutencaoRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/manutencao': {
+      id: '/manutencao'
+      path: '/manutencao'
+      fullPath: '/manutencao'
+      preLoaderRoute: typeof ManutencaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -423,6 +467,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPagamentoQuota_idRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin/saude': {
+      id: '/app/admin/saude'
+      path: '/saude'
+      fullPath: '/app/admin/saude'
+      preLoaderRoute: typeof AppAdminSaudeRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/reportes': {
+      id: '/app/admin/reportes'
+      path: '/reportes'
+      fullPath: '/app/admin/reportes'
+      preLoaderRoute: typeof AppAdminReportesRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/admin/relatorios': {
       id: '/app/admin/relatorios'
       path: '/relatorios'
@@ -499,6 +557,8 @@ interface AppAdminRouteChildren {
   AppAdminPerfisRoute: typeof AppAdminPerfisRoute
   AppAdminPremiacaoRoute: typeof AppAdminPremiacaoRoute
   AppAdminRelatoriosRoute: typeof AppAdminRelatoriosRoute
+  AppAdminReportesRoute: typeof AppAdminReportesRoute
+  AppAdminSaudeRoute: typeof AppAdminSaudeRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
 }
 
@@ -512,6 +572,8 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminPerfisRoute: AppAdminPerfisRoute,
   AppAdminPremiacaoRoute: AppAdminPremiacaoRoute,
   AppAdminRelatoriosRoute: AppAdminRelatoriosRoute,
+  AppAdminReportesRoute: AppAdminReportesRoute,
+  AppAdminSaudeRoute: AppAdminSaudeRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,
 }
 
@@ -554,6 +616,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ManutencaoRoute: ManutencaoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

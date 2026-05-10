@@ -13,10 +13,14 @@ import {
   ArrowLeft,
   Menu,
   ShieldCheck,
+  Activity,
+  Bug,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import { PrizeBanner } from "./prize-banner";
+import { BugReportFAB } from "./bug-report-fab";
+import { MaintenanceBanner } from "./maintenance-banner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const items = [
@@ -30,6 +34,8 @@ const items = [
   { to: "/app/admin/configuracoes", label: "Configurações", icon: Settings },
   { to: "/app/admin/auditoria", label: "Auditoria", icon: ScrollText },
   { to: "/app/admin/relatorios", label: "Relatórios", icon: FileBarChart },
+  { to: "/app/admin/saude", label: "Saúde", icon: Activity },
+  { to: "/app/admin/reportes", label: "Reportes", icon: Bug },
 ] as const;
 
 function NavList({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
@@ -63,6 +69,7 @@ export function AdminShell() {
 
   return (
     <div className="min-h-screen bg-background">
+      <MaintenanceBanner />
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
@@ -109,6 +116,7 @@ export function AdminShell() {
           <Outlet />
         </main>
       </div>
+      <BugReportFAB />
     </div>
   );
 }

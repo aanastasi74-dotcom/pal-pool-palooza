@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { times, janelasTop4 } from "@/lib/mock-data";
+import { times, janelasTop4Corrigida as janelasTop4 } from "@/lib/mock-data";
 import { Sparkles, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
