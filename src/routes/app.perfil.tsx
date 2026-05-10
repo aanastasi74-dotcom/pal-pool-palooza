@@ -22,10 +22,11 @@ function Perfil() {
   useEffect(() => {
     if (profile) {
       setApelido(profile.apelido ?? "");
+      const n = (profile.notificacoes ?? {}) as Record<string, boolean>;
       setNotif({
-        whatsapp: profile.notificacoes?.whatsapp ?? true,
-        email: profile.notificacoes?.email ?? true,
-        antesDeTravar: profile.notificacoes?.antesDeTravar ?? true,
+        whatsapp: n.whatsapp ?? true,
+        email: n.email ?? true,
+        antesDeTravar: n.antesDeTravar ?? true,
       });
     }
   }, [profile]);
