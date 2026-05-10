@@ -163,7 +163,7 @@ export const perfis: PerfilPersonalidade[] = [
     apelidos_alternativos: ["Cacá", "Carlou"],
     tracos: [
       { traco: "sempre chega atrasada", brincadeira: "perdeu o palpite de novo, claro" },
-      { traco: "ET Carlou", brincadeira: "esqueceu de preencher de novo" },
+      { traco: "compra quota última hora", brincadeira: "vivendo no fio do prazo" },
     ],
     tags: ["atrasada", "última hora"],
     observacoes_admin: "Adora cravar placar exato no último minuto antes de travar.",

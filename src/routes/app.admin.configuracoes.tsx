@@ -36,11 +36,11 @@ function Configuracoes() {
           <AccordionItem value="pontuacao">
             <AccordionTrigger>Regras de pontuação</AccordionTrigger>
             <AccordionContent className="grid gap-3 md:grid-cols-2">
-              <Field label="Placar exato" defaultValue="100" type="number" />
-              <Field label="Resultado certo" defaultValue="50" type="number" />
-              <Field label="Gols do vencedor" defaultValue="20" type="number" />
-              <Field label="Diferença de gols" defaultValue="15" type="number" />
-              <Field label="Gols de um time" defaultValue="10" type="number" />
+              <Field label="Placar exato" defaultValue="12" type="number" />
+              <Field label="Resultado certo" defaultValue="4" type="number" />
+              <Field label="Gols do vencedor" defaultValue="2" type="number" />
+              <Field label="Diferença de gols" defaultValue="2" type="number" />
+              <Field label="Gols de um time" defaultValue="1" type="number" />
               <Field label="Peso inicial" defaultValue="10" type="number" />
               <Field label="Incremento por dia" defaultValue="1" type="number" />
               <Field label="Peso da final" defaultValue="50" type="number" />
