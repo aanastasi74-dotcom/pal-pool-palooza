@@ -3,11 +3,13 @@ import { useState } from "react";
 import { useBulletins, useCreateBulletin, useUpdateBulletin, useDeleteBulletin } from "@/lib/queries/bulletins";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Sparkles, Send, Pencil, Trash2 } from "lucide-react";
+import { Plus, Sparkles, Send, Pencil, Trash2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/app/admin/boletins")({
   head: () => ({ meta: [{ title: "Admin — Boletins" }] }),
@@ -25,6 +27,7 @@ const statusColor: Record<string, string> = {
 function BoletinsAdmin() {
   const { data: boletins, isLoading } = useBulletins();
   const del = useDeleteBulletin();
+  const qc = useQueryClient();
 
   const [editando, setEditando] = useState<BoletimRow | null>(null);
   const [excluir, setExcluir] = useState<BoletimRow | null>(null);
@@ -39,9 +42,24 @@ function BoletinsAdmin() {
           <h1 className="font-display text-3xl font-extrabold">Boletins</h1>
           <p className="mt-1 text-sm text-muted-foreground">Geração com IA, edição e publicação.</p>
         </div>
-        <button onClick={novo} className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
-          <Plus className="h-3 w-3" /> Novo boletim
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              const t = toast.loading("Gerando boletim…");
+              const { data, error } = await supabase.functions.invoke("gerar-boletim-diario", { body: {} });
+              toast.dismiss(t);
+              if (error || data?.error) toast.error(`Erro: ${error?.message ?? data?.error}`);
+              else if (data?.skipped) toast.info("Auto-geração desativada nas configurações.");
+              else { toast.success("Boletim gerado como rascunho."); qc.invalidateQueries({ queryKey: ["bulletins"] }); }
+            }}
+            className="flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-bold"
+          >
+            <Wand2 className="h-3 w-3" /> Gerar boletim agora
+          </button>
+          <button onClick={novo} className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
+            <Plus className="h-3 w-3" /> Novo boletim
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
