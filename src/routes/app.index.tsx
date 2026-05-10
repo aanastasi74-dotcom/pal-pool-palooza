@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { jogos, ranking, times, currentUser, perfis, gerarBoletimMock } from "@/lib/mock-data";
-import { Sparkles, TrendingUp, Trophy, Pencil } from "lucide-react";
+import { jogos, ranking, times, currentUser, perfis, gerarBoletimMock, minhasQuotas, TOTAL_QUOTAS } from "@/lib/mock-data";
+import { Sparkles, TrendingUp, Trophy, Pencil, Lightbulb, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { BoletimEditor } from "@/components/boletim-editor";
+import { calcularEngajamento, isElegivelLanterna, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Início — Bolão dos Perebas" }] }),
