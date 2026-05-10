@@ -31,9 +31,7 @@ const defaults = {
   top4Antes: "100",
   top4Grupos: "50",
   top4Oitavas: "25",
-  top4Quartas: "12.5",
-  top4Semis: "6.25",
-  top4Final: "0",
+  top4PosOitavas: "0",
   boletimHora: "22:00",
   autoBoletim: true,
 };
