@@ -14,6 +14,7 @@ import { BugReportFAB } from "./bug-report-fab";
 import { MaintenanceBanner } from "./maintenance-banner";
 import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { currentUser, minhasQuotas } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-context";
 
 const nav = [
   { to: "/app", label: "Início", icon: Trophy, exact: true },
@@ -26,7 +27,8 @@ const nav = [
 export function AppShell() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const isAdmin = currentUser.role === "admin";
+  const { signOut, isAdmin: isAuthAdmin } = useAuth();
+  const isAdmin = isAuthAdmin || currentUser.role === "admin";
   const { maintenance } = useMaintenanceMode();
 
   if (maintenance && !pathname.startsWith("/app/admin")) {
@@ -101,7 +103,12 @@ export function AppShell() {
                   </>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate({ to: "/" })}>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await signOut();
+                    navigate({ to: "/" });
+                  }}
+                >
                   <LogOut className="mr-2 h-4 w-4" /> Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>

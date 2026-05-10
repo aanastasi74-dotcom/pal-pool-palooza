@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app/admin/convites")({
   head: () => ({ meta: [{ title: "Admin — Convites & Usuários" }] }),
@@ -206,9 +207,32 @@ function NovoConviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange
   const errors = !parsed.success ? parsed.error.flatten().fieldErrors : {};
   const valido = parsed.success;
 
-  const enviar = () => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const enviar = async () => {
     if (!valido) return;
-    toast.success("Convite enviado.");
+    setSubmitting(true);
+    const { data: inserted, error: insErr } = await supabase
+      .from("invites")
+      .insert({ nome: nome.trim(), email: email.trim(), mensagem: mensagem || null })
+      .select("id, token")
+      .single();
+    if (insErr || !inserted) {
+      setSubmitting(false);
+      toast.error(insErr?.message ?? "Não consegui criar o convite.");
+      return;
+    }
+    const { error: fnErr } = await supabase.functions.invoke("send-convite-email", {
+      body: { invite_id: inserted.id },
+    });
+    setSubmitting(false);
+    if (fnErr) {
+      const link = `${window.location.origin}/cadastro/${inserted.token}`;
+      navigator.clipboard?.writeText(link);
+      toast.warning(`Convite criado, mas não enviei o e-mail. Link copiado pra mandar manualmente: ${link}`);
+    } else {
+      toast.success(`Convite enviado pra ${nome}!`);
+    }
     setNome(""); setEmail(""); setMensagem("");
     onOpenChange(false);
   };
@@ -229,8 +253,8 @@ function NovoConviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange
           <textarea value={mensagem} onChange={(e) => setMensagem(e.target.value)} placeholder="Mensagem (opcional, máx 200)" rows={3} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
           {errors.mensagem && <p className="mt-1 text-xs text-destructive">{errors.mensagem[0]}</p>}
         </div>
-        <button disabled={!valido} onClick={enviar} className="rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50">
-          <Mail className="mr-1 inline h-3 w-3" /> Enviar
+        <button disabled={!valido || submitting} onClick={enviar} className="rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50">
+          <Mail className="mr-1 inline h-3 w-3" /> {submitting ? "Enviando…" : "Enviar"}
         </button>
       </DialogContent>
     </Dialog>
