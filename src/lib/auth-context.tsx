@@ -89,11 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Best-effort: ensure profile reflects nome/apelido
       await supabase.from("profiles").update({ nome, apelido }).eq("id", newUserId);
     }
-    // Mark invite as used
-    await supabase
-      .from("invites")
-      .update({ status: "usado", usado_em: new Date().toISOString() })
-      .eq("token", token);
+    // Mark invite as used (SECURITY DEFINER bypasses RLS)
+    await supabase.rpc("consume_invite", { p_token: token });
 
     return {};
   };
