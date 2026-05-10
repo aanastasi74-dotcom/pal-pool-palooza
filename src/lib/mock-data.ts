@@ -60,17 +60,21 @@ export type Participante = {
   exatos: number;
   quotas: number;
   evolucao?: number[]; // posições recentes para sparkline
+  // Elegibilidade ao lanterninha (calculados ao final da Copa):
+  palpites_validos: number;
+  palpites_possiveis: number;
+  elegivel_lanterna: boolean;
 };
 
 export const ranking: Participante[] = [
-  { id: "1", nome: "Carla Mendes", apelido: "CM", cor: "oklch(0.7 0.17 90)", pontos: 1840, variacao: 2, exatos: 7, quotas: 3, evolucao: [5, 4, 4, 3, 1] },
-  { id: "2", nome: "Você", apelido: "VC", cor: "oklch(0.55 0.16 150)", pontos: 1720, variacao: 1, exatos: 6, quotas: 2, evolucao: [6, 5, 4, 3, 2] },
-  { id: "3", nome: "Rafael Tomaz", apelido: "RT", cor: "oklch(0.6 0.18 30)", pontos: 1655, variacao: -2, exatos: 5, quotas: 2, evolucao: [1, 2, 2, 3, 3] },
-  { id: "4", nome: "Juliana Prado", apelido: "JP", cor: "oklch(0.6 0.18 280)", pontos: 1540, variacao: 0, exatos: 5, quotas: 1, evolucao: [4, 4, 4, 4, 4] },
-  { id: "5", nome: "Diego Alves", apelido: "DA", cor: "oklch(0.65 0.16 200)", pontos: 1490, variacao: 3, exatos: 4, quotas: 4, evolucao: [8, 7, 6, 6, 5] },
-  { id: "6", nome: "Marina Souza", apelido: "MS", cor: "oklch(0.6 0.17 350)", pontos: 1410, variacao: -1, exatos: 4, quotas: 2, evolucao: [5, 5, 6, 5, 6] },
-  { id: "7", nome: "Marcos (ET)", apelido: "ET", cor: "oklch(0.55 0.13 260)", pontos: 1320, variacao: 1, exatos: 3, quotas: 1, evolucao: [8, 8, 7, 7, 7] },
-  { id: "8", nome: "Aninha Lima", apelido: "AL", cor: "oklch(0.7 0.16 60)", pontos: 1180, variacao: -3, exatos: 2, quotas: 2, evolucao: [5, 5, 6, 7, 8] },
+  { id: "1", nome: "Carla Mendes", apelido: "CM", cor: "oklch(0.7 0.17 90)", pontos: 1840, variacao: 2, exatos: 7, quotas: 3, evolucao: [5, 4, 4, 3, 1], palpites_validos: 38, palpites_possiveis: 40, elegivel_lanterna: true },
+  { id: "2", nome: "Você", apelido: "VC", cor: "oklch(0.55 0.16 150)", pontos: 1720, variacao: 1, exatos: 6, quotas: 2, evolucao: [6, 5, 4, 3, 2], palpites_validos: 38, palpites_possiveis: 40, elegivel_lanterna: true },
+  { id: "3", nome: "Rafael Tomaz", apelido: "RT", cor: "oklch(0.6 0.18 30)", pontos: 1655, variacao: -2, exatos: 5, quotas: 2, evolucao: [1, 2, 2, 3, 3], palpites_validos: 36, palpites_possiveis: 40, elegivel_lanterna: true },
+  { id: "4", nome: "Juliana Prado", apelido: "JP", cor: "oklch(0.6 0.18 280)", pontos: 1540, variacao: 0, exatos: 5, quotas: 1, evolucao: [4, 4, 4, 4, 4], palpites_validos: 35, palpites_possiveis: 40, elegivel_lanterna: true },
+  { id: "5", nome: "Diego Alves", apelido: "DA", cor: "oklch(0.65 0.16 200)", pontos: 1490, variacao: 3, exatos: 4, quotas: 4, evolucao: [8, 7, 6, 6, 5], palpites_validos: 33, palpites_possiveis: 40, elegivel_lanterna: true },
+  { id: "6", nome: "Marina Souza", apelido: "MS", cor: "oklch(0.6 0.17 350)", pontos: 1410, variacao: -1, exatos: 4, quotas: 2, evolucao: [5, 5, 6, 5, 6], palpites_validos: 28, palpites_possiveis: 40, elegivel_lanterna: false },
+  { id: "7", nome: "Marcos (ET)", apelido: "ET", cor: "oklch(0.55 0.13 260)", pontos: 1320, variacao: 1, exatos: 3, quotas: 1, evolucao: [8, 8, 7, 7, 7], palpites_validos: 34, palpites_possiveis: 40, elegivel_lanterna: true },
+  { id: "8", nome: "Aninha Lima", apelido: "AL", cor: "oklch(0.7 0.16 60)", pontos: 1180, variacao: -3, exatos: 2, quotas: 2, evolucao: [5, 5, 6, 7, 8], palpites_validos: 22, palpites_possiveis: 40, elegivel_lanterna: false },
 ];
 
 // ----- Usuário atual e papel -----
