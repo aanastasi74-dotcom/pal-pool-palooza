@@ -483,3 +483,39 @@ export const janelasTop4Corrigida = [
   { fase: "Semis", eficacia: 6.25, ativa: false },
   { fase: "Final", eficacia: 0, ativa: false },
 ];
+
+export function gerarBoletimMock(
+  rankingDoDia: Participante[] = ranking,
+  perfisAtivos: PerfilPersonalidade[] = perfis,
+): { titulo: string; conteudo: string } {
+  const sorted = [...rankingDoDia];
+  const top3 = sorted.slice(0, 3);
+  const maiorSubida = [...sorted].sort((a, b) => b.variacao - a.variacao)[0];
+  const maiorQueda = [...sorted].sort((a, b) => a.variacao - b.variacao)[0];
+
+  const refDe = (p: Participante) => {
+    const perfil = perfisAtivos.find((x) => x.participante_id === p.id);
+    if (!perfil) return p.nome;
+    const alt = perfil.apelidos_alternativos[0];
+    return alt ? perfil.apelido_principal + " (" + alt + ")" : perfil.apelido_principal;
+  };
+  const brincadeira = (p: Participante) => {
+    const perfil = perfisAtivos.find((x) => x.participante_id === p.id);
+    return perfil?.tracos[0]?.brincadeira ?? "sem comentários hoje";
+  };
+
+  const lider = top3[0];
+  const segundo = top3[1];
+  const terceiro = top3[2];
+
+  const partes: string[] = [];
+  if (lider) partes.push(refDe(lider) + " segue na ponta com " + lider.pontos.toLocaleString("pt-BR") + " pts — " + brincadeira(lider) + ".");
+  if (segundo && terceiro) partes.push(refDe(segundo) + " cola em segundo, e " + refDe(terceiro) + " fecha o pódio.");
+  if (maiorSubida && maiorSubida.variacao > 0) partes.push("Quem mais subiu hoje foi " + refDe(maiorSubida) + ", +" + maiorSubida.variacao + " posições.");
+  if (maiorQueda && maiorQueda.variacao < 0) partes.push("Já " + refDe(maiorQueda) + " despencou " + Math.abs(maiorQueda.variacao) + " — " + brincadeira(maiorQueda) + ".");
+
+  const conteudo = partes.join(" ") || "Dia tranquilo na perebada — sem grandes reviravoltas.";
+  const titulo = lider ? refDe(lider) + " na ponta, perebada acompanha" : "Boletim do dia";
+
+  return { titulo, conteudo };
+}
