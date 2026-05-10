@@ -117,6 +117,18 @@ function Premio() {
           ))}
         </ul>
       </section>
+
+      <Dialog open={openRegra} onOpenChange={setOpenRegra}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Regra do prêmio do lanterninha</DialogTitle>
+            <DialogDescription>Como funciona o prêmio de 5% pro último colocado.</DialogDescription>
+          </DialogHeader>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+            {REGRA_LANTERNINHA}
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
