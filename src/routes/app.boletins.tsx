@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { boletins, currentUser, type Boletim } from "@/lib/mock-data";
-import { Pencil, Eye } from "lucide-react";
+import { Pencil, Eye, Newspaper } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useBulletins } from "@/lib/queries/bulletins";
+import { useProfile } from "@/lib/queries/profiles";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/boletins")({
   head: () => ({
@@ -15,12 +17,22 @@ export const Route = createFileRoute("/app/boletins")({
   component: BoletinsPage,
 });
 
-function BoletinsPage() {
-  const isAdmin = currentUser.role === "admin";
-  const [aberto, setAberto] = useState<Boletim | null>(null);
+type BoletimRow = { id: string; data: string; titulo: string; conteudo: string; status: string };
 
-  if (!boletins.length) {
-    return <EmptyState title="Nenhum boletim ainda" description="Quando a Copa começar, aparece aqui o primeiro." />;
+function BoletinsPage() {
+  const { data: profile } = useProfile();
+  const isAdmin = profile?.role === "admin";
+  const { data: boletins = [], isLoading } = useBulletins();
+  const [aberto, setAberto] = useState<BoletimRow | null>(null);
+
+  const publicados = (boletins as BoletimRow[]).filter((b) => b.status === "publicado");
+
+  if (isLoading) {
+    return <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>;
+  }
+
+  if (!publicados.length) {
+    return <EmptyState icon={Newspaper} title="Nenhum boletim publicado ainda" description="— saiu da forja." />;
   }
 
   return (
@@ -31,13 +43,11 @@ function BoletinsPage() {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        {boletins.map((b) => (
+        {publicados.map((b) => (
           <article key={b.id} className="rounded-2xl border border-border bg-card p-5 shadow-card">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="font-semibold">{b.data}</span>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${b.status === "publicado" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
-                {b.status === "publicado" ? "Publicado" : "Rascunho"}
-              </span>
+              <span className="font-semibold">{new Date(b.data).toLocaleDateString("pt-BR")}</span>
+              <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success">Publicado</span>
             </div>
             <h3 className="mt-2 font-display text-lg font-bold">{b.titulo}</h3>
             <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{b.conteudo}</p>
@@ -60,7 +70,7 @@ function BoletinsPage() {
           {aberto && (
             <>
               <DialogHeader>
-                <p className="text-xs text-muted-foreground">{aberto.data}</p>
+                <p className="text-xs text-muted-foreground">{new Date(aberto.data).toLocaleDateString("pt-BR")}</p>
                 <DialogTitle className="font-display text-xl">{aberto.titulo}</DialogTitle>
               </DialogHeader>
               <p className="whitespace-pre-line text-sm">{aberto.conteudo}</p>
