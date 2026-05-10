@@ -27,6 +27,7 @@ const statusColor: Record<string, string> = {
 function BoletinsAdmin() {
   const { data: boletins, isLoading } = useBulletins();
   const del = useDeleteBulletin();
+  const qc = useQueryClient();
 
   const [editando, setEditando] = useState<BoletimRow | null>(null);
   const [excluir, setExcluir] = useState<BoletimRow | null>(null);
