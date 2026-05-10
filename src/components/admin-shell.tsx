@@ -69,6 +69,7 @@ export function AdminShell() {
 
   return (
     <div className="min-h-screen bg-background">
+      <MaintenanceBanner />
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
@@ -115,6 +116,7 @@ export function AdminShell() {
           <Outlet />
         </main>
       </div>
+      <BugReportFAB />
     </div>
   );
 }
