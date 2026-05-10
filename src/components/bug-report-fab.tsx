@@ -3,40 +3,39 @@ import { Bug } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { currentUser, reportes, type Reporte } from "@/lib/mock-data";
+import { useCreateReport } from "@/lib/queries/reports";
+import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 
-type Severidade = Reporte["severidade"];
+type Severidade = "critico" | "importante" | "menor";
 
 export function BugReportFAB() {
   const [open, setOpen] = useState(false);
   const [descricao, setDescricao] = useState("");
   const [severidade, setSeveridade] = useState<Severidade>("importante");
+  const { profile } = useAuth();
+  const createReport = useCreateReport();
 
-  const enviar = () => {
+  const enviar = async () => {
     if (!descricao.trim()) {
       toast.error("Conta o que aconteceu, peraba.");
       return;
     }
-    const novo: Reporte = {
-      id: `r${Date.now()}`,
-      descricao: descricao.trim(),
-      url: typeof window !== "undefined" ? window.location.pathname : "",
-      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
-      autor: currentUser.nome,
-      data: new Date().toLocaleString("pt-BR"),
-      severidade,
-      status: "aberto",
-    };
-    reportes.unshift(novo);
-    toast.success("Reporte enviado, peraba!");
-    setDescricao("");
-    setSeveridade("importante");
-    setOpen(false);
+    try {
+      await createReport.mutateAsync({ descricao: descricao.trim(), severidade });
+      toast.success("Reporte enviado, peraba!");
+      setDescricao("");
+      setSeveridade("importante");
+      setOpen(false);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao enviar reporte.");
+    }
   };
 
   const url = typeof window !== "undefined" ? window.location.pathname : "—";
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "—";
+  const nome = profile?.nome ?? "Anônimo";
+  const role = profile?.role ?? "participante";
 
   return (
     <>
@@ -86,7 +85,7 @@ export function BugReportFAB() {
             </div>
             <div className="rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground">
               <p><strong>URL:</strong> {url}</p>
-              <p><strong>Usuário:</strong> {currentUser.nome} ({currentUser.role})</p>
+              <p><strong>Usuário:</strong> {nome} ({role})</p>
               <p className="truncate"><strong>Navegador:</strong> {ua}</p>
               <p><strong>Quando:</strong> {new Date().toLocaleString("pt-BR")}</p>
             </div>
@@ -94,7 +93,9 @@ export function BugReportFAB() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={enviar}>Enviar</Button>
+            <Button onClick={enviar} disabled={createReport.isPending}>
+              {createReport.isPending ? "Enviando..." : "Enviar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

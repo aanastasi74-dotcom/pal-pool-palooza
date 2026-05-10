@@ -13,8 +13,8 @@ import { ThemeToggle } from "./theme-toggle";
 import { BugReportFAB } from "./bug-report-fab";
 import { MaintenanceBanner } from "./maintenance-banner";
 import { useMaintenanceMode } from "@/hooks/use-maintenance";
-import { currentUser, minhasQuotas } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth-context";
+import { useMinhasQuotas } from "@/lib/queries/quotas";
 
 const nav = [
   { to: "/app", label: "Início", icon: Trophy, exact: true },
@@ -27,9 +27,11 @@ const nav = [
 export function AppShell() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { signOut, isAdmin: isAuthAdmin } = useAuth();
-  const isAdmin = isAuthAdmin || currentUser.role === "admin";
+  const { signOut, isAdmin, profile } = useAuth();
+  const { data: minhasQuotas = [] } = useMinhasQuotas();
   const { maintenance } = useMaintenanceMode();
+  const nome = profile?.nome ?? "Peraba";
+  const apelido = (profile?.apelido ?? nome).slice(0, 2).toUpperCase();
 
   if (maintenance && !pathname.startsWith("/app/admin")) {
     return <Navigate to="/manutencao" />;
@@ -71,11 +73,11 @@ export function AppShell() {
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-border bg-card px-2 py-1.5 transition hover:bg-secondary">
                 <div className="hidden text-right text-xs leading-tight md:block">
-                  <p className="font-semibold">{currentUser.nome}</p>
-                  <p className="text-muted-foreground">{minhasQuotas.length} quota{minhasQuotas.length > 1 ? "s" : ""}</p>
+                  <p className="font-semibold">{nome}</p>
+                  <p className="text-muted-foreground">{minhasQuotas.length} quota{minhasQuotas.length === 1 ? "" : "s"}</p>
                 </div>
                 <div className="grid h-8 w-8 place-items-center rounded-full bg-gold text-xs font-bold text-gold-foreground">
-                  {currentUser.apelido}
+                  {apelido}
                 </div>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </DropdownMenuTrigger>
