@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app/admin/convites")({
   head: () => ({ meta: [{ title: "Admin — Convites & Usuários" }] }),
