@@ -94,6 +94,12 @@ export const currentUser: CurrentUser = {
 };
 
 // ----- Prêmio -----
+export type DistribuicaoItem = {
+  id: "primeiro" | "segundo" | "terceiro" | "lanterna";
+  label: string;
+  pct: number;
+};
+
 export type Premio = {
   total_confirmado: number;
   total_pendente: number;
@@ -102,9 +108,16 @@ export type Premio = {
   quotas_pendentes: number;
   atualizado_em: string; // ISO
   evolucao: { data: string; valor: number }[];
-  distribuicao: { posicao: number; pct: number }[];
+  distribuicao: DistribuicaoItem[];
   ultimasConfirmacoes: { quota: string; valor: number; ha: string }[];
 };
+
+export const distribuicaoDefault: DistribuicaoItem[] = [
+  { id: "primeiro", label: "1º lugar", pct: 60 },
+  { id: "segundo", label: "2º lugar", pct: 25 },
+  { id: "terceiro", label: "3º lugar", pct: 10 },
+  { id: "lanterna", label: "Lanterninha", pct: 5 },
+];
 
 export const premio: Premio = {
   total_confirmado: 2350,
@@ -126,12 +139,7 @@ export const premio: Premio = {
     { data: "08/06", valor: 2200 },
     { data: "10/06", valor: 2350 },
   ],
-  distribuicao: [
-    { posicao: 1, pct: 50 },
-    { posicao: 2, pct: 25 },
-    { posicao: 3, pct: 15 },
-    { posicao: 4, pct: 10 },
-  ],
+  distribuicao: distribuicaoDefault,
   ultimasConfirmacoes: [
     { quota: "Carlinha #2", valor: 50, ha: "12 min" },
     { quota: "Diego #4", valor: 50, ha: "47 min" },
@@ -416,19 +424,32 @@ export const auditoria: AuditoriaItem[] = [
 export type PremiacaoConfig = {
   meta: number;
   custos_operacionais: number;
-  distribuicao: { posicao: number; pct: number }[];
+  distribuicao: DistribuicaoItem[];
 };
 
 export const premiacaoConfig: PremiacaoConfig = {
   meta: 5000,
   custos_operacionais: 200,
-  distribuicao: [
-    { posicao: 1, pct: 50 },
-    { posicao: 2, pct: 25 },
-    { posicao: 3, pct: 15 },
-    { posicao: 4, pct: 10 },
-  ],
+  distribuicao: distribuicaoDefault,
 };
+
+// ----- Reportes de bug -----
+export type Reporte = {
+  id: string;
+  descricao: string;
+  url: string;
+  user_agent: string;
+  autor: string;
+  data: string;
+  severidade: "critico" | "importante" | "menor";
+  status: "aberto" | "em_analise" | "resolvido";
+};
+
+export const reportes: Reporte[] = [
+  { id: "r1", descricao: "Card do prêmio sumiu no mobile", url: "/app", user_agent: "Mobile Safari", autor: "Carlinha", data: "13/06/2026 10:00", severidade: "importante", status: "aberto" },
+  { id: "r2", descricao: "Toast some rápido demais", url: "/app/palpites", user_agent: "Chrome", autor: "ET", data: "12/06/2026 22:00", severidade: "menor", status: "em_analise" },
+  { id: "r3", descricao: "Pontos não atualizaram após o jogo", url: "/app/ranking", user_agent: "Chrome", autor: "Rafa", data: "11/06/2026 09:00", severidade: "critico", status: "resolvido" },
+];
 
 // jogos extras pra gestão admin (mockados rápido)
 export const jogosAdminExtra: Jogo[] = Array.from({ length: 45 }).map((_, i) => {
