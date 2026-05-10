@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FileText, Users, Wallet, Trophy, Download } from "lucide-react";
+import { FileText, Users, Wallet, Trophy, Download, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
+import { ranking } from "@/lib/mock-data";
+import { isElegivelLanterna, distribuicaoSemLanterna } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/admin/relatorios")({
   head: () => ({ meta: [{ title: "Admin — Relatórios" }] }),
@@ -11,7 +13,6 @@ const cards = [
   { icon: Wallet, title: "Relatório financeiro completo", desc: "Pagamentos, status, conciliação e totais." },
   { icon: Users, title: "Relatório por participante", desc: "Quotas, pagamentos, palpites e pontos por usuário." },
   { icon: FileText, title: "Relatório por quota", desc: "Detalhamento individual de cada quota e desempenho." },
-  { icon: Trophy, title: "Fechamento da Copa", desc: "PDF final com cálculo do prêmio, podium e auditoria." },
 ];
 
 function Relatorios() {
