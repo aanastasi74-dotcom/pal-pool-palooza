@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { jogos, ranking, times, currentUser, perfis, gerarBoletimMock } from "@/lib/mock-data";
-import { Sparkles, TrendingUp, Trophy, Pencil } from "lucide-react";
+import { jogos, ranking, times, currentUser, perfis, gerarBoletimMock, minhasQuotas, TOTAL_QUOTAS } from "@/lib/mock-data";
+import { Sparkles, TrendingUp, Trophy, Pencil, Lightbulb, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { BoletimEditor } from "@/components/boletim-editor";
+import { calcularEngajamento, isElegivelLanterna, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Início — Bolão dos Perebas" }] }),
@@ -47,6 +48,8 @@ function Home() {
           <Stat label="Aproveitamento" valor="68%" />
         </div>
       </section>
+
+      <LanternaAviso />
 
       <section>
         <SectionHeader title="Próximos jogos" link="/app/jogos" />
@@ -156,6 +159,54 @@ function SectionHeader({ title, link }: { title: string; link: string }) {
     <div className="flex items-center justify-between">
       <h2 className="font-display text-xl font-bold">{title}</h2>
       <Link to={link} className="text-xs font-semibold text-primary hover:underline">Ver tudo</Link>
+    </div>
+  );
+}
+
+function LanternaAviso() {
+  const quotasNoFundo = minhasQuotas.filter((q) => estaNosUltimos25(q.posicao, TOTAL_QUOTAS));
+  if (quotasNoFundo.length === 0) return null;
+  // pega a "melhor" caso haja várias (menor posição entre as do fundo)
+  const q = quotasNoFundo.sort((a, b) => a.posicao - b.posicao)[0];
+  const eng = calcularEngajamento(q.palpites_validos, q.palpites_possiveis);
+  const elegivel = isElegivelLanterna(q);
+  return (
+    <section className={`rounded-3xl border p-5 shadow-card ${elegivel ? "border-success/40 bg-success/5" : "border-accent/40 bg-accent/10"}`}>
+      <div className="flex items-start gap-3">
+        <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${elegivel ? "bg-success/15 text-success" : "bg-accent/30 text-accent-foreground"}`}>
+          <Lightbulb className="h-5 w-5 rotate-180" />
+        </div>
+        <div className="flex-1">
+          <p className="font-display text-sm font-bold">
+            {elegivel
+              ? "Sua quota tá no fundo, mas elegível ao lanterninha. Mantém o ritmo, peraba."
+              : "Sua quota está nos 25% finais. Lanterninha vale 5% do prêmio — mas só pra quem palpitou direito."}
+          </p>
+          <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+            <Criterio
+              ok={eng >= ENGAJAMENTO_MIN}
+              label={`Palpites válidos: ${q.palpites_validos}/${q.palpites_possiveis} (${(eng * 100).toFixed(0)}%) — mín. ${ENGAJAMENTO_MIN * 100}%`}
+            />
+            <Criterio
+              ok={q.pontos >= PONTOS_MIN}
+              label={`Pontuação: ${q.pontos} — mín. ${PONTOS_MIN}`}
+            />
+          </div>
+          <Link to="/app/perfil" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
+            Ver detalhes
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Criterio({ ok, label }: { ok: boolean; label: string }) {
+  const Icon = ok ? CheckCircle2 : AlertCircle;
+  return (
+    <div className={`flex items-center gap-2 rounded-xl px-3 py-2 ${ok ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+      <Icon className="h-3.5 w-3.5 shrink-0" />
+      <span className="font-medium text-foreground/90">{label}</span>
     </div>
   );
 }

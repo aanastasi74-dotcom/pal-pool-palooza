@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { premiacaoConfig, premio } from "@/lib/mock-data";
+import { premiacaoConfig, premio, ranking } from "@/lib/mock-data";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
+import { isElegivelLanterna, razaoNaoElegivel, REGRA_LANTERNINHA, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/admin/premiacao")({
   head: () => ({ meta: [{ title: "Admin — Premiação" }] }),
@@ -74,9 +76,88 @@ function PremiacaoAdmin() {
         </div>
       </div>
 
+      <PainelLanterna />
+
       <button onClick={salvar} className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow">
         Salvar configuração
       </button>
+    </div>
+  );
+}
+
+function PainelLanterna() {
+  const ordenado = [...ranking].sort((a, b) => a.pontos - b.pontos);
+  const ultimo = ordenado[0];
+  const primeiroElegivel = ordenado.find((p) => isElegivelLanterna(p));
+  const elegiveis = ranking.filter((p) => isElegivelLanterna(p)).length;
+  const naoElegiveis = ranking.length - elegiveis;
+  const lanternaCoincide = ultimo && primeiroElegivel && ultimo.id === primeiroElegivel.id;
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+      <div className="flex items-center gap-2">
+        <Lightbulb className="h-4 w-4 rotate-180 text-accent-foreground" />
+        <h3 className="font-display font-bold">Regra do lanterninha · 5%</h3>
+      </div>
+      <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
+        {REGRA_LANTERNINHA}
+      </p>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl bg-success/10 p-3">
+          <p className="font-display text-2xl font-bold text-success">{elegiveis}</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Quotas elegíveis</p>
+        </div>
+        <div className="rounded-xl bg-accent/20 p-3">
+          <p className="font-display text-2xl font-bold text-accent-foreground">{naoElegiveis}</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Quotas não elegíveis</p>
+        </div>
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-xl border border-border">
+        <table className="w-full text-xs">
+          <thead className="bg-secondary text-left">
+            <tr>
+              <th className="px-3 py-2">Cenário</th>
+              <th className="px-3 py-2">Participante</th>
+              <th className="px-3 py-2">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            <tr>
+              <td className="px-3 py-2 font-semibold">Último colocado</td>
+              <td className="px-3 py-2">{ultimo?.nome ?? "—"}</td>
+              <td className="px-3 py-2">
+                {ultimo && isElegivelLanterna(ultimo) ? (
+                  <span className="flex items-center gap-1 text-success"><CheckCircle2 className="h-3 w-3" /> Elegível</span>
+                ) : (
+                  <span className="flex items-center gap-1 text-destructive"><AlertCircle className="h-3 w-3" /> {ultimo ? razaoNaoElegivel(ultimo) : "—"}</span>
+                )}
+              </td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2 font-semibold">Lanterninha elegível</td>
+              <td className="px-3 py-2">{primeiroElegivel?.nome ?? "Ninguém"}</td>
+              <td className="px-3 py-2">
+                {primeiroElegivel ? (
+                  <span className="flex items-center gap-1 text-success"><CheckCircle2 className="h-3 w-3" /> {primeiroElegivel.pontos} pts · {primeiroElegivel.palpites_validos}/{primeiroElegivel.palpites_possiveis}</span>
+                ) : (
+                  <span className="text-muted-foreground">Redistribui 67/27/11 entre o pódio</span>
+                )}
+              </td>
+            </tr>
+            {!lanternaCoincide && primeiroElegivel && (
+              <tr className="bg-accent/10">
+                <td className="px-3 py-2 font-semibold">Diferença</td>
+                <td className="px-3 py-2 text-muted-foreground">Lanterninha real ≠ elegível</td>
+                <td className="px-3 py-2 text-muted-foreground">Prêmio sobe pra {primeiroElegivel.nome}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-3 text-[11px] text-muted-foreground">Critérios mínimos: {ENGAJAMENTO_MIN * 100}% de palpites válidos e {PONTOS_MIN} pontos.</p>
     </div>
   );
 }

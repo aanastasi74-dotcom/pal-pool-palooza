@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { currentUser } from "@/lib/mock-data";
+import { currentUser, minhasQuotas, TOTAL_QUOTAS } from "@/lib/mock-data";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
+import { CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
+import { calcularEngajamento, isElegivelLanterna, razaoNaoElegivel, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/perfil")({
   head: () => ({ meta: [{ title: "Meu perfil — Bolão dos Perebas" }] }),
@@ -64,6 +67,8 @@ function Perfil() {
         </div>
       </section>
 
+      <ElegibilidadeLanterna />
+
       <button
         onClick={() => toast.success("Perfil atualizado, peraba!")}
         className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow"
@@ -73,3 +78,70 @@ function Perfil() {
     </div>
   );
 }
+
+function ElegibilidadeLanterna() {
+  const quotasNoFundo = minhasQuotas.filter((q) => estaNosUltimos25(q.posicao, TOTAL_QUOTAS));
+  if (quotasNoFundo.length === 0) return null;
+  return (
+    <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
+      <div className="flex items-center gap-2">
+        <Lightbulb className="h-4 w-4 rotate-180 text-accent-foreground" />
+        <h2 className="font-display text-lg font-bold">Elegibilidade ao lanterninha</h2>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        O lanterninha leva 5% do prêmio — mas só pra quem palpitou direito até o fim. Aqui ficam as suas quotas que estão nos 25% finais.
+      </p>
+      <div className="mt-5 space-y-5">
+        {quotasNoFundo.map((q) => {
+          const eng = calcularEngajamento(q.palpites_validos, q.palpites_possiveis);
+          const elegivel = isElegivelLanterna(q);
+          const razao = razaoNaoElegivel(q);
+          return (
+            <div key={q.id} className="rounded-2xl border border-border bg-secondary p-4">
+              <div className="flex items-center justify-between">
+                <p className="font-display font-bold">Quota #{q.numero} · {q.posicao}º lugar</p>
+                {elegivel ? (
+                  <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success">
+                    <CheckCircle2 className="h-3 w-3" /> Elegível
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 rounded-full bg-accent/30 px-2 py-0.5 text-[10px] font-bold text-accent-foreground">
+                    <AlertCircle className="h-3 w-3" /> Não elegível
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-4 space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="font-semibold">Engajamento</span>
+                  <span className="text-muted-foreground">
+                    {q.palpites_validos} de {q.palpites_possiveis} palpites · meta {ENGAJAMENTO_MIN * 100}%
+                  </span>
+                </div>
+                <Progress value={Math.min(100, (eng / ENGAJAMENTO_MIN) * 100)} className="h-2" />
+              </div>
+
+              <div className="mt-4 space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="font-semibold">Pontuação</span>
+                  <span className="text-muted-foreground">
+                    {q.pontos} pts · meta {PONTOS_MIN}
+                  </span>
+                </div>
+                <Progress value={Math.min(100, (q.pontos / PONTOS_MIN) * 100)} className="h-2" />
+              </div>
+
+              {!elegivel && razao && (
+                <p className="mt-3 text-xs text-muted-foreground">Motivo: {razao}.</p>
+              )}
+              {elegivel && (
+                <p className="mt-3 text-xs text-success">Tudo certo — segue palpitando até o fim.</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+

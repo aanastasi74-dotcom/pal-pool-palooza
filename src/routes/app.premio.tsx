@@ -3,6 +3,9 @@ import { premio } from "@/lib/mock-data";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { CountUp } from "@/components/count-up";
 import { Trophy, Lightbulb } from "lucide-react";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { REGRA_LANTERNINHA } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/premio")({
   head: () => ({
@@ -17,6 +20,7 @@ export const Route = createFileRoute("/app/premio")({
 const fmtBRL = (n: number) => `R$ ${Math.round(n).toLocaleString("pt-BR")}`;
 
 function Premio() {
+  const [openRegra, setOpenRegra] = useState(false);
   const total = premio.total_confirmado;
   const potencial = premio.total_confirmado + premio.total_pendente;
   const pct = Math.min(100, (total / premio.meta) * 100);
@@ -82,7 +86,17 @@ function Premio() {
                 </div>
                 <p className="mt-3 font-display text-3xl font-black">{d.pct}%</p>
                 <p className="mt-1 text-xs opacity-80">≈ {fmtBRL((potencial * d.pct) / 100)}</p>
-                {isLanterna && <p className="mt-2 text-[11px] italic opacity-80">Prêmio de consolação — pra perebada não sair só com a vergonha.</p>}
+                {isLanterna && (
+                  <>
+                    <p className="mt-2 text-[11px] italic opacity-80">Vale 5% — para quem palpitou direito até o fim.</p>
+                    <button
+                      onClick={() => setOpenRegra(true)}
+                      className="mt-1 text-[11px] font-semibold text-primary hover:underline"
+                    >
+                      Ver regra completa
+                    </button>
+                  </>
+                )}
               </div>
             );
           })}
@@ -103,6 +117,18 @@ function Premio() {
           ))}
         </ul>
       </section>
+
+      <Dialog open={openRegra} onOpenChange={setOpenRegra}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Regra do prêmio do lanterninha</DialogTitle>
+            <DialogDescription>Como funciona o prêmio de 5% pro último colocado.</DialogDescription>
+          </DialogHeader>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+            {REGRA_LANTERNINHA}
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
