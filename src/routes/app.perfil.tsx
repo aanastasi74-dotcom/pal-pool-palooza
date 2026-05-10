@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { currentUser } from "@/lib/mock-data";
+import { currentUser, minhasQuotas, TOTAL_QUOTAS } from "@/lib/mock-data";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
+import { CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
+import { calcularEngajamento, isElegivelLanterna, razaoNaoElegivel, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/perfil")({
   head: () => ({ meta: [{ title: "Meu perfil — Bolão dos Perebas" }] }),
