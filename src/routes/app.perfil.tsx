@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { currentUser, minhasQuotas, TOTAL_QUOTAS } from "@/lib/mock-data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
 import { calcularEngajamento, isElegivelLanterna, razaoNaoElegivel, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
+import { useProfile, useUpdateProfile } from "@/lib/queries/profiles";
+import { useMinhasQuotas, useTotalQuotas } from "@/lib/queries/quotas";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/perfil")({
   head: () => ({ meta: [{ title: "Meu perfil — Bolão dos Perebas" }] }),
@@ -12,8 +14,24 @@ export const Route = createFileRoute("/app/perfil")({
 });
 
 function Perfil() {
-  const [apelido, setApelido] = useState(currentUser.apelido);
-  const [notif, setNotif] = useState(currentUser.notificacoes);
+  const { data: profile, isLoading } = useProfile();
+  const updateProfile = useUpdateProfile();
+  const [apelido, setApelido] = useState("");
+  const [notif, setNotif] = useState<{ whatsapp: boolean; email: boolean; antesDeTravar: boolean }>({ whatsapp: true, email: true, antesDeTravar: true });
+
+  useEffect(() => {
+    if (profile) {
+      setApelido(profile.apelido ?? "");
+      const n = (profile.notificacoes ?? {}) as Record<string, boolean>;
+      setNotif({
+        whatsapp: n.whatsapp ?? true,
+        email: n.email ?? true,
+        antesDeTravar: n.antesDeTravar ?? true,
+      });
+    }
+  }, [profile]);
+
+  if (isLoading || !profile) return <Skeleton className="h-96 w-full" />;
 
   return (
     <div className="space-y-6">
@@ -25,13 +43,13 @@ function Perfil() {
       <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
         <div className="flex items-center gap-4">
           <div className="grid h-16 w-16 place-items-center rounded-full bg-gold font-display text-xl font-bold text-gold-foreground">
-            {apelido.slice(0, 2).toUpperCase()}
+            {(apelido || "??").slice(0, 2).toUpperCase()}
           </div>
           <div>
-            <p className="font-display text-xl font-bold">{currentUser.nome}</p>
-            <p className="text-sm text-muted-foreground">{currentUser.email}</p>
+            <p className="font-display text-xl font-bold">{profile.nome}</p>
+            <p className="text-sm text-muted-foreground">{profile.email}</p>
             <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
-              {currentUser.role}
+              {profile.role}
             </span>
           </div>
         </div>
@@ -70,17 +88,28 @@ function Perfil() {
       <ElegibilidadeLanterna />
 
       <button
-        onClick={() => toast.success("Perfil atualizado, peraba!")}
-        className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow"
+        disabled={updateProfile.isPending}
+        onClick={() =>
+          updateProfile.mutate(
+            { apelido, notificacoes: notif },
+            {
+              onSuccess: () => toast.success("Perfil atualizado, peraba!"),
+              onError: () => toast.error("Não foi possível salvar agora."),
+            },
+          )
+        }
+        className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-50"
       >
-        Salvar alterações
+        {updateProfile.isPending ? "Salvando…" : "Salvar alterações"}
       </button>
     </div>
   );
 }
 
 function ElegibilidadeLanterna() {
-  const quotasNoFundo = minhasQuotas.filter((q) => estaNosUltimos25(q.posicao, TOTAL_QUOTAS));
+  const { data: minhasQuotas = [] } = useMinhasQuotas();
+  const { data: totalQuotas = 0 } = useTotalQuotas();
+  const quotasNoFundo = (minhasQuotas as any[]).filter((q) => estaNosUltimos25(q.posicao ?? 9999, totalQuotas));
   if (quotasNoFundo.length === 0) return null;
   return (
     <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
@@ -93,7 +122,7 @@ function ElegibilidadeLanterna() {
       </p>
       <div className="mt-5 space-y-5">
         {quotasNoFundo.map((q) => {
-          const eng = calcularEngajamento(q.palpites_validos, q.palpites_possiveis);
+          const eng = calcularEngajamento(q.palpites_validos ?? 0, q.palpites_possiveis ?? 0);
           const elegivel = isElegivelLanterna(q);
           const razao = razaoNaoElegivel(q);
           return (
@@ -128,7 +157,7 @@ function ElegibilidadeLanterna() {
                     {q.pontos} pts · meta {PONTOS_MIN}
                   </span>
                 </div>
-                <Progress value={Math.min(100, (q.pontos / PONTOS_MIN) * 100)} className="h-2" />
+                <Progress value={Math.min(100, ((q.pontos ?? 0) / PONTOS_MIN) * 100)} className="h-2" />
               </div>
 
               {!elegivel && razao && (
@@ -144,4 +173,3 @@ function ElegibilidadeLanterna() {
     </section>
   );
 }
-

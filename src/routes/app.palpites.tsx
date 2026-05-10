@@ -1,28 +1,80 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { jogos, times } from "@/lib/mock-data";
+import { times } from "@/lib/mock-data";
 import { Sparkles, Trophy, Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "@/components/empty-state";
+import { useMatches } from "@/lib/queries/matches";
+import { useMinhasQuotas } from "@/lib/queries/quotas";
+import { useMyPredictions, useUpsertPrediction } from "@/lib/queries/predictions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/palpites")({
   head: () => ({ meta: [{ title: "Palpites — Bolão dos Perebas" }] }),
   component: Palpites,
 });
 
-function Palpites() {
-  const abertos = jogos.filter((j) => j.status === "agendado");
-  const [savedAt, setSavedAt] = useState<string | null>(null);
+function travaEm(iso?: string | null) {
+  if (!iso) return null;
+  const diff = new Date(iso).getTime() - Date.now();
+  if (diff <= 0) return null;
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.floor((diff % 3_600_000) / 60_000);
+  if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
+  if (h > 0) return `${h}h ${m}min`;
+  return `${m}min`;
+}
 
-  // autosave mock: a cada digitação atualiza timestamp
-  const onChange = () => {
-    const t = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    setSavedAt(t);
-  };
+function Palpites() {
+  const { data: matches = [], isLoading: loadingM } = useMatches();
+  const { data: quotas = [], isLoading: loadingQ } = useMinhasQuotas();
+  const [quotaId, setQuotaId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const t = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    setSavedAt(t);
-  }, []);
+    if (!quotaId && quotas.length) setQuotaId(quotas[0].id);
+  }, [quotas, quotaId]);
+
+  const { data: preds = [] } = useMyPredictions(quotaId);
+  const upsert = useUpsertPrediction();
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+
+  const abertos = useMemo(
+    () =>
+      (matches as any[]).filter(
+        (m) => m.status === "agendado" && (!m.travado_em || new Date(m.travado_em).getTime() > Date.now()),
+      ),
+    [matches],
+  );
+
+  const predMap = new Map((preds as any[]).map((p) => [p.match_id, p]));
+
+  const handleChange = (matchId: string, field: "casa" | "fora", raw: string) => {
+    if (!quotaId) return;
+    const value = raw === "" ? null : Math.max(0, Math.min(99, Number(raw)));
+    const pred = predMap.get(matchId);
+    const placar_casa = field === "casa" ? value : pred?.placar_casa ?? null;
+    const placar_fora = field === "fora" ? value : pred?.placar_fora ?? null;
+    upsert.mutate(
+      { quota_id: quotaId, match_id: matchId, placar_casa, placar_fora },
+      {
+        onSuccess: () => {
+          const t = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+          setSavedAt(t);
+        },
+      },
+    );
+  };
+
+  if (loadingM || loadingQ) return <Skeleton className="h-64 w-full" />;
+
+  if (!quotas.length) {
+    return (
+      <EmptyState
+        icon={Sparkles}
+        title="Você ainda não tem quotas"
+        description="Compra uma quota pra começar a palpitar, peraba."
+      />
+    );
+  }
 
   if (!abertos.length) {
     return (
@@ -34,24 +86,31 @@ function Palpites() {
     );
   }
 
+  const quotaAtiva = quotas.find((q: any) => q.id === quotaId) ?? quotas[0];
+
   return (
     <div className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
           <h1 className="font-display text-3xl font-extrabold">Meus palpites</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Quota ativa: <span className="font-semibold text-foreground">Quota #1</span>
+            Quota ativa: <span className="font-semibold text-foreground">Quota #{quotaAtiva.numero}</span>
             {savedAt && <span className="ml-2 text-xs text-success">· Rascunho salvo às {savedAt}</span>}
           </p>
         </div>
-        <select className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold shadow-card">
-          <option>Quota #1</option>
-          <option>Quota #2</option>
+        <select
+          value={quotaId ?? ""}
+          onChange={(e) => setQuotaId(e.target.value)}
+          className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold shadow-card"
+        >
+          {(quotas as any[]).map((q) => (
+            <option key={q.id} value={q.id}>Quota #{q.numero}</option>
+          ))}
         </select>
       </div>
 
       <Link
-        to="/app/palpites/top4"
+        to="/app/palpites_/top4"
         className="flex items-center justify-between rounded-3xl border border-accent/40 bg-gold p-5 text-gold-foreground shadow-card transition hover:scale-[1.01]"
       >
         <div className="flex items-center gap-3">
@@ -72,48 +131,55 @@ function Palpites() {
       </div>
 
       <div className="space-y-3">
-        {abertos.map((j) => (
-          <article key={j.id} className="rounded-2xl border border-border bg-card p-5 shadow-card">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{j.fase} · {j.data} · {j.hora}</span>
-              <span className="flex items-center gap-2">
-                {j.travaEm && (
-                  <span className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 font-bold text-destructive">
-                    <Clock className="h-3 w-3" /> Trava em {j.travaEm}
-                  </span>
-                )}
-                peso {j.peso}
-              </span>
-            </div>
-            <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-              <div className="flex items-center justify-end gap-3">
-                <p className="hidden font-display font-bold sm:block">{times[j.casa].nome}</p>
-                <span className="text-3xl">{times[j.casa].bandeira}</span>
+        {abertos.map((j) => {
+          const pred = predMap.get(j.id);
+          const trava = travaEm(j.travado_em);
+          const tCasa = times[j.casa] ?? { nome: j.casa, sigla: j.casa, bandeira: "🏳️" };
+          const tFora = times[j.fora] ?? { nome: j.fora, sigla: j.fora, bandeira: "🏳️" };
+          const dataLabel = new Date(j.data_jogo).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+          return (
+            <article key={j.id} className="rounded-2xl border border-border bg-card p-5 shadow-card">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{j.fase} · {dataLabel}</span>
+                <span className="flex items-center gap-2">
+                  {trava && (
+                    <span className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 font-bold text-destructive">
+                      <Clock className="h-3 w-3" /> Trava em {trava}
+                    </span>
+                  )}
+                  peso {j.peso}
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <ScoreInput value={j.meuPalpiteCasa} onChange={onChange} />
-                <span className="text-xl font-bold text-muted-foreground">×</span>
-                <ScoreInput value={j.meuPalpiteFora} onChange={onChange} />
+              <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div className="flex items-center justify-end gap-3">
+                  <p className="hidden font-display font-bold sm:block">{tCasa.nome}</p>
+                  <span className="text-3xl">{tCasa.bandeira}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ScoreInput value={pred?.placar_casa} onChange={(v) => handleChange(j.id, "casa", v)} />
+                  <span className="text-xl font-bold text-muted-foreground">×</span>
+                  <ScoreInput value={pred?.placar_fora} onChange={(v) => handleChange(j.id, "fora", v)} />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{tFora.bandeira}</span>
+                  <p className="hidden font-display font-bold sm:block">{tFora.nome}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{times[j.fora].bandeira}</span>
-                <p className="hidden font-display font-bold sm:block">{times[j.fora].nome}</p>
-              </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function ScoreInput({ value, onChange }: { value?: number; onChange?: () => void }) {
+function ScoreInput({ value, onChange }: { value?: number | null; onChange: (raw: string) => void }) {
   return (
     <input
       type="number"
       min={0}
       defaultValue={value ?? ""}
-      onChange={onChange}
+      onBlur={(e) => onChange(e.target.value)}
       placeholder="-"
       className="h-14 w-14 rounded-2xl border border-border bg-secondary text-center font-display text-2xl font-black focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
     />

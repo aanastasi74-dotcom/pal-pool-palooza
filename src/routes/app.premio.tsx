@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { premio } from "@/lib/mock-data";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { CountUp } from "@/components/count-up";
 import { Trophy, Lightbulb } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { REGRA_LANTERNINHA } from "@/lib/lanterninha";
+import { usePremio } from "@/lib/queries/premio";
+import { useRecentApprovedPayments } from "@/lib/queries/payments";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/premio")({
   head: () => ({
@@ -14,16 +15,24 @@ export const Route = createFileRoute("/app/premio")({
       { name: "description", content: "Acompanhe a evolução do prêmio da perebada em tempo real." },
     ],
   }),
-  component: Premio,
+  component: PremioPage,
 });
 
 const fmtBRL = (n: number) => `R$ ${Math.round(n).toLocaleString("pt-BR")}`;
 
-function Premio() {
+function PremioPage() {
   const [openRegra, setOpenRegra] = useState(false);
+  const { data: premio, isLoading } = usePremio();
+  const { data: ultimas = [] } = useRecentApprovedPayments(10);
+
+  if (isLoading || !premio) {
+    return <Skeleton className="h-96 w-full" />;
+  }
+
   const total = premio.total_confirmado;
   const potencial = premio.total_confirmado + premio.total_pendente;
-  const pct = Math.min(100, (total / premio.meta) * 100);
+  const pct = premio.meta > 0 ? Math.min(100, (total / premio.meta) * 100) : 0;
+
   return (
     <div className="space-y-8">
       <section className="overflow-hidden rounded-3xl bg-hero p-6 text-primary-foreground shadow-glow md:p-10">
@@ -44,21 +53,7 @@ function Premio() {
 
       <section className="rounded-3xl border border-border bg-card p-5 shadow-card md:p-6">
         <h2 className="font-display text-lg font-bold">Evolução do prêmio</h2>
-        <p className="text-xs text-muted-foreground">Cada quota confirmada engorda o caldeirão.</p>
-        <div className="mt-4 h-56 w-full">
-          <ResponsiveContainer>
-            <LineChart data={premio.evolucao}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="data" stroke="var(--muted-foreground)" fontSize={11} />
-              <YAxis stroke="var(--muted-foreground)" fontSize={11} tickFormatter={(v) => `${v}`} />
-              <Tooltip
-                contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }}
-                formatter={(v: number) => fmtBRL(v)}
-              />
-              <Line type="monotone" dataKey="valor" stroke="var(--primary)" strokeWidth={3} dot={{ fill: "var(--primary)", r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <p className="mt-2 text-sm text-muted-foreground">Histórico ainda não tem dados, peraba.</p>
       </section>
 
       <section>
@@ -69,6 +64,7 @@ function Premio() {
             const isPrimeiro = d.id === "primeiro";
             const isLanterna = d.id === "lanterna";
             const Icon = isLanterna ? Lightbulb : Trophy;
+            const valor = (premio.total_confirmado * d.pct) / 100;
             return (
               <div
                 key={d.id}
@@ -81,11 +77,11 @@ function Premio() {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Icon className={`h-4 w-4 ${isLanterna ? "rotate-180" : ""}`} />
-                  <p className="text-xs font-semibold uppercase tracking-widest">{d.label}</p>
+                  <Icon className={`h-5 w-5 ${isLanterna ? "rotate-180" : ""}`} />
+                  <p className="font-display text-lg font-bold">{d.label}</p>
                 </div>
                 <p className="mt-3 font-display text-3xl font-black">{d.pct}%</p>
-                <p className="mt-1 text-xs opacity-80">≈ {fmtBRL((potencial * d.pct) / 100)}</p>
+                <p className="mt-1 text-xs opacity-80">≈ {fmtBRL(valor)}</p>
                 {isLanterna && (
                   <>
                     <p className="mt-2 text-[11px] italic opacity-80">Vale 5% — para quem palpitou direito até o fim.</p>
@@ -105,17 +101,23 @@ function Premio() {
 
       <section className="rounded-3xl border border-border bg-card p-5 shadow-card md:p-6">
         <h2 className="font-display text-lg font-bold">Últimas confirmações</h2>
-        <ul className="mt-4 divide-y divide-border">
-          {premio.ultimasConfirmacoes.map((c, i) => (
-            <li key={i} className="flex items-center justify-between py-3 text-sm">
-              <span className="font-semibold">{c.quota}</span>
-              <span className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="font-display font-bold text-foreground">{fmtBRL(c.valor)}</span>
-                <span>há {c.ha}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
+        {ultimas.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">Nenhuma confirmação ainda — esperando a perebada.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-border">
+            {(ultimas as any[]).map((c) => (
+              <li key={c.id} className="flex items-center justify-between py-3 text-sm">
+                <span className="font-semibold">
+                  {c.profile?.apelido ?? c.profile?.nome ?? "Peraba"} #{c.quota?.numero ?? "—"}
+                </span>
+                <span className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="font-display font-bold text-foreground">{fmtBRL(Number(c.valor))}</span>
+                  <span>{c.aprovado_em ? new Date(c.aprovado_em).toLocaleDateString("pt-BR") : ""}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <Dialog open={openRegra} onOpenChange={setOpenRegra}>

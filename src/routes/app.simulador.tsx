@@ -2,28 +2,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { times } from "@/lib/mock-data";
 import { toast } from "sonner";
-import { RotateCcw, Share2 } from "lucide-react";
+import { RotateCcw, Share2, CalendarSearch } from "lucide-react";
+import { useMatches } from "@/lib/queries/matches";
+import { EmptyState } from "@/components/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/simulador")({
   head: () => ({ meta: [{ title: "Simulador — Bolão dos Perebas" }] }),
   component: Simulador,
 });
 
-const oitavasConfrontos: [string, string][] = [
-  ["BRA", "POR"],
-  ["ARG", "HOL"],
-  ["FRA", "ALE"],
-  ["ESP", "ING"],
-  ["URU", "MEX"],
-  ["EUA", "CAN"],
-  ["BRA", "ARG"], // mock variety
-  ["FRA", "ESP"],
-];
-
 type State = {
-  oitavasWin: (string | null)[]; // 8
-  quartasWin: (string | null)[]; // 4
-  semisWin: (string | null)[]; // 2
+  oitavasWin: (string | null)[];
+  quartasWin: (string | null)[];
+  semisWin: (string | null)[];
   campeao: string | null;
 };
 
@@ -35,12 +27,16 @@ const initialState: State = {
 };
 
 function Simulador() {
+  const { data: matches = [], isLoading } = useMatches();
   const [s, setS] = useState<State>(initialState);
+
+  // Constrói confrontos das oitavas a partir dos matches reais (fase = "Oitavas")
+  const oitavasMatches = (matches as any[]).filter((m) => (m.fase ?? "").toLowerCase() === "oitavas").slice(0, 8);
+  const oitavasConfrontos: [string, string][] = oitavasMatches.map((m) => [m.casa, m.fora]);
 
   const pickOitavas = (i: number, time: string) => {
     const next = { ...s, oitavasWin: [...s.oitavasWin] };
     next.oitavasWin[i] = time;
-    // invalidar fases seguintes que dependem desse confronto
     const qIdx = Math.floor(i / 2);
     next.quartasWin = [...s.quartasWin];
     next.quartasWin[qIdx] = null;
@@ -86,7 +82,7 @@ function Simulador() {
       return;
     }
     const vice = finalConfronto[0] === s.campeao ? finalConfronto[1] : finalConfronto[0];
-    const txt = `Meu palpite: ${times[s.campeao]?.nome} campeão, derrotando ${times[vice ?? ""]?.nome ?? "—"} na final.`;
+    const txt = `Meu palpite: ${times[s.campeao]?.nome ?? s.campeao} campeão, derrotando ${times[vice ?? ""]?.nome ?? vice ?? "—"} na final.`;
     navigator.clipboard?.writeText(txt);
     toast.success("Simulação copiada — manda no grupo!");
   };
@@ -114,36 +110,48 @@ function Simulador() {
         </div>
       </div>
 
-      <FaseConfrontos
-        title="Oitavas"
-        confrontos={oitavasConfrontos}
-        winners={s.oitavasWin}
-        onPick={pickOitavas}
-      />
-      <FaseConfrontos
-        title="Quartas"
-        confrontos={quartasConfrontos}
-        winners={s.quartasWin}
-        onPick={pickQuartas}
-      />
-      <FaseConfrontos
-        title="Semifinais"
-        confrontos={semisConfrontos}
-        winners={s.semisWin}
-        onPick={pickSemis}
-      />
-      <FaseConfrontos
-        title="Final"
-        confrontos={[finalConfronto]}
-        winners={[s.campeao]}
-        onPick={(_, t) => pickFinal(t)}
-      />
+      {isLoading ? (
+        <Skeleton className="h-64 w-full" />
+      ) : oitavasConfrontos.length === 0 ? (
+        <EmptyState
+          icon={CalendarSearch}
+          title="Sem jogos cadastrados ainda"
+          description="Volte depois que os admins importarem o calendário."
+        />
+      ) : (
+        <>
+          <FaseConfrontos
+            title="Oitavas"
+            confrontos={oitavasConfrontos}
+            winners={s.oitavasWin}
+            onPick={pickOitavas}
+          />
+          <FaseConfrontos
+            title="Quartas"
+            confrontos={quartasConfrontos}
+            winners={s.quartasWin}
+            onPick={pickQuartas}
+          />
+          <FaseConfrontos
+            title="Semifinais"
+            confrontos={semisConfrontos}
+            winners={s.semisWin}
+            onPick={pickSemis}
+          />
+          <FaseConfrontos
+            title="Final"
+            confrontos={[finalConfronto]}
+            winners={[s.campeao]}
+            onPick={(_, t) => pickFinal(t)}
+          />
 
-      <section className="rounded-3xl bg-hero p-6 text-center text-primary-foreground shadow-glow">
-        <p className="text-xs uppercase tracking-widest opacity-80">Seu campeão</p>
-        <p className="mt-2 font-display text-5xl font-black">{s.campeao ? times[s.campeao]?.bandeira : "🏆"}</p>
-        <p className="mt-1 font-display text-2xl font-bold">{s.campeao ? times[s.campeao]?.nome : "A definir"}</p>
-      </section>
+          <section className="rounded-3xl bg-hero p-6 text-center text-primary-foreground shadow-glow">
+            <p className="text-xs uppercase tracking-widest opacity-80">Seu campeão</p>
+            <p className="mt-2 font-display text-5xl font-black">{s.campeao ? times[s.campeao]?.bandeira ?? "🏆" : "🏆"}</p>
+            <p className="mt-1 font-display text-2xl font-bold">{s.campeao ? times[s.campeao]?.nome ?? s.campeao : "A definir"}</p>
+          </section>
+        </>
+      )}
     </div>
   );
 }
@@ -179,8 +187,8 @@ function FaseConfrontos({
                         : "border-border bg-background hover:bg-secondary disabled:opacity-40"
                     }`}
                   >
-                    <span className="text-xl">{t ? times[t]?.bandeira : "❔"}</span>
-                    <span className="truncate">{t ? times[t]?.nome : "Aguardando"}</span>
+                    <span className="text-xl">{t ? times[t]?.bandeira ?? "❔" : "❔"}</span>
+                    <span className="truncate">{t ? times[t]?.nome ?? t : "Aguardando"}</span>
                   </button>
                 ))}
               </div>
