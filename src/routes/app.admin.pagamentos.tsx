@@ -1,22 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
-import { pagamentosAdmin, type PagamentoAdmin } from "@/lib/mock-data";
+import { useCallback, useEffect, useState } from "react";
+import { usePaymentsAdmin, useApprovePayment, useRejectPayment, useReversePayment } from "@/lib/queries/payments";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, FileText } from "lucide-react";
+import { FileText, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app/admin/pagamentos")({
   head: () => ({ meta: [{ title: "Admin — Pagamentos" }] }),
   component: Pagamentos,
 });
 
-const fmt = (n: number) => `R$ ${n.toLocaleString("pt-BR")}`;
+const fmt = (n: number) => `R$ ${Number(n).toLocaleString("pt-BR")}`;
 const statusColor: Record<string, string> = {
   aprovado: "bg-success/15 text-success",
   pendente: "bg-accent/15 text-accent",
@@ -24,29 +24,30 @@ const statusColor: Record<string, string> = {
   estornado: "bg-muted text-muted-foreground",
 };
 
-// dd/mm/yyyy hh:mm → Date
-function parseDataBr(s: string): Date {
-  const [d, hora] = s.split(" ");
-  const [dd, mm, yy] = d.split("/").map(Number);
-  const [hh = 0, mi = 0] = (hora ?? "00:00").split(":").map(Number);
-  return new Date(yy, (mm ?? 1) - 1, dd ?? 1, hh, mi);
-}
+type Pay = any;
 
 function Pagamentos() {
+  const { data: pays, isLoading } = usePaymentsAdmin();
+  const approve = useApprovePayment();
+  const reject = useRejectPayment();
+  const reverse = useReversePayment();
+
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [dataIni, setDataIni] = useState("");
   const [dataFim, setDataFim] = useState("");
-  const [selecionados, setSelecionados] = useState<string[]>([]);
-  const [aberto, setAberto] = useState<PagamentoAdmin | null>(null);
-  const [importOpen, setImportOpen] = useState(false);
-  const [confirmAcao, setConfirmAcao] = useState<null | { tipo: "rejeitar" | "estornar" | "rejeitar_um" | "estornar_um"; id?: string }>(null);
+  const [aberto, setAberto] = useState<Pay | null>(null);
+  const [rejeitarPay, setRejeitarPay] = useState<Pay | null>(null);
+  const [estornarPay, setEstornarPay] = useState<Pay | null>(null);
+  const [motivo, setMotivo] = useState("");
 
   const predicate = useCallback(
-    (p: PagamentoAdmin, q: string) => {
+    (p: Pay, q: string) => {
       if (filtroStatus !== "todos" && p.status !== filtroStatus) return false;
-      if (q && !p.participante.toLowerCase().includes(q)) return false;
+      const nome = (p.profile?.nome ?? "").toLowerCase();
+      const apelido = (p.profile?.apelido ?? "").toLowerCase();
+      if (q && !(nome.includes(q) || apelido.includes(q))) return false;
       if (dataIni || dataFim) {
-        const d = parseDataBr(p.data);
+        const d = new Date(p.created_at);
         if (dataIni && d < new Date(dataIni)) return false;
         if (dataFim && d > new Date(dataFim + "T23:59:59")) return false;
       }
@@ -56,46 +57,25 @@ function Pagamentos() {
   );
 
   const { query, setQuery, page, setPage, totalPages, slice, total, pageSize } = usePaginatedList(
-    pagamentosAdmin,
+    pays ?? [],
     predicate,
     20,
   );
 
-  const pendentesNaTela = slice.filter((p) => p.status === "pendente").length;
-
-  const toggle = (id: string) =>
-    setSelecionados((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
-
-  const aprovarMassa = () => {
-    toast.success("Aprovado! O caldeirão tá engordando.");
-    setSelecionados([]);
-  };
-
-  const executarConfirm = () => {
-    if (!confirmAcao) return;
-    if (confirmAcao.tipo === "rejeitar" || confirmAcao.tipo === "rejeitar_um") {
-      toast.info(confirmAcao.tipo === "rejeitar_um" ? "Pagamento rejeitado." : "Marcados como rejeitados.");
-    } else {
-      toast.info(confirmAcao.tipo === "estornar_um" ? "Pagamento estornado." : "Marcados como estornados.");
-    }
-    setSelecionados([]);
-    setAberto(null);
-    setConfirmAcao(null);
-  };
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-72" />
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold">Pagamentos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Conciliação dos Pix da perebada.</p>
-        </div>
-        <button
-          onClick={() => setImportOpen(true)}
-          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
-        >
-          <Upload className="h-3 w-3" /> Importar extrato Pix (CSV)
-        </button>
+      <div>
+        <h1 className="font-display text-3xl font-extrabold">Pagamentos</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Conciliação dos Pix da perebada.</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card">
@@ -111,27 +91,18 @@ function Pagamentos() {
         <span className="text-xs text-muted-foreground">até</span>
         <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs" />
         <span className="ml-auto text-xs text-muted-foreground">
-          {total} pagamento{total !== 1 ? "s" : ""} · {pendentesNaTela} pendentes nesta página · página {page} de {totalPages}
+          {total} pagamento(s) · página {page} de {totalPages}
         </span>
-        {selecionados.length > 0 && (
-          <div className="flex w-full justify-end gap-2 border-t border-border pt-2">
-            <span className="text-xs text-muted-foreground">{selecionados.length} selecionado(s)</span>
-            <button onClick={aprovarMassa} className="rounded-full bg-success px-3 py-1 text-xs font-bold text-success-foreground">Aprovar</button>
-            <button onClick={() => setConfirmAcao({ tipo: "rejeitar" })} className="rounded-full bg-destructive px-3 py-1 text-xs font-bold text-destructive-foreground">Rejeitar</button>
-            <button onClick={() => setConfirmAcao({ tipo: "estornar" })} className="rounded-full border border-border px-3 py-1 text-xs font-bold">Estornar</button>
-          </div>
-        )}
       </div>
 
       {total === 0 ? (
-        <EmptyState title="Sem pagamentos por aqui" description="A perebada ainda não Pixou." />
+        <EmptyState title="Sem pagamentos por aqui" description="Perebada ainda não Pixou." />
       ) : (
         <>
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
-                  <th className="w-10 p-3"></th>
                   <th className="p-3 text-left">Participante</th>
                   <th className="p-3 text-left">Quota</th>
                   <th className="p-3 text-right">Valor</th>
@@ -141,12 +112,14 @@ function Pagamentos() {
               </thead>
               <tbody>
                 {slice.map((p) => (
-                  <tr key={p.id} className="border-t border-border hover:bg-muted/30">
-                    <td className="p-3"><Checkbox checked={selecionados.includes(p.id)} onCheckedChange={() => toggle(p.id)} /></td>
-                    <td className="cursor-pointer p-3 font-medium" onClick={() => setAberto(p)}>{p.participante}</td>
-                    <td className="cursor-pointer p-3 text-muted-foreground" onClick={() => setAberto(p)}>{p.quota_label}</td>
-                    <td className="cursor-pointer p-3 text-right font-display font-bold" onClick={() => setAberto(p)}>{fmt(p.valor)}</td>
-                    <td className="cursor-pointer p-3 text-xs text-muted-foreground" onClick={() => setAberto(p)}>{p.data}</td>
+                  <tr key={p.id} onClick={() => setAberto(p)} className="cursor-pointer border-t border-border hover:bg-muted/30">
+                    <td className="p-3 font-medium">
+                      {p.profile?.nome ?? "—"}
+                      {p.profile?.apelido && <span className="ml-1 text-xs text-muted-foreground">({p.profile.apelido})</span>}
+                    </td>
+                    <td className="p-3 text-muted-foreground">{p.quota?.numero ? `#${p.quota.numero}` : "—"}</td>
+                    <td className="p-3 text-right font-display font-bold">{fmt(p.valor)}</td>
+                    <td className="p-3 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleString("pt-BR")}</td>
                     <td className="p-3"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[p.status]}`}>{p.status}</span></td>
                   </tr>
                 ))}
@@ -158,71 +131,129 @@ function Pagamentos() {
       )}
 
       <Sheet open={!!aberto} onOpenChange={(v) => !v && setAberto(null)}>
-        <SheetContent className="w-[420px] sm:max-w-md">
+        <SheetContent className="w-[420px] overflow-y-auto sm:max-w-md">
           {aberto && (
-            <>
-              <SheetHeader>
-                <SheetTitle>{aberto.quota_label}</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4 space-y-3 text-sm">
-                <div className="flex justify-between"><span className="text-muted-foreground">Participante</span><b>{aberto.participante}</b></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Valor</span><b>{fmt(aberto.valor)}</b></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Data</span><span>{aberto.data}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[aberto.status]}`}>{aberto.status}</span></div>
-                {aberto.aprovado_por && <div className="flex justify-between"><span className="text-muted-foreground">Aprovado por</span><span>{aberto.aprovado_por}</span></div>}
-                {aberto.motivo_rejeicao && <div className="rounded-lg bg-destructive/10 p-2 text-xs text-destructive">Motivo: {aberto.motivo_rejeicao}</div>}
-                <div className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
-                  <FileText className="mx-auto mb-2 h-8 w-8" /> Pré-visualização do comprovante (mock)
-                </div>
-                {aberto.status === "pendente" && (
-                  <div className="flex gap-2">
-                    <button onClick={() => { toast.success("Aprovado! O caldeirão tá engordando."); setAberto(null); }} className="flex-1 rounded-full bg-success px-4 py-2 text-xs font-bold text-success-foreground">Aprovar</button>
-                    <button onClick={() => setConfirmAcao({ tipo: "rejeitar_um", id: aberto.id })} className="flex-1 rounded-full bg-destructive px-4 py-2 text-xs font-bold text-destructive-foreground">Rejeitar</button>
-                  </div>
-                )}
-                {aberto.status === "aprovado" && (
-                  <button onClick={() => setConfirmAcao({ tipo: "estornar_um", id: aberto.id })} className="w-full rounded-full border border-border px-4 py-2 text-xs font-bold">Estornar pagamento</button>
-                )}
-              </div>
-            </>
+            <DetalhePagamento
+              pay={aberto}
+              onApprove={async () => {
+                await approve.mutateAsync(aberto.id);
+                toast.success("Aprovado! O caldeirão tá engordando.");
+                setAberto(null);
+              }}
+              onRejectClick={() => setRejeitarPay(aberto)}
+              onReverseClick={() => setEstornarPay(aberto)}
+            />
           )}
         </SheetContent>
       </Sheet>
 
-      <Dialog open={importOpen} onOpenChange={setImportOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Importar extrato Pix (CSV)</DialogTitle></DialogHeader>
-          <div className="rounded-xl border border-dashed border-border p-8 text-center">
-            <Upload className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm">Arraste o CSV aqui ou <button className="text-primary underline">selecione</button></p>
-          </div>
-          <p className="text-xs font-bold">Pré-visualização (3 matches encontrados)</p>
-          <div className="rounded-lg border border-border text-xs">
-            <div className="grid grid-cols-3 gap-2 border-b border-border bg-muted/50 p-2 font-semibold"><span>Data</span><span>Pagador</span><span>Valor</span></div>
-            <div className="grid grid-cols-3 gap-2 border-b border-border p-2"><span>13/06 14:00</span><span>Marina Souza</span><span>R$ 50,00</span></div>
-            <div className="grid grid-cols-3 gap-2 border-b border-border p-2"><span>13/06 12:30</span><span>Aninha Lima</span><span>R$ 50,00</span></div>
-            <div className="grid grid-cols-3 gap-2 p-2"><span>12/06 18:00</span><span>Pedro</span><span>R$ 50,00</span></div>
-          </div>
-          <button onClick={() => { toast.success("Conciliação aplicada — 3 pagamentos aprovados."); setImportOpen(false); }} className="rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground">Confirmar conciliação</button>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={!!rejeitarPay}
+        onOpenChange={(v) => { if (!v) { setRejeitarPay(null); setMotivo(""); } }}
+        title="Rejeitar pagamento?"
+        description={
+          <div className="space-y-2">
+            <p>O participante verá o status como rejeitado.</p>
+            <textarea
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+              placeholder="Motivo da rejeição (obrigatório)"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              rows={3}
+            />
+          </div> as any
+        }
+        confirmLabel="Rejeitar"
+        destructive
+        onConfirm={async () => {
+          if (!motivo.trim()) { toast.error("Informe um motivo."); return; }
+          await reject.mutateAsync({ payment_id: rejeitarPay.id, motivo: motivo.trim() });
+          toast.info("Pagamento rejeitado.");
+          setRejeitarPay(null); setMotivo(""); setAberto(null);
+        }}
+      />
 
       <ConfirmDialog
-        open={!!confirmAcao}
-        onOpenChange={(v) => !v && setConfirmAcao(null)}
-        title="Tem certeza?"
-        description={
-          confirmAcao?.tipo === "rejeitar"
-            ? `Rejeitar ${selecionados.length} pagamento(s) selecionado(s)? Os participantes verão o status como rejeitado.`
-            : confirmAcao?.tipo === "estornar"
-            ? `Estornar ${selecionados.length} pagamento(s) selecionado(s)? A quota volta a ficar pendente.`
-            : confirmAcao?.tipo === "rejeitar_um"
-            ? "Rejeitar este pagamento? O participante verá o status como rejeitado."
-            : "Estornar este pagamento? A quota volta a ficar pendente."
-        }
-        confirmLabel={confirmAcao?.tipo?.startsWith("rejeitar") ? "Rejeitar" : "Estornar"}
-        onConfirm={executarConfirm}
+        open={!!estornarPay}
+        onOpenChange={(v) => { if (!v) { setEstornarPay(null); setMotivo(""); } }}
+        title="Estornar pagamento?"
+        description="A quota volta a ficar expirada."
+        confirmLabel="Estornar"
+        onConfirm={async () => {
+          await reverse.mutateAsync({ payment_id: estornarPay.id, motivo: motivo.trim() || undefined });
+          toast.info("Pagamento estornado.");
+          setEstornarPay(null); setMotivo(""); setAberto(null);
+        }}
       />
     </div>
+  );
+}
+
+function DetalhePagamento({ pay, onApprove, onRejectClick, onReverseClick }: {
+  pay: Pay;
+  onApprove: () => void;
+  onRejectClick: () => void;
+  onReverseClick: () => void;
+}) {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    setSignedUrl(null);
+    if (!pay.comprovante_path) return;
+    setLoading(true);
+    supabase.storage
+      .from("comprovantes-pix")
+      .createSignedUrl(pay.comprovante_path, 3600)
+      .then(({ data }) => { if (mounted) setSignedUrl(data?.signedUrl ?? null); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
+  }, [pay.id, pay.comprovante_path]);
+
+  const isImage = pay.comprovante_path && /\.(png|jpe?g|webp|gif)$/i.test(pay.comprovante_path);
+
+  return (
+    <>
+      <SheetHeader>
+        <SheetTitle>{pay.profile?.nome ?? "Pagamento"} {pay.quota?.numero ? `#${pay.quota.numero}` : ""}</SheetTitle>
+      </SheetHeader>
+      <div className="mt-4 space-y-3 text-sm">
+        <div className="flex justify-between"><span className="text-muted-foreground">Valor</span><b>{fmt(pay.valor)}</b></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">Data</span><span>{new Date(pay.created_at).toLocaleString("pt-BR")}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[pay.status]}`}>{pay.status}</span></div>
+        {pay.aprovado_em && <div className="flex justify-between"><span className="text-muted-foreground">Aprovado em</span><span>{new Date(pay.aprovado_em).toLocaleString("pt-BR")}</span></div>}
+        {pay.motivo_rejeicao && <div className="rounded-lg bg-destructive/10 p-2 text-xs text-destructive">Motivo: {pay.motivo_rejeicao}</div>}
+
+        <div className="rounded-xl border border-border p-3">
+          <p className="mb-2 text-xs font-bold">Comprovante</p>
+          {!pay.comprovante_path ? (
+            <p className="text-xs text-muted-foreground">Sem comprovante anexado.</p>
+          ) : loading ? (
+            <Skeleton className="h-40 w-full" />
+          ) : signedUrl ? (
+            isImage ? (
+              <img src={signedUrl} alt="Comprovante Pix" className="max-h-72 w-full rounded-lg border border-border object-contain" />
+            ) : (
+              <a href={signedUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                <FileText className="h-3 w-3" /> Abrir comprovante <ExternalLink className="h-3 w-3" />
+              </a>
+            )
+          ) : (
+            <p className="text-xs text-destructive">Não consegui carregar o comprovante.</p>
+          )}
+        </div>
+
+        {pay.status === "pendente" && (
+          <div className="flex gap-2">
+            <button onClick={onApprove} className="flex-1 rounded-full bg-success px-4 py-2 text-xs font-bold text-success-foreground">Aprovar</button>
+            <button onClick={onRejectClick} className="flex-1 rounded-full bg-destructive px-4 py-2 text-xs font-bold text-destructive-foreground">Rejeitar</button>
+          </div>
+        )}
+        {pay.status === "aprovado" && (
+          <button onClick={onReverseClick} className="w-full rounded-full border border-border px-4 py-2 text-xs font-bold">Estornar pagamento</button>
+        )}
+      </div>
+    </>
   );
 }

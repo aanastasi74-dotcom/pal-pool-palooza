@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { z } from "zod";
-import { convites, usuariosAdmin, type Convite, type UsuarioAdmin } from "@/lib/mock-data";
+import { useInvites, useCreateInvite, useRevokeInvite, useResendInvite } from "@/lib/queries/invites";
+import { useUsuariosAdmin, useToggleAdmin, useToggleAtivo } from "@/lib/queries/profiles";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -10,7 +11,8 @@ import { toast } from "sonner";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { supabase } from "@/integrations/supabase/client";
+import { EmptyState } from "@/components/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/admin/convites")({
   head: () => ({ meta: [{ title: "Admin — Convites & Usuários" }] }),
@@ -31,17 +33,24 @@ const conviteSchema = z.object({
 });
 
 function ConvitesUsuarios() {
+  const { data: invites, isLoading: loadInv } = useInvites();
+  const { data: usuarios, isLoading: loadUsr } = useUsuariosAdmin();
+  const revoke = useRevokeInvite();
+  const resend = useResendInvite();
+  const toggleAdmin = useToggleAdmin();
+  const toggleAtivo = useToggleAtivo();
+
   const [novoOpen, setNovoOpen] = useState(false);
-  const [usuarioOpen, setUsuarioOpen] = useState<UsuarioAdmin | null>(null);
+  const [usuarioOpen, setUsuarioOpen] = useState<any | null>(null);
   const [filtroPapel, setFiltroPapel] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
 
-  const [confirmRevogar, setConfirmRevogar] = useState<Convite | null>(null);
-  const [confirmDesativar, setConfirmDesativar] = useState<UsuarioAdmin | null>(null);
-  const [confirmRemoverAdmin, setConfirmRemoverAdmin] = useState<UsuarioAdmin | null>(null);
+  const [confirmRevogar, setConfirmRevogar] = useState<any | null>(null);
+  const [confirmDesativar, setConfirmDesativar] = useState<any | null>(null);
+  const [confirmRemoverAdmin, setConfirmRemoverAdmin] = useState<any | null>(null);
 
   const convPredicate = useCallback(
-    (c: Convite, q: string) => {
+    (c: any, q: string) => {
       if (filtroStatus !== "todos" && c.status !== filtroStatus) return false;
       if (q && !(c.nome.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))) return false;
       return true;
@@ -49,16 +58,22 @@ function ConvitesUsuarios() {
     [filtroStatus],
   );
   const usrPredicate = useCallback(
-    (u: UsuarioAdmin, q: string) => {
+    (u: any, q: string) => {
       if (filtroPapel !== "todos" && u.role !== filtroPapel) return false;
-      if (q && !(u.nome.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))) return false;
+      if (q && !((u.nome ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q))) return false;
       return true;
     },
     [filtroPapel],
   );
 
-  const conv = usePaginatedList(convites, convPredicate, 20);
-  const usr = usePaginatedList(usuariosAdmin, usrPredicate, 20);
+  const conv = usePaginatedList(invites ?? [], convPredicate, 20);
+  const usr = usePaginatedList(usuarios ?? [], usrPredicate, 20);
+
+  const copiarLink = (token: string) => {
+    const link = `${window.location.origin}/cadastro/${token}`;
+    navigator.clipboard?.writeText(link);
+    toast.success("Link copiado.");
+  };
 
   return (
     <div className="space-y-5">
@@ -88,27 +103,31 @@ function ConvitesUsuarios() {
               <Plus className="h-3 w-3" /> Novo convite
             </button>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Nome</th><th className="p-2 text-left">E-mail</th><th className="p-2 text-left">Status</th><th className="p-2 text-left">Enviado</th><th className="p-2 text-left">Expira</th><th className="p-2"></th></tr></thead>
-              <tbody>
-                {conv.slice.map((c) => (
-                  <tr key={c.id} className="border-t border-border">
-                    <td className="p-2 font-medium">{c.nome}</td>
-                    <td className="p-2 text-xs text-muted-foreground">{c.email}</td>
-                    <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[c.status]}`}>{c.status}</span></td>
-                    <td className="p-2 text-xs">{c.enviado_em}</td>
-                    <td className="p-2 text-xs">{c.expira_em}</td>
-                    <td className="p-2 text-right">
-                      <button onClick={() => toast.success("Convite reenviado.")} title="Reenviar" className="mr-1 rounded p-1 hover:bg-muted"><Send className="h-3 w-3" /></button>
-                      <button onClick={() => { navigator.clipboard?.writeText(`https://perebas.com/convite/${c.id}`); toast.success("Link copiado."); }} title="Copiar link" className="mr-1 rounded p-1 hover:bg-muted"><Copy className="h-3 w-3" /></button>
-                      <button onClick={() => setConfirmRevogar(c)} title="Revogar" className="rounded p-1 hover:bg-muted"><Ban className="h-3 w-3" /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {loadInv ? <Skeleton className="h-48" /> : conv.total === 0 ? (
+            <EmptyState title="Sem convites" description="Convide alguém pra perebada." />
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Nome</th><th className="p-2 text-left">E-mail</th><th className="p-2 text-left">Status</th><th className="p-2 text-left">Enviado</th><th className="p-2 text-left">Expira</th><th className="p-2"></th></tr></thead>
+                <tbody>
+                  {conv.slice.map((c: any) => (
+                    <tr key={c.id} className="border-t border-border">
+                      <td className="p-2 font-medium">{c.nome}</td>
+                      <td className="p-2 text-xs text-muted-foreground">{c.email}</td>
+                      <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[c.status] ?? ""}`}>{c.status}</span></td>
+                      <td className="p-2 text-xs">{c.enviado_em ? new Date(c.enviado_em).toLocaleDateString("pt-BR") : "—"}</td>
+                      <td className="p-2 text-xs">{new Date(c.expira_em).toLocaleDateString("pt-BR")}</td>
+                      <td className="p-2 text-right">
+                        <button onClick={async () => { await resend.mutateAsync(c.id); toast.success("Convite reenviado."); }} title="Reenviar" className="mr-1 rounded p-1 hover:bg-muted"><Send className="h-3 w-3" /></button>
+                        <button onClick={() => copiarLink(c.token)} title="Copiar link" className="mr-1 rounded p-1 hover:bg-muted"><Copy className="h-3 w-3" /></button>
+                        <button onClick={() => setConfirmRevogar(c)} title="Revogar" className="rounded p-1 hover:bg-muted"><Ban className="h-3 w-3" /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           <DataTablePagination total={conv.total} page={conv.page} totalPages={conv.totalPages} pageSize={conv.pageSize} onPageChange={conv.setPage} />
         </TabsContent>
 
@@ -122,23 +141,27 @@ function ConvitesUsuarios() {
             <input value={usr.query} onChange={(e) => usr.setQuery(e.target.value)} placeholder="Buscar nome ou e-mail…" className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs" />
             <span className="text-xs text-muted-foreground">{usr.total} usuário(s)</span>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Nome</th><th className="p-2 text-left">E-mail</th><th className="p-2 text-left">Papel</th><th className="p-2 text-right">Quotas</th><th className="p-2 text-left">Último acesso</th><th className="p-2 text-left">Ativo</th></tr></thead>
-              <tbody>
-                {usr.slice.map((u) => (
-                  <tr key={u.id} onClick={() => setUsuarioOpen(u)} className="cursor-pointer border-t border-border hover:bg-muted/30">
-                    <td className="p-2 font-medium">{u.nome}</td>
-                    <td className="p-2 text-xs text-muted-foreground">{u.email}</td>
-                    <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${u.role === "admin" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{u.role}</span></td>
-                    <td className="p-2 text-right font-bold">{u.quotas_count}</td>
-                    <td className="p-2 text-xs">{u.ultimo_acesso ?? "—"}</td>
-                    <td className="p-2 text-xs">{u.ativo ? "Sim" : "Não"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {loadUsr ? <Skeleton className="h-48" /> : usr.total === 0 ? (
+            <EmptyState title="Sem usuários" description="Convide alguém pra entrar." />
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Nome</th><th className="p-2 text-left">E-mail</th><th className="p-2 text-left">Papel</th><th className="p-2 text-right">Quotas</th><th className="p-2 text-left">Último acesso</th><th className="p-2 text-left">Ativo</th></tr></thead>
+                <tbody>
+                  {usr.slice.map((u: any) => (
+                    <tr key={u.id} onClick={() => setUsuarioOpen(u)} className="cursor-pointer border-t border-border hover:bg-muted/30">
+                      <td className="p-2 font-medium">{u.nome}</td>
+                      <td className="p-2 text-xs text-muted-foreground">{u.email}</td>
+                      <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${u.role === "admin" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{u.role}</span></td>
+                      <td className="p-2 text-right font-bold">{u.quotas_count}</td>
+                      <td className="p-2 text-xs">{u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString("pt-BR") : "—"}</td>
+                      <td className="p-2 text-xs">{u.ativo ? "Sim" : "Não"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           <DataTablePagination total={usr.total} page={usr.page} totalPages={usr.totalPages} pageSize={usr.pageSize} onPageChange={usr.setPage} />
         </TabsContent>
       </Tabs>
@@ -154,9 +177,9 @@ function ConvitesUsuarios() {
                 <p className="text-muted-foreground">{usuarioOpen.email}</p>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (usuarioOpen.role === "admin") setConfirmRemoverAdmin(usuarioOpen);
-                      else { toast.success("Promovido a admin."); setUsuarioOpen(null); }
+                      else { await toggleAdmin.mutateAsync({ user_id: usuarioOpen.id, makeAdmin: true }); toast.success("Promovido a admin."); setUsuarioOpen(null); }
                     }}
                     className="flex-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
                   >
@@ -175,30 +198,39 @@ function ConvitesUsuarios() {
       <ConfirmDialog
         open={!!confirmRevogar}
         onOpenChange={(v) => !v && setConfirmRevogar(null)}
-        description={`Revogar o convite de ${confirmRevogar?.nome ?? ""}? O link ficará inválido e o convidado não conseguirá entrar.`}
+        description={`Revogar o convite de ${confirmRevogar?.nome ?? ""}? O link ficará inválido.`}
         confirmLabel="Revogar"
-        onConfirm={() => { toast.info("Convite revogado."); setConfirmRevogar(null); }}
+        destructive
+        onConfirm={async () => { if (confirmRevogar) { await revoke.mutateAsync(confirmRevogar.id); toast.info("Convite revogado."); } setConfirmRevogar(null); }}
       />
       <ConfirmDialog
         open={!!confirmRemoverAdmin}
         onOpenChange={(v) => !v && setConfirmRemoverAdmin(null)}
-        description={`Remover o privilégio de admin de ${confirmRemoverAdmin?.nome ?? ""}? Ele perderá acesso ao backoffice.`}
+        description={`Remover privilégio de admin de ${confirmRemoverAdmin?.nome ?? ""}?`}
         confirmLabel="Remover admin"
-        onConfirm={() => { toast.success("Admin removido."); setConfirmRemoverAdmin(null); setUsuarioOpen(null); }}
+        destructive
+        onConfirm={async () => {
+          if (confirmRemoverAdmin) { await toggleAdmin.mutateAsync({ user_id: confirmRemoverAdmin.id, makeAdmin: false }); toast.success("Admin removido."); }
+          setConfirmRemoverAdmin(null); setUsuarioOpen(null);
+        }}
       />
       <ConfirmDialog
         open={!!confirmDesativar}
         onOpenChange={(v) => !v && setConfirmDesativar(null)}
-        description={`${confirmDesativar?.ativo ? "Desativar" : "Ativar"} ${confirmDesativar?.nome ?? ""}? ${confirmDesativar?.ativo ? "O usuário não conseguirá mais acessar o app." : "O usuário poderá voltar a acessar."}`}
+        description={`${confirmDesativar?.ativo ? "Desativar" : "Ativar"} ${confirmDesativar?.nome ?? ""}?`}
         confirmLabel={confirmDesativar?.ativo ? "Desativar" : "Ativar"}
         destructive={!!confirmDesativar?.ativo}
-        onConfirm={() => { toast.info(confirmDesativar?.ativo ? "Desativado." : "Ativado."); setConfirmDesativar(null); setUsuarioOpen(null); }}
+        onConfirm={async () => {
+          if (confirmDesativar) { await toggleAtivo.mutateAsync({ user_id: confirmDesativar.id, ativo: !confirmDesativar.ativo }); toast.info(confirmDesativar.ativo ? "Desativado." : "Ativado."); }
+          setConfirmDesativar(null); setUsuarioOpen(null);
+        }}
       />
     </div>
   );
 }
 
 function NovoConviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const create = useCreateInvite();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -212,29 +244,22 @@ function NovoConviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange
   const enviar = async () => {
     if (!valido) return;
     setSubmitting(true);
-    const { data: inserted, error: insErr } = await supabase
-      .from("invites")
-      .insert({ nome: nome.trim(), email: email.trim(), mensagem: mensagem || null })
-      .select("id, token")
-      .single();
-    if (insErr || !inserted) {
+    try {
+      const { invite, emailError } = await create.mutateAsync({ nome: nome.trim(), email: email.trim(), mensagem: mensagem || null });
+      if (emailError) {
+        const link = `${window.location.origin}/cadastro/${invite.token}`;
+        navigator.clipboard?.writeText(link);
+        toast.warning(`Convite criado, mas e-mail falhou. Link copiado: ${link}`);
+      } else {
+        toast.success(`Convite enviado pra ${nome}!`);
+      }
+      setNome(""); setEmail(""); setMensagem("");
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao criar convite.");
+    } finally {
       setSubmitting(false);
-      toast.error(insErr?.message ?? "Não consegui criar o convite.");
-      return;
     }
-    const { error: fnErr } = await supabase.functions.invoke("send-convite-email", {
-      body: { invite_id: inserted.id },
-    });
-    setSubmitting(false);
-    if (fnErr) {
-      const link = `${window.location.origin}/cadastro/${inserted.token}`;
-      navigator.clipboard?.writeText(link);
-      toast.warning(`Convite criado, mas não enviei o e-mail. Link copiado pra mandar manualmente: ${link}`);
-    } else {
-      toast.success(`Convite enviado pra ${nome}!`);
-    }
-    setNome(""); setEmail(""); setMensagem("");
-    onOpenChange(false);
   };
 
   return (

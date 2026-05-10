@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { auditoria, pagamentosAdmin, ranking } from "@/lib/mock-data";
+import { usePaymentsAdmin } from "@/lib/queries/payments";
+import { useBulletins } from "@/lib/queries/bulletins";
+import { useAuditLog } from "@/lib/queries/audit";
+import { useRanking } from "@/lib/queries/profiles";
 import { Activity, Database, Cloud, Mail, Sparkles, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -31,11 +34,16 @@ const corStatus = {
 };
 
 function SaudeAdmin() {
-  const ativos24h = ranking.length;
-  const palpites24h = 132;
-  const pendentes = pagamentosAdmin.filter((p) => p.status === "pendente").length;
-  const sensiveis = auditoria
-    .filter((a) => /estorn|atualizou_config|rejeitou|atualizou_premiacao/.test(a.acao))
+  const { data: pays } = usePaymentsAdmin();
+  const { data: boletins } = useBulletins();
+  const { data: ranking } = useRanking();
+  const { data: audits } = useAuditLog();
+
+  const ativos = (ranking ?? []).length;
+  const pendentes = (pays ?? []).filter((p: any) => p.status === "pendente").length;
+  const naoPublicados = (boletins ?? []).filter((b: any) => b.status !== "publicado").length;
+  const sensiveis = (audits ?? [])
+    .filter((a: any) => /estorn|atualizou_config|rejeit|atualizou_premiacao|excluiu/.test(a.acao))
     .slice(0, 10);
 
   return (
@@ -70,24 +78,24 @@ function SaudeAdmin() {
         ))}
       </div>
 
-      <div className="grid gap-3 md:grid-cols-4">
-        <Metric label="Usuários ativos 24h" valor={ativos24h} />
-        <Metric label="Palpites 24h" valor={palpites24h} />
+      <div className="grid gap-3 md:grid-cols-3">
+        <Metric label="Quotas ativas" valor={ativos} />
         <Metric label="Pagamentos pendentes" valor={pendentes} />
-        <Metric label="Boletins não publicados" valor={1} />
+        <Metric label="Boletins não publicados" valor={naoPublicados} />
       </div>
 
       <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
         <h2 className="font-display text-base font-bold">Últimas ações sensíveis</h2>
         <ul className="mt-3 divide-y divide-border">
-          {sensiveis.map((a) => (
+          {sensiveis.length === 0 && <li className="py-2 text-xs text-muted-foreground">Nenhuma ação sensível recente.</li>}
+          {sensiveis.map((a: any) => (
             <li key={a.id} className="flex items-center justify-between py-2 text-sm">
               <span className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                <span className="font-semibold">{a.ator}</span>
+                <span className="font-semibold">{a.ator_nome ?? "—"}</span>
                 <span className="text-muted-foreground">{a.acao.replace(/_/g, " ")}</span>
               </span>
-              <span className="text-xs text-muted-foreground">{a.data}</span>
+              <span className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString("pt-BR")}</span>
             </li>
           ))}
         </ul>
