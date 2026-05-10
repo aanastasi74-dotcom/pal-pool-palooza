@@ -564,6 +564,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_set_ativo: {
+        Args: { p_ativo: boolean; p_user_id: string }
+        Returns: undefined
+      }
+      admin_set_role: {
+        Args: { p_role: string; p_user_id: string }
+        Returns: undefined
+      }
+      consume_invite: { Args: { p_token: string }; Returns: boolean }
+      fase_atual_copa: { Args: never; Returns: string }
       get_invite_by_token: {
         Args: { p_token: string }
         Returns: {
