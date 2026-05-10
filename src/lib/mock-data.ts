@@ -486,13 +486,13 @@ export const jogosAdminExtra: Jogo[] = Array.from({ length: 45 }).map((_, i) => 
 });
 
 // Janelas top 4 com correção (rodada C)
+// Janelas Top 4: trocas permitidas só até o fim do round of 32 (oitavas).
+// Potencial total = 4.000 pts. Eficácia define quanto desse potencial sobra.
 export const janelasTop4Corrigida = [
-  { fase: "Antes da Copa", eficacia: 100, ativa: false },
-  { fase: "Fase de grupos", eficacia: 50, ativa: true },
-  { fase: "Oitavas", eficacia: 25, ativa: false },
-  { fase: "Quartas", eficacia: 12.5, ativa: false },
-  { fase: "Semis", eficacia: 6.25, ativa: false },
-  { fase: "Final", eficacia: 0, ativa: false },
+  { fase: "Antes da Copa", eficacia: 100, ativa: false },     // 4.000 pts
+  { fase: "Fase de grupos", eficacia: 50, ativa: true },      // 2.000 pts
+  { fase: "Oitavas (round of 32)", eficacia: 25, ativa: false }, // 1.000 pts
+  { fase: "Pós-oitavas — trocas encerradas", eficacia: 0, ativa: false, encerrada: true },
 ];
 
 export function gerarBoletimMock(

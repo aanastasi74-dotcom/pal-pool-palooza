@@ -31,9 +31,7 @@ const defaults = {
   top4Antes: "100",
   top4Grupos: "50",
   top4Oitavas: "25",
-  top4Quartas: "12.5",
-  top4Semis: "6.25",
-  top4Final: "0",
+  top4PosOitavas: "0",
   boletimHora: "22:00",
   autoBoletim: true,
 };
@@ -145,9 +143,8 @@ function Configuracoes() {
               <Field label="Antes da Copa (%)" value={cfg.top4Antes} onChange={(v) => set("top4Antes", v)} type="number" />
               <Field label="Fase de grupos (%)" value={cfg.top4Grupos} onChange={(v) => set("top4Grupos", v)} type="number" />
               <Field label="Oitavas (%)" value={cfg.top4Oitavas} onChange={(v) => set("top4Oitavas", v)} type="number" />
-              <Field label="Quartas (%)" value={cfg.top4Quartas} onChange={(v) => set("top4Quartas", v)} type="number" />
-              <Field label="Semis (%)" value={cfg.top4Semis} onChange={(v) => set("top4Semis", v)} type="number" />
-              <Field label="Final (%)" value={cfg.top4Final} onChange={(v) => set("top4Final", v)} type="number" />
+              <Field label="Pós-oitavas (%)" value={cfg.top4PosOitavas} onChange={(v) => set("top4PosOitavas", v)} type="number" />
+              <p className="md:col-span-2 text-[11px] text-muted-foreground">Trocas encerram após o round of 32. Potencial total: 4.000 pts (100%) → 2.000 (grupos) → 1.000 (oitavas) → 0 depois.</p>
             </AccordionContent>
           </AccordionItem>
 
