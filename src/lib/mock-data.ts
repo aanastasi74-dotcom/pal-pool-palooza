@@ -236,8 +236,9 @@ export type Boletim = {
   titulo: string;
   conteudo: string;
   conteudo_original?: string; // antes da edição do admin
-  status: "publicado" | "rascunho";
+  status: "publicado" | "rascunho" | "agendado";
   publicado_em?: string;
+  agendado_para?: string;
 };
 
 export const boletins: Boletim[] = [
