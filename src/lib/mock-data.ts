@@ -293,11 +293,18 @@ export type Quota = {
   pagaEm?: string;
   pontos: number;
   posicao: number;
+  // Elegibilidade ao prêmio do lanterninha:
+  palpites_validos: number;
+  palpites_possiveis: number;
+  elegivel_lanterna: boolean;
 };
 
+// Total de quotas no bolão (usado para calcular o corte dos 25% finais).
+export const TOTAL_QUOTAS = 17;
+
 export const minhasQuotas: Quota[] = [
-  { id: "q1", numero: 1, status: "ativa", pagaEm: "01/05/2026", pontos: 1720, posicao: 2 },
-  { id: "q2", numero: 2, status: "ativa", pagaEm: "10/05/2026", pontos: 980, posicao: 14 },
+  { id: "q1", numero: 1, status: "ativa", pagaEm: "01/05/2026", pontos: 1720, posicao: 2, palpites_validos: 38, palpites_possiveis: 40, elegivel_lanterna: true },
+  { id: "q2", numero: 2, status: "ativa", pagaEm: "10/05/2026", pontos: 980, posicao: 14, palpites_validos: 24, palpites_possiveis: 40, elegivel_lanterna: false },
 ];
 
 // ----- Top 4 colocados (palpite) -----
