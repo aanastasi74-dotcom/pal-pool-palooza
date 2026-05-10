@@ -564,6 +564,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_invite_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          email: string
+          expira_em: string
+          id: string
+          mensagem: string
+          nome: string
+          status: string
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
