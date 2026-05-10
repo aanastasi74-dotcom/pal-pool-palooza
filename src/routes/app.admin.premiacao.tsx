@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { premiacaoConfig, premio } from "@/lib/mock-data";
+import { premiacaoConfig, premio, ranking } from "@/lib/mock-data";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
+import { isElegivelLanterna, razaoNaoElegivel, REGRA_LANTERNINHA, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/admin/premiacao")({
   head: () => ({ meta: [{ title: "Admin — Premiação" }] }),
