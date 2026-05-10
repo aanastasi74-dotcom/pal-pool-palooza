@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useCallback, useState } from "react";
 import { pagamentosAdmin, type PagamentoAdmin } from "@/lib/mock-data";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -7,6 +7,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { DataTablePagination } from "@/components/data-table-pagination";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/app/admin/pagamentos")({
   head: () => ({ meta: [{ title: "Admin — Pagamentos" }] }),
@@ -21,20 +24,44 @@ const statusColor: Record<string, string> = {
   estornado: "bg-muted text-muted-foreground",
 };
 
+// dd/mm/yyyy hh:mm → Date
+function parseDataBr(s: string): Date {
+  const [d, hora] = s.split(" ");
+  const [dd, mm, yy] = d.split("/").map(Number);
+  const [hh = 0, mi = 0] = (hora ?? "00:00").split(":").map(Number);
+  return new Date(yy, (mm ?? 1) - 1, dd ?? 1, hh, mi);
+}
+
 function Pagamentos() {
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
-  const [busca, setBusca] = useState("");
+  const [dataIni, setDataIni] = useState("");
+  const [dataFim, setDataFim] = useState("");
   const [selecionados, setSelecionados] = useState<string[]>([]);
   const [aberto, setAberto] = useState<PagamentoAdmin | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [confirmAcao, setConfirmAcao] = useState<null | { tipo: "rejeitar" | "estornar" | "rejeitar_um" | "estornar_um"; id?: string }>(null);
 
-  const filtrados = useMemo(() => {
-    return pagamentosAdmin.filter((p) => {
+  const predicate = useCallback(
+    (p: PagamentoAdmin, q: string) => {
       if (filtroStatus !== "todos" && p.status !== filtroStatus) return false;
-      if (busca && !p.participante.toLowerCase().includes(busca.toLowerCase())) return false;
+      if (q && !p.participante.toLowerCase().includes(q)) return false;
+      if (dataIni || dataFim) {
+        const d = parseDataBr(p.data);
+        if (dataIni && d < new Date(dataIni)) return false;
+        if (dataFim && d > new Date(dataFim + "T23:59:59")) return false;
+      }
       return true;
-    });
-  }, [filtroStatus, busca]);
+    },
+    [filtroStatus, dataIni, dataFim],
+  );
+
+  const { query, setQuery, page, setPage, totalPages, slice, total, pageSize } = usePaginatedList(
+    pagamentosAdmin,
+    predicate,
+    20,
+  );
+
+  const pendentesNaTela = slice.filter((p) => p.status === "pendente").length;
 
   const toggle = (id: string) =>
     setSelecionados((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
@@ -42,6 +69,18 @@ function Pagamentos() {
   const aprovarMassa = () => {
     toast.success("Aprovado! O caldeirão tá engordando.");
     setSelecionados([]);
+  };
+
+  const executarConfirm = () => {
+    if (!confirmAcao) return;
+    if (confirmAcao.tipo === "rejeitar" || confirmAcao.tipo === "rejeitar_um") {
+      toast.info(confirmAcao.tipo === "rejeitar_um" ? "Pagamento rejeitado." : "Marcados como rejeitados.");
+    } else {
+      toast.info(confirmAcao.tipo === "estornar_um" ? "Pagamento estornado." : "Marcados como estornados.");
+    }
+    setSelecionados([]);
+    setAberto(null);
+    setConfirmAcao(null);
   };
 
   return (
@@ -67,46 +106,55 @@ function Pagamentos() {
           <option value="rejeitado">Rejeitado</option>
           <option value="estornado">Estornado</option>
         </select>
-        <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar participante…" className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs" />
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar participante…" className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs" />
+        <input type="date" value={dataIni} onChange={(e) => setDataIni(e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs" />
+        <span className="text-xs text-muted-foreground">até</span>
+        <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs" />
+        <span className="ml-auto text-xs text-muted-foreground">
+          {total} pagamento{total !== 1 ? "s" : ""} · {pendentesNaTela} pendentes nesta página · página {page} de {totalPages}
+        </span>
         {selecionados.length > 0 && (
-          <div className="ml-auto flex gap-2">
+          <div className="flex w-full justify-end gap-2 border-t border-border pt-2">
             <span className="text-xs text-muted-foreground">{selecionados.length} selecionado(s)</span>
             <button onClick={aprovarMassa} className="rounded-full bg-success px-3 py-1 text-xs font-bold text-success-foreground">Aprovar</button>
-            <button onClick={() => { toast.info("Marcados como rejeitados."); setSelecionados([]); }} className="rounded-full bg-destructive px-3 py-1 text-xs font-bold text-destructive-foreground">Rejeitar</button>
-            <button onClick={() => { toast.info("Marcados como estornados."); setSelecionados([]); }} className="rounded-full border border-border px-3 py-1 text-xs font-bold">Estornar</button>
+            <button onClick={() => setConfirmAcao({ tipo: "rejeitar" })} className="rounded-full bg-destructive px-3 py-1 text-xs font-bold text-destructive-foreground">Rejeitar</button>
+            <button onClick={() => setConfirmAcao({ tipo: "estornar" })} className="rounded-full border border-border px-3 py-1 text-xs font-bold">Estornar</button>
           </div>
         )}
       </div>
 
-      {filtrados.length === 0 ? (
+      {total === 0 ? (
         <EmptyState title="Sem pagamentos por aqui" description="A perebada ainda não Pixou." />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="w-10 p-3"></th>
-                <th className="p-3 text-left">Participante</th>
-                <th className="p-3 text-left">Quota</th>
-                <th className="p-3 text-right">Valor</th>
-                <th className="p-3 text-left">Data</th>
-                <th className="p-3 text-left">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.map((p) => (
-                <tr key={p.id} className="border-t border-border hover:bg-muted/30">
-                  <td className="p-3"><Checkbox checked={selecionados.includes(p.id)} onCheckedChange={() => toggle(p.id)} /></td>
-                  <td className="cursor-pointer p-3 font-medium" onClick={() => setAberto(p)}>{p.participante}</td>
-                  <td className="cursor-pointer p-3 text-muted-foreground" onClick={() => setAberto(p)}>{p.quota_label}</td>
-                  <td className="cursor-pointer p-3 text-right font-display font-bold" onClick={() => setAberto(p)}>{fmt(p.valor)}</td>
-                  <td className="cursor-pointer p-3 text-xs text-muted-foreground" onClick={() => setAberto(p)}>{p.data}</td>
-                  <td className="p-3"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[p.status]}`}>{p.status}</span></td>
+        <>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="w-10 p-3"></th>
+                  <th className="p-3 text-left">Participante</th>
+                  <th className="p-3 text-left">Quota</th>
+                  <th className="p-3 text-right">Valor</th>
+                  <th className="p-3 text-left">Data</th>
+                  <th className="p-3 text-left">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {slice.map((p) => (
+                  <tr key={p.id} className="border-t border-border hover:bg-muted/30">
+                    <td className="p-3"><Checkbox checked={selecionados.includes(p.id)} onCheckedChange={() => toggle(p.id)} /></td>
+                    <td className="cursor-pointer p-3 font-medium" onClick={() => setAberto(p)}>{p.participante}</td>
+                    <td className="cursor-pointer p-3 text-muted-foreground" onClick={() => setAberto(p)}>{p.quota_label}</td>
+                    <td className="cursor-pointer p-3 text-right font-display font-bold" onClick={() => setAberto(p)}>{fmt(p.valor)}</td>
+                    <td className="cursor-pointer p-3 text-xs text-muted-foreground" onClick={() => setAberto(p)}>{p.data}</td>
+                    <td className="p-3"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[p.status]}`}>{p.status}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <DataTablePagination total={total} page={page} totalPages={totalPages} pageSize={pageSize} onPageChange={setPage} />
+        </>
       )}
 
       <Sheet open={!!aberto} onOpenChange={(v) => !v && setAberto(null)}>
@@ -129,8 +177,11 @@ function Pagamentos() {
                 {aberto.status === "pendente" && (
                   <div className="flex gap-2">
                     <button onClick={() => { toast.success("Aprovado! O caldeirão tá engordando."); setAberto(null); }} className="flex-1 rounded-full bg-success px-4 py-2 text-xs font-bold text-success-foreground">Aprovar</button>
-                    <button onClick={() => { toast.info("Pagamento rejeitado."); setAberto(null); }} className="flex-1 rounded-full bg-destructive px-4 py-2 text-xs font-bold text-destructive-foreground">Rejeitar</button>
+                    <button onClick={() => setConfirmAcao({ tipo: "rejeitar_um", id: aberto.id })} className="flex-1 rounded-full bg-destructive px-4 py-2 text-xs font-bold text-destructive-foreground">Rejeitar</button>
                   </div>
+                )}
+                {aberto.status === "aprovado" && (
+                  <button onClick={() => setConfirmAcao({ tipo: "estornar_um", id: aberto.id })} className="w-full rounded-full border border-border px-4 py-2 text-xs font-bold">Estornar pagamento</button>
                 )}
               </div>
             </>
@@ -155,6 +206,23 @@ function Pagamentos() {
           <button onClick={() => { toast.success("Conciliação aplicada — 3 pagamentos aprovados."); setImportOpen(false); }} className="rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground">Confirmar conciliação</button>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!confirmAcao}
+        onOpenChange={(v) => !v && setConfirmAcao(null)}
+        title="Tem certeza?"
+        description={
+          confirmAcao?.tipo === "rejeitar"
+            ? `Rejeitar ${selecionados.length} pagamento(s) selecionado(s)? Os participantes verão o status como rejeitado.`
+            : confirmAcao?.tipo === "estornar"
+            ? `Estornar ${selecionados.length} pagamento(s) selecionado(s)? A quota volta a ficar pendente.`
+            : confirmAcao?.tipo === "rejeitar_um"
+            ? "Rejeitar este pagamento? O participante verá o status como rejeitado."
+            : "Estornar este pagamento? A quota volta a ficar pendente."
+        }
+        confirmLabel={confirmAcao?.tipo?.startsWith("rejeitar") ? "Rejeitar" : "Estornar"}
+        onConfirm={executarConfirm}
+      />
     </div>
   );
 }
