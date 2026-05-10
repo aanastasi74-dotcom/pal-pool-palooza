@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { jogos, ranking, times, boletimDoDia, currentUser, perfis } from "@/lib/mock-data";
+import { jogos, ranking, times, currentUser, perfis, gerarBoletimMock } from "@/lib/mock-data";
 import { Sparkles, TrendingUp, Trophy, Pencil } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { BoletimEditor } from "@/components/boletim-editor";
 
@@ -14,8 +14,15 @@ function Home() {
   const proximos = jogos.filter((j) => j.status !== "encerrado").slice(0, 3);
   const top3 = ranking.slice(0, 3);
   const isAdmin = currentUser.role === "admin";
-  const [boletim, setBoletim] = useState(boletimDoDia.conteudo);
+  const gerado = useMemo(() => gerarBoletimMock(ranking, perfis), []);
+  const [boletim, setBoletim] = useState(gerado.conteudo);
   const [editing, setEditing] = useState(false);
+  const perfisLidos = useMemo(() => {
+    const ids = new Set<string>();
+    [...ranking.slice(0, 3), [...ranking].sort((a, b) => b.variacao - a.variacao)[0], [...ranking].sort((a, b) => a.variacao - b.variacao)[0]]
+      .forEach((p) => p && ids.add(p.id));
+    return perfis.filter((p) => ids.has(p.participante_id)).map((p) => p.apelido_principal);
+  }, []);
 
   const compartilharWhats = () => {
     const texto = encodeURIComponent(`📰 Boletim dos Perebas\n\n${boletim}`);
