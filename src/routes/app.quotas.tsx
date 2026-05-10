@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { minhasQuotas } from "@/lib/mock-data";
-import { Plus } from "lucide-react";
+import { minhasQuotas, TOTAL_QUOTAS } from "@/lib/mock-data";
+import { Plus, CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
+import { estaNosUltimos25, isElegivelLanterna, razaoNaoElegivel } from "@/lib/lanterninha";
 
 export const Route = createFileRoute("/app/quotas")({
   head: () => ({ meta: [{ title: "Minhas quotas — Bolão dos Perebas" }] }),
@@ -33,6 +34,9 @@ function QuotasPage() {
       <div className="grid gap-3 md:grid-cols-2">
         {minhasQuotas.map((q) => {
           const s = labelStatus[q.status];
+          const noFundo = estaNosUltimos25(q.posicao, TOTAL_QUOTAS);
+          const elegivel = isElegivelLanterna(q);
+          const razao = razaoNaoElegivel(q);
           return (
             <article key={q.id} className="rounded-2xl border border-border bg-card p-5 shadow-card">
               <div className="flex items-center justify-between">
@@ -44,6 +48,23 @@ function QuotasPage() {
                 <Stat label="Pontos" valor={q.pontos.toLocaleString("pt-BR")} />
                 <Stat label="Posição" valor={`${q.posicao}º`} />
               </div>
+              {noFundo && (
+                <div
+                  className={`mt-3 flex items-start gap-2 rounded-xl px-3 py-2 text-xs ${
+                    elegivel ? "bg-success/10 text-success" : "bg-accent/20 text-accent-foreground"
+                  }`}
+                >
+                  {elegivel ? (
+                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  ) : (
+                    <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  )}
+                  <span>
+                    <Lightbulb className="mr-1 inline h-3 w-3 rotate-180" />
+                    {elegivel ? "Elegível ao lanterninha" : `Não elegível ao lanterninha — ${razao}`}
+                  </span>
+                </div>
+              )}
             </article>
           );
         })}
