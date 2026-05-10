@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { perfis, type PerfilPersonalidade } from "@/lib/mock-data";
+import { useCallback, useState } from "react";
+import { perfis, usuariosAdmin, type PerfilPersonalidade } from "@/lib/mock-data";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, X, Eye } from "lucide-react";
+import { Plus, X, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { DataTablePagination } from "@/components/data-table-pagination";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/app/admin/perfis")({
   head: () => ({ meta: [{ title: "Admin — Perfis" }] }),
@@ -14,6 +17,14 @@ export const Route = createFileRoute("/app/admin/perfis")({
 function PerfisAdmin() {
   const [aberto, setAberto] = useState<PerfilPersonalidade | null>(null);
   const [exemploOpen, setExemploOpen] = useState(false);
+
+  const predicate = useCallback((p: PerfilPersonalidade, q: string) => {
+    if (!q) return true;
+    if (p.apelido_principal.toLowerCase().includes(q)) return true;
+    return p.apelidos_alternativos.some((a) => a.toLowerCase().includes(q));
+  }, []);
+
+  const { query, setQuery, page, setPage, totalPages, slice, total, pageSize } = usePaginatedList(perfis, predicate, 20);
 
   return (
     <div className="space-y-5">
@@ -32,11 +43,16 @@ function PerfisAdmin() {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card">
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar apelido…" className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs" />
+        <span className="text-xs text-muted-foreground">{total} perfil(is)</span>
+      </div>
+
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Apelido</th><th className="p-2 text-right">Traços</th><th className="p-2 text-right">Tags</th><th className="p-2 text-left">Observações</th></tr></thead>
           <tbody>
-            {perfis.map((p) => (
+            {slice.map((p) => (
               <tr key={p.participante_id} onClick={() => setAberto(p)} className="cursor-pointer border-t border-border hover:bg-muted/30">
                 <td className="p-2 font-display font-bold">{p.apelido_principal}</td>
                 <td className="p-2 text-right">{p.tracos.length}</td>
@@ -47,10 +63,11 @@ function PerfisAdmin() {
           </tbody>
         </table>
       </div>
+      <DataTablePagination total={total} page={page} totalPages={totalPages} pageSize={pageSize} onPageChange={setPage} />
 
       <Sheet open={!!aberto} onOpenChange={(v) => !v && setAberto(null)}>
         <SheetContent className="w-[480px] overflow-y-auto sm:max-w-lg">
-          {aberto && <PerfilForm perfil={aberto} onClose={() => setAberto(null)} />}
+          {aberto && <PerfilForm key={aberto.participante_id || "novo"} perfil={aberto} onClose={() => setAberto(null)} />}
         </SheetContent>
       </Sheet>
 
@@ -58,7 +75,7 @@ function PerfisAdmin() {
         <DialogContent>
           <DialogHeader><DialogTitle>Exemplo de boletim com os perfis</DialogTitle></DialogHeader>
           <p className="text-sm leading-relaxed">
-            A Carlinha (sim, a Cacá) quase perdeu o palpite outra vez, mas dessa vez cravou e disparou pra liderança. O ET (o Limão, claro) acertou só meia-hora antes de fechar e ainda assim tá em sétimo. Diego segue investindo: agora são 4 quotas só pra apostar em zebra. A Juliana defendeu o empate e levou os pontos — surpresa pra ninguém. O Rafa veio explicar tática no grupo às 3 da manhã.
+            A Carlinha (sim, a Cacá) quase perdeu o palpite outra vez, mas dessa vez cravou e disparou pra liderança. O ET (o Limão, claro) acertou só meia-hora antes de fechar e ainda assim tá em sétimo. Diego segue investindo: agora são 4 quotas só pra apostar em zebra.
           </p>
         </DialogContent>
       </Dialog>
@@ -70,6 +87,8 @@ function PerfilForm({ perfil, onClose }: { perfil: PerfilPersonalidade; onClose:
   const [p, setP] = useState(perfil);
   const [novoApelido, setNovoApelido] = useState("");
   const [novaTag, setNovaTag] = useState("");
+  const [confirmDel, setConfirmDel] = useState(false);
+  const isNovo = !perfil.participante_id;
 
   const salvar = () => {
     if (!p.apelido_principal.trim()) {
@@ -80,10 +99,30 @@ function PerfilForm({ perfil, onClose }: { perfil: PerfilPersonalidade; onClose:
     onClose();
   };
 
+  const excluir = () => {
+    toast.success("Perfil excluído.");
+    setConfirmDel(false);
+    onClose();
+  };
+
   return (
     <>
       <SheetHeader><SheetTitle>{p.apelido_principal || "Novo perfil"}</SheetTitle></SheetHeader>
       <div className="mt-4 space-y-4 text-sm">
+        <div>
+          <label className="text-xs font-bold">Participante vinculado</label>
+          <select
+            value={p.participante_id}
+            onChange={(e) => setP({ ...p, participante_id: e.target.value })}
+            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          >
+            <option value="">Sem vínculo</option>
+            {usuariosAdmin.map((u) => (
+              <option key={u.id} value={u.id}>{u.nome}</option>
+            ))}
+          </select>
+        </div>
+
         <div>
           <label className="text-xs font-bold">Apelido principal *</label>
           <input value={p.apelido_principal} onChange={(e) => setP({ ...p, apelido_principal: e.target.value })} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
@@ -141,7 +180,19 @@ function PerfilForm({ perfil, onClose }: { perfil: PerfilPersonalidade; onClose:
         </div>
 
         <button onClick={salvar} className="w-full rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground">Salvar perfil</button>
+        {!isNovo && (
+          <button onClick={() => setConfirmDel(true)} className="flex w-full items-center justify-center gap-1 rounded-full border border-destructive/40 px-5 py-2 text-xs font-bold text-destructive">
+            <Trash2 className="h-3 w-3" /> Excluir perfil
+          </button>
+        )}
       </div>
+      <ConfirmDialog
+        open={confirmDel}
+        onOpenChange={setConfirmDel}
+        description={`Excluir o perfil "${p.apelido_principal}"? Os boletins futuros não terão mais acesso à zoeira deste participante.`}
+        confirmLabel="Excluir"
+        onConfirm={excluir}
+      />
     </>
   );
 }
