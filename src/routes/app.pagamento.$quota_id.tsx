@@ -1,26 +1,83 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Copy, Upload, QrCode } from "lucide-react";
+import { useSetting } from "@/lib/queries/settings";
+import { useCreatePayment } from "@/lib/queries/payments";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/app/pagamento/$quota_id")({
   head: () => ({ meta: [{ title: "Pagamento Pix — Bolão dos Perebas" }] }),
   component: Pagamento,
 });
 
-const PIX_KEY = "perebas@bolao.com.br";
+const ALLOWED_MIME = ["image/png", "image/jpeg", "image/jpg", "application/pdf"];
+const MAX_SIZE = 5 * 1024 * 1024;
+
+type PixConfig = { chave?: string; valor_quota?: number; instrucoes?: string };
 
 function Pagamento() {
   const { quota_id } = useParams({ from: "/app/pagamento/$quota_id" });
-  const [comprovante, setComprovante] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { data: pixConfig } = useSetting<PixConfig>("pix_config");
+  const createPayment = useCreatePayment();
+  const navigate = useNavigate();
+  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
+
+  const chave = pixConfig?.chave ?? "perebas@bolao.com.br";
+  const valor = pixConfig?.valor_quota ?? 50;
+
+  const onPickFile = (file: File | null) => {
+    if (!file) {
+      setArquivo(null);
+      return;
+    }
+    if (!ALLOWED_MIME.includes(file.type)) {
+      toast.error("Tipo de arquivo inválido. Use PNG, JPG ou PDF.");
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      toast.error("Arquivo grande demais (máx. 5 MB).");
+      return;
+    }
+    setArquivo(file);
+  };
+
+  const enviar = async () => {
+    if (!arquivo || !user) return;
+    setEnviando(true);
+    try {
+      const path = `${user.id}/${quota_id}/${Date.now()}-${arquivo.name}`;
+      const { error: upErr } = await supabase.storage.from("comprovantes-pix").upload(path, arquivo, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: arquivo.type,
+      });
+      if (upErr) {
+        toast.error("Não conseguimos enviar o comprovante. Tenta de novo, peraba.");
+        setEnviando(false);
+        return;
+      }
+      await createPayment.mutateAsync({ quota_id, valor, comprovante_path: path });
+      setEnviado(true);
+      toast.success("Comprovante enviado! Aguarda a aprovação do admin.");
+      setTimeout(() => navigate({ to: "/app/quotas" }), 1500);
+    } catch (e) {
+      toast.error("Não conseguimos registrar o pagamento. Tenta de novo, peraba.");
+    } finally {
+      setEnviando(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
         <h1 className="font-display text-3xl font-extrabold">Pagar via Pix</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {quota_id === "nova" ? "Nova quota — R$ 50" : `Quota ${quota_id} — R$ 50`}. Vamos lá, perebas!
+          Quota — R$ {valor}. Vamos lá, perebas!
         </p>
       </div>
 
@@ -35,10 +92,10 @@ function Pagamento() {
         <div className="mt-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Chave Pix</p>
           <div className="mt-2 flex items-center gap-2 rounded-2xl border border-border bg-secondary px-4 py-3">
-            <code className="flex-1 font-mono text-sm">{PIX_KEY}</code>
+            <code className="flex-1 font-mono text-sm">{chave}</code>
             <button
               onClick={() => {
-                navigator.clipboard.writeText(PIX_KEY);
+                navigator.clipboard.writeText(chave);
                 toast.success("Chave copiada!");
               }}
               className="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground"
@@ -53,24 +110,22 @@ function Pagamento() {
         <h2 className="font-display text-lg font-bold">Enviar comprovante</h2>
         <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-secondary px-6 py-10 text-center transition hover:border-primary">
           <Upload className="h-6 w-6 text-muted-foreground" />
-          <p className="mt-2 text-sm font-semibold">{comprovante ?? "Clique pra enviar"}</p>
-          <p className="text-xs text-muted-foreground">PNG, JPG ou PDF</p>
+          <p className="mt-2 text-sm font-semibold">{arquivo?.name ?? "Clique pra enviar"}</p>
+          <p className="text-xs text-muted-foreground">PNG, JPG ou PDF · até 5 MB</p>
           <input
             type="file"
+            accept="image/png,image/jpeg,image/jpg,application/pdf"
             className="hidden"
-            onChange={(e) => setComprovante(e.target.files?.[0]?.name ?? null)}
+            onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
           />
         </label>
 
         <button
-          disabled={!comprovante || enviado}
-          onClick={() => {
-            setEnviado(true);
-            toast.success("Comprovante enviado! Aguardando aprovação.");
-          }}
+          disabled={!arquivo || enviando || enviado}
+          onClick={enviar}
           className="mt-4 w-full rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-50"
         >
-          {enviado ? "Aguardando aprovação" : "Enviar comprovante"}
+          {enviado ? "Aguardando aprovação" : enviando ? "Enviando…" : "Enviar comprovante"}
         </button>
       </section>
     </div>
