@@ -60,6 +60,7 @@ function BoletinsAdmin() {
             <Plus className="h-3 w-3" /> Novo boletim
           </button>
         </div>
+      </div>
 
       {isLoading ? (
         <Skeleton className="h-64" />
