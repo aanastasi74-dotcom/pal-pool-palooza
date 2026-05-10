@@ -20,6 +20,7 @@ export const Route = createFileRoute("/app/premio")({
 const fmtBRL = (n: number) => `R$ ${Math.round(n).toLocaleString("pt-BR")}`;
 
 function Premio() {
+  const [openRegra, setOpenRegra] = useState(false);
   const total = premio.total_confirmado;
   const potencial = premio.total_confirmado + premio.total_pendente;
   const pct = Math.min(100, (total / premio.meta) * 100);
