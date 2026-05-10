@@ -49,6 +49,8 @@ function Home() {
         </div>
       </section>
 
+      <LanternaAviso />
+
       <section>
         <SectionHeader title="Próximos jogos" link="/app/jogos" />
         <div className="mt-4 space-y-3">
