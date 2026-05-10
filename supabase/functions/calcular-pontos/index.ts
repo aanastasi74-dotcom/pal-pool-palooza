@@ -17,7 +17,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-const REGRAS_DEFAULT = { exato: 25, resultado: 10, gols_vencedor: 5, dif_gols: 3, gols_time: 2 };
+const REGRAS_DEFAULT = { exato: 12, resultado: 4, gols_vencedor: 2, dif_gols: 2, gols_time: 1 };
 
 function calcularPontos(pc: number, pf: number, rc: number, rf: number, regras: any): number {
   if (pc === rc && pf === rf) return regras.exato;
