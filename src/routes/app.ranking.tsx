@@ -11,8 +11,13 @@ export const Route = createFileRoute("/app/ranking")({
 
 function Ranking() {
   const [filtroQuota, setFiltroQuota] = useState<string>("todos");
+  const [busca, setBusca] = useState("");
 
-  const lista = filtroQuota === "todos" ? ranking : ranking.filter((p) => p.id === filtroQuota);
+  const lista = ranking.filter((p) => {
+    if (filtroQuota !== "todos" && p.id !== filtroQuota) return false;
+    if (busca && !p.nome.toLowerCase().includes(busca.toLowerCase())) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -36,17 +41,26 @@ function Ranking() {
             </TooltipProvider>
           </p>
         </div>
-        <select
-          value={filtroQuota}
-          onChange={(e) => setFiltroQuota(e.target.value)}
-          className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold shadow-card"
-        >
-          <option value="todos">Ver quotas de… todos</option>
-          {ranking.map((p) => (
-            <option key={p.id} value={p.id}>{p.nome}</option>
-          ))}
-        </select>
+        <div className="flex flex-wrap gap-2">
+          <input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar peraba…"
+            className="rounded-full border border-border bg-card px-4 py-2 text-sm shadow-card"
+          />
+          <select
+            value={filtroQuota}
+            onChange={(e) => setFiltroQuota(e.target.value)}
+            className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold shadow-card"
+          >
+            <option value="todos">Ver quotas de… todos</option>
+            {ranking.map((p) => (
+              <option key={p.id} value={p.id}>{p.nome}</option>
+            ))}
+          </select>
+        </div>
       </div>
+      <p className="text-xs text-muted-foreground">{lista.length} de {ranking.length} perebas</p>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         {["Geral", "Diário", "Fase de grupos", "Mata-mata"].map((f, i) => (
