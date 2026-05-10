@@ -9,10 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as CadastroTokenRouteImport } from './routes/cadastro.$token'
 import { Route as AppSimuladorRouteImport } from './routes/app.simulador'
 import { Route as AppRankingRouteImport } from './routes/app.ranking'
 import { Route as AppQuotasRouteImport } from './routes/app.quotas'
@@ -37,9 +41,24 @@ import { Route as AppAdminConfiguracoesRouteImport } from './routes/app.admin.co
 import { Route as AppAdminBoletinsRouteImport } from './routes/app.admin.boletins'
 import { Route as AppAdminAuditoriaRouteImport } from './routes/app.admin.auditoria'
 
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ManutencaoRoute = ManutencaoRouteImport.update({
   id: '/manutencao',
   path: '/manutencao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -56,6 +75,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const CadastroTokenRoute = CadastroTokenRouteImport.update({
+  id: '/cadastro/$token',
+  path: '/cadastro/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppSimuladorRoute = AppSimuladorRouteImport.update({
   id: '/simulador',
@@ -176,7 +200,10 @@ const AppAdminAuditoriaRoute = AppAdminAuditoriaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
@@ -186,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
+  '/cadastro/$token': typeof CadastroTokenRoute
   '/app/': typeof AppIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
@@ -204,7 +232,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -213,6 +244,7 @@ export interface FileRoutesByTo {
   '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
+  '/cadastro/$token': typeof CadastroTokenRoute
   '/app': typeof AppIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
@@ -233,7 +265,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
   '/app/jogos': typeof AppJogosRoute
@@ -243,6 +278,7 @@ export interface FileRoutesById {
   '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
+  '/cadastro/$token': typeof CadastroTokenRoute
   '/app/': typeof AppIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
@@ -264,7 +300,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/esqueci-senha'
+    | '/login'
     | '/manutencao'
+    | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
     | '/app/jogos'
@@ -274,6 +313,7 @@ export interface FileRouteTypes {
     | '/app/quotas'
     | '/app/ranking'
     | '/app/simulador'
+    | '/cadastro/$token'
     | '/app/'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
@@ -292,7 +332,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/esqueci-senha'
+    | '/login'
     | '/manutencao'
+    | '/redefinir-senha'
     | '/app/boletins'
     | '/app/jogos'
     | '/app/palpites'
@@ -301,6 +344,7 @@ export interface FileRouteTypes {
     | '/app/quotas'
     | '/app/ranking'
     | '/app/simulador'
+    | '/cadastro/$token'
     | '/app'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
@@ -320,7 +364,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/esqueci-senha'
+    | '/login'
     | '/manutencao'
+    | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
     | '/app/jogos'
@@ -330,6 +377,7 @@ export interface FileRouteTypes {
     | '/app/quotas'
     | '/app/ranking'
     | '/app/simulador'
+    | '/cadastro/$token'
     | '/app/'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
@@ -350,16 +398,41 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  EsqueciSenhaRoute: typeof EsqueciSenhaRoute
+  LoginRoute: typeof LoginRoute
   ManutencaoRoute: typeof ManutencaoRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  CadastroTokenRoute: typeof CadastroTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/manutencao': {
       id: '/manutencao'
       path: '/manutencao'
       fullPath: '/manutencao'
       preLoaderRoute: typeof ManutencaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/esqueci-senha': {
+      id: '/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/esqueci-senha'
+      preLoaderRoute: typeof EsqueciSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -382,6 +455,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/cadastro/$token': {
+      id: '/cadastro/$token'
+      path: '/cadastro/$token'
+      fullPath: '/cadastro/$token'
+      preLoaderRoute: typeof CadastroTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/simulador': {
       id: '/app/simulador'
@@ -616,7 +696,11 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  EsqueciSenhaRoute: EsqueciSenhaRoute,
+  LoginRoute: LoginRoute,
   ManutencaoRoute: ManutencaoRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
+  CadastroTokenRoute: CadastroTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
