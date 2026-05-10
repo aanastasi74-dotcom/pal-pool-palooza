@@ -1,12 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { Trophy, Radio } from "lucide-react";
-import { premio } from "@/lib/mock-data";
+import { usePremio } from "@/lib/queries/premio";
 import { CountUp } from "./count-up";
 
 const fmtBRL = (n: number) => `R$ ${Math.round(n).toLocaleString("pt-BR")}`;
 
 export function PrizeBanner() {
-  const pct = Math.min(100, (premio.total_confirmado / premio.meta) * 100);
+  const { data: premio } = usePremio();
+  if (!premio) return null;
+  const pct = premio.meta > 0 ? Math.min(100, (premio.total_confirmado / premio.meta) * 100) : 0;
   const atualizado = new Date(premio.atualizado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   return (
     <Link
