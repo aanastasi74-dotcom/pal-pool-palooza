@@ -136,47 +136,32 @@ function JogosAdmin() {
 
 function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => void }) {
   const [j, setJ] = useState<any>({ ...jogo, data_local: new Date(jogo.data_jogo ?? Date.now()).toISOString().slice(0, 16) });
-  const create = useCreateMatch();
   const update = useUpdateMatch();
   const { data: teams = [] } = useTeams();
   const { data: stadiums = [] } = useStadiums();
-  const isNovo = !jogo.id;
   const isGrupos = j.fase === "grupos";
+  const stadium = stadiums.find((s) => s.id === j.stadium_id);
 
   const salvar = async () => {
     if (isGrupos && (!j.team_home_id || !j.team_away_id)) {
       toast.error("Em jogos de grupo, selecione os dois times.");
       return;
     }
-    if (!isGrupos && (!j.slot_casa || !j.slot_visitante)) {
-      toast.error("Em mata-mata, preencha os slots de casa e visitante.");
-      return;
-    }
     const home = teams.find((t) => t.id === j.team_home_id);
     const away = teams.find((t) => t.id === j.team_away_id);
-    const stadium = stadiums.find((s) => s.id === j.stadium_id);
     const payload: any = {
-      fase: j.fase,
       data_jogo: new Date(j.data_local).toISOString(),
       team_home_id: j.team_home_id || null,
       team_away_id: j.team_away_id || null,
-      stadium_id: j.stadium_id || null,
-      slot_casa: isGrupos ? null : j.slot_casa || null,
-      slot_visitante: isGrupos ? null : j.slot_visitante || null,
-      numero_jogo: j.numero_jogo ? Number(j.numero_jogo) : null,
       hora_definida: !!j.hora_definida,
-      // legacy text mirrors for backward compatibility
       casa: home?.nome_pt ?? j.slot_casa ?? j.casa ?? "",
       fora: away?.nome_pt ?? j.slot_visitante ?? j.fora ?? "",
-      estadio: stadium?.nome ?? j.estadio ?? null,
-      cidade: stadium?.cidade ?? j.cidade ?? null,
       peso: Number(j.peso ?? 10),
       status: j.status,
       placar_casa: j.status === "encerrado" && j.placar_casa !== "" && j.placar_casa != null ? Number(j.placar_casa) : null,
       placar_fora: j.status === "encerrado" && j.placar_fora !== "" && j.placar_fora != null ? Number(j.placar_fora) : null,
     };
-    if (isNovo) await create.mutateAsync(payload);
-    else await update.mutateAsync({ id: jogo.id, ...payload });
+    await update.mutateAsync({ id: jogo.id, ...payload });
     toast.success("Jogo salvo.");
     onClose();
   };
@@ -184,15 +169,13 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-lg space-y-3">
-        <DialogHeader><DialogTitle>{isNovo ? "Novo jogo" : "Editar jogo"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Editar jogo</DialogTitle></DialogHeader>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <Field label="Fase">
-            <select value={j.fase} onChange={(e) => setJ({ ...j, fase: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm">
-              {FASES.map((f) => <option key={f.v} value={f.v}>{f.l}</option>)}
-            </select>
+          <Field label="Fase (estrutural)">
+            <input value={faseLabel(j.fase)} readOnly className="w-full rounded-lg border border-border bg-muted/50 px-2 py-1 text-sm text-muted-foreground" />
           </Field>
-          <Field label="Número FIFA">
-            <input type="number" value={j.numero_jogo ?? ""} onChange={(e) => setJ({ ...j, numero_jogo: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+          <Field label="Número FIFA (estrutural)">
+            <input value={j.numero_jogo ?? "—"} readOnly className="w-full rounded-lg border border-border bg-muted/50 px-2 py-1 text-sm text-muted-foreground" />
           </Field>
           <Field label="Data/hora">
             <input type="datetime-local" value={j.data_local} onChange={(e) => setJ({ ...j, data_local: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
@@ -220,19 +203,32 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
             </>
           ) : (
             <>
-              <Field label="Slot casa">
-                <input value={j.slot_casa ?? ""} onChange={(e) => setJ({ ...j, slot_casa: e.target.value })} placeholder="ex: 1º Grupo F" className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+              <Field label="Slot casa (estrutural)">
+                <input value={j.slot_casa ?? "—"} readOnly className="w-full rounded-lg border border-border bg-muted/50 px-2 py-1 text-sm text-muted-foreground" />
               </Field>
-              <Field label="Slot visitante">
-                <input value={j.slot_visitante ?? ""} onChange={(e) => setJ({ ...j, slot_visitante: e.target.value })} placeholder="ex: Vencedor Jogo 73" className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+              <Field label="Slot visitante (estrutural)">
+                <input value={j.slot_visitante ?? "—"} readOnly className="w-full rounded-lg border border-border bg-muted/50 px-2 py-1 text-sm text-muted-foreground" />
+              </Field>
+              <Field label="Time da casa (mata-mata)">
+                <select value={j.team_home_id ?? ""} onChange={(e) => setJ({ ...j, team_home_id: e.target.value || null })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm">
+                  <option value="">— a definir —</option>
+                  {teams.map((t) => <option key={t.id} value={t.id}>{t.bandeira_emoji} {t.nome_pt}</option>)}
+                </select>
+              </Field>
+              <Field label="Time visitante (mata-mata)">
+                <select value={j.team_away_id ?? ""} onChange={(e) => setJ({ ...j, team_away_id: e.target.value || null })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm">
+                  <option value="">— a definir —</option>
+                  {teams.map((t) => <option key={t.id} value={t.id}>{t.bandeira_emoji} {t.nome_pt}</option>)}
+                </select>
               </Field>
             </>
           )}
-          <Field label="Estádio">
-            <select value={j.stadium_id ?? ""} onChange={(e) => setJ({ ...j, stadium_id: e.target.value || null })} className="col-span-2 w-full rounded-lg border border-border bg-background px-2 py-1 text-sm">
-              <option value="">— selecione —</option>
-              {stadiums.map((s) => <option key={s.id} value={s.id}>{s.nome} — {s.cidade}, {s.pais}</option>)}
-            </select>
+          <Field label="Estádio (estrutural)">
+            <input
+              value={stadium ? `${stadium.nome} — ${stadium.cidade}, ${stadium.pais}` : (j.estadio ?? "—")}
+              readOnly
+              className="col-span-2 w-full rounded-lg border border-border bg-muted/50 px-2 py-1 text-sm text-muted-foreground"
+            />
           </Field>
           <Field label="Peso">
             <input type="number" value={j.peso ?? 10} onChange={(e) => setJ({ ...j, peso: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
