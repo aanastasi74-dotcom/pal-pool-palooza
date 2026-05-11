@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Lock, Radio, CalendarSearch } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
