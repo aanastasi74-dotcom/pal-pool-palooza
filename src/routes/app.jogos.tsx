@@ -35,6 +35,7 @@ function travaEm(iso?: string | null) {
 }
 
 function Jogos() {
+  const navigate = useNavigate();
   const [filtro, setFiltro] = useState("Todos");
   const { data: matches = [], isLoading } = useMatches();
   const { data: quotas = [] } = useMinhasQuotas();
@@ -150,7 +151,10 @@ function Jogos() {
                           trava em {trava}
                         </span>
                       )}
-                      <button className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
+                      <button
+                        onClick={() => navigate({ to: "/app/palpites", search: { match_id: j.id } as any })}
+                        className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
+                      >
                         {pred ? "Editar" : "Palpitar"}
                       </button>
                     </div>
