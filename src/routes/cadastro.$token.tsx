@@ -2,9 +2,10 @@ import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Trophy } from "lucide-react";
+import { Trophy, Check, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { useCheckApelido } from "@/lib/queries/public-profile";
 
 export const Route = createFileRoute("/cadastro/$token")({
   head: () => ({ meta: [{ title: "Aceitar convite — Bolão dos Perebas" }] }),
@@ -123,15 +124,7 @@ function CadastroPage() {
               className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
             />
           </div>
-          <div>
-            <label className="text-xs font-semibold">Apelido (até 8 letras)</label>
-            <input
-              value={apelido}
-              onChange={(e) => setApelido(e.target.value.toUpperCase())}
-              maxLength={8}
-              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            />
-          </div>
+          <ApelidoField apelido={apelido} setApelido={setApelido} />
           <div>
             <label className="text-xs font-semibold">Senha</label>
             <input
