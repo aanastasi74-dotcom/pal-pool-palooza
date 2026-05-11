@@ -14,7 +14,7 @@ export function useTeams() {
   return useQuery({
     queryKey: ["teams"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("teams")
         .select("*")
         .order("grupo", { ascending: true })
