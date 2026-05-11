@@ -158,6 +158,8 @@ function Configuracoes() {
               </div>
             </AccordionContent>
           </AccordionItem>
+
+          <AccordionItem value="backup">
             <AccordionTrigger>Backup e snapshot</AccordionTrigger>
             <AccordionContent className="space-y-3">
               <p className="text-xs text-muted-foreground">
