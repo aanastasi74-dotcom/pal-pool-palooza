@@ -158,11 +158,18 @@ export type Database = {
           estadio: string | null
           fase: string
           fora: string
+          hora_definida: boolean
           id: string
+          numero_jogo: number | null
           peso: number
           placar_casa: number | null
           placar_fora: number | null
+          slot_casa: string | null
+          slot_visitante: string | null
+          stadium_id: string | null
           status: string
+          team_away_id: string | null
+          team_home_id: string | null
           travado_em: string | null
         }
         Insert: {
@@ -173,11 +180,18 @@ export type Database = {
           estadio?: string | null
           fase: string
           fora: string
+          hora_definida?: boolean
           id?: string
+          numero_jogo?: number | null
           peso?: number
           placar_casa?: number | null
           placar_fora?: number | null
+          slot_casa?: string | null
+          slot_visitante?: string | null
+          stadium_id?: string | null
           status?: string
+          team_away_id?: string | null
+          team_home_id?: string | null
           travado_em?: string | null
         }
         Update: {
@@ -188,14 +202,43 @@ export type Database = {
           estadio?: string | null
           fase?: string
           fora?: string
+          hora_definida?: boolean
           id?: string
+          numero_jogo?: number | null
           peso?: number
           placar_casa?: number | null
           placar_fora?: number | null
+          slot_casa?: string | null
+          slot_visitante?: string | null
+          stadium_id?: string | null
           status?: string
+          team_away_id?: string | null
+          team_home_id?: string | null
           travado_em?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "matches_stadium_id_fkey"
+            columns: ["stadium_id"]
+            isOneToOne: false
+            referencedRelation: "stadiums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_team_away_id_fkey"
+            columns: ["team_away_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_team_home_id_fkey"
+            columns: ["team_home_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
@@ -518,11 +561,69 @@ export type Database = {
           },
         ]
       }
+      stadiums: {
+        Row: {
+          cidade: string
+          created_at: string | null
+          fuso_horario: string
+          id: string
+          nome: string
+          pais: string
+        }
+        Insert: {
+          cidade: string
+          created_at?: string | null
+          fuso_horario: string
+          id?: string
+          nome: string
+          pais: string
+        }
+        Update: {
+          cidade?: string
+          created_at?: string | null
+          fuso_horario?: string
+          id?: string
+          nome?: string
+          pais?: string
+        }
+        Relationships: []
+      }
+      teams: {
+        Row: {
+          bandeira_emoji: string
+          bracket_position: string
+          confederacao: string | null
+          created_at: string | null
+          grupo: string
+          id: string
+          nome_pt: string
+        }
+        Insert: {
+          bandeira_emoji: string
+          bracket_position: string
+          confederacao?: string | null
+          created_at?: string | null
+          grupo: string
+          id?: string
+          nome_pt: string
+        }
+        Update: {
+          bandeira_emoji?: string
+          bracket_position?: string
+          confederacao?: string | null
+          created_at?: string | null
+          grupo?: string
+          id?: string
+          nome_pt?: string
+        }
+        Relationships: []
+      }
       top4_predictions: {
         Row: {
           alterado_em: string | null
           fase_alteracao: string | null
           id: string
+          peso_no_palpite: number
           posicao_1: string | null
           posicao_2: string | null
           posicao_3: string | null
@@ -533,6 +634,7 @@ export type Database = {
           alterado_em?: string | null
           fase_alteracao?: string | null
           id?: string
+          peso_no_palpite?: number
           posicao_1?: string | null
           posicao_2?: string | null
           posicao_3?: string | null
@@ -543,6 +645,7 @@ export type Database = {
           alterado_em?: string | null
           fase_alteracao?: string | null
           id?: string
+          peso_no_palpite?: number
           posicao_1?: string | null
           posicao_2?: string | null
           posicao_3?: string | null
@@ -585,7 +688,24 @@ export type Database = {
           status: string
         }[]
       }
+      get_peso_top4_atual: { Args: never; Returns: number }
+      get_ranking_geral: {
+        Args: never
+        Returns: {
+          apelido: string
+          cor: string
+          exatos: number
+          nome: string
+          numero: number
+          pontos: number
+          posicao: number
+          quota_id: string
+          resultados: number
+          user_id: string
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
+      pode_criar_quota: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
