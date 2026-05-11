@@ -22,12 +22,13 @@ function QuotasPage() {
   const navigate = useNavigate();
   const { data: quotas = [], isLoading } = useMinhasQuotas();
   const { data: totalQuotas = 0 } = useTotalQuotas();
+  const { data: podeCriar = true } = usePodeCriarQuota();
   const createQuota = useCreateQuota();
 
   const handleCreate = () => {
     createQuota.mutate(undefined, {
       onSuccess: (q: any) => navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } }),
-      onError: () => toast.error("Não conseguimos criar a quota agora."),
+      onError: (e: any) => toast.error(e?.message ?? "Não conseguimos criar a quota agora."),
     });
   };
 
@@ -38,14 +39,23 @@ function QuotasPage() {
           <h1 className="font-display text-3xl font-extrabold">Minhas quotas</h1>
           <p className="mt-1 text-sm text-muted-foreground">Cada quota é um time independente no bolão.</p>
         </div>
-        <button
-          onClick={handleCreate}
-          disabled={createQuota.isPending}
-          className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
-        >
-          <Plus className="h-4 w-4" /> {createQuota.isPending ? "Criando…" : "Comprar nova quota"}
-        </button>
+        {podeCriar ? (
+          <button
+            onClick={handleCreate}
+            disabled={createQuota.isPending}
+            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+          >
+            <Plus className="h-4 w-4" /> {createQuota.isPending ? "Criando…" : "Comprar nova quota"}
+          </button>
+        ) : null}
       </div>
+
+      {!podeCriar && (
+        <div className="flex items-start gap-2 rounded-2xl border border-border bg-muted/40 p-4 text-xs">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+          <p><b>Quotas encerradas</b> — a Copa já começou. Boa sorte aos perebas inscritos! 🍀</p>
+        </div>
+      )}
 
       {isLoading ? (
         <Skeleton className="h-40 w-full" />
