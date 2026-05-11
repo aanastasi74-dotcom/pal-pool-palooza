@@ -675,6 +675,10 @@ export type Database = {
         Args: { p_role: string; p_user_id: string }
         Returns: undefined
       }
+      check_apelido_disponivel: {
+        Args: { p_apelido: string }
+        Returns: boolean
+      }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
       fase_atual_copa: { Args: never; Returns: string }
       get_invite_by_token: {
@@ -688,7 +692,56 @@ export type Database = {
           status: string
         }[]
       }
+      get_palpites_publicos_jogos: {
+        Args: { p_user_id: string }
+        Returns: {
+          casa: string
+          data_jogo: string
+          fase: string
+          fora: string
+          match_id: string
+          numero_jogo: number
+          placar_casa_palpite: number
+          placar_casa_real: number
+          placar_fora_palpite: number
+          placar_fora_real: number
+          pontos: number
+          quota_numero: number
+          slot_casa: string
+          slot_visitante: string
+          status: string
+          team_away_id: string
+          team_home_id: string
+        }[]
+      }
+      get_palpites_publicos_top4: {
+        Args: { p_user_id: string }
+        Returns: {
+          alterado_em: string
+          fase_alteracao: string
+          posicao_1: string
+          posicao_2: string
+          posicao_3: string
+          posicao_4: string
+          quota_numero: number
+        }[]
+      }
       get_peso_top4_atual: { Args: never; Returns: number }
+      get_ranking_diario: {
+        Args: { data_referencia?: string }
+        Returns: {
+          apelido: string
+          cor: string
+          exatos: number
+          nome: string
+          numero: number
+          pontos: number
+          posicao: number
+          quota_id: string
+          resultados: number
+          user_id: string
+        }[]
+      }
       get_ranking_geral: {
         Args: never
         Returns: {

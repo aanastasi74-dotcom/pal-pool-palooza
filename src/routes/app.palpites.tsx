@@ -113,7 +113,7 @@ function Palpites() {
         </div>
       ) : (
         <Link
-          to="/app/palpites_/top4"
+          to="/app/palpites/top4"
           className="flex items-center justify-between rounded-3xl border border-accent/40 bg-gold p-5 text-gold-foreground shadow-card transition hover:scale-[1.01]"
         >
           <div className="flex items-center gap-3">
