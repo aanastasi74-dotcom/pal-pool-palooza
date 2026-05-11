@@ -107,7 +107,7 @@ function PremiacaoAdmin() {
 
 function PainelLanterna() {
   const { data: ranking } = useRanking();
-  const list = (ranking ?? []).map((q: any) => ({
+  const list: { id: string; nome: string; pontos: number; palpites_validos: number; palpites_possiveis: number }[] = (ranking ?? []).map((q: any) => ({
     id: q.id,
     nome: q.profile?.nome ?? "—",
     pontos: q.pontos ?? 0,

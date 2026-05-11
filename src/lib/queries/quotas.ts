@@ -21,7 +21,11 @@ export function useCreateQuota() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async () => {
-      // pega próximo número
+      const { data: pode, error: errPode } = await (supabase as any).rpc("pode_criar_quota");
+      if (errPode) throw errPode;
+      if (pode === false) {
+        throw new Error("As quotas foram encerradas — a Copa já começou. Boa sorte aos perebas inscritos! 🍀");
+      }
       const { data: existing } = await supabase
         .from("quotas").select("numero").eq("user_id", user!.id).order("numero", { ascending: false }).limit(1);
       const next = (existing?.[0]?.numero ?? 0) + 1;

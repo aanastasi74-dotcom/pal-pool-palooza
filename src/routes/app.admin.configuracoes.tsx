@@ -17,6 +17,8 @@ const defaultPix = { chave: "", banco: "", titular: "", instrucoes: "", valor_qu
 const defaultScore = { exato: 12, resultado: 4, gols_vencedor: 2, dif_gols: 2, gols_time: 1 };
 const defaultPeso = { inicial: 10, incremento_dia: 1, final: 50 };
 const defaultBoletim = { hora_envio: "22:00", auto_geracao: true };
+const defaultLanterninha = { engajamento_minimo: 0.8, pontos_minimos: 200 };
+const defaultCopaStart = "2026-06-11T20:00:00Z";
 
 function Configuracoes() {
   const { data: settings } = useSettings();
@@ -27,6 +29,8 @@ function Configuracoes() {
   const [score, setScore] = useState<any>(defaultScore);
   const [peso, setPeso] = useState<any>(defaultPeso);
   const [boletim, setBoletim] = useState<any>(defaultBoletim);
+  const [lanterninha, setLanterninha] = useState<any>(defaultLanterninha);
+  const [copaStart, setCopaStart] = useState<string>(defaultCopaStart);
 
   useEffect(() => {
     if (!settings) return;
@@ -34,6 +38,13 @@ function Configuracoes() {
     setScore({ ...defaultScore, ...(settings.score_rules ?? {}) });
     setPeso({ ...defaultPeso, ...(settings.peso_progressivo ?? {}) });
     setBoletim({ ...defaultBoletim, ...(settings.boletim_config ?? {}) });
+    setLanterninha({ ...defaultLanterninha, ...(settings.lanterninha_rule ?? {}) });
+    if (settings.copa_start_date) {
+      const raw = typeof settings.copa_start_date === "string" ? settings.copa_start_date : String(settings.copa_start_date);
+      try {
+        setCopaStart(new Date(raw).toISOString().slice(0, 16));
+      } catch { setCopaStart(raw.slice(0, 16)); }
+    }
   }, [settings]);
 
   const salvar = async () => {
@@ -42,6 +53,8 @@ function Configuracoes() {
       update.mutateAsync({ key: "score_rules", value: score }),
       update.mutateAsync({ key: "peso_progressivo", value: peso }),
       update.mutateAsync({ key: "boletim_config", value: boletim }),
+      update.mutateAsync({ key: "lanterninha_rule", value: lanterninha }),
+      update.mutateAsync({ key: "copa_start_date", value: new Date(copaStart).toISOString() }),
     ]);
     toast.success("Configurações salvas, peraba-admin.");
   };
@@ -116,6 +129,32 @@ function Configuracoes() {
               <div className="flex items-center justify-between">
                 <span className="text-sm">Geração automática</span>
                 <Switch checked={!!boletim.auto_geracao} onCheckedChange={(v) => setBoletim({ ...boletim, auto_geracao: v })} />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="copa">
+            <AccordionTrigger>Copa 2026 e lanterninha</AccordionTrigger>
+            <AccordionContent className="space-y-3">
+              <Field
+                label="Data e hora de início da Copa (após isso, ninguém compra mais quota)"
+                type="datetime-local"
+                value={copaStart}
+                onChange={(v) => setCopaStart(v)}
+              />
+              <div className="grid gap-3 md:grid-cols-2">
+                <Field
+                  label="Engajamento mínimo lanterninha (0 a 1)"
+                  type="number"
+                  value={String(lanterninha.engajamento_minimo)}
+                  onChange={(v) => setLanterninha({ ...lanterninha, engajamento_minimo: Number(v) })}
+                />
+                <Field
+                  label="Pontos mínimos lanterninha"
+                  type="number"
+                  value={String(lanterninha.pontos_minimos)}
+                  onChange={(v) => setLanterninha({ ...lanterninha, pontos_minimos: Number(v) })}
+                />
               </div>
             </AccordionContent>
           </AccordionItem>

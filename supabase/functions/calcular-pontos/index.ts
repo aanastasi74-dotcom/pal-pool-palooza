@@ -104,6 +104,9 @@ Deno.serve(async (req) => {
       `matches?travado_em=not.is.null&travado_em=lte.${new Date().toISOString()}&select=id`,
     )).length;
 
+    const lantSettings = await sb(`settings?key=eq.lanterninha_rule&select=value`);
+    const lantRule = lantSettings[0]?.value ?? { engajamento_minimo: 0.8, pontos_minimos: 200 };
+
     let quotasCount = 0;
     const totaisPontos: { id: string; pontos: number }[] = [];
     for (const q of quotas) {
@@ -114,7 +117,7 @@ Deno.serve(async (req) => {
       const validos = allPreds.filter((x: any) => x.submetido_em != null).length;
       const possiveis = totalMatchesTravados;
       const engajamento = possiveis > 0 ? validos / possiveis : 0;
-      const elegivel = engajamento >= 0.8 && pontos >= 200;
+      const elegivel = engajamento >= lantRule.engajamento_minimo && pontos >= lantRule.pontos_minimos;
       await sb(`quotas?id=eq.${q.id}`, {
         method: "PATCH",
         body: JSON.stringify({

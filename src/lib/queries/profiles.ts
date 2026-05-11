@@ -77,26 +77,21 @@ export function useRanking() {
   return useQuery({
     queryKey: ["ranking"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("quotas")
-        .select("id, numero, pontos, posicao, palpites_validos, palpites_possiveis, elegivel_lanterna, user_id, profile:profiles!quotas_user_id_fkey(id, nome, apelido, cor)")
-        .eq("status", "ativa")
-        .order("pontos", { ascending: false });
-      // join may fail if no FK alias; fallback to manual join
-      if (error) {
-        const { data: quotas, error: e2 } = await supabase
-          .from("quotas").select("*").eq("status", "ativa").order("pontos", { ascending: false });
-        if (e2) throw e2;
-        const ids = Array.from(new Set((quotas ?? []).map((q) => q.user_id)));
-        const { data: profs } = await supabase.from("profiles").select("*").in("id", ids);
-        const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
-        return (quotas ?? []).map((q, i) => ({
-          ...q,
-          posicao: q.posicao ?? i + 1,
-          profile: pmap.get(q.user_id) ?? null,
-        }));
-      }
-      return (data ?? []).map((q: any, i) => ({ ...q, posicao: q.posicao ?? i + 1 }));
+      const { data, error } = await (supabase as any).rpc("get_ranking_geral");
+      if (error) throw error;
+      return (data ?? []).map((r: any) => ({
+        id: r.quota_id,
+        user_id: r.user_id,
+        numero: r.numero,
+        pontos: r.pontos,
+        exatos: r.exatos,
+        resultados: r.resultados,
+        posicao: r.posicao,
+        palpites_validos: 0,
+        palpites_possiveis: 0,
+        elegivel_lanterna: false,
+        profile: { id: r.user_id, nome: r.nome, apelido: r.apelido, cor: r.cor },
+      }));
     },
   });
 }
