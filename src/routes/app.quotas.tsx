@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Plus, CheckCircle2, AlertCircle, Lightbulb, ListChecks } from "lucide-react";
+import { Plus, CheckCircle2, AlertCircle, Lightbulb, ListChecks, Lock } from "lucide-react";
 import { estaNosUltimos25, isElegivelLanterna, razaoNaoElegivel } from "@/lib/lanterninha";
 import { useMinhasQuotas, useCreateQuota, useTotalQuotas } from "@/lib/queries/quotas";
+import { usePodeCriarQuota } from "@/lib/queries/copa";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { toast } from "sonner";
