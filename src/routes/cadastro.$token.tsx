@@ -41,6 +41,7 @@ function CadastroPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [apelidoStatus, setApelidoStatus] = useState<"idle" | "checking" | "ok" | "taken">("idle");
 
   useEffect(() => {
     (async () => {
@@ -124,7 +125,7 @@ function CadastroPage() {
               className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
             />
           </div>
-          <ApelidoField apelido={apelido} setApelido={setApelido} />
+          <ApelidoField apelido={apelido} setApelido={setApelido} onStatus={setApelidoStatus} />
           <div>
             <label className="text-xs font-semibold">Senha</label>
             <input
@@ -147,13 +148,53 @@ function CadastroPage() {
           </div>
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || apelidoStatus === "checking" || apelidoStatus === "taken"}
             className="w-full rounded-full bg-primary py-2 text-sm font-bold text-primary-foreground disabled:opacity-50"
           >
             {submitting ? "Criando…" : "Entrar no bolão"}
           </button>
         </form>
       </div>
+    </div>
+  );
+}
+
+function ApelidoField({
+  apelido,
+  setApelido,
+  onStatus,
+}: {
+  apelido: string;
+  setApelido: (v: string) => void;
+  onStatus: (s: "idle" | "checking" | "ok" | "taken") => void;
+}) {
+  const { data: disponivel, isFetching } = useCheckApelido(apelido);
+  useEffect(() => {
+    if (apelido.trim().length < 2) onStatus("idle");
+    else if (isFetching) onStatus("checking");
+    else if (disponivel === true) onStatus("ok");
+    else if (disponivel === false) onStatus("taken");
+  }, [apelido, isFetching, disponivel, onStatus]);
+
+  return (
+    <div>
+      <label className="text-xs font-semibold">Apelido (até 8 letras)</label>
+      <div className="relative">
+        <input
+          value={apelido}
+          onChange={(e) => setApelido(e.target.value.toUpperCase())}
+          maxLength={8}
+          className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 pr-9 text-sm"
+        />
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+          {apelido.trim().length >= 2 && isFetching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          {!isFetching && disponivel === true && <Check className="h-4 w-4 text-success" />}
+          {!isFetching && disponivel === false && <X className="h-4 w-4 text-destructive" />}
+        </div>
+      </div>
+      {!isFetching && disponivel === false && (
+        <p className="mt-1 text-xs text-destructive">Esse apelido já está em uso, escolhe outro.</p>
+      )}
     </div>
   );
 }
