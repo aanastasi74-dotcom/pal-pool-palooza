@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { times } from "@/lib/mock-data";
+import { useMemo, useState } from "react";
 import { Lock, Radio, CalendarSearch } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useMatches } from "@/lib/queries/matches";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyPredictions } from "@/lib/queries/predictions";
+import { useTeams } from "@/lib/queries/teams";
+import { useStadiums } from "@/lib/queries/stadiums";
 import { Skeleton } from "@/components/ui/skeleton";
+import { buildHeader, getTeamSide } from "@/lib/match-helpers";
 
 export const Route = createFileRoute("/app/jogos")({
   head: () => ({ meta: [{ title: "Jogos — Bolão dos Perebas" }] }),
