@@ -19,11 +19,22 @@ export const Route = createFileRoute("/app/palpites_/top4")({
 const candidatos = ["BRA", "ARG", "FRA", "ESP", "ALE", "ING", "POR", "HOL", "URU"];
 
 function bannerCls(fase: string, bloqueada: boolean) {
-  if (bloqueada) return "border-muted-foreground/40 bg-muted text-muted-foreground";
+  if (bloqueada) return "border-destructive/40 bg-destructive/10 text-destructive";
   if (fase === "antes_copa") return "border-success/40 bg-success/10 text-success";
   if (fase === "grupos") return "border-accent/40 bg-gold text-gold-foreground";
-  if (fase === "round_32") return "border-orange-500/40 bg-orange-500/10 text-orange-700";
-  return "border-border bg-card";
+  if (fase === "round_32" || fase === "round_of_32") return "border-orange-500/40 bg-orange-500/10 text-orange-700";
+  return "border-destructive/40 bg-destructive/10 text-destructive";
+}
+
+function bannerTexto(fase: string, bloqueada: boolean, lockData?: string | null) {
+  if (bloqueada) {
+    const dt = lockData ? new Date(lockData).toLocaleDateString("pt-BR") : "—";
+    return `Palpites travados desde ${dt}. Boa sorte com suas escolhas, pereba!`;
+  }
+  if (fase === "antes_copa") return "Perebada, a Copa ainda não começou — cada acerto aqui vale 1000 pontos. Potencial máximo: 4000 pts";
+  if (fase === "grupos") return "Atenção pereba, já estamos na fase de grupos! Se mudar palpite agora, cada acerto vale só 500 pts";
+  if (fase === "round_32" || fase === "round_of_32") return "Olho vivo pereba, estamos no Round of 32 — última chance de mudar, mas cada acerto valerá só 250 pts";
+  return "Palpites do Top 4 já travados.";
 }
 
 function Top4Page() {
@@ -104,9 +115,9 @@ function Top4Page() {
         <div className="flex items-start gap-3">
           {bloqueada ? <Lock className="mt-1 h-5 w-5" /> : <Sparkles className="mt-1 h-5 w-5" />}
           <div>
-            <p className="font-display font-bold">Estamos em: {regra.label}</p>
-            <p className="text-xs">
-              Eficácia agora: <span className="font-bold">{regra.eficacia}%</span> · potencial máximo <span className="font-bold">{regra.max_pontos.toLocaleString("pt-BR")} pts</span>
+            <p className="font-display font-bold">{bannerTexto(faseAtual, bloqueada, top4?.alterado_em)}</p>
+            <p className="mt-1 text-xs opacity-80">
+              Estamos em: <strong>{regra.label}</strong> · eficácia <strong>{regra.eficacia}%</strong> · potencial máx. <strong>{regra.max_pontos.toLocaleString("pt-BR")} pts</strong>
             </p>
           </div>
         </div>

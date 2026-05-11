@@ -49,6 +49,17 @@ function Palpites() {
     if (!quotaId && quotas.length) setQuotaId(quotas[0].id);
   }, [quotas, quotaId]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const matchId = new URLSearchParams(window.location.search).get("match_id");
+    if (!matchId) return;
+    const t = setTimeout(() => {
+      const el = document.getElementById(`match-${matchId}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [matches]);
+
   const { data: preds = [] } = useMyPredictions(quotaId);
   const { data: top4 } = useMyTop4(quotaId);
   const { data: faseAtual = "antes_copa" } = useFaseAtual();
@@ -113,7 +124,7 @@ function Palpites() {
         </div>
       ) : (
         <Link
-          to="/app/palpites_/top4"
+          to="/app/palpites/top4"
           className="flex items-center justify-between rounded-3xl border border-accent/40 bg-gold p-5 text-gold-foreground shadow-card transition hover:scale-[1.01]"
         >
           <div className="flex items-center gap-3">
@@ -225,7 +236,7 @@ function PalpiteCard({
   };
 
   return (
-    <article className="rounded-2xl border border-border bg-card p-5 shadow-card">
+    <article id={`match-${jogo.id}`} className="rounded-2xl border border-border bg-card p-5 shadow-card">
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="font-semibold">{header}</span>
         <span className="flex items-center gap-2">

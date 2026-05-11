@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowDown, ArrowUp, Minus, Trophy, Info, Users } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRanking } from "@/lib/queries/profiles";
+import { useRankingDiario } from "@/lib/queries/public-profile";
 import { useAuth } from "@/lib/auth-context";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,23 +13,25 @@ export const Route = createFileRoute("/app/ranking")({
   component: Ranking,
 });
 
+type Tab = "geral" | "diario";
+
 function Ranking() {
   const { user } = useAuth();
-  const { data: ranking = [], isLoading } = useRanking();
-  const [filtroQuota, setFiltroQuota] = useState<string>("todos");
+  const [tab, setTab] = useState<Tab>("geral");
   const [busca, setBusca] = useState("");
+  const geral = useRanking();
+  const diario = useRankingDiario();
+  const active = tab === "geral" ? geral : diario;
+  const isLoading = active.isLoading;
 
   type Row = { id: string; user_id: string; pontos: number; numero: number; profile?: { nome?: string; apelido?: string; cor?: string } | null };
-  const rows = ranking as Row[];
+  const rows = (active.data ?? []) as Row[];
 
   const lista = rows.filter((p) => {
     const nome = p.profile?.nome ?? "";
-    if (filtroQuota !== "todos" && p.user_id !== filtroQuota) return false;
     if (busca && !nome.toLowerCase().includes(busca.toLowerCase())) return false;
     return true;
   });
-
-  const usuariosUnicos = Array.from(new Map(rows.map((r) => [r.user_id, r.profile?.nome ?? "—"])).entries());
 
   return (
     <div className="space-y-6">
@@ -52,36 +55,25 @@ function Ranking() {
             </TooltipProvider>
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar peraba…"
-            className="rounded-full border border-border bg-card px-4 py-2 text-sm shadow-card"
-          />
-          <select
-            value={filtroQuota}
-            onChange={(e) => setFiltroQuota(e.target.value)}
-            className="rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold shadow-card"
-          >
-            <option value="todos">Ver quotas de… todos</option>
-            {usuariosUnicos.map(([uid, nome]) => (
-              <option key={uid} value={uid}>{nome}</option>
-            ))}
-          </select>
-        </div>
+        <input
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Buscar peraba…"
+          className="rounded-full border border-border bg-card px-4 py-2 text-sm shadow-card"
+        />
       </div>
       <p className="text-xs text-muted-foreground">{lista.length} de {rows.length} quotas</p>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {["Geral", "Diário", "Fase de grupos", "Mata-mata"].map((f, i) => (
+        {(["geral", "diario"] as Tab[]).map((t) => (
           <button
-            key={f}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold ${
-              i === 0 ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
+            key={t}
+            onClick={() => setTab(t)}
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition ${
+              tab === t ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
             }`}
           >
-            {f}
+            {t === "geral" ? "Geral" : "Diário (hoje)"}
           </button>
         ))}
       </div>
@@ -89,7 +81,7 @@ function Ranking() {
       {isLoading ? (
         <Skeleton className="h-64 w-full" />
       ) : rows.length === 0 ? (
-        <EmptyState icon={Users} title="Ranking ainda vazio" description="Ninguém na perebada palpitou ainda. Vamos lá." />
+        <EmptyState icon={Users} title="Ranking ainda vazio" description={tab === "diario" ? "Nenhum jogo encerrado hoje ainda." : "Ninguém na perebada palpitou ainda. Vamos lá."} />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
           {lista.map((p, i) => {
@@ -115,13 +107,16 @@ function Ranking() {
                   {apelido}
                 </div>
                 <div className="flex-1">
-                  <p className="font-display font-bold">
+                  <Link
+                    to="/app/pereba/$user_id"
+                    params={{ user_id: p.user_id }}
+                    className="font-display font-bold hover:underline"
+                  >
                     {nome}
                     {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
-                  </p>
+                  </Link>
                   <p className="text-xs text-muted-foreground">Quota #{p.numero}</p>
                 </div>
-                {isMe && <Sparkline values={[3, 3, 3, 3, 3]} />}
                 <div className="text-right">
                   <p className="font-display text-lg font-bold">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
                   <Variacao v={0} />
@@ -132,20 +127,6 @@ function Ranking() {
         </div>
       )}
     </div>
-  );
-}
-
-function Sparkline({ values }: { values: number[] }) {
-  const max = Math.max(...values);
-  const w = 60, h = 24;
-  const step = w / (values.length - 1);
-  const points = values
-    .map((v, i) => `${i * step},${h - ((max - v) / (max || 1)) * h}`)
-    .join(" ");
-  return (
-    <svg width={w} height={h} className="hidden text-primary sm:block">
-      <polyline points={points} fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
   );
 }
 

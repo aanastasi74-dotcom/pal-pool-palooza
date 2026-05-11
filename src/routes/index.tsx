@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import heroImg from "@/assets/hero-bolao.jpg";
 import { Trophy, Users, Wallet, Sparkles, Calendar, ListOrdered, ShieldCheck, Smartphone } from "lucide-react";
+import { HomeMatchCarousel } from "@/components/home-match-carousel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -74,30 +75,7 @@ function Landing() {
             </div>
           </div>
           <div className="relative">
-            <div className="absolute -inset-6 rounded-3xl bg-white/10 blur-2xl" />
-            <div className="relative rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl shadow-glow">
-              <div className="flex items-center justify-between text-xs uppercase tracking-widest text-white/70">
-                <span>Próximo jogo</span>
-                <span className="flex items-center gap-1 rounded-full bg-destructive/90 px-2 py-0.5 text-[10px] font-bold text-destructive-foreground">
-                  AO VIVO
-                </span>
-              </div>
-              <div className="mt-4 flex items-center justify-between">
-                <TeamBadge flag="🇧🇷" name="Brasil" />
-                <div className="text-center">
-                  <p className="font-display text-4xl font-black">2 - 0</p>
-                  <p className="mt-1 text-[10px] uppercase tracking-widest text-white/60">2º tempo · 67'</p>
-                </div>
-                <TeamBadge flag="🇵🇹" name="Portugal" right />
-              </div>
-              <div className="mt-5 rounded-2xl bg-black/25 p-4">
-                <p className="text-xs text-white/70">Seu palpite</p>
-                <p className="mt-1 font-display text-lg font-bold">3 × 1 · peso 12</p>
-                <div className="mt-2 flex items-center gap-2 text-xs text-accent">
-                  <Sparkles className="h-3.5 w-3.5" /> Resultado correto garantido (+48 pts)
-                </div>
-              </div>
-            </div>
+            <HomeMatchCarousel />
           </div>
         </div>
       </section>
@@ -171,15 +149,6 @@ function Landing() {
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
         © 2026 Bolão dos Perebas · Feito com 💛💚 pra Copa do Mundo
       </footer>
-    </div>
-  );
-}
-
-function TeamBadge({ flag, name, right }: { flag: string; name: string; right?: boolean }) {
-  return (
-    <div className={`flex flex-col items-center gap-2 ${right ? "text-right" : ""}`}>
-      <div className="grid h-14 w-14 place-items-center rounded-full bg-white text-3xl shadow-glow">{flag}</div>
-      <p className="text-sm font-bold">{name}</p>
     </div>
   );
 }

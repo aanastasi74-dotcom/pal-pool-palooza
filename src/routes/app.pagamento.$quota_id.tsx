@@ -106,6 +106,13 @@ function Pagamento() {
         </div>
       </section>
 
+      <div className="rounded-2xl border-2 border-accent/60 bg-gold/30 p-4 text-sm text-gold-foreground shadow-card">
+        <p className="font-bold">⚠️ Não esqueça, pereba!</p>
+        <p className="mt-1 text-foreground">
+          Após pagar, anexe o comprovante aqui no app. A quota só conta após aprovação manual de um admin.
+        </p>
+      </div>
+
       <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
         <h2 className="font-display text-lg font-bold">Enviar comprovante</h2>
         <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-secondary px-6 py-10 text-center transition hover:border-primary">

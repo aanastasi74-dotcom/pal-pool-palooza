@@ -29,6 +29,7 @@ import { Route as AppEstadiosRouteImport } from './routes/app.estadios'
 import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
+import { Route as AppPerebaUser_idRouteImport } from './routes/app.pereba.$user_id'
 import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4'
 import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
 import { Route as AppAdminSaudeRouteImport } from './routes/app.admin.saude'
@@ -143,6 +144,11 @@ const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppPerebaUser_idRoute = AppPerebaUser_idRouteImport.update({
+  id: '/pereba/$user_id',
+  path: '/pereba/$user_id',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPalpitesTop4Route = AppPalpitesTop4RouteImport.update({
   id: '/palpites_/top4',
   path: '/palpites/top4',
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
+  '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/admin/': typeof AppAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
+  '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/admin': typeof AppAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites_/top4': typeof AppPalpitesTop4Route
+  '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/admin/': typeof AppAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -348,6 +357,7 @@ export interface FileRouteTypes {
     | '/app/admin/saude'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
+    | '/app/pereba/$user_id'
     | '/app/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/app/admin/saude'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
+    | '/app/pereba/$user_id'
     | '/app/admin'
   id:
     | '__root__'
@@ -416,6 +427,7 @@ export interface FileRouteTypes {
     | '/app/admin/saude'
     | '/app/pagamento/$quota_id'
     | '/app/palpites_/top4'
+    | '/app/pereba/$user_id'
     | '/app/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -571,6 +583,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminIndexRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/pereba/$user_id': {
+      id: '/app/pereba/$user_id'
+      path: '/pereba/$user_id'
+      fullPath: '/app/pereba/$user_id'
+      preLoaderRoute: typeof AppPerebaUser_idRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/palpites_/top4': {
       id: '/app/palpites_/top4'
       path: '/palpites/top4'
@@ -714,6 +733,7 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppPagamentoQuota_idRoute: typeof AppPagamentoQuota_idRoute
   AppPalpitesTop4Route: typeof AppPalpitesTop4Route
+  AppPerebaUser_idRoute: typeof AppPerebaUser_idRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -731,6 +751,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppPagamentoQuota_idRoute: AppPagamentoQuota_idRoute,
   AppPalpitesTop4Route: AppPalpitesTop4Route,
+  AppPerebaUser_idRoute: AppPerebaUser_idRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
