@@ -17,6 +17,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as CadastroTokenRouteImport } from './routes/cadastro.$token'
+import { Route as AppTimesRouteImport } from './routes/app.times'
 import { Route as AppSimuladorRouteImport } from './routes/app.simulador'
 import { Route as AppRankingRouteImport } from './routes/app.ranking'
 import { Route as AppQuotasRouteImport } from './routes/app.quotas'
@@ -24,6 +25,7 @@ import { Route as AppPremioRouteImport } from './routes/app.premio'
 import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
 import { Route as AppJogosRouteImport } from './routes/app.jogos'
+import { Route as AppEstadiosRouteImport } from './routes/app.estadios'
 import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
@@ -81,6 +83,11 @@ const CadastroTokenRoute = CadastroTokenRouteImport.update({
   path: '/cadastro/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppTimesRoute = AppTimesRouteImport.update({
+  id: '/times',
+  path: '/times',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSimuladorRoute = AppSimuladorRouteImport.update({
   id: '/simulador',
   path: '/simulador',
@@ -114,6 +121,11 @@ const AppPalpitesRoute = AppPalpitesRouteImport.update({
 const AppJogosRoute = AppJogosRouteImport.update({
   id: '/jogos',
   path: '/jogos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEstadiosRoute = AppEstadiosRouteImport.update({
+  id: '/estadios',
+  path: '/estadios',
   getParentRoute: () => AppRoute,
 } as any)
 const AppBoletinsRoute = AppBoletinsRouteImport.update({
@@ -206,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
   '/app/perfil': typeof AppPerfilRoute
@@ -213,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
+  '/app/times': typeof AppTimesRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/app/': typeof AppIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
@@ -237,6 +251,7 @@ export interface FileRoutesByTo {
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
   '/app/perfil': typeof AppPerfilRoute
@@ -244,6 +259,7 @@ export interface FileRoutesByTo {
   '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
+  '/app/times': typeof AppTimesRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/app': typeof AppIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
@@ -271,6 +287,7 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
   '/app/perfil': typeof AppPerfilRoute
@@ -278,6 +295,7 @@ export interface FileRoutesById {
   '/app/quotas': typeof AppQuotasRoute
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
+  '/app/times': typeof AppTimesRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/app/': typeof AppIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
@@ -306,6 +324,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
+    | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
     | '/app/perfil'
@@ -313,6 +332,7 @@ export interface FileRouteTypes {
     | '/app/quotas'
     | '/app/ranking'
     | '/app/simulador'
+    | '/app/times'
     | '/cadastro/$token'
     | '/app/'
     | '/app/admin/auditoria'
@@ -337,6 +357,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/redefinir-senha'
     | '/app/boletins'
+    | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
     | '/app/perfil'
@@ -344,6 +365,7 @@ export interface FileRouteTypes {
     | '/app/quotas'
     | '/app/ranking'
     | '/app/simulador'
+    | '/app/times'
     | '/cadastro/$token'
     | '/app'
     | '/app/admin/auditoria'
@@ -370,6 +392,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
+    | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
     | '/app/perfil'
@@ -377,6 +400,7 @@ export interface FileRouteTypes {
     | '/app/quotas'
     | '/app/ranking'
     | '/app/simulador'
+    | '/app/times'
     | '/cadastro/$token'
     | '/app/'
     | '/app/admin/auditoria'
@@ -463,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CadastroTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/times': {
+      id: '/app/times'
+      path: '/times'
+      fullPath: '/app/times'
+      preLoaderRoute: typeof AppTimesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/simulador': {
       id: '/app/simulador'
       path: '/simulador'
@@ -510,6 +541,13 @@ declare module '@tanstack/react-router' {
       path: '/jogos'
       fullPath: '/app/jogos'
       preLoaderRoute: typeof AppJogosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/estadios': {
+      id: '/app/estadios'
+      path: '/estadios'
+      fullPath: '/app/estadios'
+      preLoaderRoute: typeof AppEstadiosRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/boletins': {
@@ -664,6 +702,7 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppBoletinsRoute: typeof AppBoletinsRoute
+  AppEstadiosRoute: typeof AppEstadiosRoute
   AppJogosRoute: typeof AppJogosRoute
   AppPalpitesRoute: typeof AppPalpitesRoute
   AppPerfilRoute: typeof AppPerfilRoute
@@ -671,6 +710,7 @@ interface AppRouteChildren {
   AppQuotasRoute: typeof AppQuotasRoute
   AppRankingRoute: typeof AppRankingRoute
   AppSimuladorRoute: typeof AppSimuladorRoute
+  AppTimesRoute: typeof AppTimesRoute
   AppIndexRoute: typeof AppIndexRoute
   AppPagamentoQuota_idRoute: typeof AppPagamentoQuota_idRoute
   AppPalpitesTop4Route: typeof AppPalpitesTop4Route
@@ -679,6 +719,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
   AppBoletinsRoute: AppBoletinsRoute,
+  AppEstadiosRoute: AppEstadiosRoute,
   AppJogosRoute: AppJogosRoute,
   AppPalpitesRoute: AppPalpitesRoute,
   AppPerfilRoute: AppPerfilRoute,
@@ -686,6 +727,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppQuotasRoute: AppQuotasRoute,
   AppRankingRoute: AppRankingRoute,
   AppSimuladorRoute: AppSimuladorRoute,
+  AppTimesRoute: AppTimesRoute,
   AppIndexRoute: AppIndexRoute,
   AppPagamentoQuota_idRoute: AppPagamentoQuota_idRoute,
   AppPalpitesTop4Route: AppPalpitesTop4Route,
@@ -705,3 +747,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
