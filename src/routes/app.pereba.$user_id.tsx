@@ -21,10 +21,11 @@ function usePerebaPublic(user_id: string) {
   return useQuery({
     queryKey: ["pereba-public", user_id],
     queryFn: async () => {
-      const [{ data: profile }, { data: ranking }] = await Promise.all([
-        supabase.from("profiles").select("nome, apelido, cor").eq("id", user_id).maybeSingle(),
+      const [{ data: profileRows }, { data: ranking }] = await Promise.all([
+        (supabase as any).rpc("get_profile_public", { p_user_id: user_id }),
         (supabase as any).rpc("get_ranking_geral"),
       ]);
+      const profile = Array.isArray(profileRows) ? profileRows[0] ?? null : profileRows;
       const minhaLinha = (ranking ?? []).find((r: any) => r.user_id === user_id);
       return { profile, ranking: minhaLinha };
     },
