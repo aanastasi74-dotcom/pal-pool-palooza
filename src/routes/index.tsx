@@ -77,6 +77,7 @@ function Landing() {
           <div className="relative">
             <HomeMatchCarousel />
           </div>
+        </div>
       </section>
 
       {/* FEATURES */}
