@@ -727,6 +727,15 @@ export type Database = {
         }[]
       }
       get_peso_top4_atual: { Args: never; Returns: number }
+      get_profile_public: {
+        Args: { p_user_id: string }
+        Returns: {
+          apelido: string
+          cor: string
+          id: string
+          nome: string
+        }[]
+      }
       get_ranking_diario: {
         Args: { data_referencia?: string }
         Returns: {
