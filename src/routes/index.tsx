@@ -153,15 +153,6 @@ function Landing() {
   );
 }
 
-function TeamBadge({ flag, name, right }: { flag: string; name: string; right?: boolean }) {
-  return (
-    <div className={`flex flex-col items-center gap-2 ${right ? "text-right" : ""}`}>
-      <div className="grid h-14 w-14 place-items-center rounded-full bg-white text-3xl shadow-glow">{flag}</div>
-      <p className="text-sm font-bold">{name}</p>
-    </div>
-  );
-}
-
 const features = [
   { icon: Users, title: "Acesso por convite", desc: "Site privado: só entra quem é dos Perebas. Múltiplas quotas por pessoa, cada uma com palpites e ranking próprios." },
   { icon: Wallet, title: "Pix integrado", desc: "Quota a R$ 50 com QR Code, comprovante e aprovação manual pelos administradores." },
