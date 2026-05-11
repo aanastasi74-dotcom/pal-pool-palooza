@@ -38,8 +38,13 @@ function Jogos() {
   const [filtro, setFiltro] = useState("Todos");
   const { data: matches = [], isLoading } = useMatches();
   const { data: quotas = [] } = useMinhasQuotas();
+  const { data: teams = [] } = useTeams();
+  const { data: stadiums = [] } = useStadiums();
   const primeiraQuota = quotas[0];
   const { data: minhasPreds = [] } = useMyPredictions(primeiraQuota?.id);
+
+  const teamMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
+  const stadiumMap = useMemo(() => new Map(stadiums.map((s) => [s.id, s])), [stadiums]);
 
   const hoje = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
   const lista = (matches as any[]).filter((j) => {
@@ -90,12 +95,13 @@ function Jogos() {
           {lista.map((j) => {
             const pred = predMap.get(j.id);
             const trava = travaEm(j.travado_em);
-            const tCasa = times[j.casa] ?? { nome: j.casa, sigla: j.casa, bandeira: "🏳️" };
-            const tFora = times[j.fora] ?? { nome: j.fora, sigla: j.fora, bandeira: "🏳️" };
+            const tCasa = getTeamSide(j.team_home_id, j.slot_casa, j.casa, teamMap);
+            const tFora = getTeamSide(j.team_away_id, j.slot_visitante, j.fora, teamMap);
+            const header = buildHeader(j, stadiumMap);
             return (
               <article key={j.id} className="rounded-2xl border border-border bg-card p-5 shadow-card">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="font-semibold">{j.fase} · {j.estadio ?? ""}</span>
+                  <span className="font-semibold">{header}</span>
                   <span className="flex items-center gap-2">
                     {j.status === "ao-vivo" && (
                       <span className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 font-bold text-destructive">
@@ -110,7 +116,6 @@ function Jogos() {
                   <div className="flex items-center justify-end gap-3">
                     <div className="text-right">
                       <p className="font-display font-bold">{tCasa.nome}</p>
-                      <p className="text-xs text-muted-foreground">{tCasa.sigla}</p>
                     </div>
                     <span className="text-3xl">{tCasa.bandeira}</span>
                   </div>
@@ -127,7 +132,6 @@ function Jogos() {
                     <span className="text-3xl">{tFora.bandeira}</span>
                     <div>
                       <p className="font-display font-bold">{tFora.nome}</p>
-                      <p className="text-xs text-muted-foreground">{tFora.sigla}</p>
                     </div>
                   </div>
                 </div>
