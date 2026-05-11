@@ -133,7 +133,31 @@ function Configuracoes() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="backup">
+          <AccordionItem value="copa">
+            <AccordionTrigger>Copa 2026 e lanterninha</AccordionTrigger>
+            <AccordionContent className="space-y-3">
+              <Field
+                label="Data e hora de início da Copa (após isso, ninguém compra mais quota)"
+                type="datetime-local"
+                value={copaStart}
+                onChange={(v) => setCopaStart(v)}
+              />
+              <div className="grid gap-3 md:grid-cols-2">
+                <Field
+                  label="Engajamento mínimo lanterninha (0 a 1)"
+                  type="number"
+                  value={String(lanterninha.engajamento_minimo)}
+                  onChange={(v) => setLanterninha({ ...lanterninha, engajamento_minimo: Number(v) })}
+                />
+                <Field
+                  label="Pontos mínimos lanterninha"
+                  type="number"
+                  value={String(lanterninha.pontos_minimos)}
+                  onChange={(v) => setLanterninha({ ...lanterninha, pontos_minimos: Number(v) })}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
             <AccordionTrigger>Backup e snapshot</AccordionTrigger>
             <AccordionContent className="space-y-3">
               <p className="text-xs text-muted-foreground">
