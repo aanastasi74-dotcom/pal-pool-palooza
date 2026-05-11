@@ -31,13 +31,11 @@ type MatchRow = any;
 
 function JogosAdmin() {
   const { data: matches, isLoading } = useMatches();
-  const deleteMatch = useDeleteMatch();
   const { data: teams = [] } = useTeams();
   const teamMap = new Map(teams.map((t) => [t.id, t]));
 
   const [fase, setFase] = useState("todas");
   const [editar, setEditar] = useState<MatchRow | null>(null);
-  const [excluir, setExcluir] = useState<MatchRow | null>(null);
 
   const todos = matches ?? [];
   const fases = Array.from(new Set(todos.map((j: any) => j.fase)));
@@ -55,28 +53,6 @@ function JogosAdmin() {
 
   const { query, setQuery, page, setPage, totalPages, slice, total, pageSize } = usePaginatedList(todos, predicate, 20);
 
-  const novo = () =>
-    setEditar({
-      id: "",
-      fase: "grupos",
-      data_jogo: new Date().toISOString(),
-      estadio: "",
-      cidade: "",
-      casa: "",
-      fora: "",
-      team_home_id: null,
-      team_away_id: null,
-      stadium_id: null,
-      slot_casa: "",
-      slot_visitante: "",
-      numero_jogo: null,
-      hora_definida: true,
-      peso: 10,
-      status: "agendado",
-      placar_casa: null,
-      placar_fora: null,
-    });
-
   const renderConfronto = (j: any) => {
     const home = teamMap.get(j.team_home_id);
     const away = teamMap.get(j.team_away_id);
@@ -88,12 +64,18 @@ function JogosAdmin() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold">Jogos da Copa</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Gestão das partidas e fases.</p>
-        </div>
-        <button onClick={novo} className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">+ Novo jogo</button>
+      <div>
+        <h1 className="font-display text-3xl font-extrabold">Jogos da Copa</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Atualize placares, times de mata-mata e horários.</p>
+      </div>
+
+      <div className="flex items-start gap-3 rounded-2xl border border-accent/40 bg-accent/10 p-4 text-xs">
+        <Info className="mt-0.5 h-4 w-4 shrink-0" />
+        <p>
+          Os 104 jogos da Copa estão pré-cadastrados. Esta tela permite atualizar placares, times de mata-mata
+          (quando a fase resolver) e data/hora (em caso de adiamento). Para alterações estruturais (fase,
+          número do jogo, slots ou estádio), use SQL direto.
+        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card">
@@ -108,13 +90,14 @@ function JogosAdmin() {
       {isLoading ? (
         <Skeleton className="h-64" />
       ) : total === 0 ? (
-        <EmptyState title="Sem jogos cadastrados" description="Crie um novo jogo." />
+        <EmptyState title="Sem jogos cadastrados" description="Nenhum jogo encontrado." />
       ) : (
         <>
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
+                  <th className="p-2 text-left">#</th>
                   <th className="p-2 text-left">Fase</th>
                   <th className="p-2 text-left">Data</th>
                   <th className="p-2 text-left">Confronto</th>
@@ -126,6 +109,7 @@ function JogosAdmin() {
               <tbody>
                 {slice.map((j: any) => (
                   <tr key={j.id} className="border-t border-border hover:bg-muted/30">
+                    <td className="p-2 text-xs text-muted-foreground">{j.numero_jogo ?? "—"}</td>
                     <td className="p-2 text-xs">{faseLabel(j.fase)}</td>
                     <td className="p-2 text-xs">{new Date(j.data_jogo).toLocaleString("pt-BR")}</td>
                     <td className="p-2 font-medium">{renderConfronto(j)}</td>
@@ -134,8 +118,7 @@ function JogosAdmin() {
                       {j.placar_casa != null ? `${j.placar_casa} - ${j.placar_fora}` : "—"}
                     </td>
                     <td className="p-2 text-right">
-                      <button onClick={() => setEditar(j)} className="mr-1 rounded p-1 hover:bg-muted"><Pencil className="h-3 w-3" /></button>
-                      <button onClick={() => setExcluir(j)} className="rounded p-1 hover:bg-muted"><Trash2 className="h-3 w-3" /></button>
+                      <button onClick={() => setEditar(j)} className="rounded p-1 hover:bg-muted"><Pencil className="h-3 w-3" /></button>
                     </td>
                   </tr>
                 ))}
@@ -147,16 +130,6 @@ function JogosAdmin() {
       )}
 
       {editar && <EditarJogoDialog jogo={editar} onClose={() => setEditar(null)} />}
-
-      <ConfirmDialog
-        open={!!excluir}
-        onOpenChange={(v) => !v && setExcluir(null)}
-        title="Excluir jogo?"
-        description="Esta ação não pode ser desfeita."
-        confirmLabel="Excluir"
-        destructive
-        onConfirm={async () => { if (excluir) { await deleteMatch.mutateAsync(excluir.id); toast.success("Jogo removido."); } setExcluir(null); }}
-      />
     </div>
   );
 }
