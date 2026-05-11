@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
-import { useMatches, useCreateMatch, useUpdateMatch, useDeleteMatch } from "@/lib/queries/matches";
+import { useMatches, useUpdateMatch } from "@/lib/queries/matches";
 import { useTeams } from "@/lib/queries/teams";
 import { useStadiums } from "@/lib/queries/stadiums";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Info } from "lucide-react";
 import { toast } from "sonner";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
