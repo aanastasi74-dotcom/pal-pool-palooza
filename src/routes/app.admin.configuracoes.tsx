@@ -38,6 +38,13 @@ function Configuracoes() {
     setScore({ ...defaultScore, ...(settings.score_rules ?? {}) });
     setPeso({ ...defaultPeso, ...(settings.peso_progressivo ?? {}) });
     setBoletim({ ...defaultBoletim, ...(settings.boletim_config ?? {}) });
+    setLanterninha({ ...defaultLanterninha, ...(settings.lanterninha_rule ?? {}) });
+    if (settings.copa_start_date) {
+      const raw = typeof settings.copa_start_date === "string" ? settings.copa_start_date : String(settings.copa_start_date);
+      try {
+        setCopaStart(new Date(raw).toISOString().slice(0, 16));
+      } catch { setCopaStart(raw.slice(0, 16)); }
+    }
   }, [settings]);
 
   const salvar = async () => {
@@ -46,6 +53,8 @@ function Configuracoes() {
       update.mutateAsync({ key: "score_rules", value: score }),
       update.mutateAsync({ key: "peso_progressivo", value: peso }),
       update.mutateAsync({ key: "boletim_config", value: boletim }),
+      update.mutateAsync({ key: "lanterninha_rule", value: lanterninha }),
+      update.mutateAsync({ key: "copa_start_date", value: new Date(copaStart).toISOString() }),
     ]);
     toast.success("Configurações salvas, peraba-admin.");
   };
