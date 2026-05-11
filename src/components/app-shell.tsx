@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate, Navigate } from "@tanstack/react-router";
-import { Trophy, CalendarDays, ListOrdered, Sparkles, Coins, ChevronDown, User, Wallet, ShieldCheck, LogOut, Globe, Building2 } from "lucide-react";
+import { Trophy, CalendarDays, ListOrdered, Sparkles, Coins, ChevronDown, User, Wallet, ShieldCheck, LogOut, Globe, Building2, Award } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ const nav = [
   { to: "/app", label: "Início", icon: Trophy, exact: true },
   { to: "/app/jogos", label: "Jogos", icon: CalendarDays, exact: false },
   { to: "/app/palpites", label: "Palpites", icon: Sparkles, exact: false },
+  { to: "/app/palpites_/top4", label: "Top 4", icon: Award, exact: false },
   { to: "/app/ranking", label: "Ranking", icon: ListOrdered, exact: false },
   { to: "/app/premio", label: "Prêmio", icon: Coins, exact: false },
 ] as const;
