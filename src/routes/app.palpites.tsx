@@ -208,14 +208,24 @@ function PalpiteCard({
   const tFora = getTeamSide(jogo.team_away_id, jogo.slot_visitante, jogo.fora, teamMap);
   const header = buildHeader(jogo, stadiumMap);
 
+  const casaNum = casa === "" ? null : Number(casa);
+  const foraNum = fora === "" ? null : Number(fora);
+  const casaInvalido = casaNum != null && (Number.isNaN(casaNum) || casaNum < 0 || casaNum > 20);
+  const foraInvalido = foraNum != null && (Number.isNaN(foraNum) || foraNum < 0 || foraNum > 20);
+  const placarInvalido = casaInvalido || foraInvalido;
+
   const dirty =
     editing &&
     (casa !== (pred?.placar_casa != null ? String(pred.placar_casa) : "") ||
       fora !== (pred?.placar_fora != null ? String(pred.placar_fora) : ""));
 
   const salvar = () => {
-    const placar_casa = casa === "" ? null : Math.max(0, Math.min(99, Number(casa)));
-    const placar_fora = fora === "" ? null : Math.max(0, Math.min(99, Number(fora)));
+    if (placarInvalido) {
+      toast.error("Placar deve estar entre 0 e 20");
+      return;
+    }
+    const placar_casa = casaNum;
+    const placar_fora = foraNum;
     upsert.mutate(
       { quota_id: quotaId, match_id: jogo.id, placar_casa, placar_fora },
       {
@@ -254,9 +264,9 @@ function PalpiteCard({
           <span className="text-3xl">{tCasa.bandeira}</span>
         </div>
         <div className="flex items-center gap-2">
-          <ScoreDisplay value={casa} editing={editing} onChange={setCasa} />
+          <ScoreDisplay value={casa} editing={editing} onChange={setCasa} invalid={casaInvalido} />
           <span className="text-xl font-bold text-muted-foreground">×</span>
-          <ScoreDisplay value={fora} editing={editing} onChange={setFora} />
+          <ScoreDisplay value={fora} editing={editing} onChange={setFora} invalid={foraInvalido} />
         </div>
         <div className="flex items-center gap-3">
           <span className="text-3xl">{tFora.bandeira}</span>
@@ -293,7 +303,7 @@ function PalpiteCard({
               </button>
               <button
                 onClick={salvar}
-                disabled={upsert.isPending || lockedByTime}
+                disabled={upsert.isPending || lockedByTime || placarInvalido}
                 className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
               >
                 {upsert.isPending ? "Salvando…" : "Salvar palpite"}
@@ -311,20 +321,28 @@ function PalpiteCard({
           )}
         </div>
       </div>
+      {editing && placarInvalido && (
+        <p className="mt-2 text-right text-[11px] font-bold text-destructive">Placar deve estar entre 0 e 20</p>
+      )}
     </article>
   );
 }
 
-function ScoreDisplay({ value, editing, onChange }: { value: string; editing: boolean; onChange: (v: string) => void }) {
+function ScoreDisplay({ value, editing, onChange, invalid }: { value: string; editing: boolean; onChange: (v: string) => void; invalid?: boolean }) {
   if (editing) {
     return (
       <input
         type="number"
         min={0}
+        max={20}
+        step={1}
+        inputMode="numeric"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="-"
-        className="h-14 w-14 rounded-2xl border border-border bg-secondary text-center font-display text-2xl font-black focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+        className={`h-14 w-14 rounded-2xl border bg-secondary text-center font-display text-2xl font-black focus:outline-none focus:ring-2 ${
+          invalid ? "border-destructive focus:border-destructive focus:ring-destructive/30" : "border-border focus:border-primary focus:ring-primary/30"
+        }`}
       />
     );
   }

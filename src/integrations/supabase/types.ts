@@ -441,7 +441,7 @@ export type Database = {
           created_at: string | null
           elegivel_lanterna: boolean | null
           id: string
-          numero: number
+          numero: number | null
           paga_em: string | null
           palpites_possiveis: number | null
           palpites_validos: number | null
@@ -455,7 +455,7 @@ export type Database = {
           created_at?: string | null
           elegivel_lanterna?: boolean | null
           id?: string
-          numero: number
+          numero?: number | null
           paga_em?: string | null
           palpites_possiveis?: number | null
           palpites_validos?: number | null
@@ -469,7 +469,7 @@ export type Database = {
           created_at?: string | null
           elegivel_lanterna?: boolean | null
           id?: string
-          numero?: number
+          numero?: number | null
           paga_em?: string | null
           palpites_possiveis?: number | null
           palpites_validos?: number | null
@@ -679,6 +679,7 @@ export type Database = {
         Args: { p_apelido: string }
         Returns: boolean
       }
+      cleanup_quotas_incompletas: { Args: never; Returns: number }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
       fase_atual_copa: { Args: never; Returns: string }
       get_invite_by_token: {
@@ -768,6 +769,8 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       pode_criar_quota: { Args: never; Returns: boolean }
+      promote_to_admin: { Args: { p_email: string }; Returns: string }
+      proximo_numero_quota: { Args: { p_user_id: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
