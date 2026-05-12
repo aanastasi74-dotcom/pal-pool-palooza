@@ -32,6 +32,11 @@ export function useCreateQuota() {
       if (pode === false) {
         throw new Error("As quotas foram encerradas — a Copa já começou. Boa sorte aos perebas inscritos! 🍀");
       }
+      const { data: podeBuy, error: errBuy } = await (supabase as any).rpc("pode_comprar_quota", { p_user_id: user!.id });
+      if (errBuy) throw errBuy;
+      if (podeBuy && podeBuy.pode === false) {
+        throw new Error(podeBuy.motivo ?? "Você não pode comprar mais quotas no momento.");
+      }
       // Reaproveita incompleta existente (sem comprovante enviado)
       const { data: incompleta } = await supabase
         .from("quotas")
