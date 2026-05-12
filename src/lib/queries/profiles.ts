@@ -19,7 +19,7 @@ export function useUpdateProfile() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (patch: Partial<{ apelido: string; nome: string; cor: string; notificacoes: any }>) => {
+    mutationFn: async (patch: Partial<{ apelido: string; nome: string; cor: string; sigla: string | null; notificacoes: any }>) => {
       const { data, error } = await supabase.from("profiles").update(patch).eq("id", user!.id).select().single();
       if (error) throw error;
       return data;
