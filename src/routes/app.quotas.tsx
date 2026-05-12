@@ -80,7 +80,11 @@ function QuotasPage() {
                       Tentativas usadas: {q.tentativas_comprovante ?? 0} de 3
                     </p>
                     <button
-                      onClick={() => navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } })}
+                      onClick={() =>
+                        q.lote_id
+                          ? navigate({ to: "/app/pagamento-lote/$lote_id", params: { lote_id: q.lote_id } })
+                          : navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } })
+                      }
                       className="mt-2 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground"
                     >
                       Enviar novo comprovante
