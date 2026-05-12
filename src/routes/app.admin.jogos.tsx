@@ -149,6 +149,18 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
     }
     const home = teams.find((t) => t.id === j.team_home_id);
     const away = teams.find((t) => t.id === j.team_away_id);
+    const placarCasaNum =
+      j.status === "encerrado" && j.placar_casa !== "" && j.placar_casa != null ? Number(j.placar_casa) : null;
+    const placarForaNum =
+      j.status === "encerrado" && j.placar_fora !== "" && j.placar_fora != null ? Number(j.placar_fora) : null;
+    if (placarCasaNum != null && (placarCasaNum < 0 || placarCasaNum > 20)) {
+      toast.error("Placar deve estar entre 0 e 20");
+      return;
+    }
+    if (placarForaNum != null && (placarForaNum < 0 || placarForaNum > 20)) {
+      toast.error("Placar deve estar entre 0 e 20");
+      return;
+    }
     const payload: any = {
       data_jogo: new Date(j.data_local).toISOString(),
       team_home_id: j.team_home_id || null,
@@ -156,10 +168,9 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
       hora_definida: !!j.hora_definida,
       casa: home?.nome_pt ?? j.slot_casa ?? j.casa ?? "",
       fora: away?.nome_pt ?? j.slot_visitante ?? j.fora ?? "",
-      peso: Number(j.peso ?? 10),
       status: j.status,
-      placar_casa: j.status === "encerrado" && j.placar_casa !== "" && j.placar_casa != null ? Number(j.placar_casa) : null,
-      placar_fora: j.status === "encerrado" && j.placar_fora !== "" && j.placar_fora != null ? Number(j.placar_fora) : null,
+      placar_casa: placarCasaNum,
+      placar_fora: placarForaNum,
     };
     await update.mutateAsync({ id: jogo.id, ...payload });
     toast.success("Jogo salvo.");
@@ -230,8 +241,13 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
               className="col-span-2 w-full rounded-lg border border-border bg-muted/50 px-2 py-1 text-sm text-muted-foreground"
             />
           </Field>
-          <Field label="Peso">
-            <input type="number" value={j.peso ?? 10} onChange={(e) => setJ({ ...j, peso: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+          <Field label="Peso (auto)">
+            <input
+              value={j.peso ?? 10}
+              readOnly
+              title="Peso é calculado automaticamente pelo dia da Copa."
+              className="w-full rounded-lg border border-border bg-muted/50 px-2 py-1 text-sm text-muted-foreground"
+            />
           </Field>
           <Field label="Status">
             <select value={j.status} onChange={(e) => setJ({ ...j, status: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm">
@@ -242,11 +258,17 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
           </Field>
           {j.status === "encerrado" && (
             <>
-              <Field label="Placar casa">
-                <input type="number" value={j.placar_casa ?? ""} onChange={(e) => setJ({ ...j, placar_casa: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+              <Field label="Placar casa (0-20)">
+                <input type="number" min={0} max={20} step={1} inputMode="numeric" value={j.placar_casa ?? ""} onChange={(e) => setJ({ ...j, placar_casa: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+                {j.placar_casa !== "" && j.placar_casa != null && (Number(j.placar_casa) < 0 || Number(j.placar_casa) > 20) && (
+                  <span className="text-[10px] font-bold text-destructive">Placar deve estar entre 0 e 20</span>
+                )}
               </Field>
-              <Field label="Placar visitante">
-                <input type="number" value={j.placar_fora ?? ""} onChange={(e) => setJ({ ...j, placar_fora: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+              <Field label="Placar visitante (0-20)">
+                <input type="number" min={0} max={20} step={1} inputMode="numeric" value={j.placar_fora ?? ""} onChange={(e) => setJ({ ...j, placar_fora: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+                {j.placar_fora !== "" && j.placar_fora != null && (Number(j.placar_fora) < 0 || Number(j.placar_fora) > 20) && (
+                  <span className="text-[10px] font-bold text-destructive">Placar deve estar entre 0 e 20</span>
+                )}
               </Field>
             </>
           )}
