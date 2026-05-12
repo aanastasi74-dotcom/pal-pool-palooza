@@ -16,6 +16,8 @@ const labelStatus: Record<string, { txt: string; cls: string }> = {
   ativa: { txt: "Ativa", cls: "bg-success/15 text-success" },
   aguardando_aprovacao: { txt: "Aguardando aprovação", cls: "bg-accent/30 text-accent-foreground" },
   expirada: { txt: "Expirada", cls: "bg-destructive/15 text-destructive" },
+  rejeitada: { txt: "Rejeitada", cls: "bg-destructive/15 text-destructive" },
+  encerrada: { txt: "Encerrada", cls: "bg-muted text-muted-foreground" },
 };
 
 function QuotasPage() {
@@ -75,10 +77,33 @@ function QuotasPage() {
             return (
               <article key={q.id} className="rounded-2xl border border-border bg-card p-5 shadow-card">
                 <div className="flex items-center justify-between">
-                  <p className="font-display text-xl font-bold">Quota #{q.numero}</p>
+                  <p className="font-display text-xl font-bold">Quota {q.numero ? `#${q.numero}` : "(sem número)"}</p>
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${s.cls}`}>{s.txt}</span>
                 </div>
                 {q.paga_em && <p className="mt-1 text-xs text-muted-foreground">Paga em {new Date(q.paga_em).toLocaleDateString("pt-BR")}</p>}
+
+                {q.status === "rejeitada" && (
+                  <div className="mt-3 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs">
+                    <p className="font-bold text-destructive">❌ Rejeitada</p>
+                    {q.motivo_rejeicao && <p className="mt-1 text-foreground">Motivo: {q.motivo_rejeicao}</p>}
+                    <p className="mt-1 text-muted-foreground">
+                      Tentativas usadas: {q.tentativas_comprovante ?? 0} de 3
+                    </p>
+                    <button
+                      onClick={() => navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } })}
+                      className="mt-2 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground"
+                    >
+                      Enviar novo comprovante
+                    </button>
+                  </div>
+                )}
+                {q.status === "encerrada" && (
+                  <div className="mt-3 rounded-xl border border-muted-foreground/30 bg-muted/40 p-3 text-xs">
+                    <p className="font-bold">Quota encerrada após 3 tentativas.</p>
+                    <p className="mt-1 text-muted-foreground">Clique em "Comprar nova quota" pra começar uma nova.</p>
+                  </div>
+                )}
+
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   <Stat label="Pontos" valor={(q.pontos ?? 0).toLocaleString("pt-BR")} />
                   <Stat label="Posição" valor={q.posicao ? `${q.posicao}º` : "—"} />
