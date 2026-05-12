@@ -149,6 +149,45 @@ export type Database = {
           },
         ]
       }
+      lotes_compra: {
+        Row: {
+          comprovante_url: string | null
+          criado_em: string
+          decidido_em: string | null
+          id: string
+          motivo_rejeicao: string | null
+          quantidade_pedida: number
+          status: string
+          tentativas_comprovante: number
+          user_id: string
+          valor_esperado: number
+        }
+        Insert: {
+          comprovante_url?: string | null
+          criado_em?: string
+          decidido_em?: string | null
+          id?: string
+          motivo_rejeicao?: string | null
+          quantidade_pedida: number
+          status?: string
+          tentativas_comprovante?: number
+          user_id: string
+          valor_esperado: number
+        }
+        Update: {
+          comprovante_url?: string | null
+          criado_em?: string
+          decidido_em?: string | null
+          id?: string
+          motivo_rejeicao?: string | null
+          quantidade_pedida?: number
+          status?: string
+          tentativas_comprovante?: number
+          user_id?: string
+          valor_esperado?: number
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           casa: string
@@ -441,6 +480,8 @@ export type Database = {
           created_at: string | null
           elegivel_lanterna: boolean | null
           id: string
+          lote_id: string | null
+          motivo_rejeicao: string | null
           numero: number | null
           paga_em: string | null
           palpites_possiveis: number | null
@@ -448,6 +489,7 @@ export type Database = {
           pontos: number | null
           posicao: number | null
           status: string
+          tentativas_comprovante: number
           user_id: string
         }
         Insert: {
@@ -455,6 +497,8 @@ export type Database = {
           created_at?: string | null
           elegivel_lanterna?: boolean | null
           id?: string
+          lote_id?: string | null
+          motivo_rejeicao?: string | null
           numero?: number | null
           paga_em?: string | null
           palpites_possiveis?: number | null
@@ -462,6 +506,7 @@ export type Database = {
           pontos?: number | null
           posicao?: number | null
           status?: string
+          tentativas_comprovante?: number
           user_id: string
         }
         Update: {
@@ -469,6 +514,8 @@ export type Database = {
           created_at?: string | null
           elegivel_lanterna?: boolean | null
           id?: string
+          lote_id?: string | null
+          motivo_rejeicao?: string | null
           numero?: number | null
           paga_em?: string | null
           palpites_possiveis?: number | null
@@ -476,9 +523,17 @@ export type Database = {
           pontos?: number | null
           posicao?: number | null
           status?: string
+          tentativas_comprovante?: number
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "quotas_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes_compra"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "quotas_user_id_fkey"
             columns: ["user_id"]
@@ -771,6 +826,7 @@ export type Database = {
       pode_criar_quota: { Args: never; Returns: boolean }
       promote_to_admin: { Args: { p_email: string }; Returns: string }
       proximo_numero_quota: { Args: { p_user_id: string }; Returns: number }
+      recompute_peso_jogos: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
