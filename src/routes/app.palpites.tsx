@@ -352,26 +352,3 @@ function ScoreDisplay({ value, editing, onChange, invalid }: { value: string; ed
     </div>
   );
 }
-    </article>
-  );
-}
-
-function ScoreDisplay({ value, editing, onChange }: { value: string; editing: boolean; onChange: (v: string) => void }) {
-  if (editing) {
-    return (
-      <input
-        type="number"
-        min={0}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="-"
-        className="h-14 w-14 rounded-2xl border border-border bg-secondary text-center font-display text-2xl font-black focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-      />
-    );
-  }
-  return (
-    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-secondary/60 font-display text-2xl font-black text-foreground">
-      {value === "" ? "—" : value}
-    </div>
-  );
-}
