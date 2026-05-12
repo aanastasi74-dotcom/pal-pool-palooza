@@ -34,6 +34,11 @@ export function AppShell() {
   const nome = profile?.nome ?? "Peraba";
   const apelido = (profile?.apelido ?? nome).slice(0, 2).toUpperCase();
 
+  const { isLoading } = useAuth();
+  if (!isLoading && !profile) {
+    return <Navigate to="/completar-perfil" />;
+  }
+
   if (maintenance && !pathname.startsWith("/app/admin")) {
     return <Navigate to="/manutencao" />;
   }
