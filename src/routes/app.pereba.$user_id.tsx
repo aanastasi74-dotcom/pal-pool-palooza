@@ -50,6 +50,7 @@ function PerebaPublicProfile() {
   const cor = header.profile.cor ?? "oklch(0.6 0.16 200)";
   const apelido = header.profile.apelido ?? "??";
   const nome = header.profile.nome;
+  const sigla = (header.profile.sigla ?? apelido).slice(0, 3).toUpperCase();
   const pos = header.ranking?.posicao;
   const pontos = header.ranking?.pontos ?? 0;
 
@@ -63,11 +64,11 @@ function PerebaPublicProfile() {
 
       <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-5 shadow-card">
         <div className="grid h-14 w-14 place-items-center rounded-full text-base font-bold text-white" style={{ background: cor }}>
-          {apelido}
+          {sigla}
         </div>
         <div className="flex-1">
-          <h1 className="font-display text-2xl font-extrabold">{nome}</h1>
-          <p className="text-xs text-muted-foreground">{apelido}</p>
+          <h1 className="font-display text-2xl font-extrabold">{apelido}</h1>
+          <p className="text-xs text-muted-foreground">{nome}</p>
         </div>
         <div className="text-right">
           {pos != null && <p className="text-xs text-muted-foreground">Posição</p>}

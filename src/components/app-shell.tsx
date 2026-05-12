@@ -32,7 +32,7 @@ export function AppShell() {
   const { data: minhasQuotas = [] } = useMinhasQuotas();
   const { maintenance } = useMaintenanceMode();
   const nome = profile?.nome ?? "Pereba";
-  const apelido = (profile?.apelido ?? nome).slice(0, 2).toUpperCase();
+  const sigla = (profile?.sigla ?? profile?.apelido ?? nome).slice(0, 3).toUpperCase();
 
   if (!isLoading && !profile) {
     return <Navigate to="/completar-perfil" />;
@@ -81,8 +81,8 @@ export function AppShell() {
                   <p className="font-semibold">{nome}</p>
                   <p className="text-muted-foreground">{minhasQuotas.length} quota{minhasQuotas.length === 1 ? "" : "s"}</p>
                 </div>
-                <div className="grid h-8 w-8 place-items-center rounded-full bg-gold text-xs font-bold text-gold-foreground">
-                  {apelido}
+                <div className="grid h-8 w-8 place-items-center rounded-full bg-gold text-[11px] font-bold text-gold-foreground">
+                  {sigla}
                 </div>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </DropdownMenuTrigger>

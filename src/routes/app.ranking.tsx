@@ -24,13 +24,13 @@ function Ranking() {
   const active = tab === "geral" ? geral : diario;
   const isLoading = active.isLoading;
 
-  type Row = { id: string; user_id: string; pontos: number; numero: number; profile?: { nome?: string; apelido?: string; cor?: string } | null };
+  type Row = { id: string; user_id: string; pontos: number; numero: number; profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null };
   const rows = (active.data ?? []) as Row[];
 
   const lista = rows.filter((p) => {
-    const nome = p.profile?.nome ?? "";
-    if (busca && !nome.toLowerCase().includes(busca.toLowerCase())) return false;
-    return true;
+    const q = busca.toLowerCase();
+    if (!q) return true;
+    return (p.profile?.apelido ?? "").toLowerCase().includes(q) || (p.profile?.nome ?? "").toLowerCase().includes(q);
   });
 
   return (
@@ -86,8 +86,8 @@ function Ranking() {
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
           {lista.map((p, i) => {
             const isMe = p.user_id === user?.id;
-            const nome = p.profile?.nome ?? "—";
-            const apelido = p.profile?.apelido ?? "??";
+            const apelido = p.profile?.apelido ?? "—";
+            const sigla = (p.profile?.sigla ?? p.profile?.apelido ?? "??").slice(0, 3).toUpperCase();
             const cor = p.profile?.cor ?? "oklch(0.6 0.16 200)";
             return (
               <div
@@ -103,8 +103,8 @@ function Ranking() {
                     <span className="font-display font-bold text-muted-foreground">{i + 1}</span>
                   )}
                 </div>
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold text-white" style={{ background: cor }}>
-                  {apelido}
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-xs font-bold text-white" style={{ background: cor }}>
+                  {sigla}
                 </div>
                 <div className="flex-1">
                   <Link
@@ -112,7 +112,7 @@ function Ranking() {
                     params={{ user_id: p.user_id }}
                     className="font-display font-bold hover:underline"
                   >
-                    {nome}
+                    {apelido}
                     {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
                   </Link>
                   <p className="text-xs text-muted-foreground">Quota #{p.numero}</p>
