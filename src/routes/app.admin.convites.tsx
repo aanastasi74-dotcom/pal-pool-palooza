@@ -301,3 +301,159 @@ function NovoConviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange
     </Dialog>
   );
 }
+
+function CounterCard({ label, current, max, hint }: { label: string; current: number; max: number; hint?: string }) {
+  const pct = max > 0 ? Math.min(100, (current / max) * 100) : 0;
+  const color = colorForPct(pct);
+  const barColor = pct >= 95 ? "bg-destructive" : pct >= 80 ? "bg-accent" : "bg-success";
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="flex items-baseline justify-between">
+        <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
+        <span className={`font-display text-2xl font-extrabold ${color}`}>
+          {current}<span className="text-sm text-muted-foreground"> / {max}</span>
+        </span>
+      </div>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+        <div className={`h-full ${barColor} transition-all`} style={{ width: `${pct}%` }} />
+      </div>
+      {hint && <p className="mt-2 text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+function LimiteCustomEditor({ user, onSaved }: { user: any; onSaved: (novo: number | null) => void }) {
+  const update = useUpdateLimiteCustom();
+  const { data: quotasGlobal = 0 } = useQuotasGlobalCount();
+  const [valor, setValor] = useState<string>(user.limite_quotas_custom?.toString() ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const salvar = async () => {
+    const novo = valor.trim() === "" ? null : Number(valor);
+    if (novo !== null && (!Number.isInteger(novo) || novo < 0 || novo > LIMITE_QUOTAS_HARD)) {
+      toast.error(`Limite inválido. Use 0..${LIMITE_QUOTAS_HARD} ou vazio.`);
+      return;
+    }
+    if (novo !== null) {
+      const atual = user.quotas_count ?? 0;
+      const delta = novo - (user.limite_quotas_custom ?? 5);
+      if (quotasGlobal + Math.max(0, delta) > LIMITE_QUOTAS_HARD) {
+        toast.error(`Esse limite estoura o teto global (${LIMITE_QUOTAS_HARD}).`);
+        return;
+      }
+      if (novo < atual) {
+        toast.error(`Pereba já tem ${atual} quotas. Limite não pode ser menor.`);
+        return;
+      }
+    }
+    setSaving(true);
+    try {
+      await update.mutateAsync({ user_id: user.id, limite: novo });
+      toast.success("Limite atualizado.");
+      onSaved(novo);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erro ao salvar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Limite de quotas</p>
+      <p className="mt-1 text-xs text-muted-foreground">Padrão: 5. Vazio = usa o padrão. Máx: {LIMITE_QUOTAS_HARD}.</p>
+      <div className="mt-2 flex gap-2">
+        <input
+          type="number"
+          value={valor}
+          onChange={(e) => setValor(e.target.value)}
+          placeholder="5"
+          className="flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-sm"
+        />
+        <button onClick={salvar} disabled={saving} className="rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-50">
+          {saving ? "Salvando…" : "Salvar"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function BulkConviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const create = useCreateInvite();
+  const [texto, setTexto] = useState("");
+  const [processando, setProcessando] = useState(false);
+  const [resultado, setResultado] = useState<{ ok: number; falhas: { linha: number; motivo: string }[] } | null>(null);
+
+  const linhas = texto.split("\n").map((l) => l.trim()).filter(Boolean);
+  const excedeu = linhas.length > 50;
+
+  const processar = async () => {
+    setResultado(null);
+    setProcessando(true);
+    const ok: number[] = [];
+    const falhas: { linha: number; motivo: string }[] = [];
+    try {
+      for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        const partes = linha.split(",").map((p) => p.trim());
+        const [nome, email] = partes;
+        const parsed = conviteSchema.safeParse({ nome, email });
+        if (!parsed.success) {
+          falhas.push({ linha: i + 1, motivo: "Formato inválido (use: Nome, email)" });
+          continue;
+        }
+        const { data: pode, error: podeErr } = await (supabase as any).rpc("pode_emitir_convite");
+        if (podeErr || !pode?.pode) {
+          falhas.push({ linha: i + 1, motivo: pode?.motivo ?? "Limite atingido" });
+          continue;
+        }
+        try {
+          await create.mutateAsync({ nome, email, mensagem: null });
+          ok.push(i + 1);
+        } catch (e: any) {
+          falhas.push({ linha: i + 1, motivo: e?.message ?? "Erro" });
+        }
+      }
+      setResultado({ ok: ok.length, falhas });
+      if (ok.length > 0) toast.success(`${ok.length} convite(s) enviado(s).`);
+      if (falhas.length > 0) toast.warning(`${falhas.length} falha(s).`);
+    } finally {
+      setProcessando(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) { setTexto(""); setResultado(null); } }}>
+      <DialogContent className="space-y-3">
+        <DialogHeader><DialogTitle>Importar convites em lote</DialogTitle></DialogHeader>
+        <p className="text-xs text-muted-foreground">Uma por linha: <code>Nome, email@exemplo.com</code>. Máx 50 por vez.</p>
+        <textarea
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          rows={10}
+          placeholder={"João Silva, joao@email.com\nMaria, maria@email.com"}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs"
+        />
+        <div className="flex items-center justify-between text-xs">
+          <span className={excedeu ? "text-destructive" : "text-muted-foreground"}>{linhas.length} linha(s){excedeu && " — máx 50"}</span>
+          <button onClick={processar} disabled={processando || excedeu || linhas.length === 0} className="rounded-full bg-primary px-5 py-2 font-bold text-primary-foreground disabled:opacity-50">
+            <Upload className="mr-1 inline h-3 w-3" /> {processando ? "Processando…" : "Enviar todos"}
+          </button>
+        </div>
+        {resultado && (
+          <div className="rounded-lg border border-border p-3 text-xs">
+            <p className="font-bold text-success">{resultado.ok} enviado(s) com sucesso.</p>
+            {resultado.falhas.length > 0 && (
+              <div className="mt-2">
+                <p className="font-bold text-destructive">{resultado.falhas.length} falha(s):</p>
+                <ul className="mt-1 space-y-0.5">
+                  {resultado.falhas.map((f) => <li key={f.linha}>Linha {f.linha}: {f.motivo}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
