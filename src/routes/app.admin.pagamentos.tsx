@@ -10,6 +10,7 @@ import { DataTablePagination } from "@/components/data-table-pagination";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { LotesPendentesSection } from "@/components/admin/lotes-pendentes-section";
 
 export const Route = createFileRoute("/app/admin/pagamentos")({
   head: () => ({ meta: [{ title: "Admin — Pagamentos" }] }),
@@ -77,6 +78,8 @@ function Pagamentos() {
         <h1 className="font-display text-3xl font-extrabold">Pagamentos</h1>
         <p className="mt-1 text-sm text-muted-foreground">Conciliação dos Pix da perebada.</p>
       </div>
+
+      <LotesPendentesSection />
 
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card">
         <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs">

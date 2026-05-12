@@ -286,6 +286,7 @@ export type Database = {
           comprovante_path: string | null
           created_at: string | null
           id: string
+          lote_id: string | null
           motivo_rejeicao: string | null
           quota_id: string | null
           status: string
@@ -298,6 +299,7 @@ export type Database = {
           comprovante_path?: string | null
           created_at?: string | null
           id?: string
+          lote_id?: string | null
           motivo_rejeicao?: string | null
           quota_id?: string | null
           status?: string
@@ -310,6 +312,7 @@ export type Database = {
           comprovante_path?: string | null
           created_at?: string | null
           id?: string
+          lote_id?: string | null
           motivo_rejeicao?: string | null
           quota_id?: string | null
           status?: string
@@ -322,6 +325,13 @@ export type Database = {
             columns: ["aprovado_por"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes_compra"
             referencedColumns: ["id"]
           },
           {
@@ -838,7 +848,9 @@ export type Database = {
       limite_perebas_hard: { Args: never; Returns: number }
       limite_quotas_global_hard: { Args: never; Returns: number }
       limite_quotas_pereba: { Args: { p_user_id: string }; Returns: number }
-      pode_comprar_quota: { Args: { p_user_id: string }; Returns: Json }
+      pode_comprar_quota:
+        | { Args: { p_user_id: string }; Returns: Json }
+        | { Args: { p_quantidade?: number; p_user_id: string }; Returns: Json }
       pode_criar_quota: { Args: never; Returns: boolean }
       pode_emitir_convite: { Args: never; Returns: Json }
       promote_to_admin: { Args: { p_email: string }; Returns: string }

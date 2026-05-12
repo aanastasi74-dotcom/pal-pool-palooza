@@ -1,11 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus, CheckCircle2, AlertCircle, Lightbulb, ListChecks, Lock } from "lucide-react";
 import { estaNosUltimos25, isElegivelLanterna, razaoNaoElegivel } from "@/lib/lanterninha";
-import { useMinhasQuotas, useCreateQuota, useTotalQuotas } from "@/lib/queries/quotas";
+import { useMinhasQuotas, useTotalQuotas } from "@/lib/queries/quotas";
 import { usePodeCriarQuota } from "@/lib/queries/copa";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/quotas")({
   head: () => ({ meta: [{ title: "Minhas quotas — Bolão dos Perebas" }] }),
@@ -25,14 +24,6 @@ function QuotasPage() {
   const { data: quotas = [], isLoading } = useMinhasQuotas();
   const { data: totalQuotas = 0 } = useTotalQuotas();
   const { data: podeCriar = true } = usePodeCriarQuota();
-  const createQuota = useCreateQuota();
-
-  const handleCreate = () => {
-    createQuota.mutate(undefined, {
-      onSuccess: (q: any) => navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } }),
-      onError: (e: any) => toast.error(e?.message ?? "Não conseguimos criar a quota agora."),
-    });
-  };
 
   return (
     <div className="space-y-6">
@@ -43,11 +34,10 @@ function QuotasPage() {
         </div>
         {podeCriar ? (
           <button
-            onClick={handleCreate}
-            disabled={createQuota.isPending}
-            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+            onClick={() => navigate({ to: "/app/comprar-quota" })}
+            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-glow"
           >
-            <Plus className="h-4 w-4" /> {createQuota.isPending ? "Criando…" : "Comprar nova quota"}
+            <Plus className="h-4 w-4" /> Comprar quotas
           </button>
         ) : null}
       </div>
@@ -90,7 +80,11 @@ function QuotasPage() {
                       Tentativas usadas: {q.tentativas_comprovante ?? 0} de 3
                     </p>
                     <button
-                      onClick={() => navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } })}
+                      onClick={() =>
+                        q.lote_id
+                          ? navigate({ to: "/app/pagamento-lote/$lote_id", params: { lote_id: q.lote_id } })
+                          : navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } })
+                      }
                       className="mt-2 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground"
                     >
                       Enviar novo comprovante
@@ -100,7 +94,7 @@ function QuotasPage() {
                 {q.status === "encerrada" && (
                   <div className="mt-3 rounded-xl border border-muted-foreground/30 bg-muted/40 p-3 text-xs">
                     <p className="font-bold">Quota encerrada após 3 tentativas.</p>
-                    <p className="mt-1 text-muted-foreground">Clique em "Comprar nova quota" pra começar uma nova.</p>
+                    <p className="mt-1 text-muted-foreground">Clique em "Comprar quotas" pra começar uma nova.</p>
                   </div>
                 )}
 
