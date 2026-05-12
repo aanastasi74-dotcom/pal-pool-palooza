@@ -26,6 +26,7 @@ import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
 import { Route as AppJogosRouteImport } from './routes/app.jogos'
 import { Route as AppEstadiosRouteImport } from './routes/app.estadios'
+import { Route as AppCompletePerfilRouteImport } from './routes/app.complete-perfil'
 import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
@@ -129,6 +130,11 @@ const AppEstadiosRoute = AppEstadiosRouteImport.update({
   path: '/estadios',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCompletePerfilRoute = AppCompletePerfilRouteImport.update({
+  id: '/complete-perfil',
+  path: '/complete-perfil',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBoletinsRoute = AppBoletinsRouteImport.update({
   id: '/boletins',
   path: '/boletins',
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/complete-perfil': typeof AppCompletePerfilRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/complete-perfil': typeof AppCompletePerfilRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -295,6 +303,7 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/complete-perfil': typeof AppCompletePerfilRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -333,6 +342,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
+    | '/app/complete-perfil'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/redefinir-senha'
     | '/app/boletins'
+    | '/app/complete-perfil'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -403,6 +414,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
+    | '/app/complete-perfil'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -560,6 +572,13 @@ declare module '@tanstack/react-router' {
       path: '/estadios'
       fullPath: '/app/estadios'
       preLoaderRoute: typeof AppEstadiosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/complete-perfil': {
+      id: '/app/complete-perfil'
+      path: '/complete-perfil'
+      fullPath: '/app/complete-perfil'
+      preLoaderRoute: typeof AppCompletePerfilRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/boletins': {
@@ -721,6 +740,7 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppBoletinsRoute: typeof AppBoletinsRoute
+  AppCompletePerfilRoute: typeof AppCompletePerfilRoute
   AppEstadiosRoute: typeof AppEstadiosRoute
   AppJogosRoute: typeof AppJogosRoute
   AppPalpitesRoute: typeof AppPalpitesRoute
@@ -739,6 +759,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
   AppBoletinsRoute: AppBoletinsRoute,
+  AppCompletePerfilRoute: AppCompletePerfilRoute,
   AppEstadiosRoute: AppEstadiosRoute,
   AppJogosRoute: AppJogosRoute,
   AppPalpitesRoute: AppPalpitesRoute,
