@@ -245,8 +245,24 @@ function PalpiteCard({
     setEditing(false);
   };
 
+  const dataFmt = jogo.data_jogo
+    ? new Date(jogo.data_jogo).toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
   return (
     <article id={`match-${jogo.id}`} className="rounded-2xl border border-border bg-card p-5 shadow-card">
+      {dataFmt && (
+        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+          {dataFmt} (Brasília)
+        </p>
+      )}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="font-semibold">{header}</span>
         <span className="flex items-center gap-2">
