@@ -324,19 +324,34 @@ function PalpiteCard({
       {editing && placarInvalido && (
         <p className="mt-2 text-right text-[11px] font-bold text-destructive">Placar deve estar entre 0 e 20</p>
       )}
-            </>
-          ) : (
-            <button
-              onClick={() => setEditing(true)}
-              disabled={lockedByTime}
-              title={lockedByTime ? "Palpites encerrados para este jogo" : ""}
-              className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
-            >
-              {lockedByTime ? "Travado" : "Editar"}
-            </button>
-          )}
-        </div>
-      </div>
+    </article>
+  );
+}
+
+function ScoreDisplay({ value, editing, onChange, invalid }: { value: string; editing: boolean; onChange: (v: string) => void; invalid?: boolean }) {
+  if (editing) {
+    return (
+      <input
+        type="number"
+        min={0}
+        max={20}
+        step={1}
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="-"
+        className={`h-14 w-14 rounded-2xl border bg-secondary text-center font-display text-2xl font-black focus:outline-none focus:ring-2 ${
+          invalid ? "border-destructive focus:border-destructive focus:ring-destructive/30" : "border-border focus:border-primary focus:ring-primary/30"
+        }`}
+      />
+    );
+  }
+  return (
+    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-secondary/60 font-display text-2xl font-black text-foreground">
+      {value === "" ? "—" : value}
+    </div>
+  );
+}
     </article>
   );
 }
