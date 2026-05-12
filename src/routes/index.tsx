@@ -1,7 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import heroImg from "@/assets/hero-bolao.jpg";
 import { Trophy, Users, Wallet, Sparkles, Calendar, ListOrdered, ShieldCheck, Smartphone } from "lucide-react";
 import { HomeMatchCarousel } from "@/components/home-match-carousel";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,6 +18,16 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const navigate = useNavigate();
+  const { user, profile, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!user) return;
+    if (profile) navigate({ to: "/app", replace: true });
+    else navigate({ to: "/completar-perfil", replace: true });
+  }, [user, profile, isLoading, navigate]);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="absolute inset-x-0 top-0 z-20">
