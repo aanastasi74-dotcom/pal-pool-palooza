@@ -95,10 +95,23 @@ export function useRejectPayment() {
         .update({ status: "rejeitado", motivo_rejeicao: motivo, aprovado_por: user!.id, aprovado_em: new Date().toISOString() })
         .eq("id", payment_id).select().single();
       if (error) throw error;
+      // Propaga motivo + 3-strike pra quota associada
+      if (data.quota_id) {
+        const { data: q } = await supabase.from("quotas").select("tentativas_comprovante").eq("id", data.quota_id).maybeSingle();
+        const novas = ((q as any)?.tentativas_comprovante ?? 0) + 1;
+        const novoStatus = novas >= 3 ? "encerrada" : "rejeitada";
+        await supabase
+          .from("quotas")
+          .update({ status: novoStatus as any, motivo_rejeicao: motivo, tentativas_comprovante: novas } as any)
+          .eq("id", data.quota_id);
+      }
       supabase.functions.invoke("send-pagamento-rejeitado-email", { body: { payment_id } }).catch(() => {});
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["payments"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["payments"] });
+      qc.invalidateQueries({ queryKey: ["quotas"] });
+    },
   });
 }
 
