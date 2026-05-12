@@ -208,14 +208,24 @@ function PalpiteCard({
   const tFora = getTeamSide(jogo.team_away_id, jogo.slot_visitante, jogo.fora, teamMap);
   const header = buildHeader(jogo, stadiumMap);
 
+  const casaNum = casa === "" ? null : Number(casa);
+  const foraNum = fora === "" ? null : Number(fora);
+  const casaInvalido = casaNum != null && (Number.isNaN(casaNum) || casaNum < 0 || casaNum > 20);
+  const foraInvalido = foraNum != null && (Number.isNaN(foraNum) || foraNum < 0 || foraNum > 20);
+  const placarInvalido = casaInvalido || foraInvalido;
+
   const dirty =
     editing &&
     (casa !== (pred?.placar_casa != null ? String(pred.placar_casa) : "") ||
       fora !== (pred?.placar_fora != null ? String(pred.placar_fora) : ""));
 
   const salvar = () => {
-    const placar_casa = casa === "" ? null : Math.max(0, Math.min(99, Number(casa)));
-    const placar_fora = fora === "" ? null : Math.max(0, Math.min(99, Number(fora)));
+    if (placarInvalido) {
+      toast.error("Placar deve estar entre 0 e 20");
+      return;
+    }
+    const placar_casa = casaNum;
+    const placar_fora = foraNum;
     upsert.mutate(
       { quota_id: quotaId, match_id: jogo.id, placar_casa, placar_fora },
       {
