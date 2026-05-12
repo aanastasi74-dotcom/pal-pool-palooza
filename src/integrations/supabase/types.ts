@@ -457,6 +457,7 @@ export type Database = {
           nome: string
           notificacoes: Json | null
           role: string
+          sigla: string | null
           ultimo_acesso: string | null
         }
         Insert: {
@@ -470,6 +471,7 @@ export type Database = {
           nome: string
           notificacoes?: Json | null
           role?: string
+          sigla?: string | null
           ultimo_acesso?: string | null
         }
         Update: {
@@ -483,6 +485,7 @@ export type Database = {
           nome?: string
           notificacoes?: Json | null
           role?: string
+          sigla?: string | null
           ultimo_acesso?: string | null
         }
         Relationships: []
@@ -755,6 +758,7 @@ export type Database = {
         Returns: boolean
       }
       cleanup_quotas_incompletas: { Args: never; Returns: number }
+      compute_default_sigla: { Args: { p_nome: string }; Returns: string }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
       fase_atual_copa: { Args: never; Returns: string }
       get_arrecadacao_atual: { Args: never; Returns: number }
