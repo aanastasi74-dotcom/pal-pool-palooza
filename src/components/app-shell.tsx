@@ -28,13 +28,12 @@ const nav = [
 export function AppShell() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { signOut, isAdmin, profile } = useAuth();
+  const { signOut, isAdmin, profile, isLoading } = useAuth();
   const { data: minhasQuotas = [] } = useMinhasQuotas();
   const { maintenance } = useMaintenanceMode();
   const nome = profile?.nome ?? "Peraba";
   const apelido = (profile?.apelido ?? nome).slice(0, 2).toUpperCase();
 
-  const { isLoading } = useAuth();
   if (!isLoading && !profile) {
     return <Navigate to="/completar-perfil" />;
   }
