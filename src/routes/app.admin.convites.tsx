@@ -43,9 +43,13 @@ function ConvitesUsuarios() {
   const toggleAtivo = useToggleAtivo();
 
   const [novoOpen, setNovoOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [usuarioOpen, setUsuarioOpen] = useState<any | null>(null);
   const [filtroPapel, setFiltroPapel] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
+
+  const { data: perebasCount } = usePerebasCount();
+  const { data: quotasGlobal = 0 } = useQuotasGlobalCount();
 
   const [confirmRevogar, setConfirmRevogar] = useState<any | null>(null);
   const [confirmDesativar, setConfirmDesativar] = useState<any | null>(null);
@@ -84,6 +88,11 @@ function ConvitesUsuarios() {
         <p className="mt-1 text-sm text-muted-foreground">Quem entra e quem mexe no bolão.</p>
       </div>
 
+      <div className="grid gap-3 md:grid-cols-2">
+        <CounterCard label="Perebas" current={perebasCount?.total ?? 0} max={LIMITE_PEREBAS_HARD} hint={`${perebasCount?.signups ?? 0} cadastrados · ${perebasCount?.convites_pendentes ?? 0} convites pendentes`} />
+        <CounterCard label="Quotas" current={quotasGlobal} max={LIMITE_QUOTAS_HARD} hint="Ativas + aguardando aprovação" />
+      </div>
+
       <Tabs defaultValue="convites">
         <TabsList>
           <TabsTrigger value="convites">Convites</TabsTrigger>
@@ -101,7 +110,10 @@ function ConvitesUsuarios() {
             </select>
             <input value={conv.query} onChange={(e) => conv.setQuery(e.target.value)} placeholder="Buscar nome ou e-mail…" className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs" />
             <span className="text-xs text-muted-foreground">{conv.total} convite(s)</span>
-            <button onClick={() => setNovoOpen(true)} className="ml-auto flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
+            <button onClick={() => setBulkOpen(true)} className="ml-auto flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold">
+              <Upload className="h-3 w-3" /> Importar em lote
+            </button>
+            <button onClick={() => setNovoOpen(true)} className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
               <Plus className="h-3 w-3" /> Novo convite
             </button>
           </div>
