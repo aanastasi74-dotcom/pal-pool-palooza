@@ -48,20 +48,21 @@ export function BugReportFAB() {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg overflow-hidden">
           <DialogHeader>
             <DialogTitle>Reportar problema</DialogTitle>
             <DialogDescription>Conta o que tá quebrado que a gente arruma, peraba.</DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3">
-            <div>
+          <div className="w-full max-w-full space-y-3">
+            <div className="w-full max-w-full">
               <label className="text-xs font-bold">Descrição</label>
               <Textarea
                 rows={4}
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
                 placeholder="O que aconteceu? O que você esperava?"
+                className="w-full max-w-full"
               />
             </div>
             <div>
@@ -83,10 +84,10 @@ export function BugReportFAB() {
                 Crítico = afeta pontos/financeiro · Importante = quebrou em parte · Menor = cosmético/UX.
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground">
+            <div className="w-full max-w-full overflow-hidden rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground [overflow-wrap:anywhere] [word-break:break-word]">
               <p><strong>URL:</strong> {url}</p>
               <p><strong>Usuário:</strong> {nome} ({role})</p>
-              <p className="truncate"><strong>Navegador:</strong> {ua}</p>
+              <p className="[overflow-wrap:anywhere]"><strong>Navegador:</strong> {ua}</p>
               <p><strong>Quando:</strong> {new Date().toLocaleString("pt-BR")}</p>
             </div>
           </div>

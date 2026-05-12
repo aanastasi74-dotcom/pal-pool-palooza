@@ -13,6 +13,7 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as CompletarPerfilRouteImport } from './routes/completar-perfil'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -62,6 +63,11 @@ const LoginRoute = LoginRouteImport.update({
 const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
   id: '/esqueci-senha',
   path: '/esqueci-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompletarPerfilRoute = CompletarPerfilRouteImport.update({
+  id: '/completar-perfil',
+  path: '/completar-perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -218,6 +224,7 @@ const AppAdminAuditoriaRoute = AppAdminAuditoriaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/completar-perfil': typeof CompletarPerfilRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
@@ -253,6 +260,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/completar-perfil': typeof CompletarPerfilRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/completar-perfil': typeof CompletarPerfilRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/completar-perfil'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/completar-perfil'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/completar-perfil'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
@@ -434,6 +446,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  CompletarPerfilRoute: typeof CompletarPerfilRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   LoginRoute: typeof LoginRoute
   ManutencaoRoute: typeof ManutencaoRoute
@@ -469,6 +482,13 @@ declare module '@tanstack/react-router' {
       path: '/esqueci-senha'
       fullPath: '/esqueci-senha'
       preLoaderRoute: typeof EsqueciSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/completar-perfil': {
+      id: '/completar-perfil'
+      path: '/completar-perfil'
+      fullPath: '/completar-perfil'
+      preLoaderRoute: typeof CompletarPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -759,6 +779,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  CompletarPerfilRoute: CompletarPerfilRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   LoginRoute: LoginRoute,
   ManutencaoRoute: ManutencaoRoute,

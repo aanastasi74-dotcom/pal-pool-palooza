@@ -153,7 +153,18 @@ function Pagamentos() {
         title="Rejeitar pagamento?"
         description={
           <div className="space-y-2">
-            <p>O participante verá o status como rejeitado.</p>
+            <p>O participante verá o motivo e poderá reenviar o comprovante (até 3 tentativas).</p>
+            <select
+              value=""
+              onChange={(e) => e.target.value && setMotivo(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Sugestões de motivo…</option>
+              <option value="Comprovante ilegível">Comprovante ilegível</option>
+              <option value="Valor não bate (R$ 50)">Valor não bate (R$ 50)</option>
+              <option value="PIX pra chave errada">PIX pra chave errada</option>
+              <option value="Comprovante de outro pagamento">Comprovante de outro pagamento</option>
+            </select>
             <textarea
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}

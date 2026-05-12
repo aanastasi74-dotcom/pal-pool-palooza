@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
-const STATUS_VISIVEIS = ["aguardando_aprovacao", "ativa", "rejeitada"] as const;
+const STATUS_VISIVEIS = ["aguardando_aprovacao", "ativa", "rejeitada", "encerrada"] as const;
 
 export function useMinhasQuotas() {
   const { user } = useAuth();
