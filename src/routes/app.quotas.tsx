@@ -90,7 +90,7 @@ function QuotasPage() {
                 {q.status === "encerrada" && (
                   <div className="mt-3 rounded-xl border border-muted-foreground/30 bg-muted/40 p-3 text-xs">
                     <p className="font-bold">Quota encerrada após 3 tentativas.</p>
-                    <p className="mt-1 text-muted-foreground">Clique em "Comprar nova quota" pra começar uma nova.</p>
+                    <p className="mt-1 text-muted-foreground">Clique em "Comprar quotas" pra começar uma nova.</p>
                   </div>
                 )}
 
