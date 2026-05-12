@@ -90,7 +90,7 @@ export function useRanking() {
         palpites_validos: 0,
         palpites_possiveis: 0,
         elegivel_lanterna: false,
-        profile: { id: r.user_id, nome: r.nome, apelido: r.apelido, cor: r.cor },
+        profile: { id: r.user_id, nome: r.nome, apelido: r.apelido, cor: r.cor, sigla: r.sigla },
       }));
     },
   });
