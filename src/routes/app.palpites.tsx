@@ -264,9 +264,9 @@ function PalpiteCard({
           <span className="text-3xl">{tCasa.bandeira}</span>
         </div>
         <div className="flex items-center gap-2">
-          <ScoreDisplay value={casa} editing={editing} onChange={setCasa} />
+          <ScoreDisplay value={casa} editing={editing} onChange={setCasa} invalid={casaInvalido} />
           <span className="text-xl font-bold text-muted-foreground">×</span>
-          <ScoreDisplay value={fora} editing={editing} onChange={setFora} />
+          <ScoreDisplay value={fora} editing={editing} onChange={setFora} invalid={foraInvalido} />
         </div>
         <div className="flex items-center gap-3">
           <span className="text-3xl">{tFora.bandeira}</span>
@@ -303,11 +303,27 @@ function PalpiteCard({
               </button>
               <button
                 onClick={salvar}
-                disabled={upsert.isPending || lockedByTime}
+                disabled={upsert.isPending || lockedByTime || placarInvalido}
                 className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
               >
                 {upsert.isPending ? "Salvando…" : "Salvar palpite"}
               </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setEditing(true)}
+              disabled={lockedByTime}
+              title={lockedByTime ? "Palpites encerrados para este jogo" : ""}
+              className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
+            >
+              {lockedByTime ? "Travado" : "Editar"}
+            </button>
+          )}
+        </div>
+      </div>
+      {editing && placarInvalido && (
+        <p className="mt-2 text-right text-[11px] font-bold text-destructive">Placar deve estar entre 0 e 20</p>
+      )}
             </>
           ) : (
             <button
