@@ -258,11 +258,6 @@ function PalpiteCard({
 
   return (
     <article id={`match-${jogo.id}`} className="rounded-2xl border border-border bg-card p-5 shadow-card">
-      {dataFmt && (
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
-          {dataFmt} (Brasília)
-        </p>
-      )}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="font-semibold">{header}</span>
         <span className="flex items-center gap-2">
@@ -274,6 +269,11 @@ function PalpiteCard({
           peso {jogo.peso}
         </span>
       </div>
+      {dataFmt && (
+        <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+          {dataFmt} (Brasília)
+        </p>
+      )}
       <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
         <div className="flex items-center justify-end gap-3">
           <p className="hidden font-display font-bold sm:block">{tCasa.nome}</p>
