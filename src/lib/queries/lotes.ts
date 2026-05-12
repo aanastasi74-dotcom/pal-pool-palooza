@@ -376,11 +376,12 @@ export function useRejectLote() {
 
       const now = new Date().toISOString();
       const novasTent = (lote.tentativas_comprovante ?? 0) + 1;
+      const loteEncerrado = novasTent >= 3;
 
       await supabase
         .from("lotes_compra")
         .update({
-          status: "rejeitado",
+          status: loteEncerrado ? "encerrado" : "rejeitado",
           motivo_rejeicao: motivo,
           tentativas_comprovante: novasTent,
           decidido_em: now,
@@ -394,13 +395,13 @@ export function useRejectLote() {
           .in("id", payments.map((p: any) => p.id));
       }
 
-      for (const q of quotas) {
-        const novas = (q.tentativas_comprovante ?? 0) + 1;
-        const novoStatus = novas >= 3 ? "encerrada" : "rejeitada";
+      // 3-strike no nível do lote — não incrementar tentativas individuais das quotas.
+      const novoStatusQuota = loteEncerrado ? "encerrada" : "rejeitada";
+      if (quotas.length) {
         await supabase
           .from("quotas")
-          .update({ status: novoStatus, motivo_rejeicao: motivo, tentativas_comprovante: novas } as any)
-          .eq("id", q.id);
+          .update({ status: novoStatusQuota, motivo_rejeicao: motivo } as any)
+          .in("id", quotas.map((q: any) => q.id));
       }
 
       supabase.functions
