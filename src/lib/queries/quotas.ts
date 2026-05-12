@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
+const STATUS_VISIVEIS = ["aguardando_aprovacao", "ativa", "rejeitada"] as const;
+
 export function useMinhasQuotas() {
   const { user } = useAuth();
   return useQuery({
@@ -9,7 +11,11 @@ export function useMinhasQuotas() {
     enabled: !!user?.id,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("quotas").select("*").eq("user_id", user!.id).order("numero", { ascending: true });
+        .from("quotas")
+        .select("*")
+        .eq("user_id", user!.id)
+        .in("status", STATUS_VISIVEIS as unknown as string[])
+        .order("numero", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
@@ -26,12 +32,22 @@ export function useCreateQuota() {
       if (pode === false) {
         throw new Error("As quotas foram encerradas — a Copa já começou. Boa sorte aos perebas inscritos! 🍀");
       }
-      const { data: existing } = await supabase
-        .from("quotas").select("numero").eq("user_id", user!.id).order("numero", { ascending: false }).limit(1);
-      const next = (existing?.[0]?.numero ?? 0) + 1;
+      // Reaproveita incompleta existente (sem comprovante enviado)
+      const { data: incompleta } = await supabase
+        .from("quotas")
+        .select("*")
+        .eq("user_id", user!.id)
+        .eq("status", "incompleta")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (incompleta) return incompleta;
+
       const { data, error } = await supabase
-        .from("quotas").insert({ user_id: user!.id, numero: next, status: "aguardando_aprovacao" })
-        .select().single();
+        .from("quotas")
+        .insert({ user_id: user!.id, numero: null as any, status: "incompleta" as any })
+        .select()
+        .single();
       if (error) throw error;
       return data;
     },

@@ -62,6 +62,14 @@ function Pagamento() {
         return;
       }
       await createPayment.mutateAsync({ quota_id, valor, comprovante_path: path });
+      // Promover quota incompleta -> aguardando_aprovacao + atribuir número
+      const { data: numero, error: numErr } = await (supabase as any).rpc("proximo_numero_quota", { p_user_id: user.id });
+      if (numErr) throw numErr;
+      await supabase
+        .from("quotas")
+        .update({ status: "aguardando_aprovacao" as any, numero })
+        .eq("id", quota_id)
+        .eq("status", "incompleta" as any);
       setEnviado(true);
       toast.success("Comprovante enviado! Aguarda a aprovação do admin.");
       setTimeout(() => navigate({ to: "/app/quotas" }), 1500);
