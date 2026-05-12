@@ -10,6 +10,7 @@ import { DataTablePagination } from "@/components/data-table-pagination";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { LotesPendentesSection } from "@/components/admin/lotes-pendentes-section";
 
 export const Route = createFileRoute("/app/admin/pagamentos")({
   head: () => ({ meta: [{ title: "Admin — Pagamentos" }] }),
