@@ -27,12 +27,14 @@ import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
 import { Route as AppJogosRouteImport } from './routes/app.jogos'
 import { Route as AppEstadiosRouteImport } from './routes/app.estadios'
+import { Route as AppComprarQuotaRouteImport } from './routes/app.comprar-quota'
 import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
 import { Route as AppPerebaUser_idRouteImport } from './routes/app.pereba.$user_id'
 import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4'
 import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
+import { Route as AppPagamentoLoteLote_idRouteImport } from './routes/app.pagamento-lote.$lote_id'
 import { Route as AppAdminSaudeRouteImport } from './routes/app.admin.saude'
 import { Route as AppAdminReportesRouteImport } from './routes/app.admin.reportes'
 import { Route as AppAdminRelatoriosRouteImport } from './routes/app.admin.relatorios'
@@ -135,6 +137,11 @@ const AppEstadiosRoute = AppEstadiosRouteImport.update({
   path: '/estadios',
   getParentRoute: () => AppRoute,
 } as any)
+const AppComprarQuotaRoute = AppComprarQuotaRouteImport.update({
+  id: '/comprar-quota',
+  path: '/comprar-quota',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBoletinsRoute = AppBoletinsRouteImport.update({
   id: '/boletins',
   path: '/boletins',
@@ -163,6 +170,11 @@ const AppPalpitesTop4Route = AppPalpitesTop4RouteImport.update({
 const AppPagamentoQuota_idRoute = AppPagamentoQuota_idRouteImport.update({
   id: '/pagamento/$quota_id',
   path: '/pagamento/$quota_id',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPagamentoLoteLote_idRoute = AppPagamentoLoteLote_idRouteImport.update({
+  id: '/pagamento-lote/$lote_id',
+  path: '/pagamento-lote/$lote_id',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminSaudeRoute = AppAdminSaudeRouteImport.update({
@@ -231,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -253,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
@@ -266,6 +280,7 @@ export interface FileRoutesByTo {
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -288,6 +303,7 @@ export interface FileRoutesByTo {
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
@@ -304,6 +320,7 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -326,6 +343,7 @@ export interface FileRoutesById {
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites_/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
@@ -343,6 +361,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
+    | '/app/comprar-quota'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -365,6 +384,7 @@ export interface FileRouteTypes {
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
     | '/app/pereba/$user_id'
@@ -378,6 +398,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/redefinir-senha'
     | '/app/boletins'
+    | '/app/comprar-quota'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -400,6 +421,7 @@ export interface FileRouteTypes {
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
     | '/app/pereba/$user_id'
@@ -415,6 +437,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
+    | '/app/comprar-quota'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -437,6 +460,7 @@ export interface FileRouteTypes {
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites_/top4'
     | '/app/pereba/$user_id'
@@ -582,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEstadiosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/comprar-quota': {
+      id: '/app/comprar-quota'
+      path: '/comprar-quota'
+      fullPath: '/app/comprar-quota'
+      preLoaderRoute: typeof AppComprarQuotaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/boletins': {
       id: '/app/boletins'
       path: '/boletins'
@@ -622,6 +653,13 @@ declare module '@tanstack/react-router' {
       path: '/pagamento/$quota_id'
       fullPath: '/app/pagamento/$quota_id'
       preLoaderRoute: typeof AppPagamentoQuota_idRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pagamento-lote/$lote_id': {
+      id: '/app/pagamento-lote/$lote_id'
+      path: '/pagamento-lote/$lote_id'
+      fullPath: '/app/pagamento-lote/$lote_id'
+      preLoaderRoute: typeof AppPagamentoLoteLote_idRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/admin/saude': {
@@ -741,6 +779,7 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppBoletinsRoute: typeof AppBoletinsRoute
+  AppComprarQuotaRoute: typeof AppComprarQuotaRoute
   AppEstadiosRoute: typeof AppEstadiosRoute
   AppJogosRoute: typeof AppJogosRoute
   AppPalpitesRoute: typeof AppPalpitesRoute
@@ -751,6 +790,7 @@ interface AppRouteChildren {
   AppSimuladorRoute: typeof AppSimuladorRoute
   AppTimesRoute: typeof AppTimesRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppPagamentoLoteLote_idRoute: typeof AppPagamentoLoteLote_idRoute
   AppPagamentoQuota_idRoute: typeof AppPagamentoQuota_idRoute
   AppPalpitesTop4Route: typeof AppPalpitesTop4Route
   AppPerebaUser_idRoute: typeof AppPerebaUser_idRoute
@@ -759,6 +799,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
   AppBoletinsRoute: AppBoletinsRoute,
+  AppComprarQuotaRoute: AppComprarQuotaRoute,
   AppEstadiosRoute: AppEstadiosRoute,
   AppJogosRoute: AppJogosRoute,
   AppPalpitesRoute: AppPalpitesRoute,
@@ -769,6 +810,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSimuladorRoute: AppSimuladorRoute,
   AppTimesRoute: AppTimesRoute,
   AppIndexRoute: AppIndexRoute,
+  AppPagamentoLoteLote_idRoute: AppPagamentoLoteLote_idRoute,
   AppPagamentoQuota_idRoute: AppPagamentoQuota_idRoute,
   AppPalpitesTop4Route: AppPalpitesTop4Route,
   AppPerebaUser_idRoute: AppPerebaUser_idRoute,
@@ -789,3 +831,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
