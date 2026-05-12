@@ -18,7 +18,7 @@ export function useRankingDiario(data?: string) {
         exatos: Number(r.exatos ?? 0),
         resultados: Number(r.resultados ?? 0),
         posicao: r.posicao,
-        profile: { id: r.user_id, nome: r.nome, apelido: r.apelido, cor: r.cor },
+        profile: { id: r.user_id, nome: r.nome, apelido: r.apelido, cor: r.cor, sigla: r.sigla },
       }));
     },
   });

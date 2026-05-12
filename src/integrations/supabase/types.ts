@@ -816,6 +816,7 @@ export type Database = {
           cor: string
           id: string
           nome: string
+          sigla: string
         }[]
       }
       get_ranking_diario: {
@@ -830,6 +831,7 @@ export type Database = {
           posicao: number
           quota_id: string
           resultados: number
+          sigla: string
           user_id: string
         }[]
       }
@@ -845,6 +847,7 @@ export type Database = {
           posicao: number
           quota_id: string
           resultados: number
+          sigla: string
           user_id: string
         }[]
       }

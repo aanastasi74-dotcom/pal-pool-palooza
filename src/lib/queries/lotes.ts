@@ -142,17 +142,17 @@ export function useSubmitComprovanteLote() {
         .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
       if (upErr) throw upErr;
 
-      // Get current lote + quotas
+      // Get current lote + quotas (incompleta OR rejeitada — both reuse the same flow)
       const { data: lote } = await supabase.from("lotes_compra").select("*").eq("id", loteId).single();
       const { data: quotas } = await supabase
         .from("quotas")
         .select("*")
         .eq("lote_id", loteId)
-        .eq("status", "incompleta")
+        .in("status", ["incompleta", "rejeitada"])
         .order("created_at", { ascending: true });
       if (!lote || !quotas || quotas.length === 0) throw new Error("Lote inválido.");
 
-      // Compute starting numero
+      // Compute starting numero (only used when quota does not yet have one)
       const { data: maxRow } = await supabase
         .from("quotas")
         .select("numero")
@@ -163,6 +163,7 @@ export function useSubmitComprovanteLote() {
         .maybeSingle();
       let nextNumero = (maxRow?.numero ?? 0) + 1;
 
+      // Lote: only the lote tracks tentativas (3-strike no nível do lote)
       await supabase
         .from("lotes_compra")
         .update({
@@ -173,21 +174,46 @@ export function useSubmitComprovanteLote() {
         })
         .eq("id", loteId);
 
-      // Update each quota sequentially & insert payment
+      // Existing payments for this lote (re-submission case)
+      const { data: existingPayments } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("lote_id", loteId);
+      const payByQuota = new Map((existingPayments ?? []).map((p: any) => [p.quota_id, p]));
+
       for (const q of quotas) {
+        const numeroFinal = q.numero ?? nextNumero;
+        if (q.numero == null) nextNumero += 1;
         await supabase
           .from("quotas")
-          .update({ status: "aguardando_aprovacao", numero: nextNumero, motivo_rejeicao: null } as any)
+          .update({
+            status: "aguardando_aprovacao",
+            numero: numeroFinal,
+            motivo_rejeicao: null,
+          } as any)
           .eq("id", q.id);
-        await supabase.from("payments").insert({
-          user_id: user.id,
-          quota_id: q.id,
-          lote_id: loteId,
-          valor: VALOR_QUOTA,
-          comprovante_path: path,
-          status: "pendente",
-        } as any);
-        nextNumero += 1;
+        const existingPay = payByQuota.get(q.id);
+        if (existingPay) {
+          await supabase
+            .from("payments")
+            .update({
+              status: "pendente",
+              comprovante_path: path,
+              motivo_rejeicao: null,
+              aprovado_em: null,
+              aprovado_por: null,
+            } as any)
+            .eq("id", existingPay.id);
+        } else {
+          await supabase.from("payments").insert({
+            user_id: user.id,
+            quota_id: q.id,
+            lote_id: loteId,
+            valor: VALOR_QUOTA,
+            comprovante_path: path,
+            status: "pendente",
+          } as any);
+        }
       }
 
       return { loteId, count: quotas.length };
@@ -196,6 +222,23 @@ export function useSubmitComprovanteLote() {
       qc.invalidateQueries({ queryKey: ["quotas"] });
       qc.invalidateQueries({ queryKey: ["lotes"] });
       qc.invalidateQueries({ queryKey: ["payments"] });
+    },
+  });
+}
+
+export function useMyLotes() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["lotes", "mine", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lotes_compra")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("criado_em", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
     },
   });
 }
@@ -333,11 +376,12 @@ export function useRejectLote() {
 
       const now = new Date().toISOString();
       const novasTent = (lote.tentativas_comprovante ?? 0) + 1;
+      const loteEncerrado = novasTent >= 3;
 
       await supabase
         .from("lotes_compra")
         .update({
-          status: "rejeitado",
+          status: loteEncerrado ? "encerrado" : "rejeitado",
           motivo_rejeicao: motivo,
           tentativas_comprovante: novasTent,
           decidido_em: now,
@@ -351,13 +395,13 @@ export function useRejectLote() {
           .in("id", payments.map((p: any) => p.id));
       }
 
-      for (const q of quotas) {
-        const novas = (q.tentativas_comprovante ?? 0) + 1;
-        const novoStatus = novas >= 3 ? "encerrada" : "rejeitada";
+      // 3-strike no nível do lote — não incrementar tentativas individuais das quotas.
+      const novoStatusQuota = loteEncerrado ? "encerrada" : "rejeitada";
+      if (quotas.length) {
         await supabase
           .from("quotas")
-          .update({ status: novoStatus, motivo_rejeicao: motivo, tentativas_comprovante: novas } as any)
-          .eq("id", q.id);
+          .update({ status: novoStatusQuota, motivo_rejeicao: motivo } as any)
+          .in("id", quotas.map((q: any) => q.id));
       }
 
       supabase.functions

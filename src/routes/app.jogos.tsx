@@ -112,6 +112,9 @@ function Jogos() {
                     <span>peso {j.peso}</span>
                   </span>
                 </div>
+                <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                  {fmtData(j.data_jogo)} · {fmtHora(j.data_jogo)} (Brasília)
+                </p>
 
                 <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
                   <div className="flex items-center justify-end gap-3">
@@ -125,7 +128,7 @@ function Jogos() {
                     {j.status === "encerrado" || j.status === "ao-vivo" ? (
                       <p className="font-display text-3xl font-black">{j.placar_casa} <span className="text-muted-foreground">·</span> {j.placar_fora}</p>
                     ) : (
-                      <p className="font-display text-lg font-bold">{fmtData(j.data_jogo)}<br /><span className="text-sm text-muted-foreground">{fmtHora(j.data_jogo)}</span></p>
+                      <p className="font-display text-2xl font-black text-muted-foreground">×</p>
                     )}
                   </div>
 

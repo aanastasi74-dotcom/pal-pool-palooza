@@ -17,11 +17,13 @@ function Perfil() {
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const [apelido, setApelido] = useState("");
+  const [sigla, setSigla] = useState("");
   const [notif, setNotif] = useState<{ whatsapp: boolean; email: boolean; antesDeTravar: boolean }>({ whatsapp: true, email: true, antesDeTravar: true });
 
   useEffect(() => {
     if (profile) {
       setApelido(profile.apelido ?? "");
+      setSigla(((profile as any).sigla ?? "") as string);
       const n = (profile.notificacoes ?? {}) as Record<string, boolean>;
       setNotif({
         whatsapp: n.whatsapp ?? true,
@@ -42,8 +44,8 @@ function Perfil() {
 
       <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
         <div className="flex items-center gap-4">
-          <div className="grid h-16 w-16 place-items-center rounded-full bg-gold font-display text-xl font-bold text-gold-foreground">
-            {(apelido || "??").slice(0, 2).toUpperCase()}
+          <div className="grid h-16 w-16 place-items-center rounded-full bg-gold font-display text-lg font-bold text-gold-foreground">
+            {(sigla || apelido || "??").slice(0, 3).toUpperCase()}
           </div>
           <div>
             <p className="font-display text-xl font-bold">{profile.nome}</p>
@@ -54,13 +56,26 @@ function Perfil() {
           </div>
         </div>
 
-        <div className="mt-6">
-          <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Apelido no bolão</label>
-          <input
-            value={apelido}
-            onChange={(e) => setApelido(e.target.value)}
-            className="mt-2 w-full rounded-2xl border border-border bg-secondary px-4 py-3 font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
-          />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Apelido no bolão</label>
+            <input
+              value={apelido}
+              onChange={(e) => setApelido(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-border bg-secondary px-4 py-3 font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Sigla (até 3 letras)</label>
+            <input
+              value={sigla}
+              onChange={(e) => setSigla(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3))}
+              maxLength={3}
+              placeholder="GPS"
+              className="mt-2 w-full rounded-2xl border border-border bg-secondary px-4 py-3 font-display font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">Aparece no avatar do ranking.</p>
+          </div>
         </div>
       </section>
 
@@ -91,7 +106,7 @@ function Perfil() {
         disabled={updateProfile.isPending}
         onClick={() =>
           updateProfile.mutate(
-            { apelido, notificacoes: notif },
+            { apelido, sigla: sigla || null, notificacoes: notif } as any,
             {
               onSuccess: () => toast.success("Perfil atualizado, pereba!"),
               onError: () => toast.error("Não foi possível salvar agora."),

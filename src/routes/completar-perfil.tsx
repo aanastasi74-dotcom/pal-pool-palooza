@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trophy, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,8 +19,11 @@ function CompletePerfil() {
   const navigate = useNavigate();
   const [nome, setNome] = useState("");
   const [apelido, setApelido] = useState("");
+  const [sigla, setSigla] = useState("");
+  const [siglaTouched, setSiglaTouched] = useState(false);
   const [cor, setCor] = useState(PALETA[0]);
   const [submitting, setSubmitting] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: disponivel, isFetching } = useCheckApelido(apelido);
 
@@ -40,11 +43,25 @@ function CompletePerfil() {
     setApelido(fallbackApelido);
   }, [user, profile, isLoading, navigate]);
 
+  // Auto-suggest sigla a partir do nome (debounced) enquanto pereba não digitou
+  useEffect(() => {
+    if (siglaTouched) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      const target = nome.trim();
+      if (!target) { setSigla(""); return; }
+      const { data } = await (supabase as any).rpc("compute_default_sigla", { p_nome: target });
+      setSigla((data ?? "") as string);
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [nome, siglaTouched]);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     if (nome.trim().length < 2) return toast.error("Informa um nome.");
     if (apelido.trim().length < 2) return toast.error("Apelido tem que ter pelo menos 2 letras.");
+    if (sigla.trim().length < 1) return toast.error("Escolha uma sigla de até 3 letras.");
     if (disponivel === false) return toast.error("Esse apelido já está em uso.");
     setSubmitting(true);
     const { error } = await supabase.from("profiles").insert({
@@ -52,8 +69,9 @@ function CompletePerfil() {
       email: user.email!,
       nome: nome.trim(),
       apelido: apelido.trim().toUpperCase(),
+      sigla: sigla.trim().toUpperCase(),
       cor,
-    });
+    } as any);
     setSubmitting(false);
     if (error) {
       toast.error(translatePgError(error));
@@ -104,6 +122,20 @@ function CompletePerfil() {
             {!isFetching && disponivel === false && (
               <p className="mt-1 text-xs text-destructive">Esse apelido já está em uso.</p>
             )}
+          </div>
+          <div>
+            <label className="text-xs font-semibold">Sigla (até 3 letras)</label>
+            <input
+              value={sigla}
+              onChange={(e) => {
+                setSiglaTouched(true);
+                setSigla(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3));
+              }}
+              maxLength={3}
+              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm uppercase tracking-widest"
+              placeholder="GPS"
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">Use até 3 letras pro seu avatar no ranking.</p>
           </div>
           <div>
             <label className="text-xs font-semibold">Sua cor</label>
