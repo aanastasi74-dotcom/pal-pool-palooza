@@ -17,11 +17,13 @@ function Perfil() {
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const [apelido, setApelido] = useState("");
+  const [sigla, setSigla] = useState("");
   const [notif, setNotif] = useState<{ whatsapp: boolean; email: boolean; antesDeTravar: boolean }>({ whatsapp: true, email: true, antesDeTravar: true });
 
   useEffect(() => {
     if (profile) {
       setApelido(profile.apelido ?? "");
+      setSigla(((profile as any).sigla ?? "") as string);
       const n = (profile.notificacoes ?? {}) as Record<string, boolean>;
       setNotif({
         whatsapp: n.whatsapp ?? true,
