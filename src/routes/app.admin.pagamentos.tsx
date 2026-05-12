@@ -79,6 +79,8 @@ function Pagamentos() {
         <p className="mt-1 text-sm text-muted-foreground">Conciliação dos Pix da perebada.</p>
       </div>
 
+      <LotesPendentesSection />
+
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card">
         <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs">
           <option value="todos">Todos status</option>
