@@ -93,7 +93,7 @@ function Pagamento() {
         contentType: arquivo.type,
       });
       if (upErr) {
-        toast.error("Não conseguimos enviar o comprovante. Tenta de novo, peraba.");
+        toast.error("Não conseguimos enviar o comprovante. Tenta de novo, pereba.");
         setEnviando(false);
         return;
       }

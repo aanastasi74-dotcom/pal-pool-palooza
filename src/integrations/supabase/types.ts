@@ -443,6 +443,7 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
+          limite_quotas_custom: number | null
           nome: string
           notificacoes: Json | null
           role: string
@@ -455,6 +456,7 @@ export type Database = {
           created_at?: string | null
           email: string
           id: string
+          limite_quotas_custom?: number | null
           nome: string
           notificacoes?: Json | null
           role?: string
@@ -467,6 +469,7 @@ export type Database = {
           created_at?: string | null
           email?: string
           id?: string
+          limite_quotas_custom?: number | null
           nome?: string
           notificacoes?: Json | null
           role?: string
@@ -719,7 +722,14 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vw_perebas_count: {
+        Row: {
+          convites_pendentes: number | null
+          signups: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_set_ativo: {
@@ -737,6 +747,8 @@ export type Database = {
       cleanup_quotas_incompletas: { Args: never; Returns: number }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
       fase_atual_copa: { Args: never; Returns: string }
+      get_arrecadacao_atual: { Args: never; Returns: number }
+      get_arrecadacao_potencial: { Args: never; Returns: number }
       get_invite_by_token: {
         Args: { p_token: string }
         Returns: {
@@ -823,7 +835,12 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      limite_perebas_hard: { Args: never; Returns: number }
+      limite_quotas_global_hard: { Args: never; Returns: number }
+      limite_quotas_pereba: { Args: { p_user_id: string }; Returns: number }
+      pode_comprar_quota: { Args: { p_user_id: string }; Returns: Json }
       pode_criar_quota: { Args: never; Returns: boolean }
+      pode_emitir_convite: { Args: never; Returns: Json }
       promote_to_admin: { Args: { p_email: string }; Returns: string }
       proximo_numero_quota: { Args: { p_user_id: string }; Returns: number }
       recompute_peso_jogos: { Args: never; Returns: undefined }

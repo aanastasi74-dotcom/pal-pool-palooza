@@ -83,7 +83,7 @@ function Jogos() {
         <EmptyState
           icon={CalendarSearch}
           title="Sem jogos cadastrados"
-          description="Jogos ainda não foram cadastrados. Aguarda os admins importarem o calendário, peraba."
+          description="Jogos ainda não foram cadastrados. Aguarda os admins importarem o calendário, pereba."
         />
       ) : lista.length === 0 ? (
         <EmptyState

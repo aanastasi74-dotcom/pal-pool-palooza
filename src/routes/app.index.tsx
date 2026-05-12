@@ -169,7 +169,7 @@ function Home() {
               </>
             ) : (
               <div className="mt-3">
-                <EmptyState icon={Newspaper} title="Boletim ainda não saiu, peraba" description="Quando sair, aparece aqui." />
+                <EmptyState icon={Newspaper} title="Boletim ainda não saiu, pereba" description="Quando sair, aparece aqui." />
               </div>
             )}
           </div>
@@ -225,7 +225,7 @@ function LanternaAviso() {
         <div className="flex-1">
           <p className="font-display text-sm font-bold">
             {elegivel
-              ? "Sua quota tá no fundo, mas elegível ao lanterninha. Mantém o ritmo, peraba."
+              ? "Sua quota tá no fundo, mas elegível ao lanterninha. Mantém o ritmo, pereba."
               : "Sua quota está nos 25% finais. Lanterninha vale 5% do prêmio — mas só pra quem palpitou direito."}
           </p>
           <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">

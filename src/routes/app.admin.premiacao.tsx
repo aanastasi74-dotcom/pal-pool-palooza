@@ -51,7 +51,7 @@ function PremiacaoAdmin() {
       key: "prize_distribution",
       value: { meta_arrecadacao: meta, custos, campeao_pct: pcts[0], vice_pct: pcts[1], terceiro_pct: pcts[2], lanterninha_pct: pcts[3] },
     });
-    toast.success("Configurações salvas, peraba-admin.");
+    toast.success("Configurações salvas, pereba-admin.");
   };
 
   return (

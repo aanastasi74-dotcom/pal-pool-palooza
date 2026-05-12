@@ -59,7 +59,7 @@ function CompletePerfil() {
       toast.error(translatePgError(error));
       return;
     }
-    toast.success("Perfil criado, peraba!");
+    toast.success("Perfil criado, pereba!");
     window.location.href = "/app";
   };
 

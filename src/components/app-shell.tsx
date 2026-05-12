@@ -31,7 +31,7 @@ export function AppShell() {
   const { signOut, isAdmin, profile, isLoading } = useAuth();
   const { data: minhasQuotas = [] } = useMinhasQuotas();
   const { maintenance } = useMaintenanceMode();
-  const nome = profile?.nome ?? "Peraba";
+  const nome = profile?.nome ?? "Pereba";
   const apelido = (profile?.apelido ?? nome).slice(0, 2).toUpperCase();
 
   if (!isLoading && !profile) {
@@ -87,7 +87,7 @@ export function AppShell() {
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Olá, peraba!</DropdownMenuLabel>
+                <DropdownMenuLabel>Olá, pereba!</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate({ to: "/app/perfil" })}>
                   <User className="mr-2 h-4 w-4" /> Meu perfil
