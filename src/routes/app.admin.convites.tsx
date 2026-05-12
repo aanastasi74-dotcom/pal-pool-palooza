@@ -181,6 +181,7 @@ function ConvitesUsuarios() {
       </Tabs>
 
       <NovoConviteDialog open={novoOpen} onOpenChange={setNovoOpen} />
+      <BulkConviteDialog open={bulkOpen} onOpenChange={setBulkOpen} />
 
       <Sheet open={!!usuarioOpen} onOpenChange={(v) => !v && setUsuarioOpen(null)}>
         <SheetContent>
@@ -189,6 +190,7 @@ function ConvitesUsuarios() {
               <SheetHeader><SheetTitle>{usuarioOpen.nome}</SheetTitle></SheetHeader>
               <div className="mt-4 space-y-3 text-sm">
                 <p className="text-muted-foreground">{usuarioOpen.email}</p>
+                <LimiteCustomEditor user={usuarioOpen} onSaved={(novo) => setUsuarioOpen({ ...usuarioOpen, limite_quotas_custom: novo })} />
                 <div className="flex gap-2">
                   <button
                     onClick={async () => {
