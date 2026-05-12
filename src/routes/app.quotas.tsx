@@ -24,14 +24,6 @@ function QuotasPage() {
   const { data: quotas = [], isLoading } = useMinhasQuotas();
   const { data: totalQuotas = 0 } = useTotalQuotas();
   const { data: podeCriar = true } = usePodeCriarQuota();
-  const createQuota = useCreateQuota();
-
-  const handleCreate = () => {
-    createQuota.mutate(undefined, {
-      onSuccess: (q: any) => navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } }),
-      onError: (e: any) => toast.error(e?.message ?? "Não conseguimos criar a quota agora."),
-    });
-  };
 
   return (
     <div className="space-y-6">
@@ -42,11 +34,10 @@ function QuotasPage() {
         </div>
         {podeCriar ? (
           <button
-            onClick={handleCreate}
-            disabled={createQuota.isPending}
-            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+            onClick={() => navigate({ to: "/app/comprar-quota" })}
+            className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-glow"
           >
-            <Plus className="h-4 w-4" /> {createQuota.isPending ? "Criando…" : "Comprar nova quota"}
+            <Plus className="h-4 w-4" /> Comprar quotas
           </button>
         ) : null}
       </div>
