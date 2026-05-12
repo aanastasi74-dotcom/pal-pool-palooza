@@ -85,7 +85,7 @@ function Palpites() {
       <EmptyState
         icon={Sparkles}
         title="Você ainda não tem quotas"
-        description="Compra uma quota pra começar a palpitar, peraba."
+        description="Compra uma quota pra começar a palpitar, pereba."
       />
     );
   }
@@ -145,7 +145,7 @@ function Palpites() {
       {abertos.length === 0 ? (
         <EmptyState
           icon={Sparkles}
-          title="Aqui ainda não tem peraba palpitando"
+          title="Aqui ainda não tem pereba palpitando"
           description="Quando abrir a próxima rodada, é só vir cravar."
         />
       ) : (

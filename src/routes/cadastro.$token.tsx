@@ -88,7 +88,7 @@ function CadastroPage() {
         <div className="max-w-sm space-y-3 text-center">
           <h1 className="font-display text-2xl font-extrabold">Convite inválido</h1>
           <p className="text-sm text-muted-foreground">
-            Esse convite já não vale mais, peraba. Pede outro pro admin.
+            Esse convite já não vale mais, pereba. Pede outro pro admin.
           </p>
           <Link to="/" className="inline-block rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground">
             Voltar

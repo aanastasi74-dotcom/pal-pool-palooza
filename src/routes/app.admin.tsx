@@ -17,7 +17,7 @@ export const Route = createFileRoute("/app/admin")({
       .maybeSingle();
 
     if (!profile || profile.role !== "admin" || !profile.ativo) {
-      setTimeout(() => toast.error("Essa área é só pra admin, peraba."), 0);
+      setTimeout(() => toast.error("Essa área é só pra admin, pereba."), 0);
       throw redirect({ to: "/app" });
     }
   },

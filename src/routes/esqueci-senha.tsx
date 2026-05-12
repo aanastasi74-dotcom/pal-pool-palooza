@@ -39,7 +39,7 @@ function EsqueciSenhaPage() {
         </div>
         {done ? (
           <div className="rounded-2xl border border-border bg-card p-5 text-sm shadow-card">
-            <p>Se o e-mail está cadastrado, te mandamos um link. Confere a caixa de entrada (e o spam, peraba).</p>
+            <p>Se o e-mail está cadastrado, te mandamos um link. Confere a caixa de entrada (e o spam, pereba).</p>
             <Link to="/login" className="mt-4 inline-block text-xs font-bold text-primary">
               ← Voltar ao login
             </Link>

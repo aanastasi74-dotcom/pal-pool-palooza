@@ -56,7 +56,7 @@ function Configuracoes() {
       update.mutateAsync({ key: "lanterninha_rule", value: lanterninha }),
       update.mutateAsync({ key: "copa_start_date", value: new Date(copaStart).toISOString() }),
     ]);
-    toast.success("Configurações salvas, peraba-admin.");
+    toast.success("Configurações salvas, pereba-admin.");
   };
 
   const snapshot = async () => {
@@ -73,7 +73,7 @@ function Configuracoes() {
     a.download = `perebas-snapshot-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Snapshot baixado, peraba-admin.");
+    toast.success("Snapshot baixado, pereba-admin.");
   };
 
   return (

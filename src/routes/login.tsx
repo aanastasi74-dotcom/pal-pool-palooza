@@ -37,7 +37,7 @@ function LoginPage() {
     const { error } = await signIn(email.trim(), password);
     setSubmitting(false);
     if (error) {
-      toast.error("E-mail ou senha incorretos. Tenta de novo, peraba.");
+      toast.error("E-mail ou senha incorretos. Tenta de novo, pereba.");
       return;
     }
     navigate({ to: "/app" });

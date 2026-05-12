@@ -53,7 +53,7 @@ function PremioPage() {
 
       <section className="rounded-3xl border border-border bg-card p-5 shadow-card md:p-6">
         <h2 className="font-display text-lg font-bold">Evolução do prêmio</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Histórico ainda não tem dados, peraba.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Histórico ainda não tem dados, pereba.</p>
       </section>
 
       <section>
@@ -108,7 +108,7 @@ function PremioPage() {
             {(ultimas as any[]).map((c) => (
               <li key={c.id} className="flex items-center justify-between py-3 text-sm">
                 <span className="font-semibold">
-                  {c.profile?.apelido ?? c.profile?.nome ?? "Peraba"} #{c.quota?.numero ?? "—"}
+                  {c.profile?.apelido ?? c.profile?.nome ?? "Pereba"} #{c.quota?.numero ?? "—"}
                 </span>
                 <span className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="font-display font-bold text-foreground">{fmtBRL(Number(c.valor))}</span>

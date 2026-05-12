@@ -93,7 +93,7 @@ function Perfil() {
           updateProfile.mutate(
             { apelido, notificacoes: notif },
             {
-              onSuccess: () => toast.success("Perfil atualizado, peraba!"),
+              onSuccess: () => toast.success("Perfil atualizado, pereba!"),
               onError: () => toast.error("Não foi possível salvar agora."),
             },
           )

@@ -18,12 +18,12 @@ export function BugReportFAB() {
 
   const enviar = async () => {
     if (!descricao.trim()) {
-      toast.error("Conta o que aconteceu, peraba.");
+      toast.error("Conta o que aconteceu, pereba.");
       return;
     }
     try {
       await createReport.mutateAsync({ descricao: descricao.trim(), severidade });
-      toast.success("Reporte enviado, peraba!");
+      toast.success("Reporte enviado, pereba!");
       setDescricao("");
       setSeveridade("importante");
       setOpen(false);
@@ -51,7 +51,7 @@ export function BugReportFAB() {
         <DialogContent className="w-[calc(100vw-2rem)] max-w-lg overflow-hidden">
           <DialogHeader>
             <DialogTitle>Reportar problema</DialogTitle>
-            <DialogDescription>Conta o que tá quebrado que a gente arruma, peraba.</DialogDescription>
+            <DialogDescription>Conta o que tá quebrado que a gente arruma, pereba.</DialogDescription>
           </DialogHeader>
 
           <div className="w-full max-w-full space-y-3">
