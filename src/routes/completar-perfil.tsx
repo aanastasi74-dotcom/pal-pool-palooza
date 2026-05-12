@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useCheckApelido } from "@/lib/queries/public-profile";
 import { translatePgError } from "@/lib/error-messages";
 
-export const Route = createFileRoute("/app/complete-perfil")({
+export const Route = createFileRoute("/completar-perfil")({
   head: () => ({ meta: [{ title: "Complete seu perfil — Bolão dos Perebas" }] }),
   component: CompletePerfil,
 });

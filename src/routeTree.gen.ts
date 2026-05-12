@@ -13,6 +13,7 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as CompletarPerfilRouteImport } from './routes/completar-perfil'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -26,7 +27,6 @@ import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
 import { Route as AppJogosRouteImport } from './routes/app.jogos'
 import { Route as AppEstadiosRouteImport } from './routes/app.estadios'
-import { Route as AppCompletePerfilRouteImport } from './routes/app.complete-perfil'
 import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
@@ -63,6 +63,11 @@ const LoginRoute = LoginRouteImport.update({
 const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
   id: '/esqueci-senha',
   path: '/esqueci-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompletarPerfilRoute = CompletarPerfilRouteImport.update({
+  id: '/completar-perfil',
+  path: '/completar-perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -128,11 +133,6 @@ const AppJogosRoute = AppJogosRouteImport.update({
 const AppEstadiosRoute = AppEstadiosRouteImport.update({
   id: '/estadios',
   path: '/estadios',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCompletePerfilRoute = AppCompletePerfilRouteImport.update({
-  id: '/complete-perfil',
-  path: '/complete-perfil',
   getParentRoute: () => AppRoute,
 } as any)
 const AppBoletinsRoute = AppBoletinsRouteImport.update({
@@ -224,13 +224,13 @@ const AppAdminAuditoriaRoute = AppAdminAuditoriaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/completar-perfil': typeof CompletarPerfilRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
-  '/app/complete-perfil': typeof AppCompletePerfilRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -260,12 +260,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/completar-perfil': typeof CompletarPerfilRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/boletins': typeof AppBoletinsRoute
-  '/app/complete-perfil': typeof AppCompletePerfilRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -297,13 +297,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/completar-perfil': typeof CompletarPerfilRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
-  '/app/complete-perfil': typeof AppCompletePerfilRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
@@ -336,13 +336,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/completar-perfil'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
     | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
-    | '/app/complete-perfil'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -372,12 +372,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/completar-perfil'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
     | '/redefinir-senha'
     | '/app/boletins'
-    | '/app/complete-perfil'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -408,13 +408,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/completar-perfil'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
     | '/redefinir-senha'
     | '/app/admin'
     | '/app/boletins'
-    | '/app/complete-perfil'
     | '/app/estadios'
     | '/app/jogos'
     | '/app/palpites'
@@ -446,6 +446,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  CompletarPerfilRoute: typeof CompletarPerfilRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   LoginRoute: typeof LoginRoute
   ManutencaoRoute: typeof ManutencaoRoute
@@ -481,6 +482,13 @@ declare module '@tanstack/react-router' {
       path: '/esqueci-senha'
       fullPath: '/esqueci-senha'
       preLoaderRoute: typeof EsqueciSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/completar-perfil': {
+      id: '/completar-perfil'
+      path: '/completar-perfil'
+      fullPath: '/completar-perfil'
+      preLoaderRoute: typeof CompletarPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -572,13 +580,6 @@ declare module '@tanstack/react-router' {
       path: '/estadios'
       fullPath: '/app/estadios'
       preLoaderRoute: typeof AppEstadiosRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/complete-perfil': {
-      id: '/app/complete-perfil'
-      path: '/complete-perfil'
-      fullPath: '/app/complete-perfil'
-      preLoaderRoute: typeof AppCompletePerfilRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/boletins': {
@@ -740,7 +741,6 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppBoletinsRoute: typeof AppBoletinsRoute
-  AppCompletePerfilRoute: typeof AppCompletePerfilRoute
   AppEstadiosRoute: typeof AppEstadiosRoute
   AppJogosRoute: typeof AppJogosRoute
   AppPalpitesRoute: typeof AppPalpitesRoute
@@ -759,7 +759,6 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
   AppBoletinsRoute: AppBoletinsRoute,
-  AppCompletePerfilRoute: AppCompletePerfilRoute,
   AppEstadiosRoute: AppEstadiosRoute,
   AppJogosRoute: AppJogosRoute,
   AppPalpitesRoute: AppPalpitesRoute,
@@ -780,6 +779,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  CompletarPerfilRoute: CompletarPerfilRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   LoginRoute: LoginRoute,
   ManutencaoRoute: ManutencaoRoute,
@@ -789,3 +789,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
