@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Copy, Upload } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { createStaticPix, hasError } from "pix-utils";
+import { createStaticPix, hasError } from "@/lib/pix";
 import { useSetting } from "@/lib/queries/settings";
 import { useCreatePayment } from "@/lib/queries/payments";
 import { supabase } from "@/integrations/supabase/client";
