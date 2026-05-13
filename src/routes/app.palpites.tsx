@@ -194,6 +194,7 @@ function Palpites() {
     if (!quotaId || dirtyCards.length === 0) return;
     setSavingBulk(true);
     const invalidos: string[] = [];
+    const invalidosIds: string[] = [];
     const falhas: string[] = [];
     let salvos = 0;
 
@@ -201,6 +202,7 @@ function Palpites() {
       const inv = placarInvalido(state.casa) || placarInvalido(state.fora);
       if (inv) {
         invalidos.push(jogoLabel(jogo));
+        invalidosIds.push(jogo.id);
         return false;
       }
       return true;
@@ -222,12 +224,18 @@ function Palpites() {
       else falhas.push(jogoLabel(tarefas[i].jogo));
     });
 
-    // Cards que salvaram OK saem do modo edição
+    // Mantém em modo edição apenas os que falharam ou tinham placar inválido
     setEditStates((prev) => {
-      const next = new Map(prev);
-      results.forEach((r, i) => {
-        if (r.status === "fulfilled") next.delete(tarefas[i].jogo.id);
-      });
+      const next = new Map<string, EditState>();
+      const failedIds = new Set<string>(
+        results
+          .map((r, i) => (r.status === "rejected" ? tarefas[i].jogo.id : null))
+          .filter((id): id is string => !!id),
+      );
+      for (const id of [...failedIds, ...invalidosIds]) {
+        const s = prev.get(id);
+        if (s) next.set(id, s);
+      }
       return next;
     });
 
