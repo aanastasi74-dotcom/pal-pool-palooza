@@ -142,39 +142,17 @@ function Home() {
             <Sparkles className="h-6 w-6" />
           </div>
           <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-lg font-bold">Boletim do dia · pra perebada saber</h3>
-              {isAdmin && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">admin</span>}
-            </div>
-            {loadingB ? (
-              <Skeleton className="mt-3 h-16 w-full" />
-            ) : boletim ? (
-              <>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{boletimText || boletim.conteudo}</p>
-                {isAdmin ? (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button onClick={compartilharWhats} className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
-                      Compartilhar no WhatsApp
-                    </button>
-                    <button onClick={() => setEditorOpen(true)} className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold">
-                      <Pencil className="h-3 w-3" /> Editar antes de publicar
-                    </button>
-                    <Link to="/app/boletins" className="rounded-full border border-border px-4 py-2 text-xs font-bold">
-                      Histórico
-                    </Link>
-                  </div>
-                ) : (
-                  <p className="mt-4 text-xs text-muted-foreground">Em modo leitura — só admins publicam.</p>
-                )}
-              </>
-            ) : (
-              <div className="mt-3">
-                <EmptyState icon={Newspaper} title="Boletim ainda não saiu, pereba" description="Quando sair, aparece aqui." />
-              </div>
-            )}
+            <h3 className="font-display text-lg font-bold">✨ Boletim do dia · em breve</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Em construção. Vai começar a ferver assim que rolar o primeiro jogo da Copa (11/06). Aguenta firme, pereba.
+            </p>
           </div>
         </div>
       </section>
+
+      {/* TODO Rodada J: reativar boletim do dia
+          (admin badge, conteúdo dinâmico, botões Compartilhar/Editar/Histórico, EmptyState).
+          Preserva imports: Pencil, Newspaper, Skeleton, EmptyState, BoletimEditor, useBulletinDoDia. */}
 
       <BoletimEditor
         open={editorOpen}
