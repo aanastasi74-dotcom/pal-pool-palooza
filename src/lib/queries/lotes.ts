@@ -152,17 +152,6 @@ export function useSubmitComprovanteLote() {
         .order("created_at", { ascending: true });
       if (!lote || !quotas || quotas.length === 0) throw new Error("Lote inválido.");
 
-      // Compute starting numero (only used when quota does not yet have one)
-      const { data: maxRow } = await supabase
-        .from("quotas")
-        .select("numero")
-        .eq("user_id", user.id)
-        .in("status", ["aguardando_aprovacao", "ativa", "rejeitada"])
-        .order("numero", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      let nextNumero = (maxRow?.numero ?? 0) + 1;
-
       // Lote: only the lote tracks tentativas (3-strike no nível do lote)
       await supabase
         .from("lotes_compra")
@@ -182,9 +171,22 @@ export function useSubmitComprovanteLote() {
       const payByQuota = new Map((existingPayments ?? []).map((p: any) => [p.quota_id, p]));
 
       for (const q of quotas) {
-        const numeroFinal = q.numero ?? nextNumero;
-        if (q.numero == null) nextNumero += 1;
-        await supabase
+        // Preserva numero existente (caso rejeitada → reenvio). Senão, busca atomic via RPC.
+        let numeroFinal: number;
+        if (q.numero != null && q.numero > 0) {
+          numeroFinal = q.numero;
+        } else {
+          const { data: numData, error: numErr } = await (supabase as any)
+            .rpc("proximo_numero_quota", { p_user_id: user.id });
+          if (numErr) throw numErr;
+          const n = Number(numData);
+          if (!Number.isFinite(n) || n < 1) {
+            throw new Error("proximo_numero_quota retornou valor inválido: " + JSON.stringify(numData));
+          }
+          numeroFinal = n;
+        }
+
+        const { error: updErr } = await supabase
           .from("quotas")
           .update({
             status: "aguardando_aprovacao",
@@ -192,6 +194,18 @@ export function useSubmitComprovanteLote() {
             motivo_rejeicao: null,
           } as any)
           .eq("id", q.id);
+        if (updErr) throw updErr;
+
+        // Safety check: garante numero não-NULL após UPDATE
+        const { data: check } = await supabase
+          .from("quotas")
+          .select("numero")
+          .eq("id", q.id)
+          .maybeSingle();
+        if (!check || check.numero == null) {
+          throw new Error(`Quota ${q.id} ficou sem numero após UPDATE — abortando.`);
+        }
+
         const existingPay = payByQuota.get(q.id);
         if (existingPay) {
           await supabase

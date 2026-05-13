@@ -1,7 +1,8 @@
 // Minimal service worker for Bolão dos Perebas PWA.
 // Strategy: network-first for navigations (so users always get fresh app shell),
 // cache-first for static assets (icons / manifest) to enable basic offline + faster loads.
-const CACHE = "perebas-static-v1";
+// Bump CACHE version to invalidate old shells (forces manifest re-download for installed PWAs).
+const CACHE = "perebas-static-v2";
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/icon-192.png",

@@ -1,7 +1,8 @@
 {
   "name": "Bolão dos Perebas",
   "short_name": "Bolão Perebas",
-  "description": "O bolão mais divertido da Copa 2026",
+  "description": "Bolão dos Perebas — Copa 2026. Palpites, ranking e zoeira.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sparkles, Trophy, Clock, Lock, CheckCircle2, AlertCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
 import { useMatches } from "@/lib/queries/matches";
@@ -35,6 +35,35 @@ const TOP4_PESO_BY_FASE: Record<string, number> = {
   round_of_32: 25,
 };
 
+type EditState = { editing: boolean; casa: string; fora: string };
+
+function isLockedByTime(jogo: any) {
+  return (
+    jogo.status !== "agendado" ||
+    (jogo.travado_em && new Date(jogo.travado_em).getTime() <= Date.now())
+  );
+}
+
+function isHojeBR(iso?: string | null) {
+  if (!iso) return false;
+  const d = new Date(iso);
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const today = fmt.format(new Date());
+  const dia = fmt.format(d);
+  return today === dia;
+}
+
+function placarInvalido(s: string) {
+  if (s === "") return false;
+  const n = Number(s);
+  return Number.isNaN(n) || n < 0 || n > 20;
+}
+
 function Palpites() {
   const { data: matches = [], isLoading: loadingM } = useMatches();
   const { data: quotas = [], isLoading: loadingQ } = useMinhasQuotas();
@@ -63,6 +92,7 @@ function Palpites() {
   const { data: preds = [] } = useMyPredictions(quotaId);
   const { data: top4 } = useMyTop4(quotaId);
   const { data: faseAtual = "antes_copa" } = useFaseAtual();
+  const upsert = useUpsertPrediction();
 
   const top4Bloqueado = ["oitavas", "quartas", "semis", "final"].includes(faseAtual);
   const top4Peso = TOP4_PESO_BY_FASE[faseAtual] ?? null;
@@ -76,7 +106,144 @@ function Palpites() {
     [matches],
   );
 
-  const predMap = new Map((preds as any[]).map((p) => [p.match_id, p]));
+  const predMap = useMemo(
+    () => new Map((preds as any[]).map((p) => [p.match_id, p])),
+    [preds],
+  );
+
+  // Estado de edição liftado: matchId -> EditState
+  const [editStates, setEditStates] = useState<Map<string, EditState>>(new Map());
+  const [savingBulk, setSavingBulk] = useState(false);
+
+  // Reset edit states quando troca de quota
+  useEffect(() => {
+    setEditStates(new Map());
+  }, [quotaId]);
+
+  const setCardState = useCallback((matchId: string, partial: Partial<EditState>) => {
+    setEditStates((prev) => {
+      const next = new Map(prev);
+      const cur = next.get(matchId) ?? { editing: false, casa: "", fora: "" };
+      next.set(matchId, { ...cur, ...partial });
+      return next;
+    });
+  }, []);
+
+  const startEdit = useCallback(
+    (matchId: string) => {
+      const pred = predMap.get(matchId);
+      setCardState(matchId, {
+        editing: true,
+        casa: pred?.placar_casa != null ? String(pred.placar_casa) : "",
+        fora: pred?.placar_fora != null ? String(pred.placar_fora) : "",
+      });
+    },
+    [predMap, setCardState],
+  );
+
+  const cancelEdit = useCallback((matchId: string) => {
+    setEditStates((prev) => {
+      const next = new Map(prev);
+      next.delete(matchId);
+      return next;
+    });
+  }, []);
+
+  // Bulk: filtra cards "abrir" (skip lockedByTime)
+  const editaveis = abertos.filter((j) => !isLockedByTime(j));
+  const hojeAbertos = editaveis.filter((j) => isHojeBR(j.data_jogo));
+
+  const openAll = (filter: (j: any) => boolean) => {
+    setEditStates((prev) => {
+      const next = new Map(prev);
+      for (const j of editaveis.filter(filter)) {
+        if (!next.has(j.id)) {
+          const pred = predMap.get(j.id);
+          next.set(j.id, {
+            editing: true,
+            casa: pred?.placar_casa != null ? String(pred.placar_casa) : "",
+            fora: pred?.placar_fora != null ? String(pred.placar_fora) : "",
+          });
+        } else {
+          const cur = next.get(j.id)!;
+          next.set(j.id, { ...cur, editing: true });
+        }
+      }
+      return next;
+    });
+  };
+
+  // cards com mudança não-salva
+  const dirtyCards = useMemo(() => {
+    const out: { jogo: any; state: EditState }[] = [];
+    for (const j of abertos) {
+      const st = editStates.get(j.id);
+      if (!st || !st.editing) continue;
+      const pred = predMap.get(j.id);
+      const origCasa = pred?.placar_casa != null ? String(pred.placar_casa) : "";
+      const origFora = pred?.placar_fora != null ? String(pred.placar_fora) : "";
+      if (st.casa !== origCasa || st.fora !== origFora) out.push({ jogo: j, state: st });
+    }
+    return out;
+  }, [editStates, abertos, predMap]);
+
+  const hasDirty = dirtyCards.length > 0;
+  const anyEditing = Array.from(editStates.values()).some((s) => s.editing);
+
+  const saveAll = async () => {
+    if (!quotaId || dirtyCards.length === 0) return;
+    setSavingBulk(true);
+    const invalidos: string[] = [];
+    const falhas: string[] = [];
+    let salvos = 0;
+
+    const tarefas = dirtyCards.filter(({ jogo, state }) => {
+      const inv = placarInvalido(state.casa) || placarInvalido(state.fora);
+      if (inv) {
+        invalidos.push(jogoLabel(jogo));
+        return false;
+      }
+      return true;
+    });
+
+    const results = await Promise.allSettled(
+      tarefas.map(({ jogo, state }) =>
+        upsert.mutateAsync({
+          quota_id: quotaId,
+          match_id: jogo.id,
+          placar_casa: state.casa === "" ? null : Number(state.casa),
+          placar_fora: state.fora === "" ? null : Number(state.fora),
+        }),
+      ),
+    );
+
+    results.forEach((r, i) => {
+      if (r.status === "fulfilled") salvos += 1;
+      else falhas.push(jogoLabel(tarefas[i].jogo));
+    });
+
+    // Cards que salvaram OK saem do modo edição
+    setEditStates((prev) => {
+      const next = new Map(prev);
+      results.forEach((r, i) => {
+        if (r.status === "fulfilled") next.delete(tarefas[i].jogo.id);
+      });
+      return next;
+    });
+
+    setSavingBulk(false);
+    const partes: string[] = [];
+    if (salvos) partes.push(`${salvos} palpite${salvos > 1 ? "s" : ""} salvo${salvos > 1 ? "s" : ""}`);
+    if (falhas.length) partes.push(`${falhas.length} falharam (${falhas.join(", ")})`);
+    if (invalidos.length) partes.push(`${invalidos.length} com placar inválido (${invalidos.join(", ")})`);
+    if (salvos && !falhas.length && !invalidos.length) toast.success(partes.join(" · "));
+    else if (salvos) toast.warning(partes.join(" · "));
+    else toast.error(partes.join(" · ") || "Nada salvo.");
+  };
+
+  const cancelAll = () => {
+    setEditStates(new Map());
+  };
 
   if (loadingM || loadingQ) return <Skeleton className="h-64 w-full" />;
 
@@ -157,22 +324,82 @@ function Palpites() {
             </div>
           </div>
 
+          {/* Barra de bulk actions */}
+          <div className="sticky top-2 z-10 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-card/95 p-3 shadow-card backdrop-blur">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => openAll(() => true)}
+                disabled={editaveis.length === 0 || savingBulk}
+                className="rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-foreground disabled:opacity-50"
+              >
+                Editar todos ({editaveis.length})
+              </button>
+              <button
+                onClick={() => openAll((j) => isHojeBR(j.data_jogo))}
+                disabled={hojeAbertos.length === 0 || savingBulk}
+                title={hojeAbertos.length === 0 ? "Sem jogos hoje" : ""}
+                className="rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-foreground disabled:opacity-50"
+              >
+                Editar jogos de hoje ({hojeAbertos.length})
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              {hasDirty && (
+                <span className="hidden text-[11px] font-bold text-accent-foreground sm:inline">
+                  {dirtyCards.length} com mudanças não salvas
+                </span>
+              )}
+              {(hasDirty || anyEditing) && (
+                <button
+                  onClick={cancelAll}
+                  disabled={savingBulk}
+                  className="rounded-full border border-border px-3 py-1.5 text-xs font-bold disabled:opacity-50"
+                >
+                  Cancelar todos
+                </button>
+              )}
+              {hasDirty && (
+                <button
+                  onClick={saveAll}
+                  disabled={savingBulk}
+                  className="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-50"
+                >
+                  {savingBulk ? "Salvando…" : `Salvar todos (${dirtyCards.length})`}
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="space-y-3">
-            {abertos.map((j) => (
-              <PalpiteCard
-                key={j.id}
-                jogo={j}
-                pred={predMap.get(j.id)}
-                quotaId={quotaId!}
-                teamMap={teamMap}
-                stadiumMap={stadiumMap}
-              />
-            ))}
+            {abertos.map((j) => {
+              const st = editStates.get(j.id);
+              return (
+                <PalpiteCard
+                  key={j.id}
+                  jogo={j}
+                  pred={predMap.get(j.id)}
+                  quotaId={quotaId!}
+                  teamMap={teamMap}
+                  stadiumMap={stadiumMap}
+                  state={st}
+                  onStartEdit={() => startEdit(j.id)}
+                  onCancel={() => cancelEdit(j.id)}
+                  onChange={(partial) => setCardState(j.id, partial)}
+                  onSavedLocal={() => cancelEdit(j.id)}
+                />
+              );
+            })}
           </div>
         </>
       )}
     </div>
   );
+}
+
+function jogoLabel(jogo: any) {
+  const a = jogo.casa ?? jogo.slot_casa ?? "?";
+  const b = jogo.fora ?? jogo.slot_visitante ?? "?";
+  return `${a} × ${b}`;
 }
 
 function PalpiteCard({
@@ -181,68 +408,68 @@ function PalpiteCard({
   quotaId,
   teamMap,
   stadiumMap,
+  state,
+  onStartEdit,
+  onCancel,
+  onChange,
+  onSavedLocal,
 }: {
   jogo: any;
   pred: any;
   quotaId: string;
   teamMap: Map<string, any>;
   stadiumMap: Map<string, any>;
+  state: EditState | undefined;
+  onStartEdit: () => void;
+  onCancel: () => void;
+  onChange: (partial: Partial<EditState>) => void;
+  onSavedLocal: () => void;
 }) {
   const upsert = useUpsertPrediction();
-  const [editing, setEditing] = useState(false);
-  const [casa, setCasa] = useState<string>(pred?.placar_casa != null ? String(pred.placar_casa) : "");
-  const [fora, setFora] = useState<string>(pred?.placar_fora != null ? String(pred.placar_fora) : "");
+  const editing = !!state?.editing;
+  const casa = state?.casa ?? (pred?.placar_casa != null ? String(pred.placar_casa) : "");
+  const fora = state?.fora ?? (pred?.placar_fora != null ? String(pred.placar_fora) : "");
   const [savedAt, setSavedAt] = useState<Date | null>(pred?.submetido_em ? new Date(pred.submetido_em) : null);
 
   useEffect(() => {
-    if (!editing) {
-      setCasa(pred?.placar_casa != null ? String(pred.placar_casa) : "");
-      setFora(pred?.placar_fora != null ? String(pred.placar_fora) : "");
-      if (pred?.submetido_em) setSavedAt(new Date(pred.submetido_em));
-    }
-  }, [pred, editing]);
+    if (pred?.submetido_em) setSavedAt(new Date(pred.submetido_em));
+  }, [pred?.submetido_em]);
 
   const trava = travaEm(jogo.travado_em);
-  const lockedByTime = jogo.status !== "agendado" || (jogo.travado_em && new Date(jogo.travado_em).getTime() <= Date.now());
+  const lockedByTime = isLockedByTime(jogo);
   const tCasa = getTeamSide(jogo.team_home_id, jogo.slot_casa, jogo.casa, teamMap);
   const tFora = getTeamSide(jogo.team_away_id, jogo.slot_visitante, jogo.fora, teamMap);
   const header = buildHeader(jogo, stadiumMap);
 
-  const casaNum = casa === "" ? null : Number(casa);
-  const foraNum = fora === "" ? null : Number(fora);
-  const casaInvalido = casaNum != null && (Number.isNaN(casaNum) || casaNum < 0 || casaNum > 20);
-  const foraInvalido = foraNum != null && (Number.isNaN(foraNum) || foraNum < 0 || foraNum > 20);
-  const placarInvalido = casaInvalido || foraInvalido;
+  const casaInv = placarInvalido(casa);
+  const foraInv = placarInvalido(fora);
+  const placarInv = casaInv || foraInv;
 
-  const dirty =
-    editing &&
-    (casa !== (pred?.placar_casa != null ? String(pred.placar_casa) : "") ||
-      fora !== (pred?.placar_fora != null ? String(pred.placar_fora) : ""));
+  const origCasa = pred?.placar_casa != null ? String(pred.placar_casa) : "";
+  const origFora = pred?.placar_fora != null ? String(pred.placar_fora) : "";
+  const dirty = editing && (casa !== origCasa || fora !== origFora);
 
   const salvar = () => {
-    if (placarInvalido) {
+    if (placarInv) {
       toast.error("Placar deve estar entre 0 e 20");
       return;
     }
-    const placar_casa = casaNum;
-    const placar_fora = foraNum;
     upsert.mutate(
-      { quota_id: quotaId, match_id: jogo.id, placar_casa, placar_fora },
+      {
+        quota_id: quotaId,
+        match_id: jogo.id,
+        placar_casa: casa === "" ? null : Number(casa),
+        placar_fora: fora === "" ? null : Number(fora),
+      },
       {
         onSuccess: () => {
           setSavedAt(new Date());
-          setEditing(false);
+          onSavedLocal();
           toast.success("Palpite salvo.");
         },
         onError: (e: any) => toast.error(e?.message ?? "Não foi possível salvar."),
       },
     );
-  };
-
-  const cancelar = () => {
-    setCasa(pred?.placar_casa != null ? String(pred.placar_casa) : "");
-    setFora(pred?.placar_fora != null ? String(pred.placar_fora) : "");
-    setEditing(false);
   };
 
   const dataFmt = jogo.data_jogo
@@ -280,9 +507,9 @@ function PalpiteCard({
           <span className="text-3xl">{tCasa.bandeira}</span>
         </div>
         <div className="flex items-center gap-2">
-          <ScoreDisplay value={casa} editing={editing} onChange={setCasa} invalid={casaInvalido} />
+          <ScoreDisplay value={casa} editing={editing} onChange={(v) => onChange({ casa: v })} invalid={casaInv} />
           <span className="text-xl font-bold text-muted-foreground">×</span>
-          <ScoreDisplay value={fora} editing={editing} onChange={setFora} invalid={foraInvalido} />
+          <ScoreDisplay value={fora} editing={editing} onChange={(v) => onChange({ fora: v })} invalid={foraInv} />
         </div>
         <div className="flex items-center gap-3">
           <span className="text-3xl">{tFora.bandeira}</span>
@@ -311,7 +538,7 @@ function PalpiteCard({
           {editing ? (
             <>
               <button
-                onClick={cancelar}
+                onClick={onCancel}
                 className="rounded-full border border-border px-4 py-2 text-xs font-bold"
                 disabled={upsert.isPending}
               >
@@ -319,7 +546,7 @@ function PalpiteCard({
               </button>
               <button
                 onClick={salvar}
-                disabled={upsert.isPending || lockedByTime || placarInvalido}
+                disabled={upsert.isPending || lockedByTime || placarInv}
                 className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
               >
                 {upsert.isPending ? "Salvando…" : "Salvar palpite"}
@@ -327,7 +554,7 @@ function PalpiteCard({
             </>
           ) : (
             <button
-              onClick={() => setEditing(true)}
+              onClick={onStartEdit}
               disabled={lockedByTime}
               title={lockedByTime ? "Palpites encerrados para este jogo" : ""}
               className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
@@ -337,7 +564,7 @@ function PalpiteCard({
           )}
         </div>
       </div>
-      {editing && placarInvalido && (
+      {editing && placarInv && (
         <p className="mt-2 text-right text-[11px] font-bold text-destructive">Placar deve estar entre 0 e 20</p>
       )}
     </article>
