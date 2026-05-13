@@ -111,17 +111,17 @@ function Home() {
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {top3.map((p: any, i: number) => {
               const cor = p.profile?.cor ?? "oklch(0.6 0.16 200)";
-              const apelido = p.profile?.apelido ?? "??";
-              const nome = p.profile?.nome ?? "—";
+              const sigla = p.profile?.sigla ?? "??";
+              const apelido = p.profile?.apelido ?? "—";
               return (
                 <div key={p.id} className={`rounded-2xl border p-5 shadow-card ${i === 0 ? "border-accent bg-gold text-gold-foreground" : "border-border bg-card"}`}>
                   <div className="flex items-center gap-3">
-                    <div className="grid h-10 w-10 place-items-center rounded-full font-bold text-white" style={{ background: cor }}>
-                      {apelido}
+                    <div className="grid h-10 w-10 place-items-center rounded-full text-xs font-bold text-white" style={{ background: cor }}>
+                      {sigla}
                     </div>
                     <div>
                       <p className="text-xs opacity-70">{i + 1}º lugar</p>
-                      <p className="font-display font-bold">{nome}</p>
+                      <p className="font-display font-bold">{apelido}</p>
                     </div>
                     {i === 0 && <Trophy className="ml-auto h-6 w-6" />}
                   </div>
