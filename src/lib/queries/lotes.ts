@@ -142,95 +142,13 @@ export function useSubmitComprovanteLote() {
         .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
       if (upErr) throw upErr;
 
-      // Get current lote + quotas (incompleta OR rejeitada — both reuse the same flow)
-      const { data: lote } = await supabase.from("lotes_compra").select("*").eq("id", loteId).single();
-      const { data: quotas } = await supabase
-        .from("quotas")
-        .select("*")
-        .eq("lote_id", loteId)
-        .in("status", ["incompleta", "rejeitada"])
-        .order("created_at", { ascending: true });
-      if (!lote || !quotas || quotas.length === 0) throw new Error("Lote inválido.");
-
-      // Lote: only the lote tracks tentativas (3-strike no nível do lote)
-      await supabase
-        .from("lotes_compra")
-        .update({
-          status: "aguardando_aprovacao",
-          comprovante_url: path,
-          tentativas_comprovante: (lote.tentativas_comprovante ?? 0) + 1,
-          motivo_rejeicao: null,
-        })
-        .eq("id", loteId);
-
-      // Existing payments for this lote (re-submission case)
-      const { data: existingPayments } = await supabase
-        .from("payments")
-        .select("*")
-        .eq("lote_id", loteId);
-      const payByQuota = new Map((existingPayments ?? []).map((p: any) => [p.quota_id, p]));
-
-      for (const q of quotas) {
-        // Preserva numero existente (caso rejeitada → reenvio). Senão, busca atomic via RPC.
-        let numeroFinal: number;
-        if (q.numero != null && q.numero > 0) {
-          numeroFinal = q.numero;
-        } else {
-          const { data: numData, error: numErr } = await (supabase as any)
-            .rpc("proximo_numero_quota", { p_user_id: user.id });
-          if (numErr) throw numErr;
-          const n = Number(numData);
-          if (!Number.isFinite(n) || n < 1) {
-            throw new Error("proximo_numero_quota retornou valor inválido: " + JSON.stringify(numData));
-          }
-          numeroFinal = n;
-        }
-
-        const { error: updErr } = await supabase
-          .from("quotas")
-          .update({
-            status: "aguardando_aprovacao",
-            numero: numeroFinal,
-            motivo_rejeicao: null,
-          } as any)
-          .eq("id", q.id);
-        if (updErr) throw updErr;
-
-        // Safety check: garante numero não-NULL após UPDATE
-        const { data: check } = await supabase
-          .from("quotas")
-          .select("numero")
-          .eq("id", q.id)
-          .maybeSingle();
-        if (!check || check.numero == null) {
-          throw new Error(`Quota ${q.id} ficou sem numero após UPDATE — abortando.`);
-        }
-
-        const existingPay = payByQuota.get(q.id);
-        if (existingPay) {
-          await supabase
-            .from("payments")
-            .update({
-              status: "pendente",
-              comprovante_path: path,
-              motivo_rejeicao: null,
-              aprovado_em: null,
-              aprovado_por: null,
-            } as any)
-            .eq("id", existingPay.id);
-        } else {
-          await supabase.from("payments").insert({
-            user_id: user.id,
-            quota_id: q.id,
-            lote_id: loteId,
-            valor: VALOR_QUOTA,
-            comprovante_path: path,
-            status: "pendente",
-          } as any);
-        }
-      }
-
-      return { loteId, count: quotas.length };
+      // I.5.2 — RPC atômica: numera quotas, cria/atualiza payments e atualiza lote.
+      const { data, error } = await (supabase as any).rpc("enviar_comprovante_lote", {
+        p_lote_id: loteId,
+        p_comprovante_url: path,
+      });
+      if (error) throw error;
+      return { loteId, count: (data?.count as number) ?? 0 };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["quotas"] });
