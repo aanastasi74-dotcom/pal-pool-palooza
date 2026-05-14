@@ -129,6 +129,46 @@ export function LotesPendentesSection() {
           setMotivo("");
         }}
       />
+
+      {/* Encerrar por decisão admin */}
+      <ConfirmDialog
+        open={!!encerrarLote}
+        onOpenChange={(v) => { if (!v) { setEncerrarLote(null); setMotivoEncerrar(""); } }}
+        title={`Encerrar lote (decisão admin)`}
+        description={
+          (
+            <div className="space-y-2">
+              <p>
+                Encerra o lote <b>imediatamente</b>, sem strike. Quotas viram <b>encerradas</b> e o pereba
+                não consegue mais reenviar comprovante. Use só para lotes duplicados ou abandonados.
+              </p>
+              <textarea
+                value={motivoEncerrar}
+                onChange={(e) => setMotivoEncerrar(e.target.value)}
+                placeholder="Motivo (mín. 10 caracteres) — ex: lote duplicado, comprovante já contabilizado em outro lote"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                rows={3}
+              />
+            </div>
+          ) as any
+        }
+        confirmLabel="Encerrar lote"
+        destructive
+        onConfirm={async () => {
+          if (motivoEncerrar.trim().length < 10) {
+            toast.error("Motivo precisa de pelo menos 10 caracteres.");
+            return;
+          }
+          try {
+            await encerrar.mutateAsync({ loteId: encerrarLote.id, motivo: motivoEncerrar.trim() });
+            toast.info("Lote encerrado por decisão admin.");
+            setEncerrarLote(null);
+            setMotivoEncerrar("");
+          } catch (e: any) {
+            toast.error(translatePgError(e));
+          }
+        }}
+      />
     </div>
   );
 }
@@ -138,11 +178,13 @@ function LoteCard({
   onApproveAll,
   onPartial,
   onReject,
+  onEncerrar,
 }: {
   lote: any;
   onApproveAll: () => void;
   onPartial: () => void;
   onReject: () => void;
+  onEncerrar: () => void;
 }) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   useEffect(() => {
