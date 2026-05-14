@@ -122,7 +122,7 @@ function Perfil() {
 }
 
 function ElegibilidadeLanterna() {
-  const { data: minhasQuotas = [] } = useMinhasQuotas();
+  const { data: minhasQuotas = [] } = useMinhasQuotas({ includeEncerradas: true });
   const { data: totalQuotas = 0 } = useTotalQuotas();
   const quotasNoFundo = (minhasQuotas as any[]).filter((q) => estaNosUltimos25(q.posicao ?? 9999, totalQuotas));
   if (quotasNoFundo.length === 0) return null;

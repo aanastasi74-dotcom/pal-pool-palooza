@@ -4,7 +4,8 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, ExternalLink, Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLotesAguardando, useApproveLote, useRejectLote } from "@/lib/queries/lotes";
+import { useLotesAguardando, useApproveLote, useRejectLote, useEncerrarLotePorDecisao } from "@/lib/queries/lotes";
+import { translatePgError } from "@/lib/error-messages";
 
 const fmt = (n: number) => `R$ ${Number(n).toLocaleString("pt-BR")}`;
 
@@ -12,10 +13,13 @@ export function LotesPendentesSection() {
   const { data: lotes = [], isLoading } = useLotesAguardando();
   const approve = useApproveLote();
   const reject = useRejectLote();
+  const encerrar = useEncerrarLotePorDecisao();
 
   const [parcialLote, setParcialLote] = useState<any | null>(null);
   const [parcialN, setParcialN] = useState(1);
   const [rejeitarLote, setRejeitarLote] = useState<any | null>(null);
+  const [encerrarLote, setEncerrarLote] = useState<any | null>(null);
+  const [motivoEncerrar, setMotivoEncerrar] = useState("");
   const [motivo, setMotivo] = useState("");
 
   if (isLoading) return <Skeleton className="h-32 w-full" />;
@@ -41,6 +45,7 @@ export function LotesPendentesSection() {
               setParcialLote(l);
             }}
             onReject={() => setRejeitarLote(l)}
+            onEncerrar={() => { setEncerrarLote(l); setMotivoEncerrar(""); }}
           />
         ))}
       </div>
@@ -124,6 +129,46 @@ export function LotesPendentesSection() {
           setMotivo("");
         }}
       />
+
+      {/* Encerrar por decisão admin */}
+      <ConfirmDialog
+        open={!!encerrarLote}
+        onOpenChange={(v) => { if (!v) { setEncerrarLote(null); setMotivoEncerrar(""); } }}
+        title={`Encerrar lote (decisão admin)`}
+        description={
+          (
+            <div className="space-y-2">
+              <p>
+                Encerra o lote <b>imediatamente</b>, sem strike. Quotas viram <b>encerradas</b> e o pereba
+                não consegue mais reenviar comprovante. Use só para lotes duplicados ou abandonados.
+              </p>
+              <textarea
+                value={motivoEncerrar}
+                onChange={(e) => setMotivoEncerrar(e.target.value)}
+                placeholder="Motivo (mín. 10 caracteres) — ex: lote duplicado, comprovante já contabilizado em outro lote"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                rows={3}
+              />
+            </div>
+          ) as any
+        }
+        confirmLabel="Encerrar lote"
+        destructive
+        onConfirm={async () => {
+          if (motivoEncerrar.trim().length < 10) {
+            toast.error("Motivo precisa de pelo menos 10 caracteres.");
+            return;
+          }
+          try {
+            await encerrar.mutateAsync({ loteId: encerrarLote.id, motivo: motivoEncerrar.trim() });
+            toast.info("Lote encerrado por decisão admin.");
+            setEncerrarLote(null);
+            setMotivoEncerrar("");
+          } catch (e: any) {
+            toast.error(translatePgError(e));
+          }
+        }}
+      />
     </div>
   );
 }
@@ -133,11 +178,13 @@ function LoteCard({
   onApproveAll,
   onPartial,
   onReject,
+  onEncerrar,
 }: {
   lote: any;
   onApproveAll: () => void;
   onPartial: () => void;
   onReject: () => void;
+  onEncerrar: () => void;
 }) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   useEffect(() => {
@@ -197,7 +244,7 @@ function LoteCard({
         )}
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
         <button
           onClick={onApproveAll}
           className="rounded-full bg-success px-3 py-2 text-xs font-bold text-success-foreground"
@@ -216,6 +263,12 @@ function LoteCard({
           className="rounded-full bg-destructive px-3 py-2 text-xs font-bold text-destructive-foreground"
         >
           Rejeitar todas
+        </button>
+        <button
+          onClick={onEncerrar}
+          className="rounded-full border border-destructive/60 bg-destructive/10 px-3 py-2 text-xs font-bold text-destructive"
+        >
+          Encerrar lote
         </button>
       </div>
     </article>

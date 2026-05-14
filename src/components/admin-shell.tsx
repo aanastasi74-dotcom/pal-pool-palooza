@@ -26,6 +26,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 const items = [
   { to: "/app/admin", label: "Painel financeiro", icon: LayoutDashboard, exact: true },
   { to: "/app/admin/pagamentos", label: "Pagamentos", icon: Wallet },
+  { to: "/app/admin/quotas", label: "Quotas (recuperação)", icon: ShieldCheck },
   { to: "/app/admin/premiacao", label: "Premiação", icon: Trophy },
   { to: "/app/admin/jogos", label: "Jogos da Copa", icon: CalendarDays },
   { to: "/app/admin/convites", label: "Convites & usuários", icon: Users },

@@ -753,6 +753,14 @@ export type Database = {
         Args: { p_role: string; p_user_id: string }
         Returns: undefined
       }
+      aprovar_lote: {
+        Args: { p_aprovar_n?: number; p_lote_id: string }
+        Returns: Json
+      }
+      ativar_quota_manual: {
+        Args: { p_motivo: string; p_quota_id: string }
+        Returns: Json
+      }
       check_apelido_disponivel: {
         Args: { p_apelido: string }
         Returns: boolean
@@ -760,6 +768,14 @@ export type Database = {
       cleanup_quotas_incompletas: { Args: never; Returns: number }
       compute_default_sigla: { Args: { p_nome: string }; Returns: string }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
+      encerrar_lote_por_decisao: {
+        Args: { p_lote_id: string; p_motivo: string }
+        Returns: Json
+      }
+      enviar_comprovante_lote: {
+        Args: { p_comprovante_url: string; p_lote_id: string }
+        Returns: Json
+      }
       fase_atual_copa: { Args: never; Returns: string }
       get_arrecadacao_atual: { Args: never; Returns: number }
       get_arrecadacao_potencial: { Args: never; Returns: number }
@@ -863,6 +879,10 @@ export type Database = {
       promote_to_admin: { Args: { p_email: string }; Returns: string }
       proximo_numero_quota: { Args: { p_user_id: string }; Returns: number }
       recompute_peso_jogos: { Args: never; Returns: undefined }
+      rejeitar_lote: {
+        Args: { p_lote_id: string; p_motivo: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

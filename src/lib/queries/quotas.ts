@@ -2,19 +2,24 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
-const STATUS_VISIVEIS = ["aguardando_aprovacao", "ativa", "rejeitada", "encerrada"] as const;
+// I.5.6 — encerradas escondidas dos dropdowns de palpite/top4 por padrão.
+// Quem precisa ver tudo (página de quotas/perfil) passa { includeEncerradas: true }.
+const STATUS_ATIVOS = ["aguardando_aprovacao", "ativa", "rejeitada"] as const;
+const STATUS_TODOS = ["aguardando_aprovacao", "ativa", "rejeitada", "encerrada"] as const;
 
-export function useMinhasQuotas() {
+export function useMinhasQuotas(opts?: { includeEncerradas?: boolean }) {
+  const includeEncerradas = !!opts?.includeEncerradas;
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["quotas", "mine", user?.id],
+    queryKey: ["quotas", "mine", user?.id, includeEncerradas ? "all" : "ativas"],
     enabled: !!user?.id,
     queryFn: async () => {
+      const list = (includeEncerradas ? STATUS_TODOS : STATUS_ATIVOS) as unknown as string[];
       const { data, error } = await supabase
         .from("quotas")
         .select("*")
         .eq("user_id", user!.id)
-        .in("status", STATUS_VISIVEIS as unknown as string[])
+        .in("status", list)
         .order("numero", { ascending: true });
       if (error) throw error;
       return data ?? [];
