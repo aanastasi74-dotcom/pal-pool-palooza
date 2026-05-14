@@ -244,7 +244,7 @@ function LoteCard({
         )}
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
         <button
           onClick={onApproveAll}
           className="rounded-full bg-success px-3 py-2 text-xs font-bold text-success-foreground"
@@ -263,6 +263,12 @@ function LoteCard({
           className="rounded-full bg-destructive px-3 py-2 text-xs font-bold text-destructive-foreground"
         >
           Rejeitar todas
+        </button>
+        <button
+          onClick={onEncerrar}
+          className="rounded-full border border-destructive/60 bg-destructive/10 px-3 py-2 text-xs font-bold text-destructive"
+        >
+          Encerrar lote
         </button>
       </div>
     </article>
