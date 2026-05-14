@@ -45,6 +45,24 @@ function ComprarQuotaPage() {
     return <Skeleton className="h-72 w-full" />;
   }
 
+  // I.5.8 — modo somente-leitura bloqueia novas compras (palpites continuam liberados).
+  if (readOnly) {
+    return (
+      <div className="mx-auto max-w-xl space-y-4">
+        <Link to="/app/quotas" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+          <ArrowLeft className="h-3 w-3" /> Voltar
+        </Link>
+        <div className="flex items-start gap-2 rounded-2xl border border-yellow-500/40 bg-yellow-500/15 p-4 text-sm">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            <b>Bolão em manutenção.</b> Compras de quotas estão temporariamente bloqueadas.
+            Volta já — quem já tem quota ativa pode palpitar normalmente.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!podeCriar) {
     return (
       <div className="mx-auto max-w-xl space-y-4">
