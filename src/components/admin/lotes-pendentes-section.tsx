@@ -4,7 +4,8 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, ExternalLink, Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLotesAguardando, useApproveLote, useRejectLote } from "@/lib/queries/lotes";
+import { useLotesAguardando, useApproveLote, useRejectLote, useEncerrarLotePorDecisao } from "@/lib/queries/lotes";
+import { translatePgError } from "@/lib/error-messages";
 
 const fmt = (n: number) => `R$ ${Number(n).toLocaleString("pt-BR")}`;
 
