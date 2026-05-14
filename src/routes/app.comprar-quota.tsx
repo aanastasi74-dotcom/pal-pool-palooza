@@ -21,6 +21,7 @@ function ComprarQuotaPage() {
   const { data: podeCriar = true, isLoading: loadingCopa } = usePodeCriarQuota();
   const { data: pode, isLoading: loadingPode } = usePodeComprarQuota(qtd);
   const createLote = useCreateOrUpdateLote();
+  const { readOnly } = useMaintenanceMode();
 
   const max = Math.min(
     MAX_HARD,
