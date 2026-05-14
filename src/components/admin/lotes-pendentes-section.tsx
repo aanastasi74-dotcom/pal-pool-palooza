@@ -13,10 +13,13 @@ export function LotesPendentesSection() {
   const { data: lotes = [], isLoading } = useLotesAguardando();
   const approve = useApproveLote();
   const reject = useRejectLote();
+  const encerrar = useEncerrarLotePorDecisao();
 
   const [parcialLote, setParcialLote] = useState<any | null>(null);
   const [parcialN, setParcialN] = useState(1);
   const [rejeitarLote, setRejeitarLote] = useState<any | null>(null);
+  const [encerrarLote, setEncerrarLote] = useState<any | null>(null);
+  const [motivoEncerrar, setMotivoEncerrar] = useState("");
   const [motivo, setMotivo] = useState("");
 
   if (isLoading) return <Skeleton className="h-32 w-full" />;
