@@ -45,6 +45,7 @@ export function LotesPendentesSection() {
               setParcialLote(l);
             }}
             onReject={() => setRejeitarLote(l)}
+            onEncerrar={() => { setEncerrarLote(l); setMotivoEncerrar(""); }}
           />
         ))}
       </div>
