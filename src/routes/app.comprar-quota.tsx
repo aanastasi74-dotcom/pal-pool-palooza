@@ -4,6 +4,7 @@ import { Minus, Plus, Lock, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { usePodeComprarQuota, useCreateOrUpdateLote } from "@/lib/queries/lotes";
 import { usePodeCriarQuota } from "@/lib/queries/copa";
+import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/comprar-quota")({
