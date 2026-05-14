@@ -23,7 +23,7 @@ const labelStatus: Record<string, { txt: string; cls: string }> = {
 
 function QuotasPage() {
   const navigate = useNavigate();
-  const { data: quotas = [], isLoading } = useMinhasQuotas();
+  const { data: quotas = [], isLoading } = useMinhasQuotas({ includeEncerradas: true });
   const { data: totalQuotas = 0 } = useTotalQuotas();
   const { data: lotes = [] } = useMyLotes();
   const { data: podeCriar = true } = usePodeCriarQuota();
