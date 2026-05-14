@@ -206,83 +206,25 @@ export function useLotesAguardando() {
   });
 }
 
+// I.5.3 — Aprovação via RPC atômica `aprovar_lote`.
 export function useApproveLote() {
   const qc = useQueryClient();
-  const { user } = useAuth();
   return useMutation({
     mutationFn: async ({ loteId, aprovarN }: { loteId: string; aprovarN?: number }) => {
-      const { data: quotas } = await supabase
-        .from("quotas")
-        .select("*")
-        .eq("lote_id", loteId)
-        .order("numero", { ascending: true });
-      const { data: payments } = await supabase
-        .from("payments")
-        .select("*")
-        .eq("lote_id", loteId);
-      if (!quotas || !payments) throw new Error("Lote sem dados.");
-
-      const total = quotas.length;
-      const N = aprovarN ?? total;
-      const aprovadas = quotas.slice(0, N);
-      const rejeitadas = quotas.slice(N);
-
-      const now = new Date().toISOString();
-
-      // Approve payments first (FK trigger requires payment aprovado before quota ativa)
-      const aprovadasIds = new Set(aprovadas.map((q) => q.id));
-      const payAprovIds = payments.filter((p: any) => aprovadasIds.has(p.quota_id)).map((p: any) => p.id);
-      if (payAprovIds.length) {
-        await supabase
-          .from("payments")
-          .update({ status: "aprovado", aprovado_em: now, aprovado_por: user!.id, motivo_rejeicao: null })
-          .in("id", payAprovIds);
-      }
-      if (aprovadas.length) {
-        await supabase
-          .from("quotas")
-          .update({ status: "ativa", paga_em: now } as any)
-          .in("id", aprovadas.map((q) => q.id));
-      }
-
-      if (rejeitadas.length) {
-        const motivo = `Pagamento parcial — apenas ${N} de ${total} quotas aprovadas.`;
-        // Reject remaining payments
-        const payRejIds = payments
-          .filter((p: any) => !aprovadasIds.has(p.quota_id))
-          .map((p: any) => p.id);
-        if (payRejIds.length) {
-          await supabase
-            .from("payments")
-            .update({ status: "rejeitado", motivo_rejeicao: motivo, aprovado_por: user!.id, aprovado_em: now })
-            .in("id", payRejIds);
-        }
-        for (const q of rejeitadas) {
-          const novas = (q.tentativas_comprovante ?? 0) + 1;
-          const novoStatus = novas >= 3 ? "encerrada" : "rejeitada";
-          await supabase
-            .from("quotas")
-            .update({ status: novoStatus, motivo_rejeicao: motivo, tentativas_comprovante: novas } as any)
-            .eq("id", q.id);
-        }
-      }
-
-      const novoStatusLote =
-        rejeitadas.length === 0 ? "aprovado_total" : "aprovado_parcial";
-      await supabase
-        .from("lotes_compra")
-        .update({ status: novoStatusLote, decidido_em: now })
-        .eq("id", loteId);
-
+      const { data, error } = await (supabase as any).rpc("aprovar_lote", {
+        p_lote_id: loteId,
+        p_aprovar_n: aprovarN ?? null,
+      });
+      if (error) throw error;
       // Best-effort email
-      if (payAprovIds.length) {
-        supabase.functions
-          .invoke("send-pagamento-aprovado-email", {
-            body: { lote_id: loteId, payment_ids: payAprovIds, count: aprovadas.length },
-          })
-          .catch(() => {});
-      }
-      return { loteId, aprovadas: aprovadas.length, rejeitadas: rejeitadas.length };
+      supabase.functions
+        .invoke("send-pagamento-aprovado-email", { body: { lote_id: loteId } })
+        .catch(() => {});
+      return {
+        loteId,
+        aprovadas: (data?.aprovadas as number) ?? 0,
+        rejeitadas: (data?.rejeitadas as number) ?? 0,
+      };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lotes"] });
@@ -292,61 +234,90 @@ export function useApproveLote() {
   });
 }
 
+// I.5.3b — Rejeição via RPC `rejeitar_lote` (3-strike por lote).
 export function useRejectLote() {
   const qc = useQueryClient();
-  const { user } = useAuth();
   return useMutation({
     mutationFn: async ({ loteId, motivo }: { loteId: string; motivo: string }) => {
-      const { data: lote } = await supabase
-        .from("lotes_compra")
-        .select("*")
-        .eq("id", loteId)
-        .single();
-      const { data: quotas } = await supabase.from("quotas").select("*").eq("lote_id", loteId);
-      const { data: payments } = await supabase.from("payments").select("*").eq("lote_id", loteId);
-      if (!lote || !quotas || !payments) throw new Error("Lote sem dados.");
-
-      const now = new Date().toISOString();
-      const novasTent = (lote.tentativas_comprovante ?? 0) + 1;
-      const loteEncerrado = novasTent >= 3;
-
-      await supabase
-        .from("lotes_compra")
-        .update({
-          status: loteEncerrado ? "encerrado" : "rejeitado",
-          motivo_rejeicao: motivo,
-          tentativas_comprovante: novasTent,
-          decidido_em: now,
-        })
-        .eq("id", loteId);
-
-      if (payments.length) {
-        await supabase
-          .from("payments")
-          .update({ status: "rejeitado", motivo_rejeicao: motivo, aprovado_por: user!.id, aprovado_em: now })
-          .in("id", payments.map((p: any) => p.id));
-      }
-
-      // 3-strike no nível do lote — não incrementar tentativas individuais das quotas.
-      const novoStatusQuota = loteEncerrado ? "encerrada" : "rejeitada";
-      if (quotas.length) {
-        await supabase
-          .from("quotas")
-          .update({ status: novoStatusQuota, motivo_rejeicao: motivo } as any)
-          .in("id", quotas.map((q: any) => q.id));
-      }
-
+      const { data, error } = await (supabase as any).rpc("rejeitar_lote", {
+        p_lote_id: loteId,
+        p_motivo: motivo,
+      });
+      if (error) throw error;
       supabase.functions
-        .invoke("send-pagamento-rejeitado-email", {
-          body: { lote_id: loteId, payment_ids: payments.map((p: any) => p.id), motivo },
-        })
+        .invoke("send-pagamento-rejeitado-email", { body: { lote_id: loteId, motivo } })
         .catch(() => {});
-      return { loteId };
+      return { loteId, encerrado: !!data?.encerrado };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lotes"] });
       qc.invalidateQueries({ queryKey: ["payments"] });
       qc.invalidateQueries({ queryKey: ["quotas"] });
+    },
+  });
+}
+
+// I.5.4 — Ativação manual de quota (admin).
+export function useAtivarQuotaManual() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ quotaId, motivo }: { quotaId: string; motivo: string }) => {
+      const { data, error } = await (supabase as any).rpc("ativar_quota_manual", {
+        p_quota_id: quotaId,
+        p_motivo: motivo,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quotas"] });
+      qc.invalidateQueries({ queryKey: ["payments"] });
+      qc.invalidateQueries({ queryKey: ["lotes"] });
+      qc.invalidateQueries({ queryKey: ["audit"] });
+    },
+  });
+}
+
+// I.5.5 — Encerrar lote por decisão admin (sem strike).
+export function useEncerrarLotePorDecisao() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ loteId, motivo }: { loteId: string; motivo: string }) => {
+      const { data, error } = await (supabase as any).rpc("encerrar_lote_por_decisao", {
+        p_lote_id: loteId,
+        p_motivo: motivo,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["lotes"] });
+      qc.invalidateQueries({ queryKey: ["quotas"] });
+      qc.invalidateQueries({ queryKey: ["payments"] });
+      qc.invalidateQueries({ queryKey: ["audit"] });
+    },
+  });
+}
+
+// Lista quotas (admin) com filtros, pra tela /app/admin/quotas.
+export function useAdminQuotasList(filters?: { status?: string; userId?: string }) {
+  return useQuery({
+    queryKey: ["quotas", "admin-list", filters],
+    queryFn: async () => {
+      let q = supabase.from("quotas").select("*").order("created_at", { ascending: false }).limit(500);
+      if (filters?.status) q = q.eq("status", filters.status);
+      if (filters?.userId) q = q.eq("user_id", filters.userId);
+      const { data, error } = await q;
+      if (error) throw error;
+      const rows = data ?? [];
+      const userIds = Array.from(new Set(rows.map((r: any) => r.user_id)));
+      if (userIds.length === 0) return rows;
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, nome, apelido, email")
+        .in("id", userIds);
+      const pm = new Map((profs ?? []).map((p) => [p.id, p]));
+      return rows.map((r: any) => ({ ...r, profile: pm.get(r.user_id) ?? null }));
     },
   });
 }
