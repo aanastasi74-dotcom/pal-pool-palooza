@@ -103,8 +103,8 @@ function Pagamentos() {
       <LotesPendentesSection />
 
       {ocultos > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-warning/40 bg-warning/10 p-3 text-xs text-warning-foreground shadow-card">
-          <AlertTriangle className="h-4 w-4 text-warning" />
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-accent/40 bg-accent/15 p-3 text-xs shadow-card">
+          <AlertTriangle className="h-4 w-4 text-accent" />
           <span>
             <b>{ocultos}</b> pagamento(s) de lotes incompletos foram ocultados — resolver via tela{" "}
             <Link to="/app/admin/quotas" className="font-bold underline">
