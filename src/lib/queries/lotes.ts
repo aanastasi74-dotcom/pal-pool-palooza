@@ -299,6 +299,27 @@ export function useEncerrarLotePorDecisao() {
   });
 }
 
+// I.7 — Encerrar quota manualmente (admin) via RPC encerrar_quota_manual.
+export function useEncerrarQuotaManual() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ quotaId, motivo }: { quotaId: string; motivo: string }) => {
+      const { data, error } = await (supabase as any).rpc("encerrar_quota_manual", {
+        p_quota_id: quotaId,
+        p_motivo: motivo,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quotas"] });
+      qc.invalidateQueries({ queryKey: ["payments"] });
+      qc.invalidateQueries({ queryKey: ["lotes"] });
+      qc.invalidateQueries({ queryKey: ["audit"] });
+    },
+  });
+}
+
 // Lista quotas (admin) com filtros, pra tela /app/admin/quotas.
 export function useAdminQuotasList(filters?: { status?: string; userId?: string }) {
   return useQuery({

@@ -772,6 +772,10 @@ export type Database = {
         Args: { p_lote_id: string; p_motivo: string }
         Returns: Json
       }
+      encerrar_quota_manual: {
+        Args: { p_motivo: string; p_quota_id: string }
+        Returns: Json
+      }
       enviar_comprovante_lote: {
         Args: { p_comprovante_url: string; p_lote_id: string }
         Returns: Json

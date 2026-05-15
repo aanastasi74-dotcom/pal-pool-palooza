@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { usePaymentsAdmin, useApprovePayment, useRejectPayment, useReversePayment } from "@/lib/queries/payments";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { FileText, ExternalLink } from "lucide-react";
+import { FileText, ExternalLink, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
@@ -33,6 +34,19 @@ function Pagamentos() {
   const reject = useRejectPayment();
   const reverse = useReversePayment();
 
+  // I.7.3 — Lote IDs com status='incompleta' (pra esconder pagamentos órfãos da tabela).
+  const { data: lotesIncompletosIds } = useQuery({
+    queryKey: ["lotes", "incompleta-ids"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lotes_compra")
+        .select("id")
+        .eq("status", "incompleta");
+      if (error) throw error;
+      return new Set((data ?? []).map((l: any) => l.id));
+    },
+  });
+
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [dataIni, setDataIni] = useState("");
   const [dataFim, setDataFim] = useState("");
@@ -40,6 +54,13 @@ function Pagamentos() {
   const [rejeitarPay, setRejeitarPay] = useState<Pay | null>(null);
   const [estornarPay, setEstornarPay] = useState<Pay | null>(null);
   const [motivo, setMotivo] = useState("");
+
+  // Filtra payments cujo lote é incompleto (devem ser tratados em /app/admin/quotas).
+  const visiblePays = useMemo<Pay[]>(() => {
+    const set = lotesIncompletosIds ?? new Set<string>();
+    return ((pays ?? []) as Pay[]).filter((p: any) => !p.lote_id || !set.has(p.lote_id));
+  }, [pays, lotesIncompletosIds]);
+  const ocultos = (pays?.length ?? 0) - visiblePays.length;
 
   const predicate = useCallback(
     (p: Pay, q: string) => {
@@ -58,7 +79,7 @@ function Pagamentos() {
   );
 
   const { query, setQuery, page, setPage, totalPages, slice, total, pageSize } = usePaginatedList(
-    pays ?? [],
+    visiblePays,
     predicate,
     20,
   );
@@ -80,6 +101,19 @@ function Pagamentos() {
       </div>
 
       <LotesPendentesSection />
+
+      {ocultos > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-accent/40 bg-accent/15 p-3 text-xs shadow-card">
+          <AlertTriangle className="h-4 w-4 text-accent" />
+          <span>
+            <b>{ocultos}</b> pagamento(s) de lotes incompletos foram ocultados — resolver via tela{" "}
+            <Link to="/app/admin/quotas" className="font-bold underline">
+              Quotas (recuperação)
+            </Link>
+            .
+          </span>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card">
         <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs">
