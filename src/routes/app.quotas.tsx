@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus, CheckCircle2, AlertCircle, Lightbulb, ListChecks, Lock } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { estaNosUltimos25, isElegivelLanterna, razaoNaoElegivel } from "@/lib/lanterninha";
 import { useMinhasQuotas, useTotalQuotas } from "@/lib/queries/quotas";
 import { useMyLotes } from "@/lib/queries/lotes";
@@ -23,7 +23,16 @@ const labelStatus: Record<string, { txt: string; cls: string }> = {
 
 function QuotasPage() {
   const navigate = useNavigate();
-  const { data: quotas = [], isLoading } = useMinhasQuotas({ includeEncerradas: true });
+  const [mostrarEncerradas, setMostrarEncerradas] = useState(false);
+  const { data: quotasAll = [], isLoading } = useMinhasQuotas({ includeEncerradas: true });
+  const quotas = useMemo(
+    () => (mostrarEncerradas ? quotasAll : (quotasAll as any[]).filter((q) => q.status !== "encerrada")),
+    [quotasAll, mostrarEncerradas],
+  );
+  const encerradasCount = useMemo(
+    () => (quotasAll as any[]).filter((q) => q.status === "encerrada").length,
+    [quotasAll],
+  );
   const { data: totalQuotas = 0 } = useTotalQuotas();
   const { data: lotes = [] } = useMyLotes();
   const { data: podeCriar = true } = usePodeCriarQuota();
@@ -171,6 +180,16 @@ function QuotasPage() {
               );
             })}
           </div>
+        </div>
+      )}
+      {encerradasCount > 0 && (
+        <div className="pt-2 text-center">
+          <button
+            onClick={() => setMostrarEncerradas((v) => !v)}
+            className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            {mostrarEncerradas ? `Ocultar encerradas (${encerradasCount})` : `Ver encerradas (${encerradasCount})`}
+          </button>
         </div>
       )}
     </div>
