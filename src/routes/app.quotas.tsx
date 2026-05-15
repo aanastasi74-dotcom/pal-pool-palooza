@@ -182,6 +182,16 @@ function QuotasPage() {
           </div>
         </div>
       )}
+      {encerradasCount > 0 && (
+        <div className="pt-2 text-center">
+          <button
+            onClick={() => setMostrarEncerradas((v) => !v)}
+            className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            {mostrarEncerradas ? `Ocultar encerradas (${encerradasCount})` : `Ver encerradas (${encerradasCount})`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
