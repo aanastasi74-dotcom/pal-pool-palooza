@@ -56,9 +56,9 @@ function Pagamentos() {
   const [motivo, setMotivo] = useState("");
 
   // Filtra payments cujo lote é incompleto (devem ser tratados em /app/admin/quotas).
-  const visiblePays = useMemo(() => {
+  const visiblePays = useMemo<Pay[]>(() => {
     const set = lotesIncompletosIds ?? new Set<string>();
-    return (pays ?? []).filter((p: any) => !p.lote_id || !set.has(p.lote_id));
+    return ((pays ?? []) as Pay[]).filter((p: any) => !p.lote_id || !set.has(p.lote_id));
   }, [pays, lotesIncompletosIds]);
   const ocultos = (pays?.length ?? 0) - visiblePays.length;
 
