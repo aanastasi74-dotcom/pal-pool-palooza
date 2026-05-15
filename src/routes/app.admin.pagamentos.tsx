@@ -34,6 +34,19 @@ function Pagamentos() {
   const reject = useRejectPayment();
   const reverse = useReversePayment();
 
+  // I.7.3 — Lote IDs com status='incompleta' (pra esconder pagamentos órfãos da tabela).
+  const { data: lotesIncompletosIds } = useQuery({
+    queryKey: ["lotes", "incompleta-ids"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lotes_compra")
+        .select("id")
+        .eq("status", "incompleta");
+      if (error) throw error;
+      return new Set((data ?? []).map((l: any) => l.id));
+    },
+  });
+
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [dataIni, setDataIni] = useState("");
   const [dataFim, setDataFim] = useState("");
@@ -41,6 +54,13 @@ function Pagamentos() {
   const [rejeitarPay, setRejeitarPay] = useState<Pay | null>(null);
   const [estornarPay, setEstornarPay] = useState<Pay | null>(null);
   const [motivo, setMotivo] = useState("");
+
+  // Filtra payments cujo lote é incompleto (devem ser tratados em /app/admin/quotas).
+  const visiblePays = useMemo(() => {
+    const set = lotesIncompletosIds ?? new Set<string>();
+    return (pays ?? []).filter((p: any) => !p.lote_id || !set.has(p.lote_id));
+  }, [pays, lotesIncompletosIds]);
+  const ocultos = (pays?.length ?? 0) - visiblePays.length;
 
   const predicate = useCallback(
     (p: Pay, q: string) => {
@@ -59,7 +79,7 @@ function Pagamentos() {
   );
 
   const { query, setQuery, page, setPage, totalPages, slice, total, pageSize } = usePaginatedList(
-    pays ?? [],
+    visiblePays,
     predicate,
     20,
   );
