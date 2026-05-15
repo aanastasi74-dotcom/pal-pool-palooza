@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus, CheckCircle2, AlertCircle, Lightbulb, ListChecks, Lock } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { estaNosUltimos25, isElegivelLanterna, razaoNaoElegivel } from "@/lib/lanterninha";
 import { useMinhasQuotas, useTotalQuotas } from "@/lib/queries/quotas";
 import { useMyLotes } from "@/lib/queries/lotes";
