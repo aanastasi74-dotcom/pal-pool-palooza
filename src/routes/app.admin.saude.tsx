@@ -3,34 +3,30 @@ import { usePaymentsAdmin } from "@/lib/queries/payments";
 import { useBulletins } from "@/lib/queries/bulletins";
 import { useAuditLog } from "@/lib/queries/audit";
 import { useRanking } from "@/lib/queries/profiles";
-import { Activity, Database, Cloud, Mail, Sparkles, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useCapacidadeInfra, type CapacidadeMetrica } from "@/lib/queries/capacidade";
+import { Users, Ticket, HardDrive, Mail, CheckCircle2, RefreshCw } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/admin/saude")({
   head: () => ({ meta: [{ title: "Admin — Saúde do sistema" }] }),
   component: SaudeAdmin,
 });
 
-const services = [
-  { id: "api", label: "API", icon: Activity, status: "ok" as const, info: "Latência 87ms" },
-  { id: "db", label: "Banco de dados", icon: Database, status: "ok" as const, info: "Pool 8/20" },
-  { id: "backup", label: "Backup automático", icon: Cloud, status: "warn" as const, info: "Último sucesso há 9h" },
-  { id: "llm", label: "LLM (boletim)", icon: Sparkles, status: "ok" as const, info: "OK" },
-  { id: "placares", label: "Placares ao vivo", icon: Activity, status: "ok" as const, info: "Sincronizado" },
-  { id: "email", label: "E-mail transacional", icon: Mail, status: "warn" as const, info: "Fila em 12 mensagens" },
-];
-
-const incidentes = [
-  { data: "10/06/2026", desc: "Degradação no provedor de placares", duracao: "22min", impacto: "Atualização atrasada" },
-  { data: "02/06/2026", desc: "Falha no envio de e-mails de convite", duracao: "1h 10min", impacto: "8 convites reenviados" },
-  { data: "18/05/2026", desc: "Reinício do banco em janela de manutenção", duracao: "4min", impacto: "Sem perda de dados" },
-];
-
-const corStatus = {
-  ok: "bg-success/15 text-success",
-  warn: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-300",
-  err: "bg-destructive/15 text-destructive",
+const corClasses: Record<string, string> = {
+  verde: "border-success/40 bg-success/10",
+  amarelo: "border-yellow-500/40 bg-yellow-500/10",
+  vermelho: "border-destructive/40 bg-destructive/10",
+};
+const corBadge: Record<string, string> = {
+  verde: "bg-success/20 text-success",
+  amarelo: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300",
+  vermelho: "bg-destructive/20 text-destructive",
+};
+const corProgress: Record<string, string> = {
+  verde: "[&>div]:bg-success",
+  amarelo: "[&>div]:bg-yellow-500",
+  vermelho: "[&>div]:bg-destructive",
 };
 
 function SaudeAdmin() {
@@ -38,12 +34,13 @@ function SaudeAdmin() {
   const { data: boletins } = useBulletins();
   const { data: ranking } = useRanking();
   const { data: audits } = useAuditLog();
+  const { data: cap, isLoading: capLoading, refetch: refetchCap, isFetching, dataUpdatedAt } = useCapacidadeInfra();
 
   const ativos = (ranking ?? []).length;
   const pendentes = (pays ?? []).filter((p: any) => p.status === "pendente").length;
   const naoPublicados = (boletins ?? []).filter((b: any) => b.status !== "publicado").length;
-  const sensiveis = (audits ?? [])
-    .filter((a: any) => /estorn|atualizou_config|rejeit|atualizou_premiacao|excluiu/.test(a.acao))
+  const alertasCapacidade = (audits ?? [])
+    .filter((a: any) => /^alerta_capacidade_/.test(a.acao))
     .slice(0, 10);
 
   return (
@@ -51,31 +48,56 @@ function SaudeAdmin() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-extrabold">Saúde do sistema</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Status operacional, métricas e ações sensíveis.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Capacidade de infra, métricas e alertas recentes.</p>
         </div>
-        <button
-          onClick={() => toast.success("Verificação concluída.")}
-          className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow"
-        >
-          Forçar verificação agora
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={() => refetchCap()}
+            disabled={isFetching}
+            className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-60"
+          >
+            <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
+            Forçar verificação agora
+          </button>
+          {dataUpdatedAt > 0 && (
+            <span className="text-[10px] text-muted-foreground">
+              Atualizado em {new Date(dataUpdatedAt).toLocaleTimeString("pt-BR")}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        {services.map((s) => (
-          <div key={s.id} className="rounded-2xl border border-border bg-card p-4 shadow-card">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <s.icon className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold">{s.label}</span>
-              </div>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${corStatus[s.status]}`}>
-                {s.status === "ok" ? "OK" : s.status === "warn" ? "Atenção" : "Erro"}
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">{s.info}</p>
-          </div>
-        ))}
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {capLoading || !cap ? (
+          [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-32 rounded-2xl" />)
+        ) : (
+          <>
+            <CapCard
+              icon={Users}
+              label="Perebas"
+              m={cap.metricas.perebas}
+              fmt={(m) => `${m.atual ?? 0} / ${m.max ?? 0}`}
+            />
+            <CapCard
+              icon={Ticket}
+              label="Quotas"
+              m={cap.metricas.quotas}
+              fmt={(m) => `${m.atual ?? 0} / ${m.max ?? 0}`}
+            />
+            <CapCard
+              icon={HardDrive}
+              label="Storage"
+              m={cap.metricas.storage}
+              fmt={(m) => `${m.atual_mb ?? 0} MB / ${m.max_mb ?? 0} MB`}
+            />
+            <CapCard
+              icon={Mail}
+              label="Emails (mês)"
+              m={cap.metricas.emails}
+              fmt={(m) => `${m.atual ?? 0} / ${m.max ?? 0}`}
+            />
+          </>
+        )}
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
@@ -85,45 +107,56 @@ function SaudeAdmin() {
       </div>
 
       <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
-        <h2 className="font-display text-base font-bold">Últimas ações sensíveis</h2>
+        <h2 className="font-display text-base font-bold">Alertas de capacidade recentes</h2>
         <ul className="mt-3 divide-y divide-border">
-          {sensiveis.length === 0 && <li className="py-2 text-xs text-muted-foreground">Nenhuma ação sensível recente.</li>}
-          {sensiveis.map((a: any) => (
-            <li key={a.id} className="flex items-center justify-between py-2 text-sm">
-              <span className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                <span className="font-semibold">{a.ator_nome ?? "—"}</span>
-                <span className="text-muted-foreground">{a.acao.replace(/_/g, " ")}</span>
-              </span>
-              <span className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString("pt-BR")}</span>
-            </li>
-          ))}
+          {alertasCapacidade.length === 0 && (
+            <li className="py-2 text-xs text-muted-foreground">Nenhum alerta de capacidade registrado.</li>
+          )}
+          {alertasCapacidade.map((a: any) => {
+            const nivel = a.acao.replace("alerta_capacidade_", "");
+            return (
+              <li key={a.id} className="flex items-center justify-between py-2 text-sm">
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${corBadge[nivel] ?? ""}`}>
+                    {nivel}
+                  </span>
+                </span>
+                <span className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString("pt-BR")}</span>
+              </li>
+            );
+          })}
         </ul>
       </section>
+    </div>
+  );
+}
 
-      <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
-        <h2 className="font-display text-base font-bold">Histórico de incidentes</h2>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Data</TableHead>
-              <TableHead>Descrição</TableHead>
-              <TableHead>Duração</TableHead>
-              <TableHead>Impacto</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {incidentes.map((i, idx) => (
-              <TableRow key={idx}>
-                <TableCell className="text-xs">{i.data}</TableCell>
-                <TableCell>{i.desc}</TableCell>
-                <TableCell className="text-xs">{i.duracao}</TableCell>
-                <TableCell className="text-xs text-muted-foreground">{i.impacto}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </section>
+function CapCard({
+  icon: Icon,
+  label,
+  m,
+  fmt,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  m: CapacidadeMetrica;
+  fmt: (m: CapacidadeMetrica) => string;
+}) {
+  const pct = Math.min(100, Math.round(m.pct ?? 0));
+  return (
+    <div className={`rounded-2xl border-2 p-4 shadow-card ${corClasses[m.cor] ?? "border-border bg-card"}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-semibold">{label}</span>
+        </div>
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${corBadge[m.cor] ?? ""}`}>
+          {pct}%
+        </span>
+      </div>
+      <p className="mt-2 font-display text-xl font-black">{fmt(m)}</p>
+      <Progress value={pct} className={`mt-2 ${corProgress[m.cor] ?? ""}`} />
     </div>
   );
 }

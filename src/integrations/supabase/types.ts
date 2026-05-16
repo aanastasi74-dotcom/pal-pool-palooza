@@ -735,6 +735,35 @@ export type Database = {
       }
     }
     Views: {
+      vw_capacidade_infra: {
+        Row: {
+          emails_atual: number | null
+          emails_max: number | null
+          emails_pct: number | null
+          perebas_atual: number | null
+          perebas_max: number | null
+          perebas_pct: number | null
+          quotas_atual: number | null
+          quotas_max: number | null
+          quotas_pct: number | null
+          storage_atual_bytes: number | null
+          storage_max_bytes: number | null
+          storage_pct: number | null
+          threshold_amarelo: number | null
+          threshold_vermelho: number | null
+        }
+        Relationships: []
+      }
+      vw_emails_enviados_mes: {
+        Row: {
+          aprovacoes: number | null
+          convites: number | null
+          lembretes: number | null
+          rejeicoes: number | null
+          total_estimado: number | null
+        }
+        Relationships: []
+      }
       vw_perebas_count: {
         Row: {
           convites_pendentes: number | null
@@ -753,6 +782,7 @@ export type Database = {
         Args: { p_role: string; p_user_id: string }
         Returns: undefined
       }
+      alertar_capacidade: { Args: never; Returns: Json }
       aprovar_lote: {
         Args: { p_aprovar_n?: number; p_lote_id: string }
         Returns: Json
@@ -765,6 +795,7 @@ export type Database = {
         Args: { p_apelido: string }
         Returns: boolean
       }
+      check_capacidade: { Args: never; Returns: Json }
       cleanup_quotas_incompletas: { Args: never; Returns: number }
       compute_default_sigla: { Args: { p_nome: string }; Returns: string }
       consume_invite: { Args: { p_token: string }; Returns: boolean }

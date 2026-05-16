@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.lembrete-palpite]
 verify_jwt = false
+
+[functions.send-capacidade-alerta]
+verify_jwt = false
