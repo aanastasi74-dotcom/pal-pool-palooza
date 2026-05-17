@@ -64,6 +64,7 @@ function CompletePerfil() {
     if (apelido.trim().length < 2) return toast.error("Apelido tem que ter pelo menos 2 letras.");
     if (sigla.trim().length < 1) return toast.error("Escolha uma sigla de até 3 letras.");
     if (disponivel === false) return toast.error("Esse apelido já está em uso.");
+    if (!aceitouRegulamento) return toast.error("Você precisa aceitar o regulamento pra continuar.");
     setSubmitting(true);
     const { error } = await supabase.from("profiles").insert({
       id: user.id,
@@ -73,11 +74,21 @@ function CompletePerfil() {
       sigla: sigla.trim().toUpperCase(),
       cor,
     } as any);
-    setSubmitting(false);
     if (error) {
+      setSubmitting(false);
       toast.error(translatePgError(error));
       return;
     }
+    // Registra aceite do regulamento
+    const { error: aceiteErr } = await supabase.rpc("aceitar_regras" as any);
+    if (aceiteErr) {
+      console.error("aceitar_regras:", aceiteErr);
+    }
+    // Dispara email de boas-vindas (best-effort)
+    supabase.functions
+      .invoke("send-regras-signup", { body: {} })
+      .catch((e) => console.error("send-regras-signup:", e));
+    setSubmitting(false);
     toast.success("Perfil criado, pereba!");
     window.location.href = "/app";
   };
