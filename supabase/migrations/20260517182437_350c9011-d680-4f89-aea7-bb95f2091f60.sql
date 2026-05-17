@@ -1,0 +1,1 @@
+UPDATE settings SET value = '{"exato":12,"resultado":4,"dif_gols":2,"gols_time":1}'::jsonb WHERE key = 'score_rules';
