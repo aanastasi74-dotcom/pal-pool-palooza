@@ -1,4 +1,5 @@
-import { Link, Outlet, useLocation } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { Trophy, CalendarDays, Sparkles, Award, ListOrdered, Home, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
