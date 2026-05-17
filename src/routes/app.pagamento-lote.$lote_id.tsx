@@ -81,6 +81,9 @@ function PagamentoLote() {
     if (!arquivo) return;
     try {
       const res = await submit.mutateAsync({ loteId: lote_id, file: arquivo });
+      if (!res.count || res.count < 1) {
+        throw new Error("Falha ao registrar o comprovante do lote.");
+      }
       setEnviado(true);
       toast.success(`Comprovante de ${res.count} quota(s) enviado! Aguarda aprovação.`);
       setTimeout(() => navigate({ to: "/app/quotas" }), 1500);
