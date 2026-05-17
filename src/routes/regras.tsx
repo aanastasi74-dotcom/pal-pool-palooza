@@ -188,7 +188,8 @@ function RegrasPage() {
               nenhuma hipótese.</strong>
             </li>
             <li>
-              <strong>Mata-mata (placar oficial):</strong> a partir das oitavas de final, o placar considerado
+              <strong>Mata-mata (placar oficial):</strong> a partir do mata-mata (Round of 32 em diante, ou seja,
+              da fase eliminatória da Copa 2026 com 48 seleções), o placar considerado
               para fins de pontuação é <strong>exclusivamente o resultado do tempo normal</strong> (90 minutos +
               acréscimos). <strong>Eventuais gols na prorrogação e cobranças de pênaltis são ignorados pelo
               bolão</strong> — só contam pra definir quem avança no chaveamento da Copa, não pra pontuar os palpites.
