@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegrasRouteImport } from './routes/regras'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
 import { Route as LoginRouteImport } from './routes/login'
@@ -48,6 +49,11 @@ import { Route as AppAdminConfiguracoesRouteImport } from './routes/app.admin.co
 import { Route as AppAdminBoletinsRouteImport } from './routes/app.admin.boletins'
 import { Route as AppAdminAuditoriaRouteImport } from './routes/app.admin.auditoria'
 
+const RegrasRoute = RegrasRouteImport.update({
+  id: '/regras',
+  path: '/regras',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
   path: '/redefinir-senha',
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/regras': typeof RegrasRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/regras': typeof RegrasRoute
   '/app/boletins': typeof AppBoletinsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/regras': typeof RegrasRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
@@ -368,6 +377,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/manutencao'
     | '/redefinir-senha'
+    | '/regras'
     | '/app/admin'
     | '/app/boletins'
     | '/app/comprar-quota'
@@ -407,6 +417,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/manutencao'
     | '/redefinir-senha'
+    | '/regras'
     | '/app/boletins'
     | '/app/comprar-quota'
     | '/app/estadios'
@@ -446,6 +457,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/manutencao'
     | '/redefinir-senha'
+    | '/regras'
     | '/app/admin'
     | '/app/boletins'
     | '/app/comprar-quota'
@@ -487,11 +499,19 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ManutencaoRoute: typeof ManutencaoRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  RegrasRoute: typeof RegrasRoute
   CadastroTokenRoute: typeof CadastroTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/regras': {
+      id: '/regras'
+      path: '/regras'
+      fullPath: '/regras'
+      preLoaderRoute: typeof RegrasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/redefinir-senha': {
       id: '/redefinir-senha'
       path: '/redefinir-senha'
@@ -847,18 +867,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ManutencaoRoute: ManutencaoRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
+  RegrasRoute: RegrasRoute,
   CadastroTokenRoute: CadastroTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

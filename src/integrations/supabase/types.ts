@@ -447,11 +447,13 @@ export type Database = {
       }
       profiles: {
         Row: {
+          aceitou_regras_em: string | null
           apelido: string
           ativo: boolean
           cor: string | null
           created_at: string | null
           email: string
+          email_regras_enviado_em: string | null
           id: string
           limite_quotas_custom: number | null
           nome: string
@@ -461,11 +463,13 @@ export type Database = {
           ultimo_acesso: string | null
         }
         Insert: {
+          aceitou_regras_em?: string | null
           apelido: string
           ativo?: boolean
           cor?: string | null
           created_at?: string | null
           email: string
+          email_regras_enviado_em?: string | null
           id: string
           limite_quotas_custom?: number | null
           nome: string
@@ -475,11 +479,13 @@ export type Database = {
           ultimo_acesso?: string | null
         }
         Update: {
+          aceitou_regras_em?: string | null
           apelido?: string
           ativo?: boolean
           cor?: string | null
           created_at?: string | null
           email?: string
+          email_regras_enviado_em?: string | null
           id?: string
           limite_quotas_custom?: number | null
           nome?: string
@@ -774,6 +780,7 @@ export type Database = {
       }
     }
     Functions: {
+      aceitar_regras: { Args: never; Returns: string }
       admin_set_ativo: {
         Args: { p_ativo: boolean; p_user_id: string }
         Returns: undefined
@@ -906,6 +913,7 @@ export type Database = {
       limite_perebas_hard: { Args: never; Returns: number }
       limite_quotas_global_hard: { Args: never; Returns: number }
       limite_quotas_pereba: { Args: { p_user_id: string }; Returns: number }
+      marcar_email_regras_enviado: { Args: never; Returns: string }
       pode_comprar_quota:
         | { Args: { p_user_id: string }; Returns: Json }
         | { Args: { p_quantidade?: number; p_user_id: string }; Returns: Json }

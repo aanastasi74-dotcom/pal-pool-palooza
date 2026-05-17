@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate, Navigate } from "@tanstack/react-router";
-import { Trophy, CalendarDays, ListOrdered, Sparkles, Coins, ChevronDown, User, Wallet, ShieldCheck, LogOut, Globe, Building2, Award } from "lucide-react";
+import { Trophy, CalendarDays, ListOrdered, Sparkles, Coins, ChevronDown, User, Wallet, ShieldCheck, LogOut, Globe, Building2, Award, FileText } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +40,12 @@ export function AppShell() {
 
   if (maintenance && !pathname.startsWith("/app/admin")) {
     return <Navigate to="/manutencao" />;
+  }
+
+  // Gate: pereba sem aceite do regulamento é forçado a aceitar
+  const aceitouRegras = !!(profile as any)?.aceitou_regras_em;
+  if (profile && !aceitouRegras && !isAdmin) {
+    return <Navigate to="/regras" search={{ force: true }} />;
   }
 
   return (
@@ -106,6 +112,9 @@ export function AppShell() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/app/simulador" })}>
                   <Trophy className="mr-2 h-4 w-4" /> Simulador
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate({ to: "/regras" })}>
+                  <FileText className="mr-2 h-4 w-4" /> Regulamento
                 </DropdownMenuItem>
                 {isAdmin && (
                   <>

@@ -23,6 +23,7 @@ function CompletePerfil() {
   const [siglaTouched, setSiglaTouched] = useState(false);
   const [cor, setCor] = useState(PALETA[0]);
   const [submitting, setSubmitting] = useState(false);
+  const [aceitouRegulamento, setAceitouRegulamento] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: disponivel, isFetching } = useCheckApelido(apelido);
@@ -63,6 +64,7 @@ function CompletePerfil() {
     if (apelido.trim().length < 2) return toast.error("Apelido tem que ter pelo menos 2 letras.");
     if (sigla.trim().length < 1) return toast.error("Escolha uma sigla de até 3 letras.");
     if (disponivel === false) return toast.error("Esse apelido já está em uso.");
+    if (!aceitouRegulamento) return toast.error("Você precisa aceitar o regulamento pra continuar.");
     setSubmitting(true);
     const { error } = await supabase.from("profiles").insert({
       id: user.id,
@@ -72,11 +74,21 @@ function CompletePerfil() {
       sigla: sigla.trim().toUpperCase(),
       cor,
     } as any);
-    setSubmitting(false);
     if (error) {
+      setSubmitting(false);
       toast.error(translatePgError(error));
       return;
     }
+    // Registra aceite do regulamento
+    const { error: aceiteErr } = await supabase.rpc("aceitar_regras" as any);
+    if (aceiteErr) {
+      console.error("aceitar_regras:", aceiteErr);
+    }
+    // Dispara email de boas-vindas (best-effort)
+    supabase.functions
+      .invoke("send-regras-signup", { body: {} })
+      .catch((e) => console.error("send-regras-signup:", e));
+    setSubmitting(false);
     toast.success("Perfil criado, pereba!");
     window.location.href = "/app";
   };
@@ -152,12 +164,34 @@ function CompletePerfil() {
               ))}
             </div>
           </div>
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <label className="flex items-start gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={aceitouRegulamento}
+                onChange={(e) => setAceitouRegulamento(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              <span>
+                Li e aceito o{" "}
+                <a
+                  href="/regras"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-primary underline"
+                >
+                  regulamento do bolão
+                </a>{" "}
+                na íntegra.
+              </span>
+            </label>
+          </div>
           <button
             type="submit"
-            disabled={submitting || isFetching || disponivel === false}
+            disabled={submitting || isFetching || disponivel === false || !aceitouRegulamento}
             className="w-full rounded-full bg-primary py-2 text-sm font-bold text-primary-foreground disabled:opacity-50"
           >
-            {submitting ? "Criando…" : "Salvar e entrar"}
+            {submitting ? "Criando…" : "Concluir cadastro"}
           </button>
         </form>
       </div>
