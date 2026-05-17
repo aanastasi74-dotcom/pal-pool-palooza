@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate, Navigate } from "@tanstack/react-router";
-import { Trophy, CalendarDays, ListOrdered, Sparkles, Coins, ChevronDown, User, Wallet, ShieldCheck, LogOut, Globe, Building2, Award } from "lucide-react";
+import { Trophy, CalendarDays, ListOrdered, Sparkles, Coins, ChevronDown, User, Wallet, ShieldCheck, LogOut, Globe, Building2, Award, FileText } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
