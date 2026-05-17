@@ -43,7 +43,7 @@ function RegrasPage() {
   const { force } = Route.useSearch();
   const { user, profile } = useAuth();
   const qc = useQueryClient();
-  const navigate = useNavigate();
+  
   const [aceitando, setAceitando] = useState(false);
   const aceitouEm = (profile as any)?.aceitou_regras_em as string | null | undefined;
   const podeAceitar = !!user && !aceitouEm;
