@@ -10,6 +10,7 @@ import { useFaseAtual } from "@/lib/queries/top4";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { buildHeader, getTeamSide } from "@/lib/match-helpers";
+import { PlacarJogo } from "@/components/placar-jogo";
 import { times as mockTimes } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/app/pereba/$user_id")({
@@ -124,9 +125,19 @@ function PerebaPublicProfile() {
                           {j.placar_casa_palpite ?? "—"} <span className="text-muted-foreground">×</span> {j.placar_fora_palpite ?? "—"}
                         </p>
                         {j.status === "encerrado" && (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            Real: <strong>{j.placar_casa_real} × {j.placar_fora_real}</strong>
-                          </p>
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            <span className="block text-[10px] uppercase tracking-widest">Real</span>
+                            <PlacarJogo
+                              placar_casa={j.placar_casa_real}
+                              placar_fora={j.placar_fora_real}
+                              placar_casa_prorrogacao={j.placar_casa_prorrogacao_real}
+                              placar_fora_prorrogacao={j.placar_fora_prorrogacao_real}
+                              penaltis_casa={j.penaltis_casa_real}
+                              penaltis_fora={j.penaltis_fora_real}
+                              size="sm"
+                              className="text-foreground"
+                            />
+                          </div>
                         )}
                       </div>
                       <div className="flex items-center gap-2">

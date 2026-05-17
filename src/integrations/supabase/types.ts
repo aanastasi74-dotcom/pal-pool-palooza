@@ -856,13 +856,17 @@ export type Database = {
           fase: string
           fora: string
           match_id: string
+          numero: number
           numero_jogo: number
-          placar_casa_palpite: number
-          placar_casa_real: number
-          placar_fora_palpite: number
-          placar_fora_real: number
-          pontos: number
-          quota_numero: number
+          palpite_casa: number
+          palpite_fora: number
+          penaltis_casa: number
+          penaltis_fora: number
+          placar_casa: number
+          placar_casa_prorrogacao: number
+          placar_fora: number
+          placar_fora_prorrogacao: number
+          pontos_calculados: number
           slot_casa: string
           slot_visitante: string
           status: string
