@@ -510,9 +510,9 @@ function PalpiteCard({
         </p>
       )}
       <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <div className="flex items-center justify-end gap-3">
-          <p className="hidden font-display font-bold sm:block">{tCasa.nome}</p>
-          <span className="text-3xl">{tCasa.bandeira}</span>
+        <div className="flex items-center justify-end gap-2 sm:gap-3">
+          <p className="font-display text-sm font-bold sm:text-base text-right">{tCasa.nome}</p>
+          <span className="text-2xl sm:text-3xl">{tCasa.bandeira}</span>
         </div>
         <div className="flex items-center gap-2">
           <ScoreDisplay value={casa} editing={editing} onChange={(v) => onChange({ casa: v })} invalid={casaInv} />
