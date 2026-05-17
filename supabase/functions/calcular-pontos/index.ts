@@ -108,7 +108,10 @@ Deno.serve(async (req) => {
       const allPreds = await sb(
         `predictions?quota_id=eq.${q.id}&select=pontos_calculados,submetido_em`,
       );
-      const pontos = allPreds.reduce((s: number, x: any) => s + (x.pontos_calculados ?? 0), 0);
+      const pontosJogos = allPreds.reduce((s: number, x: any) => s + (x.pontos_calculados ?? 0), 0);
+      const top4 = await sb(`top4_predictions?quota_id=eq.${q.id}&select=pontos_calculados`);
+      const pontosTop4 = top4.reduce((s: number, x: any) => s + (x.pontos_calculados ?? 0), 0);
+      const pontos = pontosJogos + pontosTop4;
       const validos = allPreds.filter((x: any) => x.submetido_em != null).length;
       const possiveis = totalMatchesTravados;
       const engajamento = possiveis > 0 ? validos / possiveis : 0;
