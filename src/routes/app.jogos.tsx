@@ -9,6 +9,7 @@ import { useTeams } from "@/lib/queries/teams";
 import { useStadiums } from "@/lib/queries/stadiums";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildHeader, getTeamSide } from "@/lib/match-helpers";
+import { PlacarJogo } from "@/components/placar-jogo";
 
 export const Route = createFileRoute("/app/jogos")({
   head: () => ({ meta: [{ title: "Jogos — Bolão dos Perebas" }] }),
@@ -126,7 +127,14 @@ function Jogos() {
 
                   <div className="text-center">
                     {j.status === "encerrado" || j.status === "ao-vivo" ? (
-                      <p className="font-display text-3xl font-black">{j.placar_casa} <span className="text-muted-foreground">·</span> {j.placar_fora}</p>
+                      <PlacarJogo
+                        placar_casa={j.placar_casa}
+                        placar_fora={j.placar_fora}
+                        placar_casa_prorrogacao={j.placar_casa_prorrogacao}
+                        placar_fora_prorrogacao={j.placar_fora_prorrogacao}
+                        penaltis_casa={j.penaltis_casa}
+                        penaltis_fora={j.penaltis_fora}
+                      />
                     ) : (
                       <p className="font-display text-2xl font-black text-muted-foreground">×</p>
                     )}
