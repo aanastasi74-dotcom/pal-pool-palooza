@@ -134,13 +134,29 @@ function JogosAdmin() {
   );
 }
 
+const FASES_KO = new Set(["round_of_32", "oitavas", "quartas", "semi", "terceiro_lugar", "final"]);
+
 function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => void }) {
   const [j, setJ] = useState<any>({ ...jogo, data_local: new Date(jogo.data_jogo ?? Date.now()).toISOString().slice(0, 16) });
   const update = useUpdateMatch();
   const { data: teams = [] } = useTeams();
   const { data: stadiums = [] } = useStadiums();
   const isGrupos = j.fase === "grupos";
+  const isKO = FASES_KO.has(j.fase);
   const stadium = stadiums.find((s) => s.id === j.stadium_id);
+
+  const placarCasaN = j.placar_casa !== "" && j.placar_casa != null ? Number(j.placar_casa) : null;
+  const placarForaN = j.placar_fora !== "" && j.placar_fora != null ? Number(j.placar_fora) : null;
+  const prorCasaN = j.placar_casa_prorrogacao !== "" && j.placar_casa_prorrogacao != null ? Number(j.placar_casa_prorrogacao) : null;
+  const prorForaN = j.placar_fora_prorrogacao !== "" && j.placar_fora_prorrogacao != null ? Number(j.placar_fora_prorrogacao) : null;
+
+  const tempoNormalEmpate =
+    isKO && placarCasaN != null && placarForaN != null && placarCasaN === placarForaN;
+  const prorrogacaoEmpate =
+    tempoNormalEmpate && prorCasaN != null && prorForaN != null && prorCasaN === prorForaN;
+
+  const jaEstavaEncerradoComPlacar =
+    jogo.status === "encerrado" && jogo.placar_casa != null && jogo.placar_fora != null;
 
   const salvar = async () => {
     if (isGrupos && (!j.team_home_id || !j.team_away_id)) {
@@ -149,18 +165,40 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
     }
     const home = teams.find((t) => t.id === j.team_home_id);
     const away = teams.find((t) => t.id === j.team_away_id);
-    const placarCasaNum =
-      j.status === "encerrado" && j.placar_casa !== "" && j.placar_casa != null ? Number(j.placar_casa) : null;
-    const placarForaNum =
-      j.status === "encerrado" && j.placar_fora !== "" && j.placar_fora != null ? Number(j.placar_fora) : null;
-    if (placarCasaNum != null && (placarCasaNum < 0 || placarCasaNum > 20)) {
-      toast.error("Placar deve estar entre 0 e 20");
-      return;
+    const isEncerrado = j.status === "encerrado";
+    const pc = isEncerrado ? placarCasaN : null;
+    const pf = isEncerrado ? placarForaN : null;
+    if (pc != null && (pc < 0 || pc > 20)) { toast.error("Placar deve estar entre 0 e 20"); return; }
+    if (pf != null && (pf < 0 || pf > 20)) { toast.error("Placar deve estar entre 0 e 20"); return; }
+
+    // Prorrogação só se mata-mata e tempo normal empate
+    let prorC: number | null = null;
+    let prorF: number | null = null;
+    if (isEncerrado && tempoNormalEmpate) {
+      prorC = prorCasaN;
+      prorF = prorForaN;
+      if (prorC != null && (prorC < 0 || prorC > 20)) { toast.error("Prorrogação deve ser entre 0 e 20"); return; }
+      if (prorF != null && (prorF < 0 || prorF > 20)) { toast.error("Prorrogação deve ser entre 0 e 20"); return; }
     }
-    if (placarForaNum != null && (placarForaNum < 0 || placarForaNum > 20)) {
-      toast.error("Placar deve estar entre 0 e 20");
-      return;
+
+    // Pênaltis só se prorrogação empatou
+    let penC: number | null = null;
+    let penF: number | null = null;
+    if (isEncerrado && prorrogacaoEmpate) {
+      penC = j.penaltis_casa !== "" && j.penaltis_casa != null ? Number(j.penaltis_casa) : null;
+      penF = j.penaltis_fora !== "" && j.penaltis_fora != null ? Number(j.penaltis_fora) : null;
+      if (penC != null && (penC < 0 || penC > 30)) { toast.error("Pênaltis deve ser entre 0 e 30"); return; }
+      if (penF != null && (penF < 0 || penF > 30)) { toast.error("Pênaltis deve ser entre 0 e 30"); return; }
+      if (penC != null && penF != null && penC === penF) {
+        toast.error("Disputa de pênaltis não pode terminar empatada");
+        return;
+      }
     }
+
+    if (jaEstavaEncerradoComPlacar && (pc !== jogo.placar_casa || pf !== jogo.placar_fora)) {
+      if (!confirm("Esse jogo já foi pontuado. Alterar o placar vai recalcular pontos dos perebas que palpitaram. Continuar?")) return;
+    }
+
     const payload: any = {
       data_jogo: new Date(j.data_local).toISOString(),
       team_home_id: j.team_home_id || null,
@@ -169,17 +207,21 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
       casa: home?.nome_pt ?? j.slot_casa ?? j.casa ?? "",
       fora: away?.nome_pt ?? j.slot_visitante ?? j.fora ?? "",
       status: j.status,
-      placar_casa: placarCasaNum,
-      placar_fora: placarForaNum,
+      placar_casa: pc,
+      placar_fora: pf,
+      placar_casa_prorrogacao: prorC,
+      placar_fora_prorrogacao: prorF,
+      penaltis_casa: penC,
+      penaltis_fora: penF,
     };
     await update.mutateAsync({ id: jogo.id, ...payload });
-    toast.success("Jogo salvo.");
+    toast.success(isEncerrado ? "Placar salvo. Pontuação está sendo recalculada..." : "Jogo salvo.");
     onClose();
   };
 
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg space-y-3">
+      <DialogContent className="max-h-[90vh] max-w-lg space-y-3 overflow-y-auto">
         <DialogHeader><DialogTitle>Editar jogo</DialogTitle></DialogHeader>
         <div className="grid grid-cols-2 gap-2 text-sm">
           <Field label="Fase (estrutural)">
@@ -258,18 +300,49 @@ function EditarJogoDialog({ jogo, onClose }: { jogo: MatchRow; onClose: () => vo
           </Field>
           {j.status === "encerrado" && (
             <>
-              <Field label="Placar casa (0-20)">
+              <div className="col-span-2 mt-2 rounded-lg border border-border bg-muted/30 p-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+                Placar tempo normal (90 + acréscimos)
+              </div>
+              <Field label="Casa (tempo normal, 0-20)">
                 <input type="number" min={0} max={20} step={1} inputMode="numeric" value={j.placar_casa ?? ""} onChange={(e) => setJ({ ...j, placar_casa: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
-                {j.placar_casa !== "" && j.placar_casa != null && (Number(j.placar_casa) < 0 || Number(j.placar_casa) > 20) && (
-                  <span className="text-[10px] font-bold text-destructive">Placar deve estar entre 0 e 20</span>
-                )}
               </Field>
-              <Field label="Placar visitante (0-20)">
+              <Field label="Visitante (tempo normal, 0-20)">
                 <input type="number" min={0} max={20} step={1} inputMode="numeric" value={j.placar_fora ?? ""} onChange={(e) => setJ({ ...j, placar_fora: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
-                {j.placar_fora !== "" && j.placar_fora != null && (Number(j.placar_fora) < 0 || Number(j.placar_fora) > 20) && (
-                  <span className="text-[10px] font-bold text-destructive">Placar deve estar entre 0 e 20</span>
-                )}
               </Field>
+
+              {isKO && tempoNormalEmpate && (
+                <>
+                  <div className="col-span-2 mt-2 rounded-lg border border-accent/40 bg-accent/10 p-2 text-[10px] uppercase tracking-widest">
+                    Prorrogação — gols marcados APENAS na prorrogação (não some com tempo normal)
+                  </div>
+                  <Field label="Casa (prorrogação)">
+                    <input type="number" min={0} max={20} step={1} inputMode="numeric" value={j.placar_casa_prorrogacao ?? ""} onChange={(e) => setJ({ ...j, placar_casa_prorrogacao: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+                  </Field>
+                  <Field label="Visitante (prorrogação)">
+                    <input type="number" min={0} max={20} step={1} inputMode="numeric" value={j.placar_fora_prorrogacao ?? ""} onChange={(e) => setJ({ ...j, placar_fora_prorrogacao: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+                  </Field>
+                </>
+              )}
+
+              {isKO && prorrogacaoEmpate && (
+                <>
+                  <div className="col-span-2 mt-2 rounded-lg border border-accent/40 bg-accent/10 p-2 text-[10px] uppercase tracking-widest">
+                    Disputa de pênaltis
+                  </div>
+                  <Field label="Casa (pênaltis)">
+                    <input type="number" min={0} max={30} step={1} inputMode="numeric" value={j.penaltis_casa ?? ""} onChange={(e) => setJ({ ...j, penaltis_casa: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+                  </Field>
+                  <Field label="Visitante (pênaltis)">
+                    <input type="number" min={0} max={30} step={1} inputMode="numeric" value={j.penaltis_fora ?? ""} onChange={(e) => setJ({ ...j, penaltis_fora: e.target.value })} className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm" />
+                  </Field>
+                </>
+              )}
+
+              {jaEstavaEncerradoComPlacar && (
+                <p className="col-span-2 text-[10px] text-amber-600 dark:text-amber-400">
+                  ⚠️ Jogo já foi pontuado. Alterar placar recalcula pontos automaticamente.
+                </p>
+              )}
             </>
           )}
         </div>
