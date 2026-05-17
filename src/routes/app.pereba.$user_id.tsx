@@ -10,6 +10,7 @@ import { useFaseAtual } from "@/lib/queries/top4";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { buildHeader, getTeamSide } from "@/lib/match-helpers";
+import { PlacarJogo } from "@/components/placar-jogo";
 import { times as mockTimes } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/app/pereba/$user_id")({
@@ -105,13 +106,13 @@ function PerebaPublicProfile() {
                 const head = buildHeader(j, stadiumMap);
                 const acertou =
                   j.status === "encerrado" &&
-                  j.placar_casa_palpite === j.placar_casa_real &&
-                  j.placar_fora_palpite === j.placar_fora_real;
+                  j.palpite_casa === j.placar_casa &&
+                  j.palpite_fora === j.placar_fora;
                 return (
-                  <article key={`${j.match_id}-${j.quota_numero}`} className="rounded-2xl border border-border bg-card p-4 shadow-card">
+                  <article key={`${j.match_id}-${j.numero}`} className="rounded-2xl border border-border bg-card p-4 shadow-card">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span className="font-semibold">{head}</span>
-                      <span>Quota #{j.quota_numero}</span>
+                      <span>Quota #{j.numero}</span>
                     </div>
                     <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                       <div className="flex items-center justify-end gap-2">
@@ -121,12 +122,21 @@ function PerebaPublicProfile() {
                       <div className="text-center">
                         <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Palpite</p>
                         <p className="font-display text-2xl font-black">
-                          {j.placar_casa_palpite ?? "—"} <span className="text-muted-foreground">×</span> {j.placar_fora_palpite ?? "—"}
+                          {j.palpite_casa ?? "—"} <span className="text-muted-foreground">×</span> {j.palpite_fora ?? "—"}
                         </p>
                         {j.status === "encerrado" && (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            Real: <strong>{j.placar_casa_real} × {j.placar_fora_real}</strong>
-                          </p>
+                          <div className="mt-2">
+                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Real</p>
+                            <PlacarJogo
+                              placar_casa={j.placar_casa}
+                              placar_fora={j.placar_fora}
+                              placar_casa_prorrogacao={j.placar_casa_prorrogacao}
+                              placar_fora_prorrogacao={j.placar_fora_prorrogacao}
+                              penaltis_casa={j.penaltis_casa}
+                              penaltis_fora={j.penaltis_fora}
+                              size="sm"
+                            />
+                          </div>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
@@ -137,7 +147,7 @@ function PerebaPublicProfile() {
                     {j.status === "encerrado" && (
                       <div className="mt-3 flex items-center justify-end gap-2 text-xs">
                         <span className={`rounded-full px-2 py-0.5 font-bold ${acertou ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}`}>
-                          {j.pontos ?? 0} pts
+                          {j.pontos_calculados ?? 0} pts
                         </span>
                       </div>
                     )}
