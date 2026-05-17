@@ -133,19 +133,3 @@ export function useReversePayment() {
     },
   });
 }
-
-export function useCreatePayment() {
-  const qc = useQueryClient();
-  const { user } = useAuth();
-  return useMutation({
-    mutationFn: async ({ quota_id, valor, comprovante_path }: { quota_id: string; valor: number; comprovante_path: string }) => {
-      const { data, error } = await supabase
-        .from("payments")
-        .insert({ user_id: user!.id, quota_id, valor, comprovante_path, status: "pendente" })
-        .select().single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["payments"] }),
-  });
-}
