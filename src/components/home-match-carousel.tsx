@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { useMatches } from "@/lib/queries/matches";
 import { useTeams } from "@/lib/queries/teams";
 import { getTeamSide } from "@/lib/match-helpers";
+import { PlacarJogo } from "@/components/placar-jogo";
 
 type CardItem = {
   id: string;
