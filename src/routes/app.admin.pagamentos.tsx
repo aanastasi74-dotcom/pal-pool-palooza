@@ -34,7 +34,7 @@ function Pagamentos() {
   const reject = useRejectPayment();
   const reverse = useReversePayment();
 
-  // I.7.3 — Lote IDs com status='incompleta' (pra esconder pagamentos órfãos da tabela).
+  // K.2 — Lote IDs com status='incompleta' (filtro pra esconder pagamentos órfãos da tabela).
   const { data: lotesIncompletosIds } = useQuery({
     queryKey: ["lotes", "incompleta-ids"],
     queryFn: async () => {
@@ -44,6 +44,19 @@ function Pagamentos() {
         .eq("status", "incompleta");
       if (error) throw error;
       return new Set((data ?? []).map((l: any) => l.id));
+    },
+  });
+
+  // K.2 — Quotas aguardando ação admin (status incompleta ou rejeitada) pro aviso.
+  const { data: quotasRecuperacaoCount } = useQuery({
+    queryKey: ["quotas", "recuperacao-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("quotas")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["incompleta", "rejeitada"]);
+      if (error) throw error;
+      return count ?? 0;
     },
   });
 
@@ -60,7 +73,7 @@ function Pagamentos() {
     const set = lotesIncompletosIds ?? new Set<string>();
     return ((pays ?? []) as Pay[]).filter((p: any) => !p.lote_id || !set.has(p.lote_id));
   }, [pays, lotesIncompletosIds]);
-  const ocultos = (pays?.length ?? 0) - visiblePays.length;
+  const recuperacao = quotasRecuperacaoCount ?? 0;
 
   const predicate = useCallback(
     (p: Pay, q: string) => {
