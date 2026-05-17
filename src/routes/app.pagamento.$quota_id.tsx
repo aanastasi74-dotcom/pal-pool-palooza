@@ -86,30 +86,20 @@ function Pagamento() {
     if (!arquivo || !user) return;
     setEnviando(true);
     try {
-      const path = `${user.id}/${quota_id}/${Date.now()}-${arquivo.name}`;
-      const { error: upErr } = await supabase.storage.from("comprovantes-pix").upload(path, arquivo, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType: arquivo.type,
-      });
-      if (upErr) {
-        toast.error("Não conseguimos enviar o comprovante. Tenta de novo, pereba.");
+      // K.2: roteia para a RPC enviar_comprovante_lote via lote_id da quota.
+      // Se a quota não tem lote_id (legado), abortar pedindo refresh — fluxo novo exige lote.
+      const { data: q, error: qErr } = await supabase
+        .from("quotas")
+        .select("lote_id")
+        .eq("id", quota_id)
+        .maybeSingle();
+      if (qErr) throw qErr;
+      if (!q?.lote_id) {
+        toast.error("Quota sem lote associado — recarrega a página e tenta de novo, pereba.");
         setEnviando(false);
         return;
       }
-      await createPayment.mutateAsync({ quota_id, valor, comprovante_path: path });
-
-      // Se quota é incompleta, atribui número agora
-      let numero = quota?.numero;
-      if (!numero) {
-        const { data: numData } = await (supabase as any).rpc("proximo_numero_quota", { p_user_id: user.id });
-        numero = numData;
-      }
-      await supabase
-        .from("quotas")
-        .update({ status: "aguardando_aprovacao" as any, numero, motivo_rejeicao: null } as any)
-        .eq("id", quota_id);
-
+      await submitLote.mutateAsync({ loteId: q.lote_id, file: arquivo });
       setEnviado(true);
       toast.success("Comprovante enviado! Aguarda a aprovação do admin.");
       setTimeout(() => navigate({ to: "/app/quotas" }), 1500);
