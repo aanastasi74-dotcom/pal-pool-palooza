@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Activity,
   Bug,
+  Crown,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
