@@ -716,6 +716,7 @@ export type Database = {
           fase_alteracao: string | null
           id: string
           peso_no_palpite: number
+          pontos_calculados: number
           posicao_1: string | null
           posicao_2: string | null
           posicao_3: string | null
@@ -727,6 +728,7 @@ export type Database = {
           fase_alteracao?: string | null
           id?: string
           peso_no_palpite?: number
+          pontos_calculados?: number
           posicao_1?: string | null
           posicao_2?: string | null
           posicao_3?: string | null
@@ -738,6 +740,7 @@ export type Database = {
           fase_alteracao?: string | null
           id?: string
           peso_no_palpite?: number
+          pontos_calculados?: number
           posicao_1?: string | null
           posicao_2?: string | null
           posicao_3?: string | null

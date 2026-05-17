@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Activity,
   Bug,
+  Crown,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -29,6 +30,7 @@ const items = [
   { to: "/app/admin/quotas", label: "Quotas (recuperação)", icon: ShieldCheck },
   { to: "/app/admin/premiacao", label: "Premiação", icon: Trophy },
   { to: "/app/admin/jogos", label: "Jogos da Copa", icon: CalendarDays },
+  { to: "/app/admin/encerrar-copa", label: "Encerrar Copa (Top 4)", icon: Crown },
   { to: "/app/admin/convites", label: "Convites & usuários", icon: Users },
   { to: "/app/admin/perfis", label: "Perfis de personalidade", icon: UserCog },
   { to: "/app/admin/boletins", label: "Boletins", icon: Newspaper },
