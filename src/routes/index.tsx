@@ -41,18 +41,20 @@ function Landing() {
               <p className="text-[10px] uppercase tracking-widest opacity-80">Copa 2026</p>
             </div>
           </div>
-          <Link
-            to="/app"
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-glow transition hover:scale-105"
-          >
-            Entrar
-          </Link>
-          <Link
-            to="/demo"
-            className="rounded-full border border-white/40 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
-          >
-            Faça um tour pelo app →
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/demo"
+              className="hidden sm:inline-flex rounded-full border border-white/40 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
+            >
+              Faça um tour pelo app →
+            </Link>
+            <Link
+              to="/app"
+              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-glow transition hover:scale-105"
+            >
+              Entrar
+            </Link>
+          </div>
         </div>
       </header>
 
