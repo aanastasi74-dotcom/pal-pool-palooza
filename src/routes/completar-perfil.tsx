@@ -164,12 +164,34 @@ function CompletePerfil() {
               ))}
             </div>
           </div>
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <label className="flex items-start gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={aceitouRegulamento}
+                onChange={(e) => setAceitouRegulamento(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              <span>
+                Li e aceito o{" "}
+                <a
+                  href="/regras"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-primary underline"
+                >
+                  regulamento do bolão
+                </a>{" "}
+                na íntegra.
+              </span>
+            </label>
+          </div>
           <button
             type="submit"
-            disabled={submitting || isFetching || disponivel === false}
+            disabled={submitting || isFetching || disponivel === false || !aceitouRegulamento}
             className="w-full rounded-full bg-primary py-2 text-sm font-bold text-primary-foreground disabled:opacity-50"
           >
-            {submitting ? "Criando…" : "Salvar e entrar"}
+            {submitting ? "Criando…" : "Concluir cadastro"}
           </button>
         </form>
       </div>
