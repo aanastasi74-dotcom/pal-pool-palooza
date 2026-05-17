@@ -42,7 +42,7 @@ function Pagamento() {
   const { quota_id } = useParams({ from: "/app/pagamento/$quota_id" });
   const { user } = useAuth();
   const { data: pixConfig } = useSetting<PixConfig>("pix_config");
-  const createPayment = useCreatePayment();
+  const submitLote = useSubmitComprovanteLote();
   const navigate = useNavigate();
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
