@@ -519,9 +519,9 @@ function PalpiteCard({
           <span className="text-xl font-bold text-muted-foreground">×</span>
           <ScoreDisplay value={fora} editing={editing} onChange={(v) => onChange({ fora: v })} invalid={foraInv} />
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">{tFora.bandeira}</span>
-          <p className="hidden font-display font-bold sm:block">{tFora.nome}</p>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="text-2xl sm:text-3xl">{tFora.bandeira}</span>
+          <p className="font-display text-sm font-bold sm:text-base">{tFora.nome}</p>
         </div>
       </div>
 
