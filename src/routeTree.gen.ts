@@ -14,9 +14,11 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as ManutencaoRouteImport } from './routes/manutencao'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as CompletarPerfilRouteImport } from './routes/completar-perfil'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as CadastroTokenRouteImport } from './routes/cadastro.$token'
 import { Route as AppTimesRouteImport } from './routes/app.times'
@@ -75,6 +77,11 @@ const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
   path: '/esqueci-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompletarPerfilRoute = CompletarPerfilRouteImport.update({
   id: '/completar-perfil',
   path: '/completar-perfil',
@@ -89,6 +96,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DemoIndexRoute = DemoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DemoRoute,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
@@ -255,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/completar-perfil': typeof CompletarPerfilRoute
+  '/demo': typeof DemoRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
@@ -274,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/app/times': typeof AppTimesRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/app/': typeof AppIndexRoute
+  '/demo/': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
@@ -314,6 +328,7 @@ export interface FileRoutesByTo {
   '/app/times': typeof AppTimesRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/app': typeof AppIndexRoute
+  '/demo': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
@@ -338,6 +353,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/completar-perfil': typeof CompletarPerfilRoute
+  '/demo': typeof DemoRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
@@ -357,6 +373,7 @@ export interface FileRoutesById {
   '/app/times': typeof AppTimesRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/app/': typeof AppIndexRoute
+  '/demo/': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
@@ -382,6 +399,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/completar-perfil'
+    | '/demo'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
@@ -401,6 +419,7 @@ export interface FileRouteTypes {
     | '/app/times'
     | '/cadastro/$token'
     | '/app/'
+    | '/demo/'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
     | '/app/admin/configuracoes'
@@ -441,6 +460,7 @@ export interface FileRouteTypes {
     | '/app/times'
     | '/cadastro/$token'
     | '/app'
+    | '/demo'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
     | '/app/admin/configuracoes'
@@ -464,6 +484,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/completar-perfil'
+    | '/demo'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
@@ -483,6 +504,7 @@ export interface FileRouteTypes {
     | '/app/times'
     | '/cadastro/$token'
     | '/app/'
+    | '/demo/'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
     | '/app/admin/configuracoes'
@@ -507,6 +529,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   CompletarPerfilRoute: typeof CompletarPerfilRoute
+  DemoRoute: typeof DemoRouteWithChildren
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   LoginRoute: typeof LoginRoute
   ManutencaoRoute: typeof ManutencaoRoute
@@ -552,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsqueciSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/completar-perfil': {
       id: '/completar-perfil'
       path: '/completar-perfil'
@@ -572,6 +602,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/demo/': {
+      id: '/demo/'
+      path: '/'
+      fullPath: '/demo/'
+      preLoaderRoute: typeof DemoIndexRouteImport
+      parentRoute: typeof DemoRoute
     }
     '/app/': {
       id: '/app/'
@@ -880,10 +917,21 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface DemoRouteChildren {
+  DemoIndexRoute: typeof DemoIndexRoute
+}
+
+const DemoRouteChildren: DemoRouteChildren = {
+  DemoIndexRoute: DemoIndexRoute,
+}
+
+const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   CompletarPerfilRoute: CompletarPerfilRoute,
+  DemoRoute: DemoRouteWithChildren,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   LoginRoute: LoginRoute,
   ManutencaoRoute: ManutencaoRoute,
@@ -894,3 +942,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
