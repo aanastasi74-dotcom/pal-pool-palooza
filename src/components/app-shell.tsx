@@ -113,6 +113,9 @@ export function AppShell() {
                 <DropdownMenuItem onClick={() => navigate({ to: "/app/simulador" })}>
                   <Trophy className="mr-2 h-4 w-4" /> Simulador
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate({ to: "/regras" })}>
+                  <FileText className="mr-2 h-4 w-4" /> Regulamento
+                </DropdownMenuItem>
                 {isAdmin && (
                   <>
                     <DropdownMenuSeparator />
