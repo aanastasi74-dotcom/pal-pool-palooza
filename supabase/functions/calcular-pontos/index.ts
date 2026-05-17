@@ -17,7 +17,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-const REGRAS_DEFAULT = { exato: 12, resultado: 4, gols_vencedor: 2, dif_gols: 2, gols_time: 1 };
+const REGRAS_DEFAULT = { exato: 12, resultado: 4, dif_gols: 2, gols_time: 1 };
 
 function calcularPontos(pc: number, pf: number, rc: number, rf: number, regras: any): number {
   if (pc === rc && pf === rf) return regras.exato;
@@ -25,12 +25,7 @@ function calcularPontos(pc: number, pf: number, rc: number, rf: number, regras: 
   const rp = Math.sign(pc - pf);
   const rr = Math.sign(rc - rf);
   if (rp === rr) pts += regras.resultado;
-  if (rr !== 0 && rp === rr) {
-    const gvp = pc > pf ? pc : pf;
-    const gvr = rc > rf ? rc : rf;
-    if (gvp === gvr) pts += regras.gols_vencedor;
-  }
-  if (Math.abs(pc - pf) === Math.abs(rc - rf)) pts += regras.dif_gols;
+  if ((pc - pf) === (rc - rf)) pts += regras.dif_gols;
   if (pc === rc || pf === rf) pts += regras.gols_time;
   return pts;
 }
