@@ -15,7 +15,7 @@ export function bloqueado(acao = "esta ação") {
   toast.info(`Modo demo — ${acao} só está disponível com convite real.`);
 }
 
-export function DemoShell() {
+export function DemoShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
