@@ -195,14 +195,19 @@ export type Database = {
           created_at: string | null
           data_jogo: string
           estadio: string | null
+          eventos: Json | null
           fase: string
           fora: string
           hora_definida: boolean
           id: string
           numero_jogo: number | null
+          penaltis_casa: number | null
+          penaltis_fora: number | null
           peso: number
           placar_casa: number | null
+          placar_casa_prorrogacao: number | null
           placar_fora: number | null
+          placar_fora_prorrogacao: number | null
           slot_casa: string | null
           slot_visitante: string | null
           stadium_id: string | null
@@ -217,14 +222,19 @@ export type Database = {
           created_at?: string | null
           data_jogo: string
           estadio?: string | null
+          eventos?: Json | null
           fase: string
           fora: string
           hora_definida?: boolean
           id?: string
           numero_jogo?: number | null
+          penaltis_casa?: number | null
+          penaltis_fora?: number | null
           peso?: number
           placar_casa?: number | null
+          placar_casa_prorrogacao?: number | null
           placar_fora?: number | null
+          placar_fora_prorrogacao?: number | null
           slot_casa?: string | null
           slot_visitante?: string | null
           stadium_id?: string | null
@@ -239,14 +249,19 @@ export type Database = {
           created_at?: string | null
           data_jogo?: string
           estadio?: string | null
+          eventos?: Json | null
           fase?: string
           fora?: string
           hora_definida?: boolean
           id?: string
           numero_jogo?: number | null
+          penaltis_casa?: number | null
+          penaltis_fora?: number | null
           peso?: number
           placar_casa?: number | null
+          placar_casa_prorrogacao?: number | null
           placar_fora?: number | null
+          placar_fora_prorrogacao?: number | null
           slot_casa?: string | null
           slot_visitante?: string | null
           stadium_id?: string | null
@@ -806,6 +821,7 @@ export type Database = {
       cleanup_quotas_incompletas: { Args: never; Returns: number }
       compute_default_sigla: { Args: { p_nome: string }; Returns: string }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
+      derivar_periodo: { Args: { p_minuto: string }; Returns: string }
       encerrar_lote_por_decisao: {
         Args: { p_lote_id: string; p_motivo: string }
         Returns: Json
@@ -926,6 +942,7 @@ export type Database = {
         Args: { p_lote_id: string; p_motivo: string }
         Returns: Json
       }
+      vencedor_real: { Args: { p_match_id: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
