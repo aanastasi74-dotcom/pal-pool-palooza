@@ -33,7 +33,7 @@ function DemoLanding() {
             to="/login"
             className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
           >
-            <LogIn className="h-4 w-4" /> Já tenho convite, fazer login
+            <LogIn className="h-4 w-4" /> Já me cadastrei, fazer login
           </Link>
         </div>
         <Link to="/" className="mt-12 text-xs text-white/70 underline hover:text-white">

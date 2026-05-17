@@ -27,7 +27,7 @@ function DemoJogos() {
             const tc = getTime(j.casa), tf = getTime(j.fora);
             const encerrado = j.status === "encerrado";
             return (
-              <div key={j.numero_jogo} className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <div key={j.numero_jogo} className="rounded-2xl border border-border bg-card p-5 shadow-card">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
                   <span>Jogo #{j.numero_jogo} · {j.fase} · peso {j.peso}</span>
                   <span>{fmt(j.data_jogo)} · {j.estadio}, {j.cidade}</span>

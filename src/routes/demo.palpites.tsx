@@ -27,7 +27,7 @@ function DemoPalpites() {
             const tc = getTime(j.casa), tf = getTime(j.fora);
             const encerrado = j.status === "encerrado";
             return (
-              <div key={p.numero_jogo} className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <div key={p.numero_jogo} className="rounded-2xl border border-border bg-card p-5 shadow-card">
                 <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground">
                   <span>#{j.numero_jogo} · {j.fase} · peso {j.peso}</span>
                   {encerrado && p.pontos != null && (
