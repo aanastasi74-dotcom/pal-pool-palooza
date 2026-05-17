@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.send-capacidade-alerta]
 verify_jwt = false
+
+[functions.send-regras-signup]
+verify_jwt = true
