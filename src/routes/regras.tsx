@@ -50,20 +50,16 @@ function RegrasPage() {
 
   const aceitar = async () => {
     setAceitando(true);
-    const { data, error } = await supabase.rpc("aceitar_regras" as any);
-    setAceitando(false);
+    const { error } = await supabase.rpc("aceitar_regras" as any);
     if (error) {
+      setAceitando(false);
       toast.error("Não consegui registrar o aceite: " + error.message);
       return;
     }
     toast.success("Aceite registrado!");
     await qc.invalidateQueries({ queryKey: ["profile"] });
-    if (force) {
-      // dar tempo do auth-context refazer fetchProfile
-      setTimeout(() => navigate({ to: "/app" }), 400);
-    }
-    // força refresh do profile no auth-context
-    window.dispatchEvent(new Event("focus"));
+    // Hard reload pra refetch do profile no AuthContext e liberar o gate
+    window.location.href = "/app";
   };
 
   return (
