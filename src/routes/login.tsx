@@ -88,6 +88,9 @@ function LoginPage() {
         <p className="text-center text-xs text-muted-foreground">
           Sem convite ainda? Pede para um admin do bolão te chamar.
         </p>
+        <Link to="/demo" className="block text-center text-xs font-semibold text-primary hover:underline">
+          Ainda sem convite? Conheça o app →
+        </Link>
       </div>
     </div>
   );
