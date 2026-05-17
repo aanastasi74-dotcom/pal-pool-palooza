@@ -12,6 +12,9 @@ verify_jwt = true
 [functions.calcular-pontos]
 verify_jwt = false
 
+[functions.calcular-pontos-top4]
+verify_jwt = true
+
 [functions.gerar-boletim-diario]
 verify_jwt = false
 
