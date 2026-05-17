@@ -105,7 +105,16 @@ export function HomeMatchCarousel() {
                   <div className="text-center">
                     {it.kind === "resultado" ? (
                       <>
-                        <p className="font-display text-4xl font-black">{j.placar_casa} - {j.placar_fora}</p>
+                        <PlacarJogo
+                          placar_casa={j.placar_casa}
+                          placar_fora={j.placar_fora}
+                          placar_casa_prorrogacao={j.placar_casa_prorrogacao}
+                          placar_fora_prorrogacao={j.placar_fora_prorrogacao}
+                          penaltis_casa={j.penaltis_casa}
+                          penaltis_fora={j.penaltis_fora}
+                          size="lg"
+                          className="text-white [&_*]:text-white/70"
+                        />
                         <p className="mt-1 text-[10px] uppercase tracking-widest text-white/60">Encerrado</p>
                       </>
                     ) : (
