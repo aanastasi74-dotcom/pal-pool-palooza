@@ -42,6 +42,12 @@ export function AppShell() {
     return <Navigate to="/manutencao" />;
   }
 
+  // Gate: pereba sem aceite do regulamento é forçado a aceitar
+  const aceitouRegras = !!(profile as any)?.aceitou_regras_em;
+  if (profile && !aceitouRegras && !isAdmin) {
+    return <Navigate to="/regras" search={{ force: true }} />;
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
       <MaintenanceBanner />
