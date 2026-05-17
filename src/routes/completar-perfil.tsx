@@ -23,6 +23,7 @@ function CompletePerfil() {
   const [siglaTouched, setSiglaTouched] = useState(false);
   const [cor, setCor] = useState(PALETA[0]);
   const [submitting, setSubmitting] = useState(false);
+  const [aceitouRegulamento, setAceitouRegulamento] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: disponivel, isFetching } = useCheckApelido(apelido);
