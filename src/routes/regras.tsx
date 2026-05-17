@@ -57,6 +57,10 @@ function RegrasPage() {
       return;
     }
     toast.success("Aceite registrado!");
+    // Dispara email de boas-vindas pós-aceite (fire-and-forget, idempotente no backend)
+    supabase.functions
+      .invoke("send-regras-signup", { body: {} })
+      .catch((err) => console.warn("send-regras-signup falhou silenciosamente:", err));
     await qc.invalidateQueries({ queryKey: ["profile"] });
     // Hard reload pra refetch do profile no AuthContext e liberar o gate
     window.location.href = "/app";
