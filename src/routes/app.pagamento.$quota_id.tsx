@@ -5,7 +5,7 @@ import { Copy, Upload } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { createStaticPix, hasError } from "@/lib/pix";
 import { useSetting } from "@/lib/queries/settings";
-import { useCreatePayment } from "@/lib/queries/payments";
+import { useSubmitComprovanteLote } from "@/lib/queries/lotes";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { translatePgError } from "@/lib/error-messages";
