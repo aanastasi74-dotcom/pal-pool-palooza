@@ -57,17 +57,22 @@ Deno.serve(async (req) => {
     const html = `
       <div style="font-family: -apple-system, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; color: #1a1a1a;">
         <h1 style="font-size: 22px; margin: 0 0 12px;">Olá, ${apelido}! 🏆</h1>
-        <p style="font-size: 15px; line-height: 1.5;">Boas-vindas ao <strong>Bolão dos Perebas Copa 2026</strong>! Você acaba de virar Pereba honorário oficial.</p>
-        <p style="font-size: 15px; line-height: 1.5;">Antes de comprar sua primeira quota e começar a palpitar, dá uma olhada no regulamento do bolão. Ele cobre como funciona a pontuação, como os prêmios são distribuídos, o que conta no mata-mata, e outras regras que vale conhecer pra evitar surpresa.</p>
+        <p style="font-size: 15px; line-height: 1.5;">Boas-vindas ao <strong>Bolão dos Perebas Copa 2026</strong>! Você acaba de virar Pereba honorário oficial — e já aceitou o regulamento. ✓</p>
+        <p style="font-size: 15px; line-height: 1.5;">Esse email é um registro do seu aceite. Guarda o link abaixo pra consultar o regulamento sempre que precisar (pontuação, prêmios, regras do mata-mata, etc.).</p>
         <p style="margin: 24px 0;">
           <a href="${link}" style="background:#16a34a; color:#fff; padding: 12px 24px; border-radius: 999px; text-decoration: none; font-weight: bold;">Ler o regulamento →</a>
         </p>
-        <p style="font-size: 14px; line-height: 1.5;">Quando você terminar de ler, clica em <strong>"Aceito as regras"</strong> no app — só assim o sistema libera a próxima etapa (compra de quota). Leva 2 minutos.</p>
-        <p style="font-size: 14px; line-height: 1.5;">Qualquer dúvida, chama no WhatsApp da galera ou fala com um dos Admins (Anasta, Anão ou Prof).</p>
+        <p style="font-size: 15px; line-height: 1.5; margin-top: 24px;"><strong>Próximos passos no app:</strong></p>
+        <ol style="font-size: 14px; line-height: 1.6; padding-left: 20px; margin: 8px 0;">
+          <li>Comprar sua primeira quota (R$ 50 via PIX)</li>
+          <li>Palpitar nos 104 jogos da Copa + escolher seu Top 4</li>
+          <li>Acompanhar o ranking e zoar a galera no grupo</li>
+        </ol>
+        <p style="font-size: 14px; line-height: 1.5; margin-top: 16px;">Qualquer dúvida, chama no WhatsApp da galera ou fala com um dos Admins (Anasta, Anão ou Prof).</p>
         <p style="font-size: 14px; line-height: 1.5; margin-top: 24px;">Boa Copa!<br/>— Os Admins</p>
       </div>
     `;
-    const text = `Olá, ${apelido}! Boas-vindas ao Bolão dos Perebas Copa 2026.\n\nLeia o regulamento: ${link}\n\nQuando terminar, clique em "Aceito as regras" no app pra liberar a compra de quota.\n\n— Os Admins`;
+    const text = `Olá, ${apelido}! 🏆\n\nBoas-vindas ao Bolão dos Perebas Copa 2026! Você acaba de virar Pereba honorário oficial — e já aceitou o regulamento. ✓\n\nEsse email é um registro do seu aceite. Guarda o link abaixo pra consultar o regulamento sempre que precisar (pontuação, prêmios, regras do mata-mata, etc.).\n\nLer o regulamento: ${link}\n\nPróximos passos no app:\n1. Comprar sua primeira quota (R$ 50 via PIX)\n2. Palpitar nos 104 jogos da Copa + escolher seu Top 4\n3. Acompanhar o ranking e zoar a galera no grupo\n\nQualquer dúvida, chama no WhatsApp da galera ou fala com um dos Admins (Anasta, Anão ou Prof).\n\nBoa Copa!\n— Os Admins`;
 
     const sendRes = await fetch(RESEND_API_URL, {
       method: "POST",
