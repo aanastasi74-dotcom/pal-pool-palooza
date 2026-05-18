@@ -85,10 +85,15 @@ export function HomeMatchCarousel() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selected, setSelected] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  const [fraseSeed, setFraseSeed] = useState(0);
 
   useEffect(() => {
     if (!emblaApi) return;
-    const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
+    const onSelect = () => {
+      setSelected(emblaApi.selectedScrollSnap());
+      setFraseSeed((s) => s + 1);
+    };
     emblaApi.on("select", onSelect);
     onSelect();
     return () => { emblaApi.off("select", onSelect); };
@@ -99,6 +104,11 @@ export function HomeMatchCarousel() {
     const id = setInterval(() => emblaApi.scrollNext(), 5000);
     return () => clearInterval(id);
   }, [emblaApi, paused, items.length]);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   if (items.length === 0) {
     return (
