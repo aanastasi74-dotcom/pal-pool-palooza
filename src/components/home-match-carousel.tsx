@@ -1,16 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Timer } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useMatches } from "@/lib/queries/matches";
 import { useTeams } from "@/lib/queries/teams";
 import { getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 
-type CardItem = {
-  id: string;
-  kind: "resultado" | "proximo";
-  jogo: any;
-};
+type CardItem =
+  | { id: string; kind: "resultado" | "proximo"; jogo: any }
+  | { id: "countdown"; kind: "countdown"; kickoff: string };
+
+const FRASES_PADRAO = [
+  "Faltam {d} dias pra zoeira começar oficialmente.",
+  "{d} dias até o primeiro vexame da Copa.",
+  "{d} dias e a galera vai descobrir quem é pereba de verdade.",
+  "Em {d} dias começa o show — e o choro.",
+  "{d} dias pra alguém aqui errar todos os placares e bancar o lanterninha.",
+  "Faltam {d} dias pro grupo do WhatsApp pegar fogo.",
+  "{d} dias até teu palpite virar piada (ou estatística).",
+  "{d} dias pra esquecer que tem trabalho na segunda.",
+];
+
+function escolheFrase(totalDays: number, totalHours: number, totalMinutes: number): string {
+  if (totalDays === 0 && totalHours === 0 && totalMinutes < 60) {
+    return "Tá pra começar! Última passada de olho nos palpites.";
+  }
+  if (totalDays === 0) {
+    return `É hoje! Em ${Math.max(1, totalHours)} horas começa. Pega a pipoca.`;
+  }
+  if (totalDays === 1) {
+    return "É amanhã, peraba! Última chance de fingir confiança nos palpites.";
+  }
+  if (totalDays <= 7) {
+    return "Última semana, perebas! Hora de revisar palpites e fingir que entende de futebol.";
+  }
+  const f = FRASES_PADRAO[Math.floor(Math.random() * FRASES_PADRAO.length)];
+  return f.replace("{d}", String(totalDays));
+}
 
 function fmtDateTime(iso: string) {
   const d = new Date(iso);
