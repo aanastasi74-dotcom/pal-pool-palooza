@@ -167,7 +167,12 @@ function ConvitesUsuarios() {
                       <td className="p-2 font-medium">{u.nome}</td>
                       <td className="p-2 text-xs text-muted-foreground">{u.email}</td>
                       <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${u.role === "admin" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{u.role}</span></td>
-                      <td className="p-2 text-right font-bold">{u.quotas_count}</td>
+                      <td className="p-2 text-right">
+                        <span className="font-bold">{u.quotas_ativas ?? u.quotas_count}</span>
+                        {(u.quotas_outras ?? 0) > 0 && (
+                          <span className="ml-1 text-[10px] text-muted-foreground">· {u.quotas_outras} outras</span>
+                        )}
+                      </td>
                       <td className="p-2 text-xs">{u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString("pt-BR") : "—"}</td>
                       <td className="p-2 text-xs">{u.ativo ? "Sim" : "Não"}</td>
                     </tr>
