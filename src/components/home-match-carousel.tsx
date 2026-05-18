@@ -68,12 +68,18 @@ export function HomeMatchCarousel() {
       .slice(0, 2)
       .map((j) => ({ id: j.id, kind: "resultado" as const, jogo: j }));
     const now = Date.now();
-    const proximos = all
+    const agendados = all
       .filter((m) => m.status === "agendado" && new Date(m.data_jogo).getTime() >= now)
-      .sort((a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime())
+      .sort((a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime());
+    const proximos = agendados
       .slice(0, 3)
       .map((j) => ({ id: j.id, kind: "proximo" as const, jogo: j }));
-    return [...encerrados, ...proximos];
+    const list: CardItem[] = [...encerrados, ...proximos];
+    const primeiro = agendados[0];
+    if (primeiro && new Date(primeiro.data_jogo).getTime() > now) {
+      list.push({ id: "countdown", kind: "countdown", kickoff: primeiro.data_jogo });
+    }
+    return list;
   }, [matches]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
