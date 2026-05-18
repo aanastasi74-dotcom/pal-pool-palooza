@@ -15,6 +15,9 @@ import { DataTablePagination } from "@/components/data-table-pagination";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/app/admin/convites")({
   head: () => ({ meta: [{ title: "Admin — Convites & Usuários" }] }),
@@ -160,23 +163,38 @@ function ConvitesUsuarios() {
           ) : (
             <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
               <table className="w-full text-sm">
-                <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Nome</th><th className="p-2 text-left">E-mail</th><th className="p-2 text-left">Papel</th><th className="p-2 text-right">Quotas</th><th className="p-2 text-left">Último acesso</th><th className="p-2 text-left">Ativo</th></tr></thead>
+                <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Nome</th><th className="p-2 text-left">E-mail</th><th className="p-2 text-left">Papel</th><th className="p-2 text-right">Quotas ativas</th><th className="p-2 text-left">Último acesso</th><th className="p-2 text-left">Ativo</th></tr></thead>
                 <tbody>
-                  {usr.slice.map((u: any) => (
+                  <TooltipProvider delayDuration={150}>
+                  {usr.slice.map((u: any) => {
+                    const ativas = u.quotas_ativas ?? u.quotas_count ?? 0;
+                    const outras = u.quotas_outras ?? 0;
+                    return (
                     <tr key={u.id} onClick={() => setUsuarioOpen(u)} className="cursor-pointer border-t border-border hover:bg-muted/30">
                       <td className="p-2 font-medium">{u.nome}</td>
                       <td className="p-2 text-xs text-muted-foreground">{u.email}</td>
                       <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${u.role === "admin" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{u.role}</span></td>
                       <td className="p-2 text-right">
-                        <span className="font-bold">{u.quotas_ativas ?? u.quotas_count}</span>
-                        {(u.quotas_outras ?? 0) > 0 && (
-                          <span className="ml-1 text-[10px] text-muted-foreground">· {u.quotas_outras} outras</span>
+                        <span className="font-bold">{ativas}</span>
+                        {outras > 0 && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="ml-0.5 cursor-help text-[10px] text-muted-foreground">*</span>
+                            </TooltipTrigger>
+                            <TooltipContent>+ {outras} outra(s) quota(s) em outros status</TooltipContent>
+                          </Tooltip>
                         )}
                       </td>
-                      <td className="p-2 text-xs">{u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString("pt-BR") : "—"}</td>
+                      <td className="p-2 text-xs text-muted-foreground">
+                        {u.ultimo_acesso
+                          ? formatDistanceToNow(new Date(u.ultimo_acesso), { addSuffix: true, locale: ptBR })
+                          : "—"}
+                      </td>
                       <td className="p-2 text-xs">{u.ativo ? "Sim" : "Não"}</td>
                     </tr>
-                  ))}
+                    );
+                  })}
+                  </TooltipProvider>
                 </tbody>
               </table>
             </div>
