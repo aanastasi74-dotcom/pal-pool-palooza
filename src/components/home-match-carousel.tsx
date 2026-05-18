@@ -1,16 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Timer } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useMatches } from "@/lib/queries/matches";
 import { useTeams } from "@/lib/queries/teams";
 import { getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 
-type CardItem = {
-  id: string;
-  kind: "resultado" | "proximo";
-  jogo: any;
-};
+type CardItem =
+  | { id: string; kind: "resultado" | "proximo"; jogo: any }
+  | { id: "countdown"; kind: "countdown"; kickoff: string };
+
+const FRASES_PADRAO = [
+  "Faltam {d} dias pra zoeira começar oficialmente.",
+  "{d} dias até o primeiro vexame da Copa.",
+  "{d} dias e a galera vai descobrir quem é pereba de verdade.",
+  "Em {d} dias começa o show — e o choro.",
+  "{d} dias pra alguém aqui errar todos os placares e bancar o lanterninha.",
+  "Faltam {d} dias pro grupo do WhatsApp pegar fogo.",
+  "{d} dias até teu palpite virar piada (ou estatística).",
+  "{d} dias pra esquecer que tem trabalho na segunda.",
+];
+
+function escolheFrase(totalDays: number, totalHours: number, totalMinutes: number): string {
+  if (totalDays === 0 && totalHours === 0 && totalMinutes < 60) {
+    return "Tá pra começar! Última passada de olho nos palpites.";
+  }
+  if (totalDays === 0) {
+    return `É hoje! Em ${Math.max(1, totalHours)} horas começa. Pega a pipoca.`;
+  }
+  if (totalDays === 1) {
+    return "É amanhã, peraba! Última chance de fingir confiança nos palpites.";
+  }
+  if (totalDays <= 7) {
+    return "Última semana, perebas! Hora de revisar palpites e fingir que entende de futebol.";
+  }
+  const f = FRASES_PADRAO[Math.floor(Math.random() * FRASES_PADRAO.length)];
+  return f.replace("{d}", String(totalDays));
+}
 
 function fmtDateTime(iso: string) {
   const d = new Date(iso);
@@ -41,21 +68,32 @@ export function HomeMatchCarousel() {
       .slice(0, 2)
       .map((j) => ({ id: j.id, kind: "resultado" as const, jogo: j }));
     const now = Date.now();
-    const proximos = all
+    const agendados = all
       .filter((m) => m.status === "agendado" && new Date(m.data_jogo).getTime() >= now)
-      .sort((a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime())
+      .sort((a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime());
+    const proximos = agendados
       .slice(0, 3)
       .map((j) => ({ id: j.id, kind: "proximo" as const, jogo: j }));
-    return [...encerrados, ...proximos];
+    const list: CardItem[] = [...encerrados, ...proximos];
+    const primeiro = agendados[0];
+    if (primeiro && new Date(primeiro.data_jogo).getTime() > now) {
+      list.push({ id: "countdown", kind: "countdown", kickoff: primeiro.data_jogo });
+    }
+    return list;
   }, [matches]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selected, setSelected] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  const [fraseSeed, setFraseSeed] = useState(0);
 
   useEffect(() => {
     if (!emblaApi) return;
-    const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
+    const onSelect = () => {
+      setSelected(emblaApi.selectedScrollSnap());
+      setFraseSeed((s) => s + 1);
+    };
     emblaApi.on("select", onSelect);
     onSelect();
     return () => { emblaApi.off("select", onSelect); };
@@ -66,6 +104,11 @@ export function HomeMatchCarousel() {
     const id = setInterval(() => emblaApi.scrollNext(), 5000);
     return () => clearInterval(id);
   }, [emblaApi, paused, items.length]);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   if (items.length === 0) {
     return (
@@ -87,6 +130,32 @@ export function HomeMatchCarousel() {
       <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-glow" ref={emblaRef}>
         <div className="flex">
           {items.map((it) => {
+            if (it.kind === "countdown") {
+              const diff = Math.max(0, new Date(it.kickoff).getTime() - now);
+              const totalDays = Math.floor(diff / 86_400_000);
+              const totalHours = Math.floor((diff % 86_400_000) / 3_600_000);
+              const totalMinutes = Math.floor((diff % 3_600_000) / 60_000);
+              // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+              fraseSeed;
+              const frase = escolheFrase(totalDays, totalHours, totalMinutes);
+              return (
+                <div key={it.id} className="min-w-0 flex-[0_0_100%] p-5">
+                  <div className="flex items-center justify-between text-xs uppercase tracking-widest text-white/70">
+                    <span className="flex items-center gap-1.5"><Timer className="h-3 w-3" /> Contagem regressiva</span>
+                    <span className="rounded-full bg-accent/30 px-2 py-0.5 text-[10px] font-bold">Copa 2026</span>
+                  </div>
+                  <p className="mt-4 text-center font-display text-lg font-black leading-tight sm:text-xl">{frase}</p>
+                  <p className="mt-3 text-center text-sm font-bold text-white/90">
+                    {totalDays} dia{totalDays === 1 ? "" : "s"}, {totalHours} hora{totalHours === 1 ? "" : "s"}, {totalMinutes} min
+                  </p>
+                  <div className="mt-3 text-center">
+                    <Link to="/app/palpites" className="text-[11px] uppercase tracking-widest text-accent hover:underline">
+                      Confere teus palpites antes que vire pizza →
+                    </Link>
+                  </div>
+                </div>
+              );
+            }
             const j = it.jogo;
             const tCasa = getTeamSide(j.team_home_id, j.slot_casa, j.casa, teamMap);
             const tFora = getTeamSide(j.team_away_id, j.slot_visitante, j.fora, teamMap);
