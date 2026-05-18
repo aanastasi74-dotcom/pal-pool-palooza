@@ -35,23 +35,12 @@ export function useUsuariosAdmin() {
   return useQuery({
     queryKey: ["usuarios-admin"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*, quotas:quotas(status)")
-        .order("nome", { ascending: true });
+      const { data, error } = await (supabase as any).rpc("admin_list_usuarios");
       if (error) throw error;
-      return (data ?? []).map((p: any) => {
-        const quotas: { status: string }[] = p.quotas ?? [];
-        const ativas = quotas.filter((q) => q.status === "ativa").length;
-        const outras = quotas.filter((q) => q.status !== "ativa").length;
-        return {
-          ...p,
-          quotas_count: ativas,
-          quotas_ativas: ativas,
-          quotas_outras: outras,
-          quotas_total: quotas.length,
-        };
-      });
+      return (data ?? []).map((p: any) => ({
+        ...p,
+        quotas_count: p.quotas_ativas ?? 0,
+      }));
     },
   });
 }

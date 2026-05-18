@@ -799,6 +799,28 @@ export type Database = {
     }
     Functions: {
       aceitar_regras: { Args: never; Returns: string }
+      admin_list_usuarios: {
+        Args: never
+        Returns: {
+          aceitou_regras_em: string
+          apelido: string
+          ativo: boolean
+          cor: string
+          created_at: string
+          email: string
+          email_regras_enviado_em: string
+          id: string
+          limite_quotas_custom: number
+          nome: string
+          notificacoes: Json
+          quotas_ativas: number
+          quotas_outras: number
+          quotas_total: number
+          role: string
+          sigla: string
+          ultimo_acesso: string
+        }[]
+      }
       admin_set_ativo: {
         Args: { p_ativo: boolean; p_user_id: string }
         Returns: undefined
