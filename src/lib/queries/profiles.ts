@@ -37,13 +37,21 @@ export function useUsuariosAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*, quotas:quotas(count)")
+        .select("*, quotas:quotas(status)")
         .order("nome", { ascending: true });
       if (error) throw error;
-      return (data ?? []).map((p: any) => ({
-        ...p,
-        quotas_count: p.quotas?.[0]?.count ?? 0,
-      }));
+      return (data ?? []).map((p: any) => {
+        const quotas: { status: string }[] = p.quotas ?? [];
+        const ativas = quotas.filter((q) => q.status === "ativa").length;
+        const outras = quotas.filter((q) => q.status !== "ativa").length;
+        return {
+          ...p,
+          quotas_count: ativas,
+          quotas_ativas: ativas,
+          quotas_outras: outras,
+          quotas_total: quotas.length,
+        };
+      });
     },
   });
 }
