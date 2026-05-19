@@ -104,36 +104,10 @@ function Home() {
       </section>
 
       <section>
-        <SectionHeader title="Pódio" link="/app/ranking" />
-        {top3.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">Pódio ainda vazio. Bora pontuar.</p>
-        ) : (
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            {top3.map((p: any, i: number) => {
-              const cor = p.profile?.cor ?? "oklch(0.6 0.16 200)";
-              const sigla = p.profile?.sigla ?? "??";
-              const apelido = p.profile?.apelido ?? "—";
-              return (
-                <div key={p.id} className={`rounded-2xl border p-5 shadow-card ${i === 0 ? "border-accent bg-gold text-gold-foreground" : "border-border bg-card"}`}>
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-10 w-10 place-items-center rounded-full text-xs font-bold text-white" style={{ background: cor }}>
-                      {sigla}
-                    </div>
-                    <div>
-                      <p className="text-xs opacity-70">{i + 1}º lugar</p>
-                      <p className="font-display font-bold">{apelido}</p>
-                    </div>
-                    {i === 0 && <Trophy className="ml-auto h-6 w-6" />}
-                  </div>
-                  <p className="mt-4 font-display text-3xl font-black">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
-                  <div className="mt-1 flex items-center gap-1 text-xs">
-                    <TrendingUp className="h-3 w-3" /> Quota #{p.numero}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <SectionHeader title="Prêmio" link="/app/premio" />
+        <div className="mt-4">
+          <PremiacaoCard />
+        </div>
       </section>
 
       <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
