@@ -25,7 +25,7 @@ function Barra({ label, pct, cor }: { label: string; pct: number; cor: string })
 }
 
 export function EstatisticasPalpites({ match_id, travado_em, minhas_quotas_ids = [] }: Props) {
-  const jogoTravado = !!travado_em && new Date(travado_em).getTime() <= Date.now();
+  const jogoTravado = travado_em === undefined ? true : !!travado_em && new Date(travado_em).getTime() <= Date.now();
   const { data, isLoading } = useEstatisticasPalpites(match_id, jogoTravado);
   const soVoceResults = useSoVoceAchouMulti(match_id, minhas_quotas_ids, jogoTravado);
 
