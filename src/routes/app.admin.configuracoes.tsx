@@ -17,8 +17,15 @@ const defaultPix = { chave: "", banco: "", titular: "", instrucoes: "", valor_qu
 const defaultScore = { exato: 12, resultado: 4, gols_vencedor: 2, dif_gols: 2, gols_time: 1 };
 const defaultPeso = { inicial: 10, incremento_dia: 1, final: 50 };
 const defaultBoletim = { hora_envio: "22:00", auto_geracao: true };
+const defaultBoletimL1 = {
+  modelo: "claude-sonnet-4-6",
+  max_tokens: 1500,
+  temperature: 0.8,
+  system_prompt: "",
+};
 const defaultLanterninha = { engajamento_minimo: 0.8, pontos_minimos: 200 };
 const defaultCopaStart = "2026-06-11T20:00:00Z";
+
 
 function Configuracoes() {
   const { data: settings } = useSettings();
