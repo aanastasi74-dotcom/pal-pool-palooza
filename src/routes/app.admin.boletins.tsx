@@ -1,195 +1,283 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useBulletins, useCreateBulletin, useUpdateBulletin, useDeleteBulletin } from "@/lib/queries/bulletins";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Sparkles, Send, Pencil, Trash2, Wand2 } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/confirm-dialog";
-import { EmptyState } from "@/components/empty-state";
+import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil } from "lucide-react";
+import {
+  useBoletinsL1,
+  useGerarBoletim,
+  usePublicarBoletim,
+  useUpdateBoletimL1,
+  type BoletimL1,
+} from "@/lib/queries/boletins-l1";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { EmptyState } from "@/components/empty-state";
+import { MarkdownView } from "@/components/markdown-view";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/app/admin/boletins")({
   head: () => ({ meta: [{ title: "Admin — Boletins" }] }),
   component: BoletinsAdmin,
 });
 
-type BoletimRow = any;
-
+const statusLabel: Record<string, string> = {
+  pendente_revisao: "Pendente revisão",
+  publicado: "Publicado",
+  arquivado: "Arquivado",
+};
 const statusColor: Record<string, string> = {
+  pendente_revisao: "bg-accent/15 text-accent",
   publicado: "bg-success/15 text-success",
-  rascunho: "bg-muted text-muted-foreground",
-  agendado: "bg-accent/15 text-accent",
+  arquivado: "bg-muted text-muted-foreground",
 };
 
 function BoletinsAdmin() {
-  const { data: boletins, isLoading } = useBulletins();
-  const del = useDeleteBulletin();
-  const qc = useQueryClient();
+  const { data: boletins, isLoading } = useBoletinsL1();
+  const gerar = useGerarBoletim();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const [editando, setEditando] = useState<BoletimRow | null>(null);
-  const [excluir, setExcluir] = useState<BoletimRow | null>(null);
+  const selected = (boletins ?? []).find((b) => b.id === selectedId) ?? null;
 
-  const novo = () =>
-    setEditando({ id: "", data: new Date().toISOString().slice(0, 10), titulo: "", conteudo: "", status: "rascunho" });
+  const gerarHoje = async () => {
+    const t = toast.loading("Gerando boletim via IA…");
+    try {
+      const r = await gerar.mutateAsync({ force_regenerate: false });
+      toast.dismiss(t);
+      if (r?.skipped) toast.info(r?.motivo ?? "Pulado.");
+      else toast.success(`Boletim gerado (${r?.tokens?.output ?? 0} tokens out).`);
+    } catch (e: any) {
+      toast.dismiss(t);
+      toast.error(`Erro: ${e?.message ?? "desconhecido"}`);
+    }
+  };
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-extrabold">Boletins</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Geração com IA, edição e publicação.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Boletins diários gerados por IA — admin revisa e publica.
+          </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={async () => {
-              const t = toast.loading("Gerando boletim…");
-              const { data, error } = await supabase.functions.invoke("gerar-boletim-diario", { body: {} });
-              toast.dismiss(t);
-              if (error || data?.error) toast.error(`Erro: ${error?.message ?? data?.error}`);
-              else if (data?.skipped) toast.info("Auto-geração desativada nas configurações.");
-              else { toast.success("Boletim gerado como rascunho."); qc.invalidateQueries({ queryKey: ["bulletins"] }); }
-            }}
-            className="flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-bold"
-          >
-            <Wand2 className="h-3 w-3" /> Gerar boletim agora
-          </button>
-          <button onClick={novo} className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
-            <Plus className="h-3 w-3" /> Novo boletim
-          </button>
-        </div>
+        <button
+          onClick={gerarHoje}
+          disabled={gerar.isPending}
+          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+        >
+          <Wand2 className="h-3 w-3" /> Gerar boletim de hoje
+        </button>
       </div>
 
-      {isLoading ? (
-        <Skeleton className="h-64" />
-      ) : (boletins ?? []).length === 0 ? (
-        <EmptyState title="Sem boletins por aqui" description="Que tal escrever o primeiro?" />
-      ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="p-2 text-left">Data</th><th className="p-2 text-left">Título</th><th className="p-2 text-left">Status</th><th className="p-2 text-left">Publicado em</th><th className="p-2"></th></tr></thead>
-            <tbody>
-              {(boletins ?? []).map((b: any) => (
-                <tr key={b.id} onClick={() => setEditando(b)} className="cursor-pointer border-t border-border hover:bg-muted/30">
-                  <td className="p-2 text-xs">{new Date(b.data).toLocaleDateString("pt-BR")}</td>
-                  <td className="p-2 font-medium">{b.titulo}</td>
-                  <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[b.status] ?? statusColor.rascunho}`}>{b.status}</span></td>
-                  <td className="p-2 text-xs text-muted-foreground">
-                    {b.publicado_em ? new Date(b.publicado_em).toLocaleString("pt-BR") :
-                      b.agendado_para ? `→ ${new Date(b.agendado_para).toLocaleString("pt-BR")}` : "—"}
-                  </td>
-                  <td className="p-2 text-right">
-                    <button onClick={(e) => { e.stopPropagation(); setEditando(b); }} className="mr-1 rounded p-1 hover:bg-muted"><Pencil className="h-3 w-3" /></button>
-                    <button onClick={(e) => { e.stopPropagation(); setExcluir(b); }} className="rounded p-1 hover:bg-muted"><Trash2 className="h-3 w-3" /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
+        <div className="space-y-2">
+          {isLoading ? (
+            <Skeleton className="h-64" />
+          ) : (boletins ?? []).length === 0 ? (
+            <EmptyState icon={Newspaper} title="Nenhum boletim ainda" description="Clique em 'Gerar boletim de hoje'." />
+          ) : (
+            (boletins ?? []).map((b) => (
+              <button
+                key={b.id}
+                onClick={() => setSelectedId(b.id)}
+                className={`w-full rounded-2xl border p-3 text-left shadow-card transition ${
+                  selectedId === b.id ? "border-primary bg-primary/5" : "border-border bg-card hover:bg-muted/30"
+                }`}
+              >
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold">
+                    {new Date(`${b.data_referencia}T12:00:00`).toLocaleDateString("pt-BR")}
+                  </span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor[b.status]}`}>
+                    {statusLabel[b.status]}
+                  </span>
+                </div>
+                <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                  {(b.publicado_md || b.rascunho_md || "").slice(0, 140)}
+                </p>
+              </button>
+            ))
+          )}
         </div>
-      )}
 
-      {editando && <BoletimDialog key={editando.id || "novo"} boletim={editando} onClose={() => setEditando(null)} />}
-
-      <ConfirmDialog
-        open={!!excluir}
-        onOpenChange={(v) => !v && setExcluir(null)}
-        title="Excluir boletim?"
-        description={`O boletim "${excluir?.titulo}" será removido. Esta ação não pode ser desfeita.`}
-        confirmLabel="Excluir"
-        destructive
-        onConfirm={async () => { if (excluir) { await del.mutateAsync(excluir.id); toast.success("Boletim excluído."); } setExcluir(null); }}
-      />
+        <div>
+          {selected ? (
+            <BoletimEditor boletim={selected} />
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
+              Selecione um boletim à esquerda pra revisar.
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
-function BoletimDialog({ boletim, onClose }: { boletim: BoletimRow; onClose: () => void }) {
-  const create = useCreateBulletin();
-  const update = useUpdateBulletin();
+function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
+  const update = useUpdateBoletimL1();
+  const publicar = usePublicarBoletim();
+  const gerar = useGerarBoletim();
 
-  const [titulo, setTitulo] = useState(boletim.titulo ?? "");
-  const [conteudo, setConteudo] = useState(boletim.conteudo ?? "");
-  const [agendadoPara, setAgendadoPara] = useState<string>(boletim.agendado_para ? new Date(boletim.agendado_para).toISOString().slice(0, 16) : "");
-  const isNovo = !boletim.id;
+  const isPublicado = boletim.status === "publicado";
+  const [editandoPublicado, setEditandoPublicado] = useState(false);
+  const podeEditar = !isPublicado || editandoPublicado;
 
-  const gerarIA = () => {
-    // mock até a Rodada F
-    setTitulo(titulo || "Boletim do dia");
-    setConteudo(conteudo + "\n\n[Gerado pela IA — placeholder até a Rodada F]");
-    toast.success("Boletim gerado pela IA — revise e publique.");
+  const [texto, setTexto] = useState(boletim.publicado_md || boletim.rascunho_md || "");
+  useEffect(() => {
+    setTexto(boletim.publicado_md || boletim.rascunho_md || "");
+    setEditandoPublicado(false);
+  }, [boletim.id, boletim.publicado_md, boletim.rascunho_md]);
+
+  const regenerar = async () => {
+    if (!confirm("Vai sobrescrever o rascunho atual via IA. Continuar?")) return;
+    const t = toast.loading("Regenerando…");
+    try {
+      const r = await gerar.mutateAsync({ data_referencia: boletim.data_referencia, force_regenerate: true });
+      toast.dismiss(t);
+      if (r?.skipped) toast.info(r?.motivo ?? "Pulado.");
+      else toast.success("Rascunho regenerado.");
+    } catch (e: any) {
+      toast.dismiss(t);
+      toast.error(`Erro: ${e?.message ?? "desconhecido"}`);
+    }
   };
-
-  const baseFields = () => ({
-    titulo,
-    conteudo,
-    data: boletim.data ?? new Date().toISOString().slice(0, 10),
-  });
 
   const salvarRascunho = async () => {
-    const fields = { ...baseFields(), status: "rascunho", agendado_para: null, publicado_em: null };
-    if (isNovo) await create.mutateAsync(fields);
-    else await update.mutateAsync({ id: boletim.id, ...fields });
-    toast.info("Salvo como rascunho.");
-    onClose();
+    await update.mutateAsync({ id: boletim.id, rascunho_md: texto });
+    toast.success("Rascunho salvo.");
   };
 
-  const agendar = async () => {
-    if (!agendadoPara) { toast.error("Defina a data/hora."); return; }
-    const fields = { ...baseFields(), status: "agendado", agendado_para: new Date(agendadoPara).toISOString(), publicado_em: null };
-    if (isNovo) await create.mutateAsync(fields);
-    else await update.mutateAsync({ id: boletim.id, ...fields });
-    toast.success("Boletim agendado.");
-    onClose();
+  const onPublicar = async () => {
+    await publicar.mutateAsync({ id: boletim.id, conteudo: texto });
+    toast.success("Boletim publicado.");
+    setEditandoPublicado(false);
   };
 
-  const publicar = async () => {
-    const fields = { ...baseFields(), status: "publicado", publicado_em: new Date().toISOString() };
-    if (isNovo) await create.mutateAsync(fields);
-    else await update.mutateAsync({ id: boletim.id, ...fields });
-    toast.success("Boletim publicado pra perebada!");
-    onClose();
+  const arquivar = async () => {
+    await update.mutateAsync({ id: boletim.id, status: "arquivado" });
+    toast.info("Boletim arquivado.");
+  };
+
+  const compartilhar = () => {
+    const cabec = `📰 Boletim do dia ${new Date(`${boletim.data_referencia}T12:00:00`).toLocaleDateString("pt-BR")}\n\n`;
+    const url = `https://wa.me/?text=${encodeURIComponent(cabec + (boletim.publicado_md ?? texto))}`;
+    window.open(url, "_blank");
   };
 
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader><DialogTitle>{isNovo ? "Novo boletim" : "Editar boletim"}</DialogTitle></DialogHeader>
-        <div className="flex items-center gap-2">
-          <button onClick={gerarIA} className="flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground">
-            <Sparkles className="h-3 w-3" /> Gerar com IA
-          </button>
-        </div>
-        <input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título" className="rounded-lg border border-border bg-background px-3 py-2 text-sm font-display font-bold" />
-        <Tabs defaultValue="editar">
-          <TabsList>
-            <TabsTrigger value="editar">Editar</TabsTrigger>
-            <TabsTrigger value="preview">Pré-visualizar</TabsTrigger>
-          </TabsList>
-          <TabsContent value="editar">
-            <textarea value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows={10} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-          </TabsContent>
-          <TabsContent value="preview">
-            <div className="rounded-lg border border-border bg-card p-4">
-              <h3 className="font-display text-lg font-bold">{titulo || "Sem título"}</h3>
-              <p className="mt-2 whitespace-pre-line text-sm">{conteudo || "Sem conteúdo ainda."}</p>
-            </div>
-          </TabsContent>
-        </Tabs>
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold">Agendar para</label>
-          <input type="datetime-local" value={agendadoPara} onChange={(e) => setAgendadoPara(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-xs text-muted-foreground">
+            {new Date(`${boletim.data_referencia}T12:00:00`).toLocaleDateString("pt-BR")}
+            {boletim.modelo_usado && (
+              <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-[10px]">{boletim.modelo_usado}</span>
+            )}
+            {boletim.tokens_output != null && (
+              <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-[10px]">
+                {boletim.tokens_input}→{boletim.tokens_output} tok
+              </span>
+            )}
+          </p>
+          <h2 className="font-display text-xl font-bold">{statusLabel[boletim.status]}</h2>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={salvarRascunho} className="flex-1 rounded-full border border-border px-4 py-2 text-xs font-bold">Salvar rascunho</button>
-          <button onClick={agendar} className="flex-1 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold text-accent">Agendar</button>
-          <button onClick={publicar} className="flex-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">
-            <Send className="mr-1 inline h-3 w-3" /> Publicar
+          {isPublicado && !editandoPublicado && (
+            <button
+              onClick={() => setEditandoPublicado(true)}
+              className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold"
+            >
+              <Pencil className="h-3 w-3" /> Editar publicado
+            </button>
+          )}
+          <button
+            onClick={regenerar}
+            disabled={gerar.isPending}
+            className="flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent disabled:opacity-50"
+          >
+            <Wand2 className="h-3 w-3" /> Regenerar via IA
           </button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      <Tabs defaultValue={podeEditar ? "editar" : "preview"}>
+        <TabsList>
+          <TabsTrigger value="editar" disabled={!podeEditar}>
+            <Pencil className="mr-1 h-3 w-3" /> Editar
+          </TabsTrigger>
+          <TabsTrigger value="preview">
+            <Eye className="mr-1 h-3 w-3" /> Preview
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="editar">
+          <textarea
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            rows={18}
+            disabled={!podeEditar}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm"
+          />
+        </TabsContent>
+        <TabsContent value="preview">
+          <div className="rounded-lg border border-border bg-background p-4">
+            <MarkdownView>{texto || "_(vazio)_"}</MarkdownView>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {!isPublicado && (
+          <>
+            <button
+              onClick={salvarRascunho}
+              className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold"
+            >
+              Salvar rascunho
+            </button>
+            <button
+              onClick={onPublicar}
+              className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow"
+            >
+              <Send className="h-3 w-3" /> Publicar agora
+            </button>
+            <button
+              onClick={arquivar}
+              className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold text-muted-foreground"
+            >
+              <Archive className="h-3 w-3" /> Arquivar
+            </button>
+          </>
+        )}
+        {isPublicado && editandoPublicado && (
+          <button
+            onClick={onPublicar}
+            className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow"
+          >
+            <Send className="h-3 w-3" /> Salvar e republicar
+          </button>
+        )}
+        {isPublicado && (
+          <button
+            onClick={compartilhar}
+            className="flex items-center gap-1 rounded-full border border-success/40 bg-success/10 px-4 py-2 text-xs font-bold text-success"
+          >
+            <Share2 className="h-3 w-3" /> Compartilhar no WhatsApp
+          </button>
+        )}
+      </div>
+
+      {isPublicado && (
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          Publicado em{" "}
+          {boletim.publicado_em
+            ? new Date(boletim.publicado_em).toLocaleString("pt-BR")
+            : "—"}
+          .{" "}
+          <Link to="/app/boletim/$data" params={{ data: boletim.data_referencia }} className="underline">
+            Ver como pereba
+          </Link>
+        </p>
+      )}
+    </div>
   );
 }
