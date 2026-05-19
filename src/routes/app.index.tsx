@@ -4,6 +4,7 @@ import { Sparkles, TrendingUp, Trophy, Pencil, Lightbulb, AlertCircle, CheckCirc
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { BoletimEditor } from "@/components/boletim-editor";
+import { BoletimCard } from "@/components/boletim-card";
 import { calcularEngajamento, isElegivelLanterna, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 import { useProfile } from "@/lib/queries/profiles";
 import { useRanking } from "@/lib/queries/profiles";
@@ -14,6 +15,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { PremiacaoCard } from "@/components/premiacao-card";
+
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Início — Bolão dos Perebas" }] }),
