@@ -47,6 +47,12 @@ function Configuracoes() {
     setScore({ ...defaultScore, ...(settings.score_rules ?? {}) });
     setPeso({ ...defaultPeso, ...(settings.peso_progressivo ?? {}) });
     setBoletim({ ...defaultBoletim, ...(settings.boletim_config ?? {}) });
+    setBoletimL1({
+      modelo: settings.boletim_modelo ?? defaultBoletimL1.modelo,
+      max_tokens: settings.boletim_max_tokens ?? defaultBoletimL1.max_tokens,
+      temperature: settings.boletim_temperature ?? defaultBoletimL1.temperature,
+      system_prompt: settings.boletim_system_prompt ?? defaultBoletimL1.system_prompt,
+    });
     setLanterninha({ ...defaultLanterninha, ...(settings.lanterninha_rule ?? {}) });
     if (settings.copa_start_date) {
       const raw = typeof settings.copa_start_date === "string" ? settings.copa_start_date : String(settings.copa_start_date);
