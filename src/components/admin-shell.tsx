@@ -33,6 +33,7 @@ const items = [
   { to: "/app/admin/encerrar-copa", label: "Encerrar Copa (Top 4)", icon: Crown },
   { to: "/app/admin/convites", label: "Convites & usuários", icon: Users },
   { to: "/app/admin/perfis", label: "Perfis de personalidade", icon: UserCog },
+  { to: "/app/admin/perfis-personalidade", label: "Resumo p/ boletim", icon: UserCog },
   { to: "/app/admin/boletins", label: "Boletins", icon: Newspaper },
   { to: "/app/admin/configuracoes", label: "Configurações", icon: Settings },
   { to: "/app/admin/auditoria", label: "Auditoria", icon: ScrollText },
