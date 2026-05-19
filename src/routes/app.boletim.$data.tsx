@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Share2, Newspaper } from "lucide-react";
 import { useBoletimPorData, useBoletinsL1 } from "@/lib/queries/boletins-l1";
 import { Skeleton } from "@/components/ui/skeleton";
