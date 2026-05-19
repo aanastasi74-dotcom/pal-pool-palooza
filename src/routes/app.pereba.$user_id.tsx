@@ -152,6 +152,7 @@ function PerebaPublicProfile() {
                         </span>
                       </div>
                     )}
+                    <EstatisticasPalpites match_id={j.match_id} travado_em={j.travado_em} />
                   </article>
                 );
               })}
