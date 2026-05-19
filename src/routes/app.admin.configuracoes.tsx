@@ -36,8 +36,10 @@ function Configuracoes() {
   const [score, setScore] = useState<any>(defaultScore);
   const [peso, setPeso] = useState<any>(defaultPeso);
   const [boletim, setBoletim] = useState<any>(defaultBoletim);
+  const [boletimL1, setBoletimL1] = useState<any>(defaultBoletimL1);
   const [lanterninha, setLanterninha] = useState<any>(defaultLanterninha);
   const [copaStart, setCopaStart] = useState<string>(defaultCopaStart);
+
 
   useEffect(() => {
     if (!settings) return;
