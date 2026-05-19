@@ -102,6 +102,63 @@ export type Database = {
           },
         ]
       }
+      faixas_premiacao: {
+        Row: {
+          created_at: string | null
+          devolucao_pos_ate: number | null
+          devolucao_pos_de: number | null
+          devolucao_qts: number
+          id: number
+          nome: string
+          pct_1: number
+          pct_2: number
+          pct_3: number
+          pct_4: number
+          pct_5: number
+          pct_6_10_cada: number
+          pct_lant: number
+          quotas_max: number | null
+          quotas_min: number
+          rotulo_faixa: string
+        }
+        Insert: {
+          created_at?: string | null
+          devolucao_pos_ate?: number | null
+          devolucao_pos_de?: number | null
+          devolucao_qts?: number
+          id: number
+          nome: string
+          pct_1: number
+          pct_2: number
+          pct_3: number
+          pct_4?: number
+          pct_5?: number
+          pct_6_10_cada?: number
+          pct_lant?: number
+          quotas_max?: number | null
+          quotas_min: number
+          rotulo_faixa: string
+        }
+        Update: {
+          created_at?: string | null
+          devolucao_pos_ate?: number | null
+          devolucao_pos_de?: number | null
+          devolucao_qts?: number
+          id?: number
+          nome?: string
+          pct_1?: number
+          pct_2?: number
+          pct_3?: number
+          pct_4?: number
+          pct_5?: number
+          pct_6_10_cada?: number
+          pct_lant?: number
+          quotas_max?: number | null
+          quotas_min?: number
+          rotulo_faixa?: string
+        }
+        Relationships: []
+      }
       invites: {
         Row: {
           criado_por: string | null
@@ -838,6 +895,7 @@ export type Database = {
         Args: { p_motivo: string; p_quota_id: string }
         Returns: Json
       }
+      calcular_premiacao: { Args: { p_quotas_ativas: number }; Returns: Json }
       check_apelido_disponivel: {
         Args: { p_apelido: string }
         Returns: boolean
