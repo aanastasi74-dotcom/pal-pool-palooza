@@ -17,8 +17,15 @@ const defaultPix = { chave: "", banco: "", titular: "", instrucoes: "", valor_qu
 const defaultScore = { exato: 12, resultado: 4, gols_vencedor: 2, dif_gols: 2, gols_time: 1 };
 const defaultPeso = { inicial: 10, incremento_dia: 1, final: 50 };
 const defaultBoletim = { hora_envio: "22:00", auto_geracao: true };
+const defaultBoletimL1 = {
+  modelo: "claude-sonnet-4-6",
+  max_tokens: 1500,
+  temperature: 0.8,
+  system_prompt: "",
+};
 const defaultLanterninha = { engajamento_minimo: 0.8, pontos_minimos: 200 };
 const defaultCopaStart = "2026-06-11T20:00:00Z";
+
 
 function Configuracoes() {
   const { data: settings } = useSettings();
@@ -29,8 +36,10 @@ function Configuracoes() {
   const [score, setScore] = useState<any>(defaultScore);
   const [peso, setPeso] = useState<any>(defaultPeso);
   const [boletim, setBoletim] = useState<any>(defaultBoletim);
+  const [boletimL1, setBoletimL1] = useState<any>(defaultBoletimL1);
   const [lanterninha, setLanterninha] = useState<any>(defaultLanterninha);
   const [copaStart, setCopaStart] = useState<string>(defaultCopaStart);
+
 
   useEffect(() => {
     if (!settings) return;
@@ -38,6 +47,12 @@ function Configuracoes() {
     setScore({ ...defaultScore, ...(settings.score_rules ?? {}) });
     setPeso({ ...defaultPeso, ...(settings.peso_progressivo ?? {}) });
     setBoletim({ ...defaultBoletim, ...(settings.boletim_config ?? {}) });
+    setBoletimL1({
+      modelo: settings.boletim_modelo ?? defaultBoletimL1.modelo,
+      max_tokens: settings.boletim_max_tokens ?? defaultBoletimL1.max_tokens,
+      temperature: settings.boletim_temperature ?? defaultBoletimL1.temperature,
+      system_prompt: settings.boletim_system_prompt ?? defaultBoletimL1.system_prompt,
+    });
     setLanterninha({ ...defaultLanterninha, ...(settings.lanterninha_rule ?? {}) });
     if (settings.copa_start_date) {
       const raw = typeof settings.copa_start_date === "string" ? settings.copa_start_date : String(settings.copa_start_date);
@@ -53,6 +68,10 @@ function Configuracoes() {
       update.mutateAsync({ key: "score_rules", value: score }),
       update.mutateAsync({ key: "peso_progressivo", value: peso }),
       update.mutateAsync({ key: "boletim_config", value: boletim }),
+      update.mutateAsync({ key: "boletim_modelo", value: boletimL1.modelo }),
+      update.mutateAsync({ key: "boletim_max_tokens", value: Number(boletimL1.max_tokens) }),
+      update.mutateAsync({ key: "boletim_temperature", value: Number(boletimL1.temperature) }),
+      update.mutateAsync({ key: "boletim_system_prompt", value: boletimL1.system_prompt }),
       update.mutateAsync({ key: "lanterninha_rule", value: lanterninha }),
       update.mutateAsync({ key: "copa_start_date", value: new Date(copaStart).toISOString() }),
     ]);
@@ -132,6 +151,41 @@ function Configuracoes() {
               </div>
             </AccordionContent>
           </AccordionItem>
+
+          <AccordionItem value="boletim-ia">
+            <AccordionTrigger>Boletim diário (IA)</AccordionTrigger>
+            <AccordionContent className="space-y-3">
+              <div>
+                <label className="text-xs font-bold">Modelo Anthropic</label>
+                <select
+                  value={boletimL1.modelo}
+                  onChange={(e) => setBoletimL1({ ...boletimL1, modelo: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+                  <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+                  <option value="claude-opus-4-6">claude-opus-4-6</option>
+                </select>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <Field label="Max tokens" type="number" value={String(boletimL1.max_tokens)} onChange={(v) => setBoletimL1({ ...boletimL1, max_tokens: Number(v) })} />
+                <Field label="Temperature (0–1)" type="number" value={String(boletimL1.temperature)} onChange={(v) => setBoletimL1({ ...boletimL1, temperature: Number(v) })} />
+              </div>
+              <div>
+                <label className="text-xs font-bold">System prompt</label>
+                <textarea
+                  value={boletimL1.system_prompt}
+                  onChange={(e) => setBoletimL1({ ...boletimL1, system_prompt: e.target.value })}
+                  rows={10}
+                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs"
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                A chave <code>ANTHROPIC_API_KEY</code> é configurada como secret no Supabase Dashboard → Edge Functions.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+
 
           <AccordionItem value="copa">
             <AccordionTrigger>Copa 2026 e lanterninha</AccordionTrigger>

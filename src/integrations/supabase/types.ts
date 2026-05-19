@@ -55,6 +55,59 @@ export type Database = {
           },
         ]
       }
+      boletins: {
+        Row: {
+          created_at: string
+          data_referencia: string
+          id: string
+          modelo_usado: string | null
+          publicado_em: string | null
+          publicado_md: string | null
+          publicado_por: string | null
+          rascunho_md: string | null
+          status: string
+          tokens_input: number | null
+          tokens_output: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_referencia: string
+          id?: string
+          modelo_usado?: string | null
+          publicado_em?: string | null
+          publicado_md?: string | null
+          publicado_por?: string | null
+          rascunho_md?: string | null
+          status?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_referencia?: string
+          id?: string
+          modelo_usado?: string | null
+          publicado_em?: string | null
+          publicado_md?: string | null
+          publicado_por?: string | null
+          rascunho_md?: string | null
+          status?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boletins_publicado_por_fkey"
+            columns: ["publicado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bulletins: {
         Row: {
           agendado_para: string | null
@@ -417,6 +470,42 @@ export type Database = {
             foreignKeyName: "payments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perfis_personalidade: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          descricao: string | null
+          profile_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          descricao?: string | null
+          profile_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          descricao?: string | null
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfis_personalidade_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "perfis_personalidade_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },

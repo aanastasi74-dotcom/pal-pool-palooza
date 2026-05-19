@@ -4,6 +4,7 @@ import { Sparkles, TrendingUp, Trophy, Pencil, Lightbulb, AlertCircle, CheckCirc
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { BoletimEditor } from "@/components/boletim-editor";
+import { BoletimCard } from "@/components/boletim-card";
 import { calcularEngajamento, isElegivelLanterna, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 import { useProfile } from "@/lib/queries/profiles";
 import { useRanking } from "@/lib/queries/profiles";
@@ -14,6 +15,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { PremiacaoCard } from "@/components/premiacao-card";
+
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Início — Bolão dos Perebas" }] }),
@@ -111,34 +113,13 @@ function Home() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
-        <div className="flex items-start gap-4">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent text-accent-foreground">
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-display text-lg font-bold">✨ Boletim do dia · em breve</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Em construção. Vai começar a ferver assim que rolar o primeiro jogo da Copa (11/06). Aguenta firme, pereba.
-            </p>
-          </div>
+      <section>
+        <SectionHeader title="Boletim" link="/app" />
+        <div className="mt-4">
+          <BoletimCard />
         </div>
       </section>
 
-      {/* TODO Rodada J: reativar boletim do dia
-          (admin badge, conteúdo dinâmico, botões Compartilhar/Editar/Histórico, EmptyState).
-          Preserva imports: Pencil, Newspaper, Skeleton, EmptyState, BoletimEditor, useBulletinDoDia. */}
-
-      <BoletimEditor
-        open={editorOpen}
-        onOpenChange={setEditorOpen}
-        initial={boletimText}
-        onPublish={(final, original) => {
-          setBoletimText(final);
-          toast.message("Versão original salva pra próxima geração aprender.");
-          console.log("[boletim] original:", original, "→ final:", final);
-        }}
-      />
     </div>
   );
 }
