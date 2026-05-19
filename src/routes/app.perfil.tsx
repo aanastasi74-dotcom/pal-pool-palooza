@@ -83,8 +83,21 @@ function Perfil() {
       <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
         <h2 className="font-display text-lg font-bold">Notificações</h2>
         <div className="mt-4 space-y-3 text-sm">
+          <label className="flex flex-col gap-1 rounded-2xl border border-border bg-secondary px-4 py-3">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold">Receber lembretes por email</span>
+              <input
+                type="checkbox"
+                checked={recebeLembretesEmail}
+                onChange={(e) => setRecebeLembretesEmail(e.target.checked)}
+                className="h-5 w-5 accent-[var(--primary)]"
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Lembretes pré-Copa e durante a Copa (na véspera de dias com jogos). Você pode desativar a qualquer momento.
+            </p>
+          </label>
           {[
-            { key: "whatsapp", label: "Lembrete no WhatsApp" },
             { key: "email", label: "E-mail diário" },
             { key: "antesDeTravar", label: "Avisar 30min antes de travar palpite" },
           ].map((opt) => (
@@ -107,7 +120,7 @@ function Perfil() {
         disabled={updateProfile.isPending}
         onClick={() =>
           updateProfile.mutate(
-            { apelido, sigla: sigla || null, notificacoes: notif } as any,
+            { apelido, sigla: sigla || null, notificacoes: notif, recebe_lembretes_email: recebeLembretesEmail } as any,
             {
               onSuccess: () => toast.success("Perfil atualizado, pereba!"),
               onError: () => toast.error("Não foi possível salvar agora."),
