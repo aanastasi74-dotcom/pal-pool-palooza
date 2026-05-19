@@ -43,11 +43,13 @@ import { Route as AppPerebaUser_idRouteImport } from './routes/app.pereba.$user_
 import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4'
 import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
 import { Route as AppPagamentoLoteLote_idRouteImport } from './routes/app.pagamento-lote.$lote_id'
+import { Route as AppBoletimDataRouteImport } from './routes/app.boletim.$data'
 import { Route as AppAdminSaudeRouteImport } from './routes/app.admin.saude'
 import { Route as AppAdminReportesRouteImport } from './routes/app.admin.reportes'
 import { Route as AppAdminRelatoriosRouteImport } from './routes/app.admin.relatorios'
 import { Route as AppAdminQuotasRouteImport } from './routes/app.admin.quotas'
 import { Route as AppAdminPremiacaoRouteImport } from './routes/app.admin.premiacao'
+import { Route as AppAdminPerfisPersonalidadeRouteImport } from './routes/app.admin.perfis-personalidade'
 import { Route as AppAdminPerfisRouteImport } from './routes/app.admin.perfis'
 import { Route as AppAdminPagamentosRouteImport } from './routes/app.admin.pagamentos'
 import { Route as AppAdminJogosRouteImport } from './routes/app.admin.jogos'
@@ -227,6 +229,11 @@ const AppPagamentoLoteLote_idRoute = AppPagamentoLoteLote_idRouteImport.update({
   path: '/pagamento-lote/$lote_id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBoletimDataRoute = AppBoletimDataRouteImport.update({
+  id: '/boletim/$data',
+  path: '/boletim/$data',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminSaudeRoute = AppAdminSaudeRouteImport.update({
   id: '/saude',
   path: '/saude',
@@ -252,6 +259,12 @@ const AppAdminPremiacaoRoute = AppAdminPremiacaoRouteImport.update({
   path: '/premiacao',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminPerfisPersonalidadeRoute =
+  AppAdminPerfisPersonalidadeRouteImport.update({
+    id: '/perfis-personalidade',
+    path: '/perfis-personalidade',
+    getParentRoute: () => AppAdminRoute,
+  } as any)
 const AppAdminPerfisRoute = AppAdminPerfisRouteImport.update({
   id: '/perfis',
   path: '/perfis',
@@ -331,11 +344,13 @@ export interface FileRoutesByFullPath {
   '/app/admin/jogos': typeof AppAdminJogosRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
+  '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/boletim/$data': typeof AppBoletimDataRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
@@ -377,11 +392,13 @@ export interface FileRoutesByTo {
   '/app/admin/jogos': typeof AppAdminJogosRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
+  '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/boletim/$data': typeof AppBoletimDataRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
@@ -427,11 +444,13 @@ export interface FileRoutesById {
   '/app/admin/jogos': typeof AppAdminJogosRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
+  '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/boletim/$data': typeof AppBoletimDataRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites_/top4': typeof AppPalpitesTop4Route
@@ -478,11 +497,13 @@ export interface FileRouteTypes {
     | '/app/admin/jogos'
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
+    | '/app/admin/perfis-personalidade'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/boletim/$data'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
@@ -524,11 +545,13 @@ export interface FileRouteTypes {
     | '/app/admin/jogos'
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
+    | '/app/admin/perfis-personalidade'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/boletim/$data'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
@@ -573,11 +596,13 @@ export interface FileRouteTypes {
     | '/app/admin/jogos'
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
+    | '/app/admin/perfis-personalidade'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/boletim/$data'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites_/top4'
@@ -838,6 +863,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPagamentoLoteLote_idRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/boletim/$data': {
+      id: '/app/boletim/$data'
+      path: '/boletim/$data'
+      fullPath: '/app/boletim/$data'
+      preLoaderRoute: typeof AppBoletimDataRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/admin/saude': {
       id: '/app/admin/saude'
       path: '/saude'
@@ -871,6 +903,13 @@ declare module '@tanstack/react-router' {
       path: '/premiacao'
       fullPath: '/app/admin/premiacao'
       preLoaderRoute: typeof AppAdminPremiacaoRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/app/admin/perfis-personalidade': {
+      id: '/app/admin/perfis-personalidade'
+      path: '/perfis-personalidade'
+      fullPath: '/app/admin/perfis-personalidade'
+      preLoaderRoute: typeof AppAdminPerfisPersonalidadeRouteImport
       parentRoute: typeof AppAdminRoute
     }
     '/app/admin/perfis': {
@@ -941,6 +980,7 @@ interface AppAdminRouteChildren {
   AppAdminJogosRoute: typeof AppAdminJogosRoute
   AppAdminPagamentosRoute: typeof AppAdminPagamentosRoute
   AppAdminPerfisRoute: typeof AppAdminPerfisRoute
+  AppAdminPerfisPersonalidadeRoute: typeof AppAdminPerfisPersonalidadeRoute
   AppAdminPremiacaoRoute: typeof AppAdminPremiacaoRoute
   AppAdminQuotasRoute: typeof AppAdminQuotasRoute
   AppAdminRelatoriosRoute: typeof AppAdminRelatoriosRoute
@@ -958,6 +998,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminJogosRoute: AppAdminJogosRoute,
   AppAdminPagamentosRoute: AppAdminPagamentosRoute,
   AppAdminPerfisRoute: AppAdminPerfisRoute,
+  AppAdminPerfisPersonalidadeRoute: AppAdminPerfisPersonalidadeRoute,
   AppAdminPremiacaoRoute: AppAdminPremiacaoRoute,
   AppAdminQuotasRoute: AppAdminQuotasRoute,
   AppAdminRelatoriosRoute: AppAdminRelatoriosRoute,
@@ -984,6 +1025,7 @@ interface AppRouteChildren {
   AppSimuladorRoute: typeof AppSimuladorRoute
   AppTimesRoute: typeof AppTimesRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppBoletimDataRoute: typeof AppBoletimDataRoute
   AppPagamentoLoteLote_idRoute: typeof AppPagamentoLoteLote_idRoute
   AppPagamentoQuota_idRoute: typeof AppPagamentoQuota_idRoute
   AppPalpitesTop4Route: typeof AppPalpitesTop4Route
@@ -1004,6 +1046,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSimuladorRoute: AppSimuladorRoute,
   AppTimesRoute: AppTimesRoute,
   AppIndexRoute: AppIndexRoute,
+  AppBoletimDataRoute: AppBoletimDataRoute,
   AppPagamentoLoteLote_idRoute: AppPagamentoLoteLote_idRoute,
   AppPagamentoQuota_idRoute: AppPagamentoQuota_idRoute,
   AppPalpitesTop4Route: AppPalpitesTop4Route,
@@ -1047,13 +1090,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
