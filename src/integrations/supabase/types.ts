@@ -1009,6 +1009,7 @@ export type Database = {
       fase_atual_copa: { Args: never; Returns: string }
       get_arrecadacao_atual: { Args: never; Returns: number }
       get_arrecadacao_potencial: { Args: never; Returns: number }
+      get_estatisticas_palpites: { Args: { p_match_id: string }; Returns: Json }
       get_invite_by_token: {
         Args: { p_token: string }
         Returns: {
@@ -1100,6 +1101,10 @@ export type Database = {
           sigla: string
           user_id: string
         }[]
+      }
+      get_so_voce_achou: {
+        Args: { p_match_id: string; p_quota_id: string }
+        Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
       limite_perebas_hard: { Args: never; Returns: number }

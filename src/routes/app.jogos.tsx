@@ -10,6 +10,7 @@ import { useStadiums } from "@/lib/queries/stadiums";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildHeader, getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
+import { EstatisticasPalpites } from "@/components/estatisticas-palpites";
 
 export const Route = createFileRoute("/app/jogos")({
   head: () => ({ meta: [{ title: "Jogos — Bolão dos Perebas" }] }),
@@ -175,6 +176,11 @@ function Jogos() {
                     </span>
                   )}
                 </div>
+                <EstatisticasPalpites
+                  match_id={j.id}
+                  travado_em={j.travado_em}
+                  minhas_quotas_ids={(quotas as any[]).map((q) => q.id)}
+                />
               </article>
             );
           })}
