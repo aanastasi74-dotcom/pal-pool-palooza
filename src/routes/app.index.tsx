@@ -13,6 +13,7 @@ import { useMinhasQuotas, useTotalQuotas } from "@/lib/queries/quotas";
 import { useAuth } from "@/lib/auth-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { PremiacaoCard } from "@/components/premiacao-card";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Início — Bolão dos Perebas" }] }),
