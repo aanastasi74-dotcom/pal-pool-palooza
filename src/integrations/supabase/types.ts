@@ -259,6 +259,44 @@ export type Database = {
           },
         ]
       }
+      lembretes_enviados: {
+        Row: {
+          data_referencia: string
+          enviado_em: string | null
+          erro: string | null
+          id: string
+          profile_id: string | null
+          status: string | null
+          tipo: string
+        }
+        Insert: {
+          data_referencia: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          profile_id?: string | null
+          status?: string | null
+          tipo: string
+        }
+        Update: {
+          data_referencia?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          profile_id?: string | null
+          status?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lembretes_enviados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lotes_compra: {
         Row: {
           comprovante_url: string | null
@@ -619,6 +657,7 @@ export type Database = {
           limite_quotas_custom: number | null
           nome: string
           notificacoes: Json | null
+          recebe_lembretes_email: boolean
           role: string
           sigla: string | null
           ultimo_acesso: string | null
@@ -635,6 +674,7 @@ export type Database = {
           limite_quotas_custom?: number | null
           nome: string
           notificacoes?: Json | null
+          recebe_lembretes_email?: boolean
           role?: string
           sigla?: string | null
           ultimo_acesso?: string | null
@@ -651,6 +691,7 @@ export type Database = {
           limite_quotas_custom?: number | null
           nome?: string
           notificacoes?: Json | null
+          recebe_lembretes_email?: boolean
           role?: string
           sigla?: string | null
           ultimo_acesso?: string | null
@@ -1057,6 +1098,17 @@ export type Database = {
           posicao_3: string
           posicao_4: string
           quota_numero: number
+        }[]
+      }
+      get_perebas_com_palpite_faltante: {
+        Args: { p_data_alvo: string }
+        Returns: {
+          apelido: string
+          email: string
+          id: string
+          nome: string
+          palpites_faltantes: number
+          recebe_lembretes_email: boolean
         }[]
       }
       get_peso_top4_atual: { Args: never; Returns: number }
