@@ -152,6 +152,41 @@ function Configuracoes() {
             </AccordionContent>
           </AccordionItem>
 
+          <AccordionItem value="boletim-ia">
+            <AccordionTrigger>Boletim diário (IA)</AccordionTrigger>
+            <AccordionContent className="space-y-3">
+              <div>
+                <label className="text-xs font-bold">Modelo Anthropic</label>
+                <select
+                  value={boletimL1.modelo}
+                  onChange={(e) => setBoletimL1({ ...boletimL1, modelo: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+                  <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+                  <option value="claude-opus-4-6">claude-opus-4-6</option>
+                </select>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <Field label="Max tokens" type="number" value={String(boletimL1.max_tokens)} onChange={(v) => setBoletimL1({ ...boletimL1, max_tokens: Number(v) })} />
+                <Field label="Temperature (0–1)" type="number" value={String(boletimL1.temperature)} onChange={(v) => setBoletimL1({ ...boletimL1, temperature: Number(v) })} />
+              </div>
+              <div>
+                <label className="text-xs font-bold">System prompt</label>
+                <textarea
+                  value={boletimL1.system_prompt}
+                  onChange={(e) => setBoletimL1({ ...boletimL1, system_prompt: e.target.value })}
+                  rows={10}
+                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs"
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                A chave <code>ANTHROPIC_API_KEY</code> é configurada como secret no Supabase Dashboard → Edge Functions.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+
+
           <AccordionItem value="copa">
             <AccordionTrigger>Copa 2026 e lanterninha</AccordionTrigger>
             <AccordionContent className="space-y-3">
