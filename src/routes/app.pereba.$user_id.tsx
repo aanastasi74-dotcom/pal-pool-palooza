@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { buildHeader, getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
+import { EstatisticasPalpites } from "@/components/estatisticas-palpites";
 import { times as mockTimes } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/app/pereba/$user_id")({
