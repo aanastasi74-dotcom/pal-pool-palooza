@@ -151,12 +151,19 @@ function derivar(fixture: any): Derived {
   if (["1H", "HT", "2H"].includes(apiStatus)) {
     placar_casa = goals.home ?? null;
     placar_fora = goals.away ?? null;
-  } else if (["ET", "BT", "P", "AET", "PEN"].includes(apiStatus) || apiStatus === "FT") {
+  } else if (["ET", "BT", "P"].includes(apiStatus)) {
+    // Ao vivo na prorrogação: tempo normal = fulltime (já fechado), prorrogação = placar corrente acumulado
+    placar_casa = ft.home ?? null;
+    placar_fora = ft.away ?? null;
+    placar_casa_prorrogacao = goals.home ?? null;
+    placar_fora_prorrogacao = goals.away ?? null;
+  } else if (["AET", "PEN", "FT"].includes(apiStatus)) {
     placar_casa = ft.home ?? goals.home ?? null;
     placar_fora = ft.away ?? goals.away ?? null;
     if (et.home != null || et.away != null) {
-      placar_casa_prorrogacao = et.home ?? null;
-      placar_fora_prorrogacao = et.away ?? null;
+      // API entrega só os gols DURANTE a prorrogação — somar com fulltime pra obter o acumulado
+      placar_casa_prorrogacao = (ft.home ?? 0) + (et.home ?? 0);
+      placar_fora_prorrogacao = (ft.away ?? 0) + (et.away ?? 0);
     }
     if (pen.home != null || pen.away != null) {
       penaltis_casa = pen.home ?? null;
@@ -243,16 +250,15 @@ async function actionSync(modo: string, season: string, action: string) {
   let jogos_atualizados = 0;
   const mudancas: any[] = [];
 
-  // Filtro de relevância (cron): só roda se houver jogo iminente/em andamento/recém-terminado
+  // Filtro de relevância (cron): jogo não-encerrado com início em [agora-4h, agora+10min]
   if (action === "cron") {
     const agora = new Date();
-    const inicio = new Date(agora.getTime() - 30 * 60 * 1000).toISOString();
+    const inicio = new Date(agora.getTime() - 4 * 60 * 60 * 1000).toISOString();
     const fim = new Date(agora.getTime() + 10 * 60 * 1000).toISOString();
     const relevantes: any[] = await sb(
-      `matches?select=id,status,data_jogo&data_jogo=gte.${inicio}&data_jogo=lte.${fim}`,
+      `matches?select=id&status=neq.encerrado&data_jogo=gte.${inicio}&data_jogo=lte.${fim}`,
     );
-    const emAndamento: any[] = await sb(`matches?select=id&status=eq.em_andamento`);
-    if ((relevantes?.length ?? 0) === 0 && (emAndamento?.length ?? 0) === 0) {
+    if ((relevantes?.length ?? 0) === 0) {
       return { skipped: true, motivo: "sem_jogo_relevante", chamadas_api, jogos_verificados, jogos_atualizados, mudancas };
     }
   }
