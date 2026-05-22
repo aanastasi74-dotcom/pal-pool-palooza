@@ -29,3 +29,6 @@ verify_jwt = true
 
 [functions.enviar-lembretes-diarios]
 verify_jwt = false
+
+[functions.sync-match-scores]
+verify_jwt = false

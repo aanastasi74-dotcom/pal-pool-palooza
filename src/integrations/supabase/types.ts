@@ -867,10 +867,50 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_logs: {
+        Row: {
+          chamadas_api: number | null
+          detalhe: Json | null
+          duracao_ms: number | null
+          erro: string | null
+          executado_em: string
+          id: string
+          jogos_atualizados: number | null
+          jogos_verificados: number | null
+          modo: string
+          season: string | null
+        }
+        Insert: {
+          chamadas_api?: number | null
+          detalhe?: Json | null
+          duracao_ms?: number | null
+          erro?: string | null
+          executado_em?: string
+          id?: string
+          jogos_atualizados?: number | null
+          jogos_verificados?: number | null
+          modo: string
+          season?: string | null
+        }
+        Update: {
+          chamadas_api?: number | null
+          detalhe?: Json | null
+          duracao_ms?: number | null
+          erro?: string | null
+          executado_em?: string
+          id?: string
+          jogos_atualizados?: number | null
+          jogos_verificados?: number | null
+          modo?: string
+          season?: string | null
+        }
+        Relationships: []
+      }
       teams: {
         Row: {
           bandeira_emoji: string
           bracket_position: string
+          codigo_api: number | null
           confederacao: string | null
           created_at: string | null
           grupo: string
@@ -880,6 +920,7 @@ export type Database = {
         Insert: {
           bandeira_emoji: string
           bracket_position: string
+          codigo_api?: number | null
           confederacao?: string | null
           created_at?: string | null
           grupo: string
@@ -889,6 +930,7 @@ export type Database = {
         Update: {
           bandeira_emoji?: string
           bracket_position?: string
+          codigo_api?: number | null
           confederacao?: string | null
           created_at?: string | null
           grupo?: string
