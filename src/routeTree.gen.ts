@@ -44,6 +44,7 @@ import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4
 import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
 import { Route as AppPagamentoLoteLote_idRouteImport } from './routes/app.pagamento-lote.$lote_id'
 import { Route as AppBoletimDataRouteImport } from './routes/app.boletim.$data'
+import { Route as AppAdminSyncRouteImport } from './routes/app.admin.sync'
 import { Route as AppAdminSaudeRouteImport } from './routes/app.admin.saude'
 import { Route as AppAdminReportesRouteImport } from './routes/app.admin.reportes'
 import { Route as AppAdminRelatoriosRouteImport } from './routes/app.admin.relatorios'
@@ -234,6 +235,11 @@ const AppBoletimDataRoute = AppBoletimDataRouteImport.update({
   path: '/boletim/$data',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminSyncRoute = AppAdminSyncRouteImport.update({
+  id: '/sync',
+  path: '/sync',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminSaudeRoute = AppAdminSaudeRouteImport.update({
   id: '/saude',
   path: '/saude',
@@ -350,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/admin/sync': typeof AppAdminSyncRoute
   '/app/boletim/$data': typeof AppBoletimDataRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/admin/sync': typeof AppAdminSyncRoute
   '/app/boletim/$data': typeof AppBoletimDataRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
@@ -450,6 +458,7 @@ export interface FileRoutesById {
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
   '/app/admin/reportes': typeof AppAdminReportesRoute
   '/app/admin/saude': typeof AppAdminSaudeRoute
+  '/app/admin/sync': typeof AppAdminSyncRoute
   '/app/boletim/$data': typeof AppBoletimDataRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/admin/sync'
     | '/app/boletim/$data'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
@@ -551,6 +561,7 @@ export interface FileRouteTypes {
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/admin/sync'
     | '/app/boletim/$data'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
@@ -602,6 +613,7 @@ export interface FileRouteTypes {
     | '/app/admin/relatorios'
     | '/app/admin/reportes'
     | '/app/admin/saude'
+    | '/app/admin/sync'
     | '/app/boletim/$data'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
@@ -870,6 +882,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBoletimDataRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin/sync': {
+      id: '/app/admin/sync'
+      path: '/sync'
+      fullPath: '/app/admin/sync'
+      preLoaderRoute: typeof AppAdminSyncRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/admin/saude': {
       id: '/app/admin/saude'
       path: '/saude'
@@ -986,6 +1005,7 @@ interface AppAdminRouteChildren {
   AppAdminRelatoriosRoute: typeof AppAdminRelatoriosRoute
   AppAdminReportesRoute: typeof AppAdminReportesRoute
   AppAdminSaudeRoute: typeof AppAdminSaudeRoute
+  AppAdminSyncRoute: typeof AppAdminSyncRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
 }
 
@@ -1004,6 +1024,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminRelatoriosRoute: AppAdminRelatoriosRoute,
   AppAdminReportesRoute: AppAdminReportesRoute,
   AppAdminSaudeRoute: AppAdminSaudeRoute,
+  AppAdminSyncRoute: AppAdminSyncRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,
 }
 
