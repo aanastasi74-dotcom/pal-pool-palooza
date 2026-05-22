@@ -151,12 +151,19 @@ function derivar(fixture: any): Derived {
   if (["1H", "HT", "2H"].includes(apiStatus)) {
     placar_casa = goals.home ?? null;
     placar_fora = goals.away ?? null;
-  } else if (["ET", "BT", "P", "AET", "PEN"].includes(apiStatus) || apiStatus === "FT") {
+  } else if (["ET", "BT", "P"].includes(apiStatus)) {
+    // Ao vivo na prorrogação: tempo normal = fulltime (já fechado), prorrogação = placar corrente acumulado
+    placar_casa = ft.home ?? null;
+    placar_fora = ft.away ?? null;
+    placar_casa_prorrogacao = goals.home ?? null;
+    placar_fora_prorrogacao = goals.away ?? null;
+  } else if (["AET", "PEN", "FT"].includes(apiStatus)) {
     placar_casa = ft.home ?? goals.home ?? null;
     placar_fora = ft.away ?? goals.away ?? null;
     if (et.home != null || et.away != null) {
-      placar_casa_prorrogacao = et.home ?? null;
-      placar_fora_prorrogacao = et.away ?? null;
+      // API entrega só os gols DURANTE a prorrogação — somar com fulltime pra obter o acumulado
+      placar_casa_prorrogacao = (ft.home ?? 0) + (et.home ?? 0);
+      placar_fora_prorrogacao = (ft.away ?? 0) + (et.away ?? 0);
     }
     if (pen.home != null || pen.away != null) {
       penaltis_casa = pen.home ?? null;
