@@ -15,6 +15,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { PremiacaoCard } from "@/components/premiacao-card";
+import { HomeCarouselCollapsible } from "@/components/home-carousel-collapsible";
 
 
 export const Route = createFileRoute("/app/")({
@@ -54,6 +55,7 @@ function Home() {
 
   return (
     <div className="space-y-8">
+      <HomeCarouselCollapsible />
       <section className="relative overflow-hidden rounded-3xl bg-hero p-6 text-primary-foreground shadow-glow md:p-10">
         <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-accent/30 blur-3xl" />
         <p className="text-xs uppercase tracking-widest opacity-80">Sua posição na perebada</p>
