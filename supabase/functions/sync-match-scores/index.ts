@@ -250,16 +250,15 @@ async function actionSync(modo: string, season: string, action: string) {
   let jogos_atualizados = 0;
   const mudancas: any[] = [];
 
-  // Filtro de relevância (cron): só roda se houver jogo iminente/em andamento/recém-terminado
+  // Filtro de relevância (cron): jogo não-encerrado com início em [agora-4h, agora+10min]
   if (action === "cron") {
     const agora = new Date();
-    const inicio = new Date(agora.getTime() - 30 * 60 * 1000).toISOString();
+    const inicio = new Date(agora.getTime() - 4 * 60 * 60 * 1000).toISOString();
     const fim = new Date(agora.getTime() + 10 * 60 * 1000).toISOString();
     const relevantes: any[] = await sb(
-      `matches?select=id,status,data_jogo&data_jogo=gte.${inicio}&data_jogo=lte.${fim}`,
+      `matches?select=id&status=neq.encerrado&data_jogo=gte.${inicio}&data_jogo=lte.${fim}`,
     );
-    const emAndamento: any[] = await sb(`matches?select=id&status=eq.em_andamento`);
-    if ((relevantes?.length ?? 0) === 0 && (emAndamento?.length ?? 0) === 0) {
+    if ((relevantes?.length ?? 0) === 0) {
       return { skipped: true, motivo: "sem_jogo_relevante", chamadas_api, jogos_verificados, jogos_atualizados, mudancas };
     }
   }
