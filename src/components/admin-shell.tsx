@@ -16,6 +16,7 @@ import {
   Activity,
   Bug,
   Crown,
+  RefreshCw,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
