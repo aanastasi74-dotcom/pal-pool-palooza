@@ -129,12 +129,13 @@ Deno.serve(async (req) => {
       quotasCount++;
     }
 
-    // Posições
-    totaisPontos.sort((a, b) => b.pontos - a.pontos);
-    for (let i = 0; i < totaisPontos.length; i++) {
-      await sb(`quotas?id=eq.${totaisPontos[i].id}`, {
+    // Posições — usa a mesma cadeia de desempate do §9 via RPC get_ranking_geral
+    // (pontos DESC, exatos DESC, resultados DESC, created_at ASC)
+    const ranking = await rpc("get_ranking_geral", {});
+    for (const r of ranking) {
+      await sb(`quotas?id=eq.${r.quota_id}`, {
         method: "PATCH",
-        body: JSON.stringify({ posicao: i + 1 }),
+        body: JSON.stringify({ posicao: Number(r.posicao) }),
       });
     }
 
