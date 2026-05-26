@@ -43,14 +43,15 @@ function PremiacaoAdmin() {
 
 function PainelLanterna() {
   const { data: ranking } = useRanking();
-  const list: { id: string; nome: string; pontos: number; palpites_validos: number; palpites_possiveis: number }[] = (ranking ?? []).map((q: any) => ({
+  const list: { id: string; nome: string; posicao: number; pontos: number; palpites_validos: number; palpites_possiveis: number }[] = (ranking ?? []).map((q: any) => ({
     id: q.id,
     nome: q.profile?.nome ?? "—",
+    posicao: q.posicao ?? 0,
     pontos: q.pontos ?? 0,
     palpites_validos: q.palpites_validos ?? 0,
     palpites_possiveis: q.palpites_possiveis ?? 0,
   }));
-  const ordenado = [...list].sort((a, b) => a.pontos - b.pontos);
+  const ordenado = [...list].sort((a, b) => (b.posicao ?? 0) - (a.posicao ?? 0));
   const ultimo = ordenado[0];
   const primeiroElegivel = ordenado.find((p) => isElegivelLanterna(p));
   const elegiveis = list.filter((p) => isElegivelLanterna(p)).length;
