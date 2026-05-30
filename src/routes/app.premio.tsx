@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { CountUp } from "@/components/count-up";
-import { Trophy, Lightbulb } from "lucide-react";
+import { Trophy, Lightbulb, Sparkles, Users } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { REGRA_LANTERNINHA } from "@/lib/lanterninha";
 import { usePremio } from "@/lib/queries/premio";
+import { usePremiacao, fmtBRL as fmtBRLPrem } from "@/lib/queries/premiacao";
 import { useRecentApprovedPayments } from "@/lib/queries/payments";
 import { Skeleton } from "@/components/ui/skeleton";
 
