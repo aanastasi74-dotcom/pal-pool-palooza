@@ -95,3 +95,111 @@ function PremioPage() {
     </div>
   );
 }
+
+type DistCard = {
+  key: string;
+  label: string;
+  valor: number;
+  sublabel?: string;
+  variant: "primeiro" | "podio" | "extra" | "devolucao" | "lanterna";
+};
+
+function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) {
+  const { data, isLoading } = usePremiacao();
+
+  if (isLoading || !data) {
+    return <Skeleton className="h-48 w-full rounded-3xl" />;
+  }
+
+  const { premios, bruta, proxima_faixa } = data;
+  const pct = (v: number) => (bruta > 0 ? (v / bruta) * 100 : 0);
+  const cards: DistCard[] = [];
+
+  cards.push({
+    key: "1",
+    label: "1º colocado",
+    valor: premios.primeiro_total,
+    sublabel:
+      premios.primeiro_bonus > 0
+        ? `inclui ${fmtBRLPrem(premios.primeiro_bonus)} de bônus de sobra`
+        : undefined,
+    variant: "primeiro",
+  });
+  cards.push({ key: "2", label: "2º colocado", valor: premios.segundo, variant: "podio" });
+  cards.push({ key: "3", label: "3º colocado", valor: premios.terceiro, variant: "podio" });
+  if (premios.quarto > 0) cards.push({ key: "4", label: "4º colocado", valor: premios.quarto, variant: "extra" });
+  if (premios.quinto > 0) cards.push({ key: "5", label: "5º colocado", valor: premios.quinto, variant: "extra" });
+  if (premios.sexto_decimo_cada > 0) {
+    cards.push({
+      key: "6-10",
+      label: "6º–10º (cada)",
+      valor: premios.sexto_decimo_cada,
+      sublabel: `total ${fmtBRLPrem(premios.sexto_decimo_total)}`,
+      variant: "extra",
+    });
+  }
+  if (premios.devolucao_total > 0 && premios.devolucao_pos_de) {
+    const ate = premios.devolucao_pos_de + premios.devolucao_qts - 1;
+    cards.push({
+      key: "devolucao",
+      label: `Devolução · ${premios.devolucao_pos_de}º–${ate}º`,
+      valor: premios.devolucao_por_pereba,
+      sublabel: `${fmtBRLPrem(premios.devolucao_por_pereba)} pra cada · ${premios.devolucao_qts} perebas`,
+      variant: "devolucao",
+    });
+  }
+  cards.push({ key: "lanterna", label: "Lanterninha", valor: premios.lanterninha, variant: "lanterna" });
+
+  return (
+    <section>
+      <h2 className="font-display text-lg font-bold">Distribuição por colocação</h2>
+      <p className="text-xs text-muted-foreground">
+        Quem chega lá em cima leva o caldeirão; o lanterninha leva um afago — pra perebada não sair só com a vergonha.
+      </p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {cards.map((c) => {
+          const isPrimeiro = c.variant === "primeiro";
+          const isLanterna = c.variant === "lanterna";
+          const isDevolucao = c.variant === "devolucao";
+          const Icon = isLanterna ? Lightbulb : isDevolucao ? Users : Trophy;
+          return (
+            <div
+              key={c.key}
+              className={`rounded-2xl border p-5 shadow-card ${
+                isPrimeiro
+                  ? "border-accent bg-gold text-gold-foreground"
+                  : isLanterna
+                    ? "border-dashed border-muted-foreground/40 bg-muted/40"
+                    : "border-border bg-card"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Icon className={`h-5 w-5 ${isLanterna ? "rotate-180" : ""}`} />
+                <p className="font-display text-lg font-bold">{c.label}</p>
+              </div>
+              <p className="mt-3 font-display text-3xl font-black">{pct(c.valor).toFixed(0)}%</p>
+              <p className="mt-1 text-xs opacity-80">{fmtBRLPrem(c.valor)}</p>
+              {c.sublabel && <p className="mt-1 text-[11px] opacity-80">{c.sublabel}</p>}
+              {isLanterna && (
+                <button
+                  onClick={onOpenRegra}
+                  className="mt-2 text-[11px] font-semibold text-primary hover:underline"
+                >
+                  Ver regra completa
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {proxima_faixa && (
+        <div className="mt-4 flex items-start gap-3 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-3 text-sm">
+          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <p className="font-bold leading-tight">
+            Faltam {proxima_faixa.quotas_para_alcancar} quota{proxima_faixa.quotas_para_alcancar === 1 ? "" : "s"} pra próxima faixa ({proxima_faixa.nome})
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
