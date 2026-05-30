@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { CountUp } from "@/components/count-up";
 import { Trophy, Lightbulb, Sparkles, Users } from "lucide-react";
 import { useState } from "react";
