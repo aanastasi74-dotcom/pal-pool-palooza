@@ -57,48 +57,8 @@ function PremioPage() {
         <p className="mt-2 text-sm text-muted-foreground">Histórico ainda não tem dados, pereba.</p>
       </section>
 
-      <section>
-        <h2 className="font-display text-lg font-bold">Distribuição por colocação</h2>
-        <p className="text-xs text-muted-foreground">Pódio leva o caldeirão e o lanterninha leva um afago — pra perebada não sair só com a vergonha.</p>
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
-          {premio.distribuicao.map((d) => {
-            const isPrimeiro = d.id === "primeiro";
-            const isLanterna = d.id === "lanterna";
-            const Icon = isLanterna ? Lightbulb : Trophy;
-            const valor = (premio.total_confirmado * d.pct) / 100;
-            return (
-              <div
-                key={d.id}
-                className={`rounded-2xl border p-5 shadow-card ${
-                  isPrimeiro
-                    ? "border-accent bg-gold text-gold-foreground"
-                    : isLanterna
-                      ? "border-dashed border-muted-foreground/40 bg-muted/40"
-                      : "border-border bg-card"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Icon className={`h-5 w-5 ${isLanterna ? "rotate-180" : ""}`} />
-                  <p className="font-display text-lg font-bold">{d.label}</p>
-                </div>
-                <p className="mt-3 font-display text-3xl font-black">{d.pct}%</p>
-                <p className="mt-1 text-xs opacity-80">≈ {fmtBRL(valor)}</p>
-                {isLanterna && (
-                  <>
-                    <p className="mt-2 text-[11px] italic opacity-80">Vale 5% — para quem palpitou direito até o fim.</p>
-                    <button
-                      onClick={() => setOpenRegra(true)}
-                      className="mt-1 text-[11px] font-semibold text-primary hover:underline"
-                    >
-                      Ver regra completa
-                    </button>
-                  </>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      <DistribuicaoPorColocacao onOpenRegra={() => setOpenRegra(true)} />
+
 
       <section className="rounded-3xl border border-border bg-card p-5 shadow-card md:p-6">
         <h2 className="font-display text-lg font-bold">Últimas confirmações</h2>
