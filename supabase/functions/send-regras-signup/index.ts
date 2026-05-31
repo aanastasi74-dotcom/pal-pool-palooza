@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     }
 
     const apelido = profile.apelido || profile.nome.split(" ")[0];
-    const link = `${SITE_URL}/regras`;
+    const link = `${await getAppUrl()}/regras`;
 
     const html = `
       <div style="font-family: -apple-system, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; color: #1a1a1a;">
