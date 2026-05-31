@@ -4,8 +4,9 @@
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
-const SITE_URL = Deno.env.get("SITE_URL") ?? "https://pal-pool-palooza.lovable.app";
 const FROM = Deno.env.get("RESEND_FROM_EMAIL") || "Bolão dos Perebas <onboarding@resend.dev>";
+// SITE_URL é resolvido em runtime a partir do setting `app_url_publico` (fonte única).
+let SITE_URL = "https://pal-pool-palooza.lovable.app";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -203,6 +204,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const appUrl = (await getSetting("app_url_publico")) as string | null;
+    if (typeof appUrl === "string" && appUrl) SITE_URL = appUrl.replace(/\/+$/, "");
+
     const hoje = todayBRT();
     const amanha = addDays(hoje, 1);
     const copaInicio = ((await getSetting("copa_data_inicio")) as string) ?? "2026-06-11";

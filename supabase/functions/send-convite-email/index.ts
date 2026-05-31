@@ -51,8 +51,19 @@ Deno.serve(async (req) => {
     const invite = rows[0];
     if (!invite) return json({ error: "Invite not found" }, 404);
 
-    const SITE_URL = Deno.env.get("SITE_URL") ?? "";
-    const origin = req.headers.get("origin") ?? SITE_URL;
+    // URL pública do app (fonte única: settings.app_url_publico)
+    const APP_URL_FALLBACK = "https://pal-pool-palooza.lovable.app";
+    let origin = APP_URL_FALLBACK;
+    try {
+      const sr = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.app_url_publico&select=value`, {
+        headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` },
+      });
+      if (sr.ok) {
+        const srows = (await sr.json()) as Array<{ value: unknown }>;
+        const v = srows[0]?.value;
+        if (typeof v === "string" && v) origin = v.replace(/\/+$/, "");
+      }
+    } catch (_) {}
     const link = `${origin}/cadastro/${invite.token}`;
     const expira = new Date(invite.expira_em).toLocaleDateString("pt-BR");
     const firstName = invite.nome.split(" ")[0];

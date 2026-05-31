@@ -5,8 +5,13 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useSettings, useUpdateSetting } from "@/lib/queries/settings";
 import { useMaintenanceMode, setReadOnly, setMaintenance, setAutoBackup } from "@/hooks/use-maintenance";
-import { Download, Lock } from "lucide-react";
+import { Download, Lock, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/app/admin/configuracoes")({
   head: () => ({ meta: [{ title: "Admin — Configurações" }] }),
@@ -235,6 +240,13 @@ function Configuracoes() {
             </AccordionContent>
           </AccordionItem>
 
+          <AccordionItem value="lembretes">
+            <AccordionTrigger>Lembretes — errata do último lote</AccordionTrigger>
+            <AccordionContent className="space-y-3">
+              <ErrataLembretesPanel />
+            </AccordionContent>
+          </AccordionItem>
+
           <AccordionItem value="manutencao">
             <AccordionTrigger>Modo manutenção</AccordionTrigger>
             <AccordionContent className="space-y-4">
@@ -273,6 +285,94 @@ function Field({ label, value, onChange, type = "text", textarea }: { label: str
       ) : (
         <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
       )}
+    </div>
+  );
+}
+
+type ErrataPreview = { data_referencia: string | null; total: number; pendentes: number };
+
+function ErrataLembretesPanel() {
+  const [loading, setLoading] = useState(true);
+  const [enviando, setEnviando] = useState(false);
+  const [preview, setPreview] = useState<ErrataPreview | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const carregar = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("enviar-errata-link", { method: "GET" });
+      if (error) throw error;
+      setPreview(data as ErrataPreview);
+    } catch (e: any) {
+      toast.error(`Não consegui carregar o último lote: ${e?.message ?? e}`);
+      setPreview(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { void carregar(); }, []);
+
+  const disparar = async () => {
+    setEnviando(true);
+    setOpen(false);
+    try {
+      const { data, error } = await supabase.functions.invoke("enviar-errata-link", { method: "POST" });
+      if (error) throw error;
+      const enviados = (data as any)?.total_enviados ?? 0;
+      const pulados = (data as any)?.total_pulados ?? 0;
+      const erros = (data as any)?.erros ?? 0;
+      toast.success(`Errata disparada: ${enviados} enviados, ${pulados} pulados, ${erros} erros.`);
+      void carregar();
+    } catch (e: any) {
+      toast.error(`Falhou: ${e?.message ?? e}`);
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">
+        Reenvia o link correto do app pros perebas que receberam o último lote de lembretes — o anterior apontava pra área de desenvolvimento e não dava acesso. Idempotente: clicar duas vezes não duplica envios (UNIQUE no banco protege).
+      </p>
+      <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs">
+        {loading ? (
+          <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> carregando último lote…</div>
+        ) : preview && preview.data_referencia ? (
+          <div className="space-y-1">
+            <div><b>Último lote:</b> {preview.data_referencia}</div>
+            <div><b>Destinatários no lote:</b> {preview.total}</div>
+            <div><b>Pendentes de errata:</b> {preview.pendentes}</div>
+          </div>
+        ) : (
+          <div className="text-muted-foreground">Nenhum lote de lembretes encontrado.</div>
+        )}
+      </div>
+
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogTrigger asChild>
+          <button
+            disabled={enviando || loading || !preview?.pendentes}
+            className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+          >
+            {enviando ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+            Enviar errata do último lote
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar envio da errata</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vou mandar errata para {preview?.pendentes ?? 0} pereba{(preview?.pendentes ?? 0) === 1 ? "" : "s"} do lote de {preview?.data_referencia ?? "—"}. Já enviados não recebem de novo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={disparar}>Confirmar e enviar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

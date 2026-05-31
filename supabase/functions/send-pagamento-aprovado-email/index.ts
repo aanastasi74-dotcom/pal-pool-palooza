@@ -4,7 +4,21 @@ const RESEND_API_URL = "https://api.resend.com/emails";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
-const SITE_URL = Deno.env.get("SITE_URL") ?? "";
+const APP_URL_FALLBACK = "https://pal-pool-palooza.lovable.app";
+
+async function getAppUrl(): Promise<string> {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.app_url_publico&select=value`, {
+      headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` },
+    });
+    if (r.ok) {
+      const rows = (await r.json()) as Array<{ value: unknown }>;
+      const v = rows[0]?.value;
+      if (typeof v === "string" && v) return v.replace(/\/+$/, "");
+    }
+  } catch (_) {}
+  return APP_URL_FALLBACK;
+}
 const FROM = Deno.env.get("RESEND_FROM_EMAIL") || "Bolão dos Perebas <onboarding@resend.dev>";
 
 const corsHeaders = {
@@ -42,7 +56,7 @@ Deno.serve(async (req) => {
       quotaNumero = q?.numero ?? null;
     }
 
-    const origin = req.headers.get("origin") ?? SITE_URL;
+    const origin = await getAppUrl();
     const link = `${origin}/app/quotas`;
     const firstName = profile.nome.split(" ")[0];
     const quotaLabel = quotaNumero != null ? `Quota #${quotaNumero}` : "sua quota";
