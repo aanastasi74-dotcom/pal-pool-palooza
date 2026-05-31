@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
       quotaNumero = q?.numero ?? null;
     }
 
-    const origin = req.headers.get("origin") ?? SITE_URL;
+    const origin = await getAppUrl();
     const link = `${origin}/app/quotas`;
     const firstName = profile.nome.split(" ")[0];
     const quotaLabel = quotaNumero != null ? `Quota #${quotaNumero}` : "sua quota";
