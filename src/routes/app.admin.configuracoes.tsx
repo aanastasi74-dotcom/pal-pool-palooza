@@ -240,6 +240,13 @@ function Configuracoes() {
             </AccordionContent>
           </AccordionItem>
 
+          <AccordionItem value="lembretes">
+            <AccordionTrigger>Lembretes — errata do último lote</AccordionTrigger>
+            <AccordionContent className="space-y-3">
+              <ErrataLembretesPanel />
+            </AccordionContent>
+          </AccordionItem>
+
           <AccordionItem value="manutencao">
             <AccordionTrigger>Modo manutenção</AccordionTrigger>
             <AccordionContent className="space-y-4">
