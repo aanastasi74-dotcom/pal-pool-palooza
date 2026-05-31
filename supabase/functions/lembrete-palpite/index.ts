@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
+    const SITE_URL = await getAppUrl();
     const now = new Date();
     const min = new Date(now.getTime() + 60 * 60 * 1000).toISOString();
     const max = new Date(now.getTime() + 90 * 60 * 1000).toISOString();
