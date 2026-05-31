@@ -5,8 +5,13 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useSettings, useUpdateSetting } from "@/lib/queries/settings";
 import { useMaintenanceMode, setReadOnly, setMaintenance, setAutoBackup } from "@/hooks/use-maintenance";
-import { Download, Lock } from "lucide-react";
+import { Download, Lock, Send, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/app/admin/configuracoes")({
   head: () => ({ meta: [{ title: "Admin — Configurações" }] }),
