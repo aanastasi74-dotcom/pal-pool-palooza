@@ -204,6 +204,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const appUrl = (await getSetting("app_url_publico")) as string | null;
+    if (typeof appUrl === "string" && appUrl) SITE_URL = appUrl.replace(/\/+$/, "");
+
     const hoje = todayBRT();
     const amanha = addDays(hoje, 1);
     const copaInicio = ((await getSetting("copa_data_inicio")) as string) ?? "2026-06-11";
