@@ -72,7 +72,8 @@ function ComprarQuotaPage() {
         <div className="flex items-start gap-2 rounded-2xl border border-border bg-muted/40 p-4 text-sm">
           <Lock className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
-            <b>Quotas encerradas</b> — a Copa já começou. Boa sorte aos perebas inscritos! 🍀
+            <b>Compras encerradas</b> — o primeiro jogo da Copa já começou (11/06, 19h).
+            Boa Copa, pereba! 🍀
           </p>
         </div>
       </div>
