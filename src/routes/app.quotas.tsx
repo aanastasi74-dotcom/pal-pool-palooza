@@ -69,13 +69,24 @@ function QuotasPage() {
           >
             <Plus className="h-4 w-4" /> Comprar quotas
           </button>
-        ) : null}
+        ) : (
+          <button
+            disabled
+            title="Compras encerradas — o primeiro jogo da Copa já começou"
+            className="flex cursor-not-allowed items-center gap-2 rounded-full bg-primary/40 px-5 py-2.5 text-xs font-bold text-primary-foreground opacity-60"
+          >
+            <Lock className="h-4 w-4" /> Comprar quotas
+          </button>
+        )}
       </div>
 
       {!podeCriar && (
         <div className="flex items-start gap-2 rounded-2xl border border-border bg-muted/40 p-4 text-xs">
           <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-          <p><b>Quotas encerradas</b> — a Copa já começou. Boa sorte aos perebas inscritos! 🍀</p>
+          <p>
+            <b>Compras encerradas</b> — o primeiro jogo da Copa já começou (11/06, 19h).
+            Boa Copa, pereba! 🍀
+          </p>
         </div>
       )}
 
