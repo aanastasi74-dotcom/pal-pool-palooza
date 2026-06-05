@@ -167,6 +167,7 @@ export function AppShell() {
       </nav>
 
       <BugReportFAB />
+      {profile && <EsclarecimentoEmpateDialog />}
     </div>
   );
 }
