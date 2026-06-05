@@ -250,6 +250,8 @@ function RegrasPage() {
             <li><strong>Exemplo 2</strong> — palpite 3×1, real 2×1: resultado certo (4 pts) + gols do visitante (1 pt, porque acertou o 1 do perdedor) = <strong>5 pts × peso</strong>. Não bate diferença (2 ≠ 1) nem gols do mandante (3 ≠ 2).</li>
             <li><strong>Exemplo 3</strong> — palpite 2×1, real 2×1: placar exato = <strong>12 pts × peso</strong>. As demais faixas ficam desativadas (não somam, mesmo todas se aplicando).</li>
             <li><strong>Exemplo 4</strong> — palpite 2×1, real 1×2 (resultado invertido): <strong>0 pts</strong>. Embora a magnitude do placar coincida, o palpite errou quem venceu, então nenhum critério secundário se aplica.</li>
+            <li><strong>Exemplo 5</strong> — palpite 1×1, real 1×0 (empate previsto, vitória da casa): <strong>0 pts</strong>. O resultado errou (palpitou empate e foi vitória), então todos os critérios secundários ficam zerados. O mesmo vale ao contrário: palpitou vitória de qualquer lado e o jogo terminou empatado → também 0 pts. A pontuação secundária só vale quando o resultado (vitória da casa, empate ou vitória do visitante) bate.</li>
+            <li><strong>Exemplo 6</strong> — palpite 1×1, real 2×2 (empate previsto, empate aconteceu): resultado certo (4 pts × peso, ambos empate) + diferença de gols igual (2 pts × peso, ambos zero) = <strong>6 pts × peso</strong>. Não bate gols isolados de nenhum time (palpite 1 ≠ real 2 nos dois lados).</li>
           </ul>
         </Secao>
 
