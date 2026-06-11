@@ -195,6 +195,16 @@ function Jogos() {
                   })()}
                 </div>
 
+                <div className="mt-3 flex justify-end">
+                  <Link
+                    to="/app/jogo/$match_id/detalhes"
+                    params={{ match_id: j.id }}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-primary"
+                  >
+                    <BarChart3 className="h-3 w-3" /> Detalhes do jogo
+                  </Link>
+                </div>
+
                 <EstatisticasPalpites
                   match_id={j.id}
                   travado_em={j.travado_em}
