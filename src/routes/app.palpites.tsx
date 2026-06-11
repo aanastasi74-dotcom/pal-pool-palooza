@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Trophy, Clock, Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Sparkles, Trophy, Clock, Lock, CheckCircle2, AlertCircle, ChevronDown, ChevronRight, BarChart3 } from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
