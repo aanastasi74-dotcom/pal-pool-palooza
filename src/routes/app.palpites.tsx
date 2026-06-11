@@ -573,16 +573,22 @@ function PalpiteCard({
                 {upsert.isPending ? "Salvando…" : "Salvar palpite"}
               </button>
             </>
+          ) : lockedByTime ? (
+            <span
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-4 py-2 text-xs font-bold text-muted-foreground"
+              title="Janela de palpite encerrada (5 min antes do apito)"
+            >
+              <Lock className="h-3 w-3" /> Palpite travado
+            </span>
           ) : (
             <button
               onClick={onStartEdit}
-              disabled={lockedByTime}
-              title={lockedByTime ? "Palpites encerrados para este jogo" : ""}
               className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
             >
-              {lockedByTime ? "Travado" : "Editar"}
+              Editar
             </button>
           )}
+
         </div>
       </div>
       {editing && placarInv && (
