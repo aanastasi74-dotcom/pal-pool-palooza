@@ -743,7 +743,7 @@ function EncerradoCard({
         <div className="flex items-center gap-3">
           <span>
             <span className="text-muted-foreground">Pontos: </span>
-            <span className="font-bold">{pred?.pontos != null ? pred.pontos : "—"}</span>
+            <span className="font-bold">{pred?.pontos_calculados != null ? pred.pontos_calculados : "—"}</span>
           </span>
           <Link
             to="/app/jogo/$match_id/detalhes"
