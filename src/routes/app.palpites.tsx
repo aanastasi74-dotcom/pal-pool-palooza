@@ -106,6 +106,13 @@ function Palpites() {
     [matches],
   );
 
+  // Lista visível na página: inclui também os jogos travados (mostrados em read-only).
+  const visiveis = useMemo(
+    () => (matches as any[]).filter((m) => m.status === "agendado"),
+    [matches],
+  );
+
+
   const predMap = useMemo(
     () => new Map((preds as any[]).map((p) => [p.match_id, p])),
     [preds],
