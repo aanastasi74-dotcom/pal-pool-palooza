@@ -106,6 +106,13 @@ function Palpites() {
     [matches],
   );
 
+  // Lista visível na página: inclui também os jogos travados (mostrados em read-only).
+  const visiveis = useMemo(
+    () => (matches as any[]).filter((m) => m.status === "agendado"),
+    [matches],
+  );
+
+
   const predMap = useMemo(
     () => new Map((preds as any[]).map((p) => [p.match_id, p])),
     [preds],
@@ -317,7 +324,7 @@ function Palpites() {
         </Link>
       )}
 
-      {abertos.length === 0 ? (
+      {visiveis.length === 0 ? (
         <EmptyState
           icon={Sparkles}
           title="Aqui ainda não tem pereba palpitando"
@@ -328,58 +335,63 @@ function Palpites() {
           <div className="rounded-2xl border border-accent/40 bg-secondary p-4">
             <div className="flex items-center gap-3 text-sm">
               <Sparkles className="h-4 w-4 text-primary" />
-              <p className="font-semibold">Você ainda tem {abertos.length} jogos abertos para palpitar.</p>
+              <p className="font-semibold">
+                {abertos.length > 0
+                  ? `Você ainda tem ${abertos.length} jogos abertos para palpitar.`
+                  : "Todos os jogos abertos já travaram — abaixo, os palpites salvos por quota (read-only)."}
+              </p>
             </div>
           </div>
 
-          {/* Barra de bulk actions */}
-          <div className="sticky top-2 z-10 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-card/95 p-3 shadow-card backdrop-blur">
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => openAll(() => true)}
-                disabled={editaveis.length === 0 || savingBulk}
-                className="rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-foreground disabled:opacity-50"
-              >
-                Editar todos ({editaveis.length})
-              </button>
-              <button
-                onClick={() => openAll((j) => isHojeBR(j.data_jogo))}
-                disabled={hojeAbertos.length === 0 || savingBulk}
-                title={hojeAbertos.length === 0 ? "Sem jogos hoje" : ""}
-                className="rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-foreground disabled:opacity-50"
-              >
-                Editar jogos de hoje ({hojeAbertos.length})
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              {hasDirty && (
-                <span className="hidden text-[11px] font-bold text-accent-foreground sm:inline">
-                  {dirtyCards.length} com mudanças não salvas
-                </span>
-              )}
-              {(hasDirty || anyEditing) && (
+          {abertos.length > 0 && (
+            <div className="sticky top-2 z-10 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-card/95 p-3 shadow-card backdrop-blur">
+              <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={cancelAll}
-                  disabled={savingBulk}
-                  className="rounded-full border border-border px-3 py-1.5 text-xs font-bold disabled:opacity-50"
+                  onClick={() => openAll(() => true)}
+                  disabled={editaveis.length === 0 || savingBulk}
+                  className="rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-foreground disabled:opacity-50"
                 >
-                  Cancelar todos
+                  Editar todos ({editaveis.length})
                 </button>
-              )}
-              {hasDirty && (
                 <button
-                  onClick={saveAll}
-                  disabled={savingBulk}
-                  className="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-50"
+                  onClick={() => openAll((j) => isHojeBR(j.data_jogo))}
+                  disabled={hojeAbertos.length === 0 || savingBulk}
+                  title={hojeAbertos.length === 0 ? "Sem jogos hoje" : ""}
+                  className="rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-foreground disabled:opacity-50"
                 >
-                  {savingBulk ? "Salvando…" : `Salvar todos (${dirtyCards.length})`}
+                  Editar jogos de hoje ({hojeAbertos.length})
                 </button>
-              )}
+              </div>
+              <div className="flex items-center gap-2">
+                {hasDirty && (
+                  <span className="hidden text-[11px] font-bold text-accent-foreground sm:inline">
+                    {dirtyCards.length} com mudanças não salvas
+                  </span>
+                )}
+                {(hasDirty || anyEditing) && (
+                  <button
+                    onClick={cancelAll}
+                    disabled={savingBulk}
+                    className="rounded-full border border-border px-3 py-1.5 text-xs font-bold disabled:opacity-50"
+                  >
+                    Cancelar todos
+                  </button>
+                )}
+                {hasDirty && (
+                  <button
+                    onClick={saveAll}
+                    disabled={savingBulk}
+                    className="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-50"
+                  >
+                    {savingBulk ? "Salvando…" : `Salvar todos (${dirtyCards.length})`}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="space-y-3">
-            {abertos.map((j) => {
+            {visiveis.map((j) => {
               const st = editStates.get(j.id);
               return (
                 <PalpiteCard
@@ -401,6 +413,7 @@ function Palpites() {
         </>
       )}
     </div>
+
   );
 }
 
@@ -560,16 +573,22 @@ function PalpiteCard({
                 {upsert.isPending ? "Salvando…" : "Salvar palpite"}
               </button>
             </>
+          ) : lockedByTime ? (
+            <span
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-4 py-2 text-xs font-bold text-muted-foreground"
+              title="Janela de palpite encerrada (5 min antes do apito)"
+            >
+              <Lock className="h-3 w-3" /> Palpite travado
+            </span>
           ) : (
             <button
               onClick={onStartEdit}
-              disabled={lockedByTime}
-              title={lockedByTime ? "Palpites encerrados para este jogo" : ""}
               className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
             >
-              {lockedByTime ? "Travado" : "Editar"}
+              Editar
             </button>
           )}
+
         </div>
       </div>
       {editing && placarInv && (
