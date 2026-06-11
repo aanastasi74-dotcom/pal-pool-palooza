@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Lock, Radio, CalendarSearch, Users } from "lucide-react";
+import { Lock, Radio, CalendarSearch, Users, BarChart3 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useMatches } from "@/lib/queries/matches";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
