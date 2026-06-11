@@ -271,7 +271,7 @@ function RegrasPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr><td className="border border-border px-3 py-2">Até 23:59 de 10/06/2026 (Brasília)</td><td className="border border-border px-3 py-2 font-semibold">1.000 pts</td><td className="border border-border px-3 py-2">400 pts</td></tr>
+                <tr><td className="border border-border px-3 py-2">Até o início do primeiro jogo (11/06/2026 às 19h BRT)</td><td className="border border-border px-3 py-2 font-semibold">1.000 pts</td><td className="border border-border px-3 py-2">400 pts</td></tr>
                 <tr><td className="border border-border px-3 py-2">Até 23:59 de 27/06/2026 (grupos)</td><td className="border border-border px-3 py-2">500 pts (50%)</td><td className="border border-border px-3 py-2">200 pts (50%)</td></tr>
                 <tr><td className="border border-border px-3 py-2">Até 23:59 de 03/07/2026 (round of 32)</td><td className="border border-border px-3 py-2">250 pts (25%)</td><td className="border border-border px-3 py-2">100 pts (25%)</td></tr>
                 <tr><td className="border border-border px-3 py-2">Depois de 03/07/2026</td><td className="border border-border px-3 py-2" colSpan={2}>Palpite travado</td></tr>
