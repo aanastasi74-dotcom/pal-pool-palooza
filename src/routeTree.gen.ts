@@ -60,6 +60,7 @@ import { Route as AppAdminConfiguracoesRouteImport } from './routes/app.admin.co
 import { Route as AppAdminBoletinsRouteImport } from './routes/app.admin.boletins'
 import { Route as AppAdminAuditoriaRouteImport } from './routes/app.admin.auditoria'
 import { Route as AppJogoMatch_idPalpitesRouteImport } from './routes/app.jogo.$match_id.palpites'
+import { Route as AppJogoMatch_idDetalhesRouteImport } from './routes/app.jogo.$match_id.detalhes'
 
 const RegrasRoute = RegrasRouteImport.update({
   id: '/regras',
@@ -317,6 +318,11 @@ const AppJogoMatch_idPalpitesRoute = AppJogoMatch_idPalpitesRouteImport.update({
   path: '/jogo/$match_id/palpites',
   getParentRoute: () => AppRoute,
 } as any)
+const AppJogoMatch_idDetalhesRoute = AppJogoMatch_idDetalhesRouteImport.update({
+  id: '/jogo/$match_id/detalhes',
+  path: '/jogo/$match_id/detalhes',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -369,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/app/palpites/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/admin/': typeof AppAdminIndexRoute
+  '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
 }
 export interface FileRoutesByTo {
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/app/palpites/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/admin': typeof AppAdminIndexRoute
+  '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
 }
 export interface FileRoutesById {
@@ -473,6 +481,7 @@ export interface FileRoutesById {
   '/app/palpites_/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/admin/': typeof AppAdminIndexRoute
+  '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
 }
 export interface FileRouteTypes {
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/app/palpites/top4'
     | '/app/pereba/$user_id'
     | '/app/admin/'
+    | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -578,6 +588,7 @@ export interface FileRouteTypes {
     | '/app/palpites/top4'
     | '/app/pereba/$user_id'
     | '/app/admin'
+    | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
   id:
     | '__root__'
@@ -631,6 +642,7 @@ export interface FileRouteTypes {
     | '/app/palpites_/top4'
     | '/app/pereba/$user_id'
     | '/app/admin/'
+    | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
   fileRoutesById: FileRoutesById
 }
@@ -1006,6 +1018,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppJogoMatch_idPalpitesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/jogo/$match_id/detalhes': {
+      id: '/app/jogo/$match_id/detalhes'
+      path: '/jogo/$match_id/detalhes'
+      fullPath: '/app/jogo/$match_id/detalhes'
+      preLoaderRoute: typeof AppJogoMatch_idDetalhesRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -1070,6 +1089,7 @@ interface AppRouteChildren {
   AppPagamentoQuota_idRoute: typeof AppPagamentoQuota_idRoute
   AppPalpitesTop4Route: typeof AppPalpitesTop4Route
   AppPerebaUser_idRoute: typeof AppPerebaUser_idRoute
+  AppJogoMatch_idDetalhesRoute: typeof AppJogoMatch_idDetalhesRoute
   AppJogoMatch_idPalpitesRoute: typeof AppJogoMatch_idPalpitesRoute
 }
 
@@ -1092,6 +1112,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPagamentoQuota_idRoute: AppPagamentoQuota_idRoute,
   AppPalpitesTop4Route: AppPalpitesTop4Route,
   AppPerebaUser_idRoute: AppPerebaUser_idRoute,
+  AppJogoMatch_idDetalhesRoute: AppJogoMatch_idDetalhesRoute,
   AppJogoMatch_idPalpitesRoute: AppJogoMatch_idPalpitesRoute,
 }
 

@@ -342,7 +342,9 @@ export type Database = {
           cidade: string | null
           created_at: string | null
           data_jogo: string
+          escalacoes: Json | null
           estadio: string | null
+          estatisticas: Json | null
           eventos: Json | null
           fase: string
           fora: string
@@ -369,7 +371,9 @@ export type Database = {
           cidade?: string | null
           created_at?: string | null
           data_jogo: string
+          escalacoes?: Json | null
           estadio?: string | null
+          estatisticas?: Json | null
           eventos?: Json | null
           fase: string
           fora: string
@@ -396,7 +400,9 @@ export type Database = {
           cidade?: string | null
           created_at?: string | null
           data_jogo?: string
+          escalacoes?: Json | null
           estadio?: string | null
+          estatisticas?: Json | null
           eventos?: Json | null
           fase?: string
           fora?: string

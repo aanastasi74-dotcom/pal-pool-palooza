@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Lock, Radio, CalendarSearch, Users } from "lucide-react";
+import { Lock, Radio, CalendarSearch, Users, BarChart3 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useMatches } from "@/lib/queries/matches";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
@@ -193,6 +193,16 @@ function Jogos() {
                       </span>
                     );
                   })()}
+                </div>
+
+                <div className="mt-3 flex justify-end">
+                  <Link
+                    to="/app/jogo/$match_id/detalhes"
+                    params={{ match_id: j.id }}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-primary"
+                  >
+                    <BarChart3 className="h-3 w-3" /> Detalhes do jogo
+                  </Link>
                 </div>
 
                 <EstatisticasPalpites

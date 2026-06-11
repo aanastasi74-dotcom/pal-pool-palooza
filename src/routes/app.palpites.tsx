@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Trophy, Clock, Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Sparkles, Trophy, Clock, Lock, CheckCircle2, AlertCircle, ChevronDown, ChevronRight, BarChart3 } from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
@@ -111,6 +111,38 @@ function Palpites() {
     () => (matches as any[]).filter((m) => m.status === "agendado"),
     [matches],
   );
+
+  const encerrados = useMemo(
+    () =>
+      (matches as any[])
+        .filter((m) => m.status === "encerrado")
+        .sort(
+          (a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime(),
+        ),
+    [matches],
+  );
+
+  const [encerradosOpen, setEncerradosOpen] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      setEncerradosOpen(localStorage.getItem("palpites_encerrados_expandidos_v1") === "1");
+    } catch {
+      /* noop */
+    }
+  }, []);
+  const toggleEncerrados = () => {
+    setEncerradosOpen((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem("palpites_encerrados_expandidos_v1", next ? "1" : "0");
+      } catch {
+        /* noop */
+      }
+      return next;
+    });
+  };
+
 
 
   const predMap = useMemo(
@@ -322,6 +354,40 @@ function Palpites() {
           </div>
           <span className="text-xs font-bold">Abrir →</span>
         </Link>
+      )}
+
+      {encerrados.length > 0 && (
+        <section className="rounded-2xl border border-border bg-card shadow-card">
+          <button
+            type="button"
+            onClick={toggleEncerrados}
+            className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
+          >
+            <span className="flex items-center gap-2 font-display text-sm font-extrabold">
+              {encerradosOpen ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+              Jogos encerrados ({encerrados.length})
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {encerradosOpen ? "ocultar" : "ver palpites e pontos"}
+            </span>
+          </button>
+          {encerradosOpen && (
+            <div className="space-y-2 border-t border-border p-3">
+              {encerrados.map((j: any) => (
+                <EncerradoCard
+                  key={j.id}
+                  jogo={j}
+                  pred={predMap.get(j.id)}
+                  teamMap={teamMap}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {visiveis.length === 0 ? (
@@ -620,5 +686,74 @@ function ScoreDisplay({ value, editing, onChange, invalid }: { value: string; ed
     <div className="grid h-14 w-14 place-items-center rounded-2xl bg-secondary/60 font-display text-2xl font-black text-foreground">
       {value === "" ? "—" : value}
     </div>
+  );
+}
+
+function EncerradoCard({
+  jogo,
+  pred,
+  teamMap,
+}: {
+  jogo: any;
+  pred: any;
+  teamMap: Map<string, any>;
+}) {
+  const tCasa = getTeamSide(jogo.team_home_id, jogo.slot_casa, jogo.casa, teamMap);
+  const tFora = getTeamSide(jogo.team_away_id, jogo.slot_visitante, jogo.fora, teamMap);
+  const dataFmt = jogo.data_jogo
+    ? new Date(jogo.data_jogo).toLocaleDateString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+      })
+    : null;
+
+  return (
+    <article className="rounded-xl border border-border bg-background p-3">
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <span className="font-semibold">
+          {dataFmt} {jogo.fase ? `· ${jogo.fase}` : ""}
+        </span>
+        <span>peso {jogo.peso}</span>
+      </div>
+      <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="flex items-center justify-end gap-2">
+          <p className="truncate text-right text-sm font-bold">{tCasa.nome}</p>
+          <span className="text-xl">{tCasa.bandeira}</span>
+        </div>
+        <div className="text-center font-display text-lg font-black">
+          {jogo.placar_casa != null && jogo.placar_fora != null
+            ? `${jogo.placar_casa} × ${jogo.placar_fora}`
+            : "—"}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{tFora.bandeira}</span>
+          <p className="truncate text-sm font-bold">{tFora.nome}</p>
+        </div>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary/60 p-2 text-xs">
+        <div>
+          <span className="text-muted-foreground">Seu palpite: </span>
+          <span className="font-display font-bold">
+            {pred && pred.placar_casa != null && pred.placar_fora != null
+              ? `${pred.placar_casa} × ${pred.placar_fora}`
+              : "— sem palpite —"}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span>
+            <span className="text-muted-foreground">Pontos: </span>
+            <span className="font-bold">{pred?.pontos != null ? pred.pontos : "—"}</span>
+          </span>
+          <Link
+            to="/app/jogo/$match_id/detalhes"
+            params={{ match_id: jogo.id }}
+            className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+          >
+            <BarChart3 className="h-3 w-3" /> Detalhes
+          </Link>
+        </div>
+      </div>
+    </article>
   );
 }

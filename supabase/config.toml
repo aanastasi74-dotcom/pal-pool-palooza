@@ -35,3 +35,6 @@ verify_jwt = true
 
 [functions.sync-match-scores]
 verify_jwt = false
+
+[functions.get-match-details]
+verify_jwt = true
