@@ -688,3 +688,72 @@ function ScoreDisplay({ value, editing, onChange, invalid }: { value: string; ed
     </div>
   );
 }
+
+function EncerradoCard({
+  jogo,
+  pred,
+  teamMap,
+}: {
+  jogo: any;
+  pred: any;
+  teamMap: Map<string, any>;
+}) {
+  const tCasa = getTeamSide(jogo.team_home_id, jogo.slot_casa, jogo.casa, teamMap);
+  const tFora = getTeamSide(jogo.team_away_id, jogo.slot_visitante, jogo.fora, teamMap);
+  const dataFmt = jogo.data_jogo
+    ? new Date(jogo.data_jogo).toLocaleDateString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+      })
+    : null;
+
+  return (
+    <article className="rounded-xl border border-border bg-background p-3">
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <span className="font-semibold">
+          {dataFmt} {jogo.fase ? `· ${jogo.fase}` : ""}
+        </span>
+        <span>peso {jogo.peso}</span>
+      </div>
+      <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="flex items-center justify-end gap-2">
+          <p className="truncate text-right text-sm font-bold">{tCasa.nome}</p>
+          <span className="text-xl">{tCasa.bandeira}</span>
+        </div>
+        <div className="text-center font-display text-lg font-black">
+          {jogo.placar_casa != null && jogo.placar_fora != null
+            ? `${jogo.placar_casa} × ${jogo.placar_fora}`
+            : "—"}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{tFora.bandeira}</span>
+          <p className="truncate text-sm font-bold">{tFora.nome}</p>
+        </div>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary/60 p-2 text-xs">
+        <div>
+          <span className="text-muted-foreground">Seu palpite: </span>
+          <span className="font-display font-bold">
+            {pred && pred.placar_casa != null && pred.placar_fora != null
+              ? `${pred.placar_casa} × ${pred.placar_fora}`
+              : "— sem palpite —"}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span>
+            <span className="text-muted-foreground">Pontos: </span>
+            <span className="font-bold">{pred?.pontos != null ? pred.pontos : "—"}</span>
+          </span>
+          <Link
+            to="/app/jogo/$match_id/detalhes"
+            params={{ match_id: jogo.id }}
+            className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+          >
+            <BarChart3 className="h-3 w-3" /> Detalhes
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
