@@ -13,6 +13,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { BugReportFAB } from "./bug-report-fab";
 import { MaintenanceBanner } from "./maintenance-banner";
 import { EsclarecimentoEmpateDialog } from "./esclarecimento-empate-dialog";
+import { BoasVindasCopaDialog } from "./boas-vindas-copa-dialog";
 import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { useAuth } from "@/lib/auth-context";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
@@ -167,6 +168,7 @@ export function AppShell() {
       </nav>
 
       <BugReportFAB />
+      {profile && <BoasVindasCopaDialog />}
       {profile && <EsclarecimentoEmpateDialog />}
     </div>
   );
