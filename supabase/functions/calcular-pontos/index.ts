@@ -20,13 +20,17 @@ function json(body: unknown, status = 200) {
 const REGRAS_DEFAULT = { exato: 12, resultado: 4, dif_gols: 2, gols_time: 1 };
 
 function calcularPontos(pc: number, pf: number, rc: number, rf: number, regras: any): number {
-  if (pc === rc && pf === rf) return regras.exato;
-  let pts = 0;
   const rp = Math.sign(pc - pf);
   const rr = Math.sign(rc - rf);
-  if (rp === rr) pts += regras.resultado;
+  // N.13: errou o resultado (W/D/L) → zero pts no jogo.
+  if (rp !== rr) return 0;
+  // Placar exato: teto único, não acumula com secundários.
+  if (pc === rc && pf === rf) return regras.exato;
+  // Acertou resultado, mas não placar exato: acumula secundários.
+  let pts = regras.resultado;
   if ((pc - pf) === (rc - rf)) pts += regras.dif_gols;
-  if (pc === rc || pf === rf) pts += regras.gols_time;
+  if (pc === rc) pts += regras.gols_time;
+  if (pf === rf) pts += regras.gols_time;
   return pts;
 }
 
