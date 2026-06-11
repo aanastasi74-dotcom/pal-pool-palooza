@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export const Route = createFileRoute("/app/jogos_/$match_id/palpites")({
+export const Route = createFileRoute("/app/jogo/$match_id/palpites")({
   head: () => ({ meta: [{ title: "Palpites do jogo — Bolão dos Perebas" }] }),
   component: PalpitesDoJogo,
 });

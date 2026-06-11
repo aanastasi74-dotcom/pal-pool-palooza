@@ -179,8 +179,8 @@ function Jogos() {
                     if (palpitesVisiveis) {
                       return (
                         <Link
-                          to="/app/jogos_/$match_id/palpites"
-                          params={{ match_id: j.id }}
+                        to="/app/jogo/$match_id/palpites"
+                        params={{ match_id: j.id }}
                           className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
                         >
                           <Users className="h-3 w-3" /> Ver todos os palpites
