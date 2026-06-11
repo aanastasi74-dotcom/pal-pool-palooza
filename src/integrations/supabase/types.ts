@@ -1104,6 +1104,20 @@ export type Database = {
           status: string
         }[]
       }
+      get_palpites_jogo: {
+        Args: { p_match_id: string }
+        Returns: {
+          apelido: string
+          cor: string
+          placar_casa: number
+          placar_fora: number
+          pontos: number
+          quota_id: string
+          quota_numero: number
+          sigla: string
+          user_id: string
+        }[]
+      }
       get_palpites_publicos_jogos: {
         Args: { p_user_id: string }
         Returns: {

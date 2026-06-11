@@ -156,26 +156,45 @@ function Jogos() {
                       {pred && pred.placar_casa != null ? `${pred.placar_casa} × ${pred.placar_fora}` : <span className="text-destructive">— sem palpite —</span>}
                     </p>
                   </div>
-                  {j.status === "agendado" ? (
-                    <div className="flex items-center gap-2">
-                      {trava && (
-                        <span className="rounded-full bg-accent/40 px-2 py-1 text-[10px] font-bold text-accent-foreground">
-                          trava em {trava}
-                        </span>
-                      )}
-                      <button
-                        onClick={() => navigate({ to: "/app/palpites", search: { match_id: j.id } as any })}
-                        className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
-                      >
-                        {pred ? "Editar" : "Palpitar"}
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                      <Lock className="h-3 w-3" /> travado
-                    </span>
-                  )}
+                  {(() => {
+                    const palpitesVisiveis = !!j.travado_em && new Date(j.travado_em).getTime() <= Date.now();
+                    const locked = j.status !== "agendado" || palpitesVisiveis;
+                    if (!locked) {
+                      return (
+                        <div className="flex items-center gap-2">
+                          {trava && (
+                            <span className="rounded-full bg-accent/40 px-2 py-1 text-[10px] font-bold text-accent-foreground">
+                              trava em {trava}
+                            </span>
+                          )}
+                          <button
+                            onClick={() => navigate({ to: "/app/palpites", search: { match_id: j.id } as any })}
+                            className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
+                          >
+                            {pred ? "Editar" : "Palpitar"}
+                          </button>
+                        </div>
+                      );
+                    }
+                    if (palpitesVisiveis) {
+                      return (
+                        <Link
+                          to="/app/jogos_/$match_id/palpites"
+                          params={{ match_id: j.id }}
+                          className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
+                        >
+                          <Users className="h-3 w-3" /> Ver todos os palpites
+                        </Link>
+                      );
+                    }
+                    return (
+                      <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                        <Lock className="h-3 w-3" /> travado
+                      </span>
+                    );
+                  })()}
                 </div>
+
                 <EstatisticasPalpites
                   match_id={j.id}
                   travado_em={j.travado_em}
