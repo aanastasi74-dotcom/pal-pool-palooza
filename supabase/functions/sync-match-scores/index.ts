@@ -117,7 +117,7 @@ const NOME_MAP: Record<string, string> = {
 
 function statusFromApi(s: string): string {
   if (["NS", "TBD", "PST", "CANC", "SUSP", "AWD", "WO"].includes(s)) return "agendado";
-  if (["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT"].includes(s)) return "em_andamento";
+  if (["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT"].includes(s)) return "ao-vivo";
   if (["FT", "AET", "PEN"].includes(s)) return "encerrado";
   return "agendado";
 }
