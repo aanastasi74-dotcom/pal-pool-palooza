@@ -356,6 +356,40 @@ function Palpites() {
         </Link>
       )}
 
+      {encerrados.length > 0 && (
+        <section className="rounded-2xl border border-border bg-card shadow-card">
+          <button
+            type="button"
+            onClick={toggleEncerrados}
+            className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
+          >
+            <span className="flex items-center gap-2 font-display text-sm font-extrabold">
+              {encerradosOpen ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+              Jogos encerrados ({encerrados.length})
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {encerradosOpen ? "ocultar" : "ver palpites e pontos"}
+            </span>
+          </button>
+          {encerradosOpen && (
+            <div className="space-y-2 border-t border-border p-3">
+              {encerrados.map((j: any) => (
+                <EncerradoCard
+                  key={j.id}
+                  jogo={j}
+                  pred={predMap.get(j.id)}
+                  teamMap={teamMap}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {visiveis.length === 0 ? (
         <EmptyState
           icon={Sparkles}
