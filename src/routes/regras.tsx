@@ -214,44 +214,54 @@ function RegrasPage() {
         </Secao>
 
         <Secao n="7" titulo="Pontuação por Placar">
-          <div className="overflow-x-auto">
+          <p>
+            Considera-se <strong>"resultado"</strong> do jogo a sinalização de <strong>vitória do mandante</strong>,
+            <strong> vitória do visitante</strong> ou <strong>empate</strong>, independentemente do placar exato.
+          </p>
+          <p className="mt-3">
+            <strong>Acerto de resultado é condição necessária para qualquer pontuação no jogo:</strong> se o pereba
+            erra o resultado (W/D/L), o palpite vale <strong>0 pts</strong> naquele jogo, independentemente de
+            qualquer acerto parcial de gols mandante, gols visitante ou diferença.
+          </p>
+          <p className="mt-3">
+            Em outras palavras: <strong>primeiro acerta o resultado, depois acumula refinamentos</strong>. Sem
+            resultado certo, não há pontuação no jogo.
+          </p>
+          <p className="mt-3">
+            Esta regra inclui o caso particular do palpite de empate: palpite de empate (qualquer X×X) só pontua
+            se o resultado real for empate (qualquer Y×Y). Esclarecimento adicionado em junho de 2026 após a primeira
+            aplicação prática (jogo 1, México × África do Sul).
+          </p>
+          <div className="mt-4 overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="bg-muted/60 text-left">
-                  <th className="border border-border px-3 py-2">Acerto</th>
+                  <th className="border border-border px-3 py-2">Acerto (com resultado certo)</th>
                   <th className="border border-border px-3 py-2">Pontos base</th>
                 </tr>
               </thead>
               <tbody>
                 <tr><td className="border border-border px-3 py-2">Placar exato (ex.: palpitou 2×1, foi 2×1)</td><td className="border border-border px-3 py-2 font-semibold">12 pts × peso do dia</td></tr>
                 <tr><td className="border border-border px-3 py-2">Resultado certo (vitória/empate), placar errado</td><td className="border border-border px-3 py-2">4 pts × peso do dia</td></tr>
-                <tr><td className="border border-border px-3 py-2">Diferença de gols</td><td className="border border-border px-3 py-2">2 pts × peso do dia</td></tr>
-                <tr><td className="border border-border px-3 py-2">Gols de um time (mandante OU visitante)</td><td className="border border-border px-3 py-2">1 pt × peso do dia</td></tr>
+                <tr><td className="border border-border px-3 py-2">Diferença de gols igual</td><td className="border border-border px-3 py-2">+2 pts × peso do dia</td></tr>
+                <tr><td className="border border-border px-3 py-2">Gols de um time (mandante OU visitante)</td><td className="border border-border px-3 py-2">+1 pt × peso do dia</td></tr>
+                <tr><td className="border border-border px-3 py-2">Errou o resultado (W/D/L)</td><td className="border border-border px-3 py-2 font-semibold">0 pts</td></tr>
               </tbody>
             </table>
           </div>
           <p className="mt-3">
-            <strong>Importante (pontuação não cumulativa com placar exato):</strong> por jogo, <strong>placar exato
-            é exclusivo</strong> — quando o pereba acerta o placar (12 pts × peso), ele não soma também as demais
-            faixas. Recebe apenas os 12 pts. As demais faixas (4, 2, 1) só valem quando o placar exato não foi
-            acertado, e <strong>se acumulam entre si conforme se aplicarem ao mesmo palpite</strong>. Cada critério
-            é avaliado independentemente: resultado certo, diferença de gols e gols de um time podem somar pontos
-            simultaneamente, dependendo do palpite.
-          </p>
-          <p className="mt-3">
-            <strong>Critério importante:</strong> todos os critérios secundários (resultado, diferença de gols,
-            gols de um time) são avaliados <strong>respeitando a posição mandante × visitante</strong>. Se o pereba
-            inverteu o resultado (palpitou vitória de um time e o outro venceu), os critérios secundários também
-            ficam zerados — porque nenhum elemento do palpite corresponde ao que aconteceu no jogo. Exemplo: palpite
-            2×1, real 1×2 → 0 pontos.
+            <strong>Placar exato é exclusivo:</strong> quando o pereba acerta o placar (12 pts × peso), ele não
+            soma também as demais faixas. Quando acerta o resultado mas erra o placar, os critérios secundários
+            (4 + diferença + gols de cada time) se acumulam entre si.
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5">
-            <li><strong>Exemplo 1</strong> — palpite 3×2, real 2×1: resultado certo (4 pts) + diferença de gols igual (2 pts) = <strong>6 pts × peso</strong>. Não bate gols isolados de cada time (mandante 3 ≠ 2; visitante 2 ≠ 1).</li>
-            <li><strong>Exemplo 2</strong> — palpite 3×1, real 2×1: resultado certo (4 pts) + gols do visitante (1 pt, porque acertou o 1 do perdedor) = <strong>5 pts × peso</strong>. Não bate diferença (2 ≠ 1) nem gols do mandante (3 ≠ 2).</li>
-            <li><strong>Exemplo 3</strong> — palpite 2×1, real 2×1: placar exato = <strong>12 pts × peso</strong>. As demais faixas ficam desativadas (não somam, mesmo todas se aplicando).</li>
-            <li><strong>Exemplo 4</strong> — palpite 2×1, real 1×2 (resultado invertido): <strong>0 pts</strong>. Embora a magnitude do placar coincida, o palpite errou quem venceu, então nenhum critério secundário se aplica.</li>
-            <li><strong>Exemplo 5</strong> — palpite 1×1, real 1×0 (empate previsto, vitória da casa): <strong>0 pts</strong>. O resultado errou (palpitou empate e foi vitória), então todos os critérios secundários ficam zerados. O mesmo vale ao contrário: palpitou vitória de qualquer lado e o jogo terminou empatado → também 0 pts. A pontuação secundária só vale quando o resultado (vitória da casa, empate ou vitória do visitante) bate.</li>
-            <li><strong>Exemplo 6</strong> — palpite 1×1, real 2×2 (empate previsto, empate aconteceu): resultado certo (4 pts × peso, ambos empate) + diferença de gols igual (2 pts × peso, ambos zero) = <strong>6 pts × peso</strong>. Não bate gols isolados de nenhum time (palpite 1 ≠ real 2 nos dois lados).</li>
+            <li><strong>Exemplo 1</strong> — palpite 3×2, real 2×1: resultado certo + diferença igual = <strong>6 pts × peso</strong>.</li>
+            <li><strong>Exemplo 2</strong> — palpite 3×1, real 2×1: resultado certo + gols do visitante = <strong>5 pts × peso</strong>.</li>
+            <li><strong>Exemplo 3</strong> — palpite 2×1, real 2×1: placar exato = <strong>12 pts × peso</strong>.</li>
+            <li><strong>Exemplo 4</strong> — palpite 2×1, real 1×2 (resultado invertido): <strong>0 pts</strong>. Errou o resultado.</li>
+            <li><strong>Exemplo 5</strong> — palpite 1×1, real 1×0 (empate previsto, vitória da casa): <strong>0 pts</strong>. Errou o resultado.</li>
+            <li><strong>Exemplo 6</strong> — palpite 1×1, real 2×2 (empate previsto, empate aconteceu): resultado certo + diferença igual = <strong>6 pts × peso</strong>.</li>
+            <li><strong>Exemplo 7</strong> — palpite 0×0, real 2×0 (caso do jogo 1): <strong>0 pts</strong>. Palpitou empate, foi vitória mandante — o "acerto" de gols visitante (0=0) não conta porque o resultado errou.</li>
           </ul>
         </Secao>
 
