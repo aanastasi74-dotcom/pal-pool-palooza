@@ -112,6 +112,38 @@ function Palpites() {
     [matches],
   );
 
+  const encerrados = useMemo(
+    () =>
+      (matches as any[])
+        .filter((m) => m.status === "encerrado")
+        .sort(
+          (a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime(),
+        ),
+    [matches],
+  );
+
+  const [encerradosOpen, setEncerradosOpen] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      setEncerradosOpen(localStorage.getItem("palpites_encerrados_expandidos_v1") === "1");
+    } catch {
+      /* noop */
+    }
+  }, []);
+  const toggleEncerrados = () => {
+    setEncerradosOpen((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem("palpites_encerrados_expandidos_v1", next ? "1" : "0");
+      } catch {
+        /* noop */
+      }
+      return next;
+    });
+  };
+
+
 
   const predMap = useMemo(
     () => new Map((preds as any[]).map((p) => [p.match_id, p])),
