@@ -150,9 +150,36 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
   };
 
   const onPublicar = async () => {
-    await publicar.mutateAsync({ id: boletim.id, conteudo: texto });
-    toast.success("Boletim publicado.");
-    setEditandoPublicado(false);
+    try {
+      const envio = await publicar.mutateAsync({ id: boletim.id, conteudo: texto });
+      if (envio?.skipped) {
+        toast.success("Boletim atualizado (email já enviado anteriormente — nenhuma notificação nova foi disparada).");
+      } else if ((envio?.falhas ?? 0) > 0) {
+        toast.warning(`Boletim publicado. Email enviado pra ${envio?.sucessos ?? 0} de ${envio?.destinatarios_total ?? 0}. Veja audit_log pra detalhes.`);
+      } else {
+        toast.success(`Boletim publicado e enviado pra ${envio?.sucessos ?? 0} perebas!`);
+      }
+      setEditandoPublicado(false);
+    } catch (e: any) {
+      toast.error(`Erro ao publicar/enviar: ${e?.message ?? "desconhecido"}`);
+    }
+  };
+
+  const onReenviar = async () => {
+    if (!confirm("Reenviar email do boletim pra todos os perebas com quota ativa?")) return;
+    const t = toast.loading("Reenviando boletim por email…");
+    try {
+      const r = await reenviar.mutateAsync({ id: boletim.id });
+      toast.dismiss(t);
+      if ((r?.falhas ?? 0) > 0) {
+        toast.warning(`Reenvio: ${r?.sucessos ?? 0} de ${r?.destinatarios_total ?? 0} (com falhas).`);
+      } else {
+        toast.success(`Email reenviado pra ${r?.sucessos ?? 0} perebas.`);
+      }
+    } catch (e: any) {
+      toast.dismiss(t);
+      toast.error(`Erro: ${e?.message ?? "desconhecido"}`);
+    }
   };
 
   const arquivar = async () => {
