@@ -125,7 +125,7 @@ function montarPrompt(ctx: any): string {
   }
   linhas.push("");
   linhas.push(
-    'Gere 3 frases curtas seguindo seu estilo. Retorne SOMENTE JSON no formato: {"frases":["frase1","frase2","frase3"]}',
+    'Gere 5 frases curtas seguindo seu estilo. Retorne SOMENTE JSON no formato: {"frases":["frase1","frase2","frase3","frase4","frase5"]}',
   );
   return linhas.join("\n");
 }
