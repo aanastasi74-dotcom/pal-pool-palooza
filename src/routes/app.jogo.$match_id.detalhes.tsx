@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { PlacarJogo } from "@/components/placar-jogo";
+import { useMatch } from "@/lib/queries/matches";
+import { useTeams } from "@/lib/queries/teams";
 
 export const Route = createFileRoute("/app/jogo/$match_id/detalhes")({
   head: () => ({ meta: [{ title: "Detalhes do jogo — Bolão dos Perebas" }] }),
@@ -116,6 +118,8 @@ function pickStat(team: any, ...types: string[]): string | number | null {
 function DetalhesDoJogo() {
   const { match_id } = Route.useParams();
   const { data, isLoading, error } = useMatchDetalhes(match_id);
+  const { data: matchRow } = useMatch(match_id);
+  const { data: teams } = useTeams();
 
   if (isLoading) return <Skeleton className="h-96 w-full" />;
   if (error || !data) {
@@ -142,11 +146,17 @@ function DetalhesDoJogo() {
     (e: any) => (e?.type ?? "").toLowerCase() === "goal",
   );
 
-  // Para mapear eventos ao time, comparar nome com home/away.
+  // Mapeia bandeira do gol por evento.team.id (codigo_api), igual ao carrossel da home.
+  const teamById = new Map((teams ?? []).map((t: any) => [t.id, t]));
+  const homeTeamRow: any = matchRow?.team_home_id ? teamById.get(matchRow.team_home_id) : null;
+  const awayTeamRow: any = matchRow?.team_away_id ? teamById.get(matchRow.team_away_id) : null;
+  const codigoHome: number | null = homeTeamRow?.codigo_api ?? null;
+  const codigoAway: number | null = awayTeamRow?.codigo_api ?? null;
   const homeNomeApi = match.home_team.nome_pt;
 
   const casaStats = estatisticas?.[0];
   const foraStats = estatisticas?.[1];
+
 
   return (
     <div className="space-y-5">
@@ -219,8 +229,13 @@ function DetalhesDoJogo() {
         ) : (
           <ul className="mt-3 space-y-2">
             {gols.map((g: any, i: number) => {
-              const teamName = g?.team?.name ?? "—";
-              const isHome = teamName === homeNomeApi;
+              const evTeamId = g?.team?.id;
+              const isHome =
+                codigoHome != null && evTeamId === codigoHome
+                  ? true
+                  : codigoAway != null && evTeamId === codigoAway
+                    ? false
+                    : (g?.team?.name ?? "—") === homeNomeApi;
               const minuto = g?.time?.elapsed != null
                 ? `${g.time.elapsed}'${g.time.extra ? `+${g.time.extra}` : ""}`
                 : "—";
