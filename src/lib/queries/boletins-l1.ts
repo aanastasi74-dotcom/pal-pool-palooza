@@ -97,11 +97,41 @@ export function usePublicarBoletim() {
         })
         .eq("id", id);
       if (error) throw error;
+
+      // Dispara envio de email (idempotente — pula se já foi enviado)
+      const { data: envio, error: envioErr } = await supabase.functions.invoke("enviar-boletim", {
+        body: { boletim_id: id },
+      });
+      if (envioErr) throw envioErr;
+      if (envio?.error) throw new Error(envio.error);
+      return envio as {
+        ok: boolean;
+        skipped?: boolean;
+        motivo?: string;
+        destinatarios_total?: number;
+        sucessos?: number;
+        falhas?: number;
+      };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["boletins-l1"] });
       qc.invalidateQueries({ queryKey: ["boletim-l1-publicado-recente"] });
     },
+  });
+}
+
+export function useReenviarBoletim() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      const { data, error } = await supabase.functions.invoke("enviar-boletim", {
+        body: { boletim_id: id, force_resend: true },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { ok: boolean; destinatarios_total: number; sucessos: number; falhas: number };
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["boletins-l1"] }),
   });
 }
 
