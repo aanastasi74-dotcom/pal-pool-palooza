@@ -166,21 +166,23 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
   };
 
   const onReenviar = async () => {
-    if (!confirm("Reenviar email do boletim pra todos os perebas com quota ativa?")) return;
+    const dataFmt = new Date(`${boletim.data_referencia}T12:00:00`).toLocaleDateString("pt-BR");
+    if (!confirm(`Reenviar boletim de ${dataFmt} pra todos os perebas com quota ativa? Esta ação pode levar 10-30s.`)) return;
     const t = toast.loading("Reenviando boletim por email…");
     try {
       const r = await reenviar.mutateAsync({ id: boletim.id });
       toast.dismiss(t);
       if ((r?.falhas ?? 0) > 0) {
-        toast.warning(`Reenvio: ${r?.sucessos ?? 0} de ${r?.destinatarios_total ?? 0} (com falhas).`);
+        toast.warning(`Enviado pra ${r?.sucessos ?? 0} de ${r?.destinatarios_total ?? 0} perebas (${r?.falhas} falhas — veja audit_log).`);
       } else {
-        toast.success(`Email reenviado pra ${r?.sucessos ?? 0} perebas.`);
+        toast.success(`Enviado pra ${r?.sucessos ?? 0} de ${r?.destinatarios_total ?? 0} perebas.`);
       }
     } catch (e: any) {
       toast.dismiss(t);
       toast.error(`Erro: ${e?.message ?? "desconhecido"}`);
     }
   };
+
 
   const arquivar = async () => {
     await update.mutateAsync({ id: boletim.id, status: "arquivado" });
@@ -293,13 +295,13 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
             <Share2 className="h-3 w-3" /> Compartilhar no WhatsApp
           </button>
         )}
-        {isPublicado && boletim.enviado_em && (
+        {isPublicado && (
           <button
             onClick={onReenviar}
             disabled={reenviar.isPending}
-            className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold text-muted-foreground disabled:opacity-50"
+            className="flex items-center gap-1 rounded-full border-2 border-accent/60 bg-background px-4 py-2 text-xs font-bold text-accent disabled:opacity-50"
           >
-            <Mail className="h-3 w-3" /> Reenviar email
+            <Mail className="h-3 w-3" /> Reenviar email aos perebas
           </button>
         )}
       </div>
