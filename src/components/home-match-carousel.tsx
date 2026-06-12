@@ -63,9 +63,9 @@ export function HomeMatchCarousel() {
   const items: CardItem[] = useMemo(() => {
     const all = matches as any[];
     const encerrados = all
-      .filter((m) => m.status === "encerrado")
+      .filter((m) => m.status === "encerrado" || m.status === "ao-vivo")
       .sort((a, b) => new Date(b.data_jogo).getTime() - new Date(a.data_jogo).getTime())
-      .slice(0, 2)
+      .slice(0, 3)
       .map((j) => ({ id: j.id, kind: "resultado" as const, jogo: j }));
     const now = Date.now();
     const agendados = all
@@ -81,6 +81,7 @@ export function HomeMatchCarousel() {
     }
     return list;
   }, [matches]);
+
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selected, setSelected] = useState(0);
@@ -160,16 +161,55 @@ export function HomeMatchCarousel() {
             const tCasa = getTeamSide(j.team_home_id, j.slot_casa, j.casa, teamMap);
             const tFora = getTeamSide(j.team_away_id, j.slot_visitante, j.fora, teamMap);
             const trava = it.kind === "proximo" ? travaCountdown(j.travado_em) : null;
+            const aoVivo = j.status === "ao-vivo";
+            const encerrado = j.status === "encerrado";
+            // Eventos: identifica time pelo codigo_api (API-Football team.id)
+            const codigoHome = (teamMap.get(j.team_home_id) as any)?.codigo_api;
+            const codigoAway = (teamMap.get(j.team_away_id) as any)?.codigo_api;
+            const eventos: any[] = Array.isArray(j.eventos) ? j.eventos : [];
+            const golsDe = (codigo: number | null | undefined) => {
+              if (codigo == null) return [];
+              return eventos
+                .filter((e) => e?.type === "Goal" && e?.team?.id === codigo)
+                .sort((a, b) => (a?.time?.elapsed ?? 0) - (b?.time?.elapsed ?? 0));
+            };
+            const golsHome = it.kind === "resultado" ? golsDe(codigoHome) : [];
+            const golsAway = it.kind === "resultado" ? golsDe(codigoAway) : [];
+            const fmtGol = (e: any) => {
+              const min = e?.time?.elapsed != null ? `${e.time.elapsed}'` : "";
+              const extra = e?.time?.extra ? `+${e.time.extra}` : "";
+              const nome = e?.player?.name ?? "?";
+              const og = e?.detail === "Own Goal" ? " (GC)" : "";
+              return `${min}${extra} ${nome}${og}`.trim();
+            };
             return (
               <div key={it.id} className="min-w-0 flex-[0_0_100%] p-5">
                 <div className="flex items-center justify-between text-xs uppercase tracking-widest text-white/70">
-                  <span>{it.kind === "resultado" ? "Resultado" : "Próximo jogo"}</span>
+                  <span className="flex items-center gap-2">
+                    {it.kind === "resultado" ? (encerrado ? "Resultado" : "Em andamento") : "Próximo jogo"}
+                    {aoVivo && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
+                        AO VIVO
+                      </span>
+                    )}
+                    {encerrado && (
+                      <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold">ENCERRADO</span>
+                    )}
+                  </span>
                   <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold">{j.fase}</span>
                 </div>
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <div className="flex flex-col items-center gap-2">
+                <div className="mt-4 flex items-start justify-between gap-3">
+                  <div className="flex w-24 flex-col items-center gap-2">
                     <div className="grid h-14 w-14 place-items-center rounded-full bg-white text-3xl shadow-glow">{tCasa.bandeira}</div>
                     <p className="text-center text-sm font-bold">{tCasa.nome}</p>
+                    {golsHome.length > 0 && (
+                      <ul className="w-full space-y-0.5 text-center text-[10px] leading-tight text-white/85">
+                        {golsHome.map((e, i) => (
+                          <li key={i}>{fmtGol(e)}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                   <div className="text-center">
                     {it.kind === "resultado" ? (
@@ -184,7 +224,6 @@ export function HomeMatchCarousel() {
                           size="lg"
                           className="text-white [&_*]:text-white/70"
                         />
-                        <p className="mt-1 text-[10px] uppercase tracking-widest text-white/60">Encerrado</p>
                       </>
                     ) : (
                       <>
@@ -193,13 +232,21 @@ export function HomeMatchCarousel() {
                       </>
                     )}
                   </div>
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex w-24 flex-col items-center gap-2">
                     <div className="grid h-14 w-14 place-items-center rounded-full bg-white text-3xl shadow-glow">{tFora.bandeira}</div>
                     <p className="text-center text-sm font-bold">{tFora.nome}</p>
+                    {golsAway.length > 0 && (
+                      <ul className="w-full space-y-0.5 text-center text-[10px] leading-tight text-white/85">
+                        {golsAway.map((e, i) => (
+                          <li key={i}>{fmtGol(e)}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
               </div>
             );
+
           })}
         </div>
 
