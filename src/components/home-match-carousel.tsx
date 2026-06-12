@@ -1,43 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Sparkles, Timer } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { ChevronLeft, ChevronRight, MessageCircle, Sparkles } from "lucide-react";
 import { useMatches } from "@/lib/queries/matches";
 import { useTeams } from "@/lib/queries/teams";
+import { useFrasesDoDia } from "@/lib/queries/frases-do-dia";
 import { getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 
 type CardItem =
   | { id: string; kind: "resultado" | "proximo"; jogo: any }
-  | { id: "countdown"; kind: "countdown"; kickoff: string };
+  | { id: "frase"; kind: "frase" };
 
-const FRASES_PADRAO = [
-  "Faltam {d} dias pra zoeira começar oficialmente.",
-  "{d} dias até o primeiro vexame da Copa.",
-  "{d} dias e a galera vai descobrir quem é pereba de verdade.",
-  "Em {d} dias começa o show — e o choro.",
-  "{d} dias pra alguém aqui errar todos os placares e bancar o lanterninha.",
-  "Faltam {d} dias pro grupo do WhatsApp pegar fogo.",
-  "{d} dias até teu palpite virar piada (ou estatística).",
-  "{d} dias pra esquecer que tem trabalho na segunda.",
-];
-
-function escolheFrase(totalDays: number, totalHours: number, totalMinutes: number): string {
-  if (totalDays === 0 && totalHours === 0 && totalMinutes < 60) {
-    return "Tá pra começar! Última passada de olho nos palpites.";
-  }
-  if (totalDays === 0) {
-    return `É hoje! Em ${Math.max(1, totalHours)} horas começa. Pega a pipoca.`;
-  }
-  if (totalDays === 1) {
-    return "É amanhã, peraba! Última chance de fingir confiança nos palpites.";
-  }
-  if (totalDays <= 7) {
-    return "Última semana, perebas! Hora de revisar palpites e fingir que entende de futebol.";
-  }
-  const f = FRASES_PADRAO[Math.floor(Math.random() * FRASES_PADRAO.length)];
-  return f.replace("{d}", String(totalDays));
-}
+const FALLBACK_FRASE = "Mais um dia de Copa, perebada. Confere teus palpites e boa rodada!";
 
 function fmtDateTime(iso: string) {
   const d = new Date(iso);
@@ -58,6 +32,7 @@ function travaCountdown(iso?: string | null) {
 export function HomeMatchCarousel() {
   const { data: matches = [] } = useMatches();
   const { data: teams = [] } = useTeams();
+  const { data: fraseRow } = useFrasesDoDia();
   const teamMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
 
   const items: CardItem[] = useMemo(() => {
@@ -66,21 +41,18 @@ export function HomeMatchCarousel() {
       .filter((m) => m.status === "encerrado" || m.status === "ao-vivo")
       .sort((a, b) => new Date(b.data_jogo).getTime() - new Date(a.data_jogo).getTime())
       .slice(0, 3)
-      .map((j) => ({ id: j.id, kind: "resultado" as const, jogo: j }));
+      .map((j) => ({ id: `r-${j.id}`, kind: "resultado" as const, jogo: j }));
     const now = Date.now();
-    const agendados = all
+    const proximos = all
       .filter((m) => m.status === "agendado" && new Date(m.data_jogo).getTime() >= now)
-      .sort((a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime());
-    const proximos = agendados
+      .sort((a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime())
       .slice(0, 3)
-      .map((j) => ({ id: j.id, kind: "proximo" as const, jogo: j }));
+      .map((j) => ({ id: `p-${j.id}`, kind: "proximo" as const, jogo: j }));
     const list: CardItem[] = [...encerrados, ...proximos];
-    const primeiro = agendados[0];
-    if (primeiro && new Date(primeiro.data_jogo).getTime() > now) {
-      list.push({ id: "countdown", kind: "countdown", kickoff: primeiro.data_jogo });
-    }
+    list.push({ id: "frase", kind: "frase" });
     return list;
   }, [matches]);
+
 
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
