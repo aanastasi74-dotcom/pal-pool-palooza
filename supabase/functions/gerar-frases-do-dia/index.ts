@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
       errMsg = "ANTHROPIC_API_KEY não configurada";
     }
 
-    const frases = normalize3(frasesGeradas ?? FALLBACK_FRASES);
+    const frases = normalizeN(frasesGeradas ?? FALLBACK_FRASES);
 
     const payload = {
       data: dataRef,
