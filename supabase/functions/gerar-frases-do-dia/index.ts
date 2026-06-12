@@ -13,10 +13,13 @@ const corsHeaders = {
 };
 
 const FALLBACK_FRASES = [
-  "Mais um dia de Copa, perebada. Confere teus palpites e vamos nessa!",
-  "Hoje tem bola rolando. Amanhã também. Aproveita.",
-  "Bolão tá quente. Bora ver quem é pereba e quem só fala.",
+  "Mais um dia de Copa, perebada.",
+  "Bola vai rolar, prepara o coração.",
+  "Cervejinha gelada e fé no palpite.",
+  "Quem palpitou empate hoje, força.",
+  "Bolão tá tinindo, confere teus pontos.",
 ];
+const ALVO_FRASES = 5;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
