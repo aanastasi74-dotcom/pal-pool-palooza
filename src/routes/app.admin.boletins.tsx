@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil } from "lucide-react";
+import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil, Mail } from "lucide-react";
 import {
   useBoletinsL1,
   useGerarBoletim,
   usePublicarBoletim,
+  useReenviarBoletim,
   useUpdateBoletimL1,
   type BoletimL1,
 } from "@/lib/queries/boletins-l1";
