@@ -229,8 +229,13 @@ function DetalhesDoJogo() {
         ) : (
           <ul className="mt-3 space-y-2">
             {gols.map((g: any, i: number) => {
-              const teamName = g?.team?.name ?? "—";
-              const isHome = teamName === homeNomeApi;
+              const evTeamId = g?.team?.id;
+              const isHome =
+                codigoHome != null && evTeamId === codigoHome
+                  ? true
+                  : codigoAway != null && evTeamId === codigoAway
+                    ? false
+                    : (g?.team?.name ?? "—") === homeNomeApi;
               const minuto = g?.time?.elapsed != null
                 ? `${g.time.elapsed}'${g.time.extra ? `+${g.time.extra}` : ""}`
                 : "—";
