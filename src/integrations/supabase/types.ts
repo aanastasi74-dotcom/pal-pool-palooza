@@ -215,6 +215,39 @@ export type Database = {
         }
         Relationships: []
       }
+      frases_do_dia: {
+        Row: {
+          created_at: string
+          data: string
+          frases: string[]
+          gerado_em: string
+          id: string
+          modelo_usado: string | null
+          tokens_input: number | null
+          tokens_output: number | null
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          frases: string[]
+          gerado_em?: string
+          id?: string
+          modelo_usado?: string | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          frases?: string[]
+          gerado_em?: string
+          id?: string
+          modelo_usado?: string | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+        }
+        Relationships: []
+      }
       invites: {
         Row: {
           criado_por: string | null
