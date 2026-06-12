@@ -293,13 +293,13 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
             <Share2 className="h-3 w-3" /> Compartilhar no WhatsApp
           </button>
         )}
-        {isPublicado && boletim.enviado_em && (
+        {isPublicado && (
           <button
             onClick={onReenviar}
             disabled={reenviar.isPending}
-            className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold text-muted-foreground disabled:opacity-50"
+            className="flex items-center gap-1 rounded-full border-2 border-accent/60 bg-background px-4 py-2 text-xs font-bold text-accent disabled:opacity-50"
           >
-            <Mail className="h-3 w-3" /> Reenviar email
+            <Mail className="h-3 w-3" /> Reenviar email aos perebas
           </button>
         )}
       </div>
