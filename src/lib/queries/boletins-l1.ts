@@ -15,6 +15,7 @@ export type BoletimL1 = {
   tokens_output: number | null;
   publicado_em: string | null;
   publicado_por: string | null;
+  enviado_em: string | null;
   created_at: string;
   updated_at: string;
 };
