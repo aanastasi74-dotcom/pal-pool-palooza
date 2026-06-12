@@ -125,13 +125,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Destinatários: perebas com quota ativa (filtra 'sistema')
-    const perebasRaw = await sbGet(
-      `profiles?role=not.eq.sistema&select=id,nome,apelido,email,quotas!inner(id,status)&quotas.status=eq.ativa`,
-    );
-    const seen = new Set<string>();
-    const destinatarios = (perebasRaw as any[])
-      .filter((p) => p.email && !seen.has(p.id) && (seen.add(p.id), true));
+    // Destinatários: perebas com pelo menos uma quota ativa (filtra 'sistema')
+    const quotasAtivas = await sbGet(`quotas?status=eq.ativa&select=user_id`);
+    const userIds = Array.from(new Set((quotasAtivas as any[]).map((q) => q.user_id))).filter(Boolean);
+    let destinatarios: Array<{ id: string; email: string; nome: string; apelido: string }> = [];
+    if (userIds.length > 0) {
+      const perebasRaw = await sbGet(
+        `profiles?id=in.(${userIds.join(",")})&role=not.eq.sistema&select=id,nome,apelido,email`,
+      );
+      destinatarios = (perebasRaw as any[]).filter((p) => !!p.email);
+    }
 
     const appUrl = await getAppUrl();
     const dataLabel = formatarData(boletim.data_referencia);
