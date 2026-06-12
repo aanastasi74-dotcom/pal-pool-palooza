@@ -103,29 +103,21 @@ export function HomeMatchCarousel() {
       <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-glow" ref={emblaRef}>
         <div className="flex">
           {items.map((it) => {
-            if (it.kind === "countdown") {
-              const diff = Math.max(0, new Date(it.kickoff).getTime() - now);
-              const totalDays = Math.floor(diff / 86_400_000);
-              const totalHours = Math.floor((diff % 86_400_000) / 3_600_000);
-              const totalMinutes = Math.floor((diff % 3_600_000) / 60_000);
-              // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-              fraseSeed;
-              const frase = escolheFrase(totalDays, totalHours, totalMinutes);
+            if (it.kind === "frase") {
+              const frasesArr = (fraseRow?.frases?.length ? fraseRow.frases : [FALLBACK_FRASE]);
+              const frase = frasesArr[fraseSeed % frasesArr.length] ?? FALLBACK_FRASE;
               return (
                 <div key={it.id} className="min-w-0 flex-[0_0_100%] p-5">
                   <div className="flex items-center justify-between text-xs uppercase tracking-widest text-white/70">
-                    <span className="flex items-center gap-1.5"><Timer className="h-3 w-3" /> Contagem regressiva</span>
-                    <span className="rounded-full bg-accent/30 px-2 py-0.5 text-[10px] font-bold">Copa 2026</span>
+                    <span className="flex items-center gap-1.5"><MessageCircle className="h-3 w-3" /> Frase do dia</span>
+                    <span className="rounded-full bg-accent/40 px-2 py-0.5 text-[10px] font-bold">💭 Perebada</span>
                   </div>
-                  <p className="mt-4 text-center font-display text-lg font-black leading-tight sm:text-xl">{frase}</p>
-                  <p className="mt-3 text-center text-sm font-bold text-white/90">
-                    {totalDays} dia{totalDays === 1 ? "" : "s"}, {totalHours} hora{totalHours === 1 ? "" : "s"}, {totalMinutes} min
+                  <div className="my-6 rounded-2xl bg-accent/15 px-4 py-5 ring-1 ring-accent/30">
+                    <p className="text-center font-display text-base font-bold leading-snug sm:text-lg">{frase}</p>
+                  </div>
+                  <p className="text-center text-[10px] uppercase tracking-widest text-white/50">
+                    {fraseRow ? "Geradinha pra hoje" : "Bom dia, perebada"}
                   </p>
-                  <div className="mt-3 text-center">
-                    <Link to="/app/palpites" className="text-[11px] uppercase tracking-widest text-accent hover:underline">
-                      Confere teus palpites antes que vire pizza →
-                    </Link>
-                  </div>
                 </div>
               );
             }
