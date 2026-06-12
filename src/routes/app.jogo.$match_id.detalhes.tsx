@@ -118,6 +118,8 @@ function pickStat(team: any, ...types: string[]): string | number | null {
 function DetalhesDoJogo() {
   const { match_id } = Route.useParams();
   const { data, isLoading, error } = useMatchDetalhes(match_id);
+  const { data: matchRow } = useMatch(match_id);
+  const { data: teams } = useTeams();
 
   if (isLoading) return <Skeleton className="h-96 w-full" />;
   if (error || !data) {
@@ -144,11 +146,17 @@ function DetalhesDoJogo() {
     (e: any) => (e?.type ?? "").toLowerCase() === "goal",
   );
 
-  // Para mapear eventos ao time, comparar nome com home/away.
+  // Mapeia bandeira do gol por evento.team.id (codigo_api), igual ao carrossel da home.
+  const teamById = new Map((teams ?? []).map((t: any) => [t.id, t]));
+  const homeTeamRow: any = matchRow?.team_home_id ? teamById.get(matchRow.team_home_id) : null;
+  const awayTeamRow: any = matchRow?.team_away_id ? teamById.get(matchRow.team_away_id) : null;
+  const codigoHome: number | null = homeTeamRow?.codigo_api ?? null;
+  const codigoAway: number | null = awayTeamRow?.codigo_api ?? null;
   const homeNomeApi = match.home_team.nome_pt;
 
   const casaStats = estatisticas?.[0];
   const foraStats = estatisticas?.[1];
+
 
   return (
     <div className="space-y-5">
