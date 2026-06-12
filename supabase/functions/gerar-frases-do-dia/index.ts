@@ -145,9 +145,9 @@ function parseFrases(text: string): string[] | null {
   return null;
 }
 
-function normalize3(frases: string[]): string[] {
-  const arr = frases.filter((f) => f && f.trim().length > 0).slice(0, 3);
-  while (arr.length < 3) arr.push(FALLBACK_FRASES[arr.length]);
+function normalizeN(frases: string[]): string[] {
+  const arr = frases.filter((f) => f && f.trim().length > 0).slice(0, ALVO_FRASES);
+  while (arr.length < ALVO_FRASES) arr.push(FALLBACK_FRASES[arr.length % FALLBACK_FRASES.length]);
   return arr;
 }
 
