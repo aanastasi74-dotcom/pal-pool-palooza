@@ -117,6 +117,7 @@ function BoletinsAdmin() {
 function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
   const update = useUpdateBoletimL1();
   const publicar = usePublicarBoletim();
+  const reenviar = useReenviarBoletim();
   const gerar = useGerarBoletim();
 
   const isPublicado = boletim.status === "publicado";
