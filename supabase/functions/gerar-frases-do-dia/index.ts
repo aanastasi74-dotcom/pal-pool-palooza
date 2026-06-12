@@ -13,10 +13,13 @@ const corsHeaders = {
 };
 
 const FALLBACK_FRASES = [
-  "Mais um dia de Copa, perebada. Confere teus palpites e vamos nessa!",
-  "Hoje tem bola rolando. Amanhã também. Aproveita.",
-  "Bolão tá quente. Bora ver quem é pereba e quem só fala.",
+  "Mais um dia de Copa, perebada.",
+  "Bola vai rolar, prepara o coração.",
+  "Cervejinha gelada e fé no palpite.",
+  "Quem palpitou empate hoje, força.",
+  "Bolão tá tinindo, confere teus pontos.",
 ];
+const ALVO_FRASES = 5;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -122,7 +125,7 @@ function montarPrompt(ctx: any): string {
   }
   linhas.push("");
   linhas.push(
-    'Gere 3 frases curtas seguindo seu estilo. Retorne SOMENTE JSON no formato: {"frases":["frase1","frase2","frase3"]}',
+    'Gere 5 frases curtas seguindo seu estilo. Retorne SOMENTE JSON no formato: {"frases":["frase1","frase2","frase3","frase4","frase5"]}',
   );
   return linhas.join("\n");
 }
@@ -142,9 +145,9 @@ function parseFrases(text: string): string[] | null {
   return null;
 }
 
-function normalize3(frases: string[]): string[] {
-  const arr = frases.filter((f) => f && f.trim().length > 0).slice(0, 3);
-  while (arr.length < 3) arr.push(FALLBACK_FRASES[arr.length]);
+function normalizeN(frases: string[]): string[] {
+  const arr = frases.filter((f) => f && f.trim().length > 0).slice(0, ALVO_FRASES);
+  while (arr.length < ALVO_FRASES) arr.push(FALLBACK_FRASES[arr.length % FALLBACK_FRASES.length]);
   return arr;
 }
 
@@ -224,7 +227,7 @@ Deno.serve(async (req) => {
       errMsg = "ANTHROPIC_API_KEY não configurada";
     }
 
-    const frases = normalize3(frasesGeradas ?? FALLBACK_FRASES);
+    const frases = normalizeN(frasesGeradas ?? FALLBACK_FRASES);
 
     const payload = {
       data: dataRef,
