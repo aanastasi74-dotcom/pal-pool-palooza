@@ -293,6 +293,15 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
             <Share2 className="h-3 w-3" /> Compartilhar no WhatsApp
           </button>
         )}
+        {isPublicado && boletim.enviado_em && (
+          <button
+            onClick={onReenviar}
+            disabled={reenviar.isPending}
+            className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold text-muted-foreground disabled:opacity-50"
+          >
+            <Mail className="h-3 w-3" /> Reenviar email
+          </button>
+        )}
       </div>
 
       {isPublicado && (
@@ -302,6 +311,11 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
             ? new Date(boletim.publicado_em).toLocaleString("pt-BR")
             : "—"}
           .{" "}
+          {boletim.enviado_em ? (
+            <span className="text-success">Email enviado em {new Date(boletim.enviado_em).toLocaleString("pt-BR")}.</span>
+          ) : (
+            <span className="text-accent">Email ainda não enviado.</span>
+          )}{" "}
           <Link to="/app/boletim/$data" params={{ data: boletim.data_referencia }} className="underline">
             Ver como pereba
           </Link>
