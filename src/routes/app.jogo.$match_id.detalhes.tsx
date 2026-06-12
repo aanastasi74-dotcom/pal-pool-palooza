@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { PlacarJogo } from "@/components/placar-jogo";
+import { useMatch } from "@/lib/queries/matches";
+import { useTeams } from "@/lib/queries/teams";
 
 export const Route = createFileRoute("/app/jogo/$match_id/detalhes")({
   head: () => ({ meta: [{ title: "Detalhes do jogo — Bolão dos Perebas" }] }),
