@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil } from "lucide-react";
+import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil, Mail } from "lucide-react";
 import {
   useBoletinsL1,
   useGerarBoletim,
   usePublicarBoletim,
+  useReenviarBoletim,
   useUpdateBoletimL1,
   type BoletimL1,
 } from "@/lib/queries/boletins-l1";
@@ -116,6 +117,7 @@ function BoletinsAdmin() {
 function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
   const update = useUpdateBoletimL1();
   const publicar = usePublicarBoletim();
+  const reenviar = useReenviarBoletim();
   const gerar = useGerarBoletim();
 
   const isPublicado = boletim.status === "publicado";
@@ -148,9 +150,36 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
   };
 
   const onPublicar = async () => {
-    await publicar.mutateAsync({ id: boletim.id, conteudo: texto });
-    toast.success("Boletim publicado.");
-    setEditandoPublicado(false);
+    try {
+      const envio = await publicar.mutateAsync({ id: boletim.id, conteudo: texto });
+      if (envio?.skipped) {
+        toast.success("Boletim atualizado (email já enviado anteriormente — nenhuma notificação nova foi disparada).");
+      } else if ((envio?.falhas ?? 0) > 0) {
+        toast.warning(`Boletim publicado. Email enviado pra ${envio?.sucessos ?? 0} de ${envio?.destinatarios_total ?? 0}. Veja audit_log pra detalhes.`);
+      } else {
+        toast.success(`Boletim publicado e enviado pra ${envio?.sucessos ?? 0} perebas!`);
+      }
+      setEditandoPublicado(false);
+    } catch (e: any) {
+      toast.error(`Erro ao publicar/enviar: ${e?.message ?? "desconhecido"}`);
+    }
+  };
+
+  const onReenviar = async () => {
+    if (!confirm("Reenviar email do boletim pra todos os perebas com quota ativa?")) return;
+    const t = toast.loading("Reenviando boletim por email…");
+    try {
+      const r = await reenviar.mutateAsync({ id: boletim.id });
+      toast.dismiss(t);
+      if ((r?.falhas ?? 0) > 0) {
+        toast.warning(`Reenvio: ${r?.sucessos ?? 0} de ${r?.destinatarios_total ?? 0} (com falhas).`);
+      } else {
+        toast.success(`Email reenviado pra ${r?.sucessos ?? 0} perebas.`);
+      }
+    } catch (e: any) {
+      toast.dismiss(t);
+      toast.error(`Erro: ${e?.message ?? "desconhecido"}`);
+    }
   };
 
   const arquivar = async () => {
@@ -264,6 +293,15 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
             <Share2 className="h-3 w-3" /> Compartilhar no WhatsApp
           </button>
         )}
+        {isPublicado && boletim.enviado_em && (
+          <button
+            onClick={onReenviar}
+            disabled={reenviar.isPending}
+            className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-bold text-muted-foreground disabled:opacity-50"
+          >
+            <Mail className="h-3 w-3" /> Reenviar email
+          </button>
+        )}
       </div>
 
       {isPublicado && (
@@ -273,6 +311,11 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
             ? new Date(boletim.publicado_em).toLocaleString("pt-BR")
             : "—"}
           .{" "}
+          {boletim.enviado_em ? (
+            <span className="text-success">Email enviado em {new Date(boletim.enviado_em).toLocaleString("pt-BR")}.</span>
+          ) : (
+            <span className="text-accent">Email ainda não enviado.</span>
+          )}{" "}
           <Link to="/app/boletim/$data" params={{ data: boletim.data_referencia }} className="underline">
             Ver como pereba
           </Link>

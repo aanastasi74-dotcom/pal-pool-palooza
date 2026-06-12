@@ -30,6 +30,9 @@ verify_jwt = true
 [functions.enviar-lembretes-diarios]
 verify_jwt = false
 
+[functions.enviar-boletim]
+verify_jwt = true
+
 [functions.enviar-errata-link]
 verify_jwt = true
 

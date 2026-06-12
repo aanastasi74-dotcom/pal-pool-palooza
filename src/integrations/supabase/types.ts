@@ -59,6 +59,7 @@ export type Database = {
         Row: {
           created_at: string
           data_referencia: string
+          enviado_em: string | null
           id: string
           modelo_usado: string | null
           publicado_em: string | null
@@ -73,6 +74,7 @@ export type Database = {
         Insert: {
           created_at?: string
           data_referencia: string
+          enviado_em?: string | null
           id?: string
           modelo_usado?: string | null
           publicado_em?: string | null
@@ -87,6 +89,7 @@ export type Database = {
         Update: {
           created_at?: string
           data_referencia?: string
+          enviado_em?: string | null
           id?: string
           modelo_usado?: string | null
           publicado_em?: string | null
