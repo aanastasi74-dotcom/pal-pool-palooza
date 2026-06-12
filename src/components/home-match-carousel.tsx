@@ -63,9 +63,9 @@ export function HomeMatchCarousel() {
   const items: CardItem[] = useMemo(() => {
     const all = matches as any[];
     const encerrados = all
-      .filter((m) => m.status === "encerrado")
+      .filter((m) => m.status === "encerrado" || m.status === "ao-vivo")
       .sort((a, b) => new Date(b.data_jogo).getTime() - new Date(a.data_jogo).getTime())
-      .slice(0, 2)
+      .slice(0, 3)
       .map((j) => ({ id: j.id, kind: "resultado" as const, jogo: j }));
     const now = Date.now();
     const agendados = all
@@ -81,6 +81,7 @@ export function HomeMatchCarousel() {
     }
     return list;
   }, [matches]);
+
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selected, setSelected] = useState(0);
