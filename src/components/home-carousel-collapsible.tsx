@@ -31,7 +31,7 @@ export function HomeCarouselCollapsible() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl">
+    <div className="relative overflow-hidden rounded-3xl bg-hero p-4 text-primary-foreground shadow-glow">
       <div className="animate-in fade-in slide-in-from-top-2 duration-300">
         <HomeMatchCarousel />
       </div>
