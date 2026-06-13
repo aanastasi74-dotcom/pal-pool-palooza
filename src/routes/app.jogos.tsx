@@ -254,6 +254,7 @@ function Jogos() {
                   match_id={j.id}
                   travado_em={j.travado_em}
                   minhas_quotas_ids={(quotas as any[]).map((q) => q.id)}
+                  defaultExpanded={j.id === featuredMatchId}
                 />
               </article>
             );
