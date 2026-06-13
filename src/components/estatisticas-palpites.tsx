@@ -52,12 +52,23 @@ export function EstatisticasPalpites({ match_id, travado_em, minhas_quotas_ids =
 
   return (
     <div className="mt-4 space-y-3 rounded-2xl border border-border bg-secondary/40 p-4">
-      <div className="flex items-center justify-between">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center justify-between gap-2 text-left"
+        aria-expanded={expanded}
+      >
         <p className="flex items-center gap-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
           <BarChart3 className="h-3.5 w-3.5" /> Estatísticas dos palpites
         </p>
-        <span className="text-[10px] text-muted-foreground">{data.total_palpites} palpites</span>
-      </div>
+        <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
+          {data.total_palpites} palpites
+          {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+        </span>
+      </button>
+
+      {expanded && <>
+
 
       {data.placar_mais_apostado && (
         <div className="rounded-xl bg-card p-3">
