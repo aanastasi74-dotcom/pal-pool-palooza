@@ -110,6 +110,7 @@ function Ranking() {
                   <Link
                     to="/app/pereba/$user_id"
                     params={{ user_id: p.user_id }}
+                    search={{ quota: p.numero }}
                     className="font-display font-bold hover:underline"
                   >
                     {apelido}
