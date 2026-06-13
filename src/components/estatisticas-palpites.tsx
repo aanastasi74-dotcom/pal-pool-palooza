@@ -1,4 +1,5 @@
-import { BarChart3, Sparkles, Target } from "lucide-react";
+import { useState } from "react";
+import { BarChart3, ChevronDown, ChevronRight, Sparkles, Target } from "lucide-react";
 import { useEstatisticasPalpites, useSoVoceAchouMulti } from "@/lib/queries/estatisticas-palpites";
 
 type Props = {
@@ -6,6 +7,8 @@ type Props = {
   travado_em?: string | null;
   /** quotas do usuário logado para checar "só você achou" */
   minhas_quotas_ids?: string[];
+  /** Quando true, a seção começa expandida. Default false (recolhida). */
+  defaultExpanded?: boolean;
 };
 
 function Barra({ label, pct, cor }: { label: string; pct: number; cor: string }) {
@@ -24,10 +27,11 @@ function Barra({ label, pct, cor }: { label: string; pct: number; cor: string })
   );
 }
 
-export function EstatisticasPalpites({ match_id, travado_em, minhas_quotas_ids = [] }: Props) {
+export function EstatisticasPalpites({ match_id, travado_em, minhas_quotas_ids = [], defaultExpanded = false }: Props) {
   const jogoTravado = travado_em === undefined ? true : !!travado_em && new Date(travado_em).getTime() <= Date.now();
   const { data, isLoading } = useEstatisticasPalpites(match_id, jogoTravado);
   const soVoceResults = useSoVoceAchouMulti(match_id, minhas_quotas_ids, jogoTravado);
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   if (!jogoTravado) return null;
   if (isLoading || !data) return null;
@@ -48,12 +52,23 @@ export function EstatisticasPalpites({ match_id, travado_em, minhas_quotas_ids =
 
   return (
     <div className="mt-4 space-y-3 rounded-2xl border border-border bg-secondary/40 p-4">
-      <div className="flex items-center justify-between">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center justify-between gap-2 text-left"
+        aria-expanded={expanded}
+      >
         <p className="flex items-center gap-2 font-display text-xs font-bold uppercase tracking-widest text-muted-foreground">
           <BarChart3 className="h-3.5 w-3.5" /> Estatísticas dos palpites
         </p>
-        <span className="text-[10px] text-muted-foreground">{data.total_palpites} palpites</span>
-      </div>
+        <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
+          {data.total_palpites} palpites
+          {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+        </span>
+      </button>
+
+      {expanded && <>
+
 
       {data.placar_mais_apostado && (
         <div className="rounded-xl bg-card p-3">
@@ -120,6 +135,7 @@ export function EstatisticasPalpites({ match_id, travado_em, minhas_quotas_ids =
           ))}
         </div>
       )}
+      </>}
     </div>
   );
 }
