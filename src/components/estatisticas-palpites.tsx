@@ -134,7 +134,7 @@ export function EstatisticasPalpites({ match_id, travado_em, minhas_quotas_ids =
             </div>
           ))}
         </div>
-      )}
+      </>}
     </div>
   );
 }
