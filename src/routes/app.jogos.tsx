@@ -136,7 +136,7 @@ function Jogos() {
         <EmptyState
           icon={CalendarSearch}
           title="Nenhum jogo nesse filtro"
-          description="Tenta mudar pra outra fase — a perebada não palpita no vazio."
+          description="Tenta mudar pro filtro de outra janela de tempo — a perebada não palpita no vazio."
         />
       ) : (
         <div className="space-y-3">
