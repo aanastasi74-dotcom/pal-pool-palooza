@@ -17,7 +17,17 @@ export const Route = createFileRoute("/app/jogos")({
   component: Jogos,
 });
 
-const filtros = ["Todos", "Hoje", "Fase de grupos", "Oitavas", "Quartas", "Semifinais", "Final"];
+const filtros = ["Todos", "Hoje", "Amanhã", "Esta semana", "Encerrados"] as const;
+type Filtro = (typeof filtros)[number];
+
+// Retorna [start, end) em ms para um dia BRT (UTC-3, sem DST).
+function brtDayBounds(offsetDays: number) {
+  // "Hoje BRT" = momento atual menos 3h, truncado pra meia-noite UTC, depois +3h.
+  const nowBrtMs = Date.now() - 3 * 3_600_000;
+  const startUtcDay = Math.floor(nowBrtMs / 86_400_000) * 86_400_000;
+  const start = startUtcDay + 3 * 3_600_000 + offsetDays * 86_400_000;
+  return { start, end: start + 86_400_000 };
+}
 
 function fmtData(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
