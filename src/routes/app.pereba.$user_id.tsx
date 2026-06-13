@@ -1,10 +1,11 @@
-import { createFileRoute, useParams, Link } from "@tanstack/react-router";
+import { createFileRoute, useParams, Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { ArrowLeft, Trophy, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useTeams } from "@/lib/queries/teams";
 import { useStadiums } from "@/lib/queries/stadiums";
+import { useQuotasDoUsuario } from "@/lib/queries/quotas";
 import { usePalpitesPublicosJogos, usePalpitesPublicosTop4 } from "@/lib/queries/public-profile";
 import { useFaseAtual } from "@/lib/queries/top4";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +37,8 @@ function usePerebaPublic(user_id: string) {
 
 function PerebaPublicProfile() {
   const { user_id } = useParams({ from: "/app/pereba/$user_id" });
+  const search = useSearch({ from: "/app/pereba/$user_id" });
+  const navigate = useNavigate({ from: "/app/pereba/$user_id" });
   const [tab, setTab] = useState<"jogos" | "top4">("jogos");
   const { data: header, isLoading: loadingH } = usePerebaPublic(user_id);
   const { data: jogos = [], isLoading: loadingJ } = usePalpitesPublicosJogos(user_id);
@@ -43,8 +46,33 @@ function PerebaPublicProfile() {
   const { data: faseAtual = "antes_copa" } = useFaseAtual();
   const { data: teams = [] } = useTeams();
   const { data: stadiums = [] } = useStadiums();
+  const { data: quotas = [] } = useQuotasDoUsuario(user_id);
   const teamMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
   const stadiumMap = useMemo(() => new Map(stadiums.map((s) => [s.id, s])), [stadiums]);
+
+  const quotaSearch = search?.quota;
+  const quotasAtivas = quotas.filter((q) => q.status === "ativa" && q.numero != null);
+  const temVariasQuotas = quotasAtivas.length > 1;
+
+  const quotaSelecionada = useMemo(() => {
+    if (!temVariasQuotas) return null;
+    if (quotaSearch != null) {
+      const n = Number(quotaSearch);
+      const existe = quotasAtivas.some((q) => q.numero === n);
+      if (existe) return n;
+    }
+    return null;
+  }, [quotaSearch, quotasAtivas, temVariasQuotas]);
+
+  const jogosFiltrados = useMemo(() => {
+    if (quotaSelecionada == null) return jogos;
+    return jogos.filter((j: any) => j.numero === quotaSelecionada);
+  }, [jogos, quotaSelecionada]);
+
+  const top4Filtrados = useMemo(() => {
+    if (quotaSelecionada == null) return top4Rows;
+    return top4Rows.filter((r: any) => r.quota_numero === quotaSelecionada);
+  }, [top4Rows, quotaSelecionada]);
 
   if (loadingH) return <Skeleton className="h-64 w-full" />;
   if (!header?.profile) return <EmptyState icon={Trophy} title="Pereba não encontrado" description="Esse perfil não existe." />;
