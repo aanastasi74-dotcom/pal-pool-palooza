@@ -121,15 +121,39 @@ function PerebaPublicProfile() {
         ))}
       </div>
 
+      {temVariasQuotas && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <button
+            onClick={() => navigate({ search: (prev) => ({ ...prev, quota: undefined }) })}
+            className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+              quotaSelecionada == null ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+            }`}
+          >
+            Todas
+          </button>
+          {quotasAtivas.map((q) => (
+            <button
+              key={q.id}
+              onClick={() => navigate({ search: (prev) => ({ ...prev, quota: q.numero }) })}
+              className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                quotaSelecionada === q.numero ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+              }`}
+            >
+              Quota #{q.numero}
+            </button>
+          ))}
+        </div>
+      )}
+
       {tab === "jogos" && (
         <>
           {loadingJ ? (
             <Skeleton className="h-32 w-full" />
-          ) : jogos.length === 0 ? (
-            <EmptyState icon={Lock} title="Sem palpites públicos ainda" description="Os palpites desse pereba ficam visíveis aqui assim que cada jogo trava." />
+          ) : jogosFiltrados.length === 0 ? (
+            <EmptyState icon={Lock} title={quotaSelecionada != null ? `Sem palpites na Quota #${quotaSelecionada}` : "Sem palpites públicos ainda"} description="Os palpites desse pereba ficam visíveis aqui assim que cada jogo trava." />
           ) : (
             <div className="space-y-3">
-              {(jogos as any[]).map((j) => {
+              {(jogosFiltrados as any[]).map((j) => {
                 const tCasa = getTeamSide(j.team_home_id, j.slot_casa, j.casa, teamMap);
                 const tFora = getTeamSide(j.team_away_id, j.slot_visitante, j.fora, teamMap);
                 const head = buildHeader(j, stadiumMap);
@@ -193,11 +217,11 @@ function PerebaPublicProfile() {
         <>
           {!top4Liberado ? (
             <EmptyState icon={Lock} title="Top 4 ainda privado" description="Os palpites do Top 4 ficam visíveis a partir do Round of 32." />
-          ) : top4Rows.length === 0 ? (
-            <EmptyState icon={Trophy} title="Sem palpite Top 4" description="Esse pereba não preencheu o Top 4." />
+          ) : top4Filtrados.length === 0 ? (
+            <EmptyState icon={Trophy} title={quotaSelecionada != null ? `Sem palpite Top 4 na Quota #${quotaSelecionada}` : "Sem palpite Top 4"} description="Esse pereba não preencheu o Top 4." />
           ) : (
             <div className="space-y-4">
-              {(top4Rows as any[]).map((row) => (
+              {(top4Filtrados as any[]).map((row) => (
                 <div key={row.quota_numero} className="rounded-2xl border border-border bg-card p-4 shadow-card">
                   <p className="text-xs text-muted-foreground">Quota #{row.quota_numero}</p>
                   <ul className="mt-3 space-y-2">
