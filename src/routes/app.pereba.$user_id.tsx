@@ -124,7 +124,7 @@ function PerebaPublicProfile() {
       {temVariasQuotas && (
         <div className="flex gap-2 overflow-x-auto pb-1">
           <button
-            onClick={() => navigate({ search: (prev) => ({ ...prev, quota: undefined }) })}
+            onClick={() => navigate({ search: (prev: any) => ({ ...prev, quota: undefined }) })}
             className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
               quotaSelecionada == null ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
             }`}
@@ -132,9 +132,9 @@ function PerebaPublicProfile() {
             Todas
           </button>
           {quotasAtivas.map((q) => (
-            <button
+          <button
               key={q.id}
-              onClick={() => navigate({ search: (prev) => ({ ...prev, quota: q.numero }) })}
+              onClick={() => navigate({ search: (prev: any) => ({ ...prev, quota: q.numero }) })}
               className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                 quotaSelecionada === q.numero ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
               }`}
