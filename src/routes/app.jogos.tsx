@@ -48,7 +48,7 @@ function travaEm(iso?: string | null) {
 
 function Jogos() {
   const navigate = useNavigate();
-  const [filtro, setFiltro] = useState("Todos");
+  const [filtro, setFiltro] = useState<Filtro>("Todos");
   const { data: matches = [], isLoading } = useMatches();
   const { data: quotas = [] } = useMinhasQuotas();
   const { data: teams = [] } = useTeams();
@@ -59,12 +59,47 @@ function Jogos() {
   const teamMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
   const stadiumMap = useMemo(() => new Map(stadiums.map((s) => [s.id, s])), [stadiums]);
 
-  const hoje = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-  const lista = (matches as any[]).filter((j) => {
-    if (filtro === "Todos") return true;
-    if (filtro === "Hoje") return fmtData(j.data_jogo) === hoje;
-    return (j.fase ?? "").toLowerCase() === filtro.toLowerCase();
-  });
+  // Jogo featured: travado_em mais recente que seja <= now()
+  const featuredMatchId = useMemo(() => {
+    const now = Date.now();
+    const candidatos = (matches as any[])
+      .filter((m) => m.travado_em && new Date(m.travado_em).getTime() <= now)
+      .sort((a, b) => new Date(b.travado_em).getTime() - new Date(a.travado_em).getTime());
+    return candidatos[0]?.id ?? null;
+  }, [matches]);
+
+  const lista = useMemo(() => {
+    const arr = (matches as any[]).slice();
+    let filtered = arr;
+    if (filtro === "Hoje") {
+      const { start, end } = brtDayBounds(0);
+      filtered = arr.filter((j) => {
+        const t = new Date(j.data_jogo).getTime();
+        return t >= start && t < end;
+      });
+    } else if (filtro === "Amanhã") {
+      const { start, end } = brtDayBounds(1);
+      filtered = arr.filter((j) => {
+        const t = new Date(j.data_jogo).getTime();
+        return t >= start && t < end;
+      });
+    } else if (filtro === "Esta semana") {
+      const { start } = brtDayBounds(0);
+      const { end } = brtDayBounds(6);
+      filtered = arr.filter((j) => {
+        const t = new Date(j.data_jogo).getTime();
+        return t >= start && t < end;
+      });
+    } else if (filtro === "Encerrados") {
+      filtered = arr.filter((j) => j.status === "encerrado");
+    }
+    filtered.sort((a, b) => {
+      const ta = new Date(a.data_jogo).getTime();
+      const tb = new Date(b.data_jogo).getTime();
+      return filtro === "Encerrados" ? tb - ta : ta - tb;
+    });
+    return filtered;
+  }, [matches, filtro]);
 
   const predMap = new Map((minhasPreds as any[]).map((p) => [p.match_id, p]));
 
