@@ -1,4 +1,5 @@
-import { BarChart3, Sparkles, Target } from "lucide-react";
+import { useState } from "react";
+import { BarChart3, ChevronDown, ChevronRight, Sparkles, Target } from "lucide-react";
 import { useEstatisticasPalpites, useSoVoceAchouMulti } from "@/lib/queries/estatisticas-palpites";
 
 type Props = {
@@ -6,6 +7,8 @@ type Props = {
   travado_em?: string | null;
   /** quotas do usuário logado para checar "só você achou" */
   minhas_quotas_ids?: string[];
+  /** Quando true, a seção começa expandida. Default false (recolhida). */
+  defaultExpanded?: boolean;
 };
 
 function Barra({ label, pct, cor }: { label: string; pct: number; cor: string }) {
