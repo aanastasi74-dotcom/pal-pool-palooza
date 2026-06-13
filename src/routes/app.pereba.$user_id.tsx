@@ -1,10 +1,11 @@
-import { createFileRoute, useParams, Link } from "@tanstack/react-router";
+import { createFileRoute, useParams, Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { ArrowLeft, Trophy, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useTeams } from "@/lib/queries/teams";
 import { useStadiums } from "@/lib/queries/stadiums";
+import { useQuotasDoUsuario } from "@/lib/queries/quotas";
 import { usePalpitesPublicosJogos, usePalpitesPublicosTop4 } from "@/lib/queries/public-profile";
 import { useFaseAtual } from "@/lib/queries/top4";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +37,8 @@ function usePerebaPublic(user_id: string) {
 
 function PerebaPublicProfile() {
   const { user_id } = useParams({ from: "/app/pereba/$user_id" });
+  const search = useSearch({ from: "/app/pereba/$user_id" });
+  const navigate = useNavigate({ from: "/app/pereba/$user_id" });
   const [tab, setTab] = useState<"jogos" | "top4">("jogos");
   const { data: header, isLoading: loadingH } = usePerebaPublic(user_id);
   const { data: jogos = [], isLoading: loadingJ } = usePalpitesPublicosJogos(user_id);
@@ -43,8 +46,33 @@ function PerebaPublicProfile() {
   const { data: faseAtual = "antes_copa" } = useFaseAtual();
   const { data: teams = [] } = useTeams();
   const { data: stadiums = [] } = useStadiums();
+  const { data: quotas = [] } = useQuotasDoUsuario(user_id);
   const teamMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
   const stadiumMap = useMemo(() => new Map(stadiums.map((s) => [s.id, s])), [stadiums]);
+
+  const quotaSearch = search?.quota;
+  const quotasAtivas = quotas.filter((q) => q.status === "ativa" && q.numero != null);
+  const temVariasQuotas = quotasAtivas.length > 1;
+
+  const quotaSelecionada = useMemo(() => {
+    if (!temVariasQuotas) return null;
+    if (quotaSearch != null) {
+      const n = Number(quotaSearch);
+      const existe = quotasAtivas.some((q) => q.numero === n);
+      if (existe) return n;
+    }
+    return null;
+  }, [quotaSearch, quotasAtivas, temVariasQuotas]);
+
+  const jogosFiltrados = useMemo(() => {
+    if (quotaSelecionada == null) return jogos;
+    return jogos.filter((j: any) => j.numero === quotaSelecionada);
+  }, [jogos, quotaSelecionada]);
+
+  const top4Filtrados = useMemo(() => {
+    if (quotaSelecionada == null) return top4Rows;
+    return top4Rows.filter((r: any) => r.quota_numero === quotaSelecionada);
+  }, [top4Rows, quotaSelecionada]);
 
   if (loadingH) return <Skeleton className="h-64 w-full" />;
   if (!header?.profile) return <EmptyState icon={Trophy} title="Pereba não encontrado" description="Esse perfil não existe." />;
@@ -93,15 +121,39 @@ function PerebaPublicProfile() {
         ))}
       </div>
 
+      {temVariasQuotas && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <button
+            onClick={() => navigate({ search: (prev: any) => ({ ...prev, quota: undefined }) })}
+            className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+              quotaSelecionada == null ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+            }`}
+          >
+            Todas
+          </button>
+          {quotasAtivas.map((q) => (
+          <button
+              key={q.id}
+              onClick={() => navigate({ search: (prev: any) => ({ ...prev, quota: q.numero }) })}
+              className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                quotaSelecionada === q.numero ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-muted"
+              }`}
+            >
+              Quota #{q.numero}
+            </button>
+          ))}
+        </div>
+      )}
+
       {tab === "jogos" && (
         <>
           {loadingJ ? (
             <Skeleton className="h-32 w-full" />
-          ) : jogos.length === 0 ? (
-            <EmptyState icon={Lock} title="Sem palpites públicos ainda" description="Os palpites desse pereba ficam visíveis aqui assim que cada jogo trava." />
+          ) : jogosFiltrados.length === 0 ? (
+            <EmptyState icon={Lock} title={quotaSelecionada != null ? `Sem palpites na Quota #${quotaSelecionada}` : "Sem palpites públicos ainda"} description="Os palpites desse pereba ficam visíveis aqui assim que cada jogo trava." />
           ) : (
             <div className="space-y-3">
-              {(jogos as any[]).map((j) => {
+              {(jogosFiltrados as any[]).map((j) => {
                 const tCasa = getTeamSide(j.team_home_id, j.slot_casa, j.casa, teamMap);
                 const tFora = getTeamSide(j.team_away_id, j.slot_visitante, j.fora, teamMap);
                 const head = buildHeader(j, stadiumMap);
@@ -165,11 +217,11 @@ function PerebaPublicProfile() {
         <>
           {!top4Liberado ? (
             <EmptyState icon={Lock} title="Top 4 ainda privado" description="Os palpites do Top 4 ficam visíveis a partir do Round of 32." />
-          ) : top4Rows.length === 0 ? (
-            <EmptyState icon={Trophy} title="Sem palpite Top 4" description="Esse pereba não preencheu o Top 4." />
+          ) : top4Filtrados.length === 0 ? (
+            <EmptyState icon={Trophy} title={quotaSelecionada != null ? `Sem palpite Top 4 na Quota #${quotaSelecionada}` : "Sem palpite Top 4"} description="Esse pereba não preencheu o Top 4." />
           ) : (
             <div className="space-y-4">
-              {(top4Rows as any[]).map((row) => (
+              {(top4Filtrados as any[]).map((row) => (
                 <div key={row.quota_numero} className="rounded-2xl border border-border bg-card p-4 shadow-card">
                   <p className="text-xs text-muted-foreground">Quota #{row.quota_numero}</p>
                   <ul className="mt-3 space-y-2">

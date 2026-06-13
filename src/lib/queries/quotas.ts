@@ -87,3 +87,20 @@ export function useTotalQuotas() {
     },
   });
 }
+
+export function useQuotasDoUsuario(user_id?: string) {
+  return useQuery({
+    queryKey: ["quotas", "usuario", user_id],
+    enabled: !!user_id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quotas")
+        .select("*")
+        .eq("user_id", user_id!)
+        .eq("status", "ativa")
+        .order("numero", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
