@@ -127,20 +127,22 @@ function Ranking() {
                   {sigla}
                 </div>
                 <div className="flex-1">
-                  <Link
-                    to="/app/pereba/$user_id"
-                    params={{ user_id: p.user_id }}
-                    search={{ quota: p.numero }}
-                    className="font-display font-bold hover:underline"
-                  >
-                    {apelido}
-                    {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/app/pereba/$user_id"
+                      params={{ user_id: p.user_id }}
+                      search={{ quota: p.numero }}
+                      className="font-display font-bold hover:underline"
+                    >
+                      {apelido}
+                      {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
+                    </Link>
+                    {tab === "geral" && <VariacaoRanking v={p.variacao} />}
+                  </div>
                   <p className="text-xs text-muted-foreground">Quota #{p.numero}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-display text-lg font-bold">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
-                  <Variacao v={0} />
                 </div>
               </div>
             );
