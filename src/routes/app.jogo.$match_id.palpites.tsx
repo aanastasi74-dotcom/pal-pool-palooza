@@ -35,7 +35,9 @@ type Linha = {
   placar_casa: number | null;
   placar_fora: number | null;
   pontos: number | null;
+  posicao_ranking: number | null;
 };
+
 
 function usePalpitesJogo(match_id: string, enabled: boolean) {
   return useQuery({
