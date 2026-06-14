@@ -1154,6 +1154,7 @@ export type Database = {
           placar_casa: number
           placar_fora: number
           pontos: number
+          posicao_ranking: number
           quota_id: string
           quota_numero: number
           sigla: string

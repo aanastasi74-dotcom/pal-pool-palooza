@@ -35,7 +35,9 @@ type Linha = {
   placar_casa: number | null;
   placar_fora: number | null;
   pontos: number | null;
+  posicao_ranking: number | null;
 };
+
 
 function usePalpitesJogo(match_id: string, enabled: boolean) {
   return useQuery({
@@ -64,7 +66,7 @@ function PalpitesDoJogo() {
 
   const { data: linhas = [], isLoading: loadingP } = usePalpitesJogo(match_id, travado);
   const [busca, setBusca] = useState("");
-  const [sort, setSort] = useState<"apelido" | "placar">("apelido");
+  const [sort, setSort] = useState<"apelido" | "placar" | "ranking">("apelido");
 
   if (loadingMatch) return <Skeleton className="h-64 w-full" />;
   if (!match) {
@@ -122,6 +124,12 @@ function PalpitesDoJogo() {
       const bc = b.placar_casa ?? -1, bf = b.placar_fora ?? -1;
       if (ac !== bc) return bc - ac;
       if (af !== bf) return bf - af;
+      return a.apelido.localeCompare(b.apelido, "pt-BR");
+    }
+    if (sort === "ranking") {
+      const ap = a.posicao_ranking ?? 9999;
+      const bp = b.posicao_ranking ?? 9999;
+      if (ap !== bp) return ap - bp;
       return a.apelido.localeCompare(b.apelido, "pt-BR");
     }
     const cmp = a.apelido.localeCompare(b.apelido, "pt-BR");
@@ -208,6 +216,14 @@ function PalpitesDoJogo() {
           >
             Por placar
           </button>
+          <button
+            onClick={() => setSort("ranking")}
+            className={`rounded-full px-3 py-1 text-xs font-bold ${
+              sort === "ranking" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            Por ranking
+          </button>
         </div>
       </div>
 
@@ -227,6 +243,7 @@ function PalpitesDoJogo() {
                 <TableHead>Pereba</TableHead>
                 <TableHead className="hidden sm:table-cell">Sigla</TableHead>
                 <TableHead>Quota</TableHead>
+                <TableHead>Ranking</TableHead>
                 <TableHead className="text-center">Palpite</TableHead>
                 <TableHead className="text-right">Pontos</TableHead>
               </TableRow>
@@ -248,6 +265,9 @@ function PalpitesDoJogo() {
                     {l.sigla ?? "—"}
                   </TableCell>
                   <TableCell className="text-xs">#{l.quota_numero}</TableCell>
+                  <TableCell className="text-xs font-semibold">
+                    {l.posicao_ranking != null ? `#${l.posicao_ranking}` : "—"}
+                  </TableCell>
                   <TableCell className="text-center font-display font-black">
                     {l.placar_casa != null && l.placar_fora != null
                       ? `${l.placar_casa} × ${l.placar_fora}`
