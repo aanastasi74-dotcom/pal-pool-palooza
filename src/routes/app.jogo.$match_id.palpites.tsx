@@ -144,7 +144,7 @@ function PalpitesDoJogo() {
         </div>
         {dataFmt && (
           <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
-            {dataFmt} (Brasília)
+            {dataFmt} ({getUserTimezoneLabel()})
           </p>
         )}
         <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
