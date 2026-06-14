@@ -56,12 +56,22 @@ function Ranking() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("geral");
   const [busca, setBusca] = useState("");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const geral = useRanking();
   const diario = useRankingDiario();
   const active = tab === "geral" ? geral : diario;
   const isLoading = active.isLoading;
 
   const rows = (active.data ?? []) as Row[];
+
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const lista = rows.filter((p) => {
     const q = busca.toLowerCase();
