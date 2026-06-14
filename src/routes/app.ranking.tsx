@@ -1,19 +1,35 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowDown, ArrowUp, Minus, Trophy, Info, Users } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Minus, Trophy, Info, Users } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRanking } from "@/lib/queries/profiles";
 import { useRankingDiario } from "@/lib/queries/public-profile";
 import { useAuth } from "@/lib/auth-context";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RankingBreakdown } from "@/components/ranking-breakdown";
 
 export const Route = createFileRoute("/app/ranking")({
   head: () => ({ meta: [{ title: "Ranking — Bolão dos Perebas" }] }),
   component: Ranking,
 });
 
-type Row = { id: string; user_id: string; pontos: number; numero: number; variacao?: number | null; profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null };
+type Row = {
+  id: string;
+  user_id: string;
+  pontos: number;
+  numero: number;
+  variacao?: number | null;
+  jec?: number;
+  pex?: number;
+  rdf?: number;
+  rgm?: number;
+  rgv?: number;
+  res?: number;
+  jzr?: number;
+  npt?: number;
+  profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null;
+};
 
 function VariacaoRanking({ v }: { v: number | null | undefined }) {
   if (v === null || v === undefined) return null;
