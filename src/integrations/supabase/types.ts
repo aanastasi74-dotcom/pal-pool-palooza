@@ -754,6 +754,7 @@ export type Database = {
           palpites_validos: number | null
           pontos: number | null
           posicao: number | null
+          posicao_anterior: number | null
           status: string
           tentativas_comprovante: number
           user_id: string
@@ -771,6 +772,7 @@ export type Database = {
           palpites_validos?: number | null
           pontos?: number | null
           posicao?: number | null
+          posicao_anterior?: number | null
           status?: string
           tentativas_comprovante?: number
           user_id: string
@@ -788,6 +790,7 @@ export type Database = {
           palpites_validos?: number | null
           pontos?: number | null
           posicao?: number | null
+          posicao_anterior?: number | null
           status?: string
           tentativas_comprovante?: number
           user_id?: string
@@ -1251,6 +1254,7 @@ export type Database = {
           resultados: number
           sigla: string
           user_id: string
+          variacao: number
         }[]
       }
       get_so_voce_achou: {

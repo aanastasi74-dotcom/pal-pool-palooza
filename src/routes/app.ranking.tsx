@@ -13,6 +13,27 @@ export const Route = createFileRoute("/app/ranking")({
   component: Ranking,
 });
 
+type Row = { id: string; user_id: string; pontos: number; numero: number; variacao?: number | null; profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null };
+
+function VariacaoRanking({ v }: { v: number | null | undefined }) {
+  if (v === null || v === undefined) return null;
+  if (v > 0) return (
+    <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-success" title="variação desde o último jogo encerrado">
+      <ArrowUp className="h-3 w-3" />+{v}
+    </span>
+  );
+  if (v < 0) return (
+    <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-destructive" title="variação desde o último jogo encerrado">
+      <ArrowDown className="h-3 w-3" />{v}
+    </span>
+  );
+  return (
+    <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-muted-foreground" title="variação desde o último jogo encerrado">
+      <Minus className="h-3 w-3" />
+    </span>
+  );
+}
+
 type Tab = "geral" | "diario";
 
 function Ranking() {
@@ -24,7 +45,6 @@ function Ranking() {
   const active = tab === "geral" ? geral : diario;
   const isLoading = active.isLoading;
 
-  type Row = { id: string; user_id: string; pontos: number; numero: number; profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null };
   const rows = (active.data ?? []) as Row[];
 
   const lista = rows.filter((p) => {
@@ -107,20 +127,22 @@ function Ranking() {
                   {sigla}
                 </div>
                 <div className="flex-1">
-                  <Link
-                    to="/app/pereba/$user_id"
-                    params={{ user_id: p.user_id }}
-                    search={{ quota: p.numero }}
-                    className="font-display font-bold hover:underline"
-                  >
-                    {apelido}
-                    {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/app/pereba/$user_id"
+                      params={{ user_id: p.user_id }}
+                      search={{ quota: p.numero }}
+                      className="font-display font-bold hover:underline"
+                    >
+                      {apelido}
+                      {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
+                    </Link>
+                    {tab === "geral" && <VariacaoRanking v={p.variacao} />}
+                  </div>
                   <p className="text-xs text-muted-foreground">Quota #{p.numero}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-display text-lg font-bold">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
-                  <Variacao v={0} />
                 </div>
               </div>
             );
@@ -131,8 +153,3 @@ function Ranking() {
   );
 }
 
-function Variacao({ v }: { v: number }) {
-  if (v === 0) return <p className="flex items-center justify-end gap-1 text-xs text-muted-foreground"><Minus className="h-3 w-3" /> 0</p>;
-  if (v > 0) return <p className="flex items-center justify-end gap-1 text-xs font-semibold text-success"><ArrowUp className="h-3 w-3" /> {v}</p>;
-  return <p className="flex items-center justify-end gap-1 text-xs font-semibold text-destructive"><ArrowDown className="h-3 w-3" /> {Math.abs(v)}</p>;
-}

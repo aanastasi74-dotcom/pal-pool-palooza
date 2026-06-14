@@ -84,6 +84,7 @@ export function useRanking() {
         exatos: r.exatos,
         resultados: r.resultados,
         posicao: r.posicao,
+        variacao: r.variacao ?? null,
         palpites_validos: 0,
         palpites_possiveis: 0,
         elegivel_lanterna: false,
