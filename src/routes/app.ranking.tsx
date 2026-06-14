@@ -45,7 +45,6 @@ function Ranking() {
   const active = tab === "geral" ? geral : diario;
   const isLoading = active.isLoading;
 
-  type Row = { id: string; user_id: string; pontos: number; numero: number; profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null };
   const rows = (active.data ?? []) as Row[];
 
   const lista = rows.filter((p) => {
