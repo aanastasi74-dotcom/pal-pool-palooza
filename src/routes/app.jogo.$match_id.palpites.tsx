@@ -126,6 +126,12 @@ function PalpitesDoJogo() {
       if (af !== bf) return bf - af;
       return a.apelido.localeCompare(b.apelido, "pt-BR");
     }
+    if (sort === "ranking") {
+      const ap = a.posicao_ranking ?? 9999;
+      const bp = b.posicao_ranking ?? 9999;
+      if (ap !== bp) return ap - bp;
+      return a.apelido.localeCompare(b.apelido, "pt-BR");
+    }
     const cmp = a.apelido.localeCompare(b.apelido, "pt-BR");
     if (cmp !== 0) return cmp;
     return a.quota_numero - b.quota_numero;
