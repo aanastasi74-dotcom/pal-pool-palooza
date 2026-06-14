@@ -153,8 +153,3 @@ function Ranking() {
   );
 }
 
-function Variacao({ v }: { v: number }) {
-  if (v === 0) return <p className="flex items-center justify-end gap-1 text-xs text-muted-foreground"><Minus className="h-3 w-3" /> 0</p>;
-  if (v > 0) return <p className="flex items-center justify-end gap-1 text-xs font-semibold text-success"><ArrowUp className="h-3 w-3" /> {v}</p>;
-  return <p className="flex items-center justify-end gap-1 text-xs font-semibold text-destructive"><ArrowDown className="h-3 w-3" /> {Math.abs(v)}</p>;
-}
