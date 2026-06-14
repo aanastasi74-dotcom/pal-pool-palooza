@@ -66,7 +66,7 @@ function PalpitesDoJogo() {
 
   const { data: linhas = [], isLoading: loadingP } = usePalpitesJogo(match_id, travado);
   const [busca, setBusca] = useState("");
-  const [sort, setSort] = useState<"apelido" | "placar">("apelido");
+  const [sort, setSort] = useState<"apelido" | "placar" | "ranking">("apelido");
 
   if (loadingMatch) return <Skeleton className="h-64 w-full" />;
   if (!match) {
