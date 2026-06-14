@@ -216,6 +216,14 @@ function PalpitesDoJogo() {
           >
             Por placar
           </button>
+          <button
+            onClick={() => setSort("ranking")}
+            className={`rounded-full px-3 py-1 text-xs font-bold ${
+              sort === "ranking" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            Por ranking
+          </button>
         </div>
       </div>
 
