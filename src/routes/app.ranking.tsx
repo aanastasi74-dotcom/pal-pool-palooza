@@ -1,19 +1,35 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowDown, ArrowUp, Minus, Trophy, Info, Users } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Minus, Trophy, Info, Users } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRanking } from "@/lib/queries/profiles";
 import { useRankingDiario } from "@/lib/queries/public-profile";
 import { useAuth } from "@/lib/auth-context";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RankingBreakdown } from "@/components/ranking-breakdown";
 
 export const Route = createFileRoute("/app/ranking")({
   head: () => ({ meta: [{ title: "Ranking — Bolão dos Perebas" }] }),
   component: Ranking,
 });
 
-type Row = { id: string; user_id: string; pontos: number; numero: number; variacao?: number | null; profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null };
+type Row = {
+  id: string;
+  user_id: string;
+  pontos: number;
+  numero: number;
+  variacao?: number | null;
+  jec?: number;
+  pex?: number;
+  rdf?: number;
+  rgm?: number;
+  rgv?: number;
+  res?: number;
+  jzr?: number;
+  npt?: number;
+  profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null;
+};
 
 function VariacaoRanking({ v }: { v: number | null | undefined }) {
   if (v === null || v === undefined) return null;
@@ -40,12 +56,22 @@ function Ranking() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("geral");
   const [busca, setBusca] = useState("");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const geral = useRanking();
   const diario = useRankingDiario();
   const active = tab === "geral" ? geral : diario;
   const isLoading = active.isLoading;
 
   const rows = (active.data ?? []) as Row[];
+
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const lista = rows.filter((p) => {
     const q = busca.toLowerCase();
@@ -109,41 +135,67 @@ function Ranking() {
             const apelido = p.profile?.apelido ?? "—";
             const sigla = (p.profile?.sigla ?? p.profile?.apelido ?? "??").slice(0, 3).toUpperCase();
             const cor = p.profile?.cor ?? "oklch(0.6 0.16 200)";
+            const showBreakdown = tab === "geral" && p.jec !== undefined;
+            const isOpen = expanded.has(p.id);
             return (
               <div
                 key={p.id}
-                className={`flex items-center gap-4 border-b border-border px-4 py-4 last:border-0 ${
-                  isMe ? "bg-secondary" : ""
-                }`}
+                className={`border-b border-border px-4 py-4 last:border-0 ${isMe ? "bg-secondary" : ""}`}
               >
-                <div className="w-8 text-center">
-                  {i < 3 ? (
-                    <Trophy className={`mx-auto h-5 w-5 ${i === 0 ? "text-accent" : i === 1 ? "text-muted-foreground" : "text-amber-700"}`} />
-                  ) : (
-                    <span className="font-display font-bold text-muted-foreground">{i + 1}</span>
-                  )}
-                </div>
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-xs font-bold text-white" style={{ background: cor }}>
-                  {sigla}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to="/app/pereba/$user_id"
-                      params={{ user_id: p.user_id }}
-                      search={{ quota: p.numero }}
-                      className="font-display font-bold hover:underline"
-                    >
-                      {apelido}
-                      {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
-                    </Link>
-                    {tab === "geral" && <VariacaoRanking v={p.variacao} />}
+                <div className="flex items-center gap-4">
+                  <div className="w-8 text-center">
+                    {i < 3 ? (
+                      <Trophy className={`mx-auto h-5 w-5 ${i === 0 ? "text-accent" : i === 1 ? "text-muted-foreground" : "text-amber-700"}`} />
+                    ) : (
+                      <span className="font-display font-bold text-muted-foreground">{i + 1}</span>
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground">Quota #{p.numero}</p>
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-xs font-bold text-white" style={{ background: cor }}>
+                    {sigla}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        to="/app/pereba/$user_id"
+                        params={{ user_id: p.user_id }}
+                        search={{ quota: p.numero }}
+                        className="font-display font-bold hover:underline"
+                      >
+                        {apelido}
+                        {isMe && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">você</span>}
+                      </Link>
+                      {tab === "geral" && <VariacaoRanking v={p.variacao} />}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Quota #{p.numero}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-display text-lg font-bold">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
+                    {showBreakdown && (
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(p.id)}
+                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                        aria-expanded={isOpen}
+                      >
+                        {isOpen ? <><ChevronUp className="h-3 w-3" />Ocultar</> : <><ChevronDown className="h-3 w-3" />Detalhes</>}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-display text-lg font-bold">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
-                </div>
+                {showBreakdown && isOpen && (
+                  <RankingBreakdown
+                    b={{
+                      jec: p.jec ?? 0,
+                      pex: p.pex ?? 0,
+                      rdf: p.rdf ?? 0,
+                      rgm: p.rgm ?? 0,
+                      rgv: p.rgv ?? 0,
+                      res: p.res ?? 0,
+                      jzr: p.jzr ?? 0,
+                      npt: p.npt ?? 0,
+                    }}
+                  />
+                )}
               </div>
             );
           })}
