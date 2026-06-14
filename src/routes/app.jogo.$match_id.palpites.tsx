@@ -265,6 +265,9 @@ function PalpitesDoJogo() {
                     {l.sigla ?? "—"}
                   </TableCell>
                   <TableCell className="text-xs">#{l.quota_numero}</TableCell>
+                  <TableCell className="text-xs font-semibold">
+                    {l.posicao_ranking != null ? `#${l.posicao_ranking}` : "—"}
+                  </TableCell>
                   <TableCell className="text-center font-display font-black">
                     {l.placar_casa != null && l.placar_fora != null
                       ? `${l.placar_casa} × ${l.placar_fora}`
