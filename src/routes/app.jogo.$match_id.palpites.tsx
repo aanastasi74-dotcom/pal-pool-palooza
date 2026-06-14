@@ -243,6 +243,7 @@ function PalpitesDoJogo() {
                 <TableHead>Pereba</TableHead>
                 <TableHead className="hidden sm:table-cell">Sigla</TableHead>
                 <TableHead>Quota</TableHead>
+                <TableHead>Ranking</TableHead>
                 <TableHead className="text-center">Palpite</TableHead>
                 <TableHead className="text-right">Pontos</TableHead>
               </TableRow>
