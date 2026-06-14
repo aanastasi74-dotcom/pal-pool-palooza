@@ -74,17 +74,25 @@ export function useRanking() {
   return useQuery({
     queryKey: ["ranking"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("get_ranking_geral");
+      const { data, error } = await (supabase as any).rpc("get_ranking_detalhado");
       if (error) throw error;
       return (data ?? []).map((r: any) => ({
         id: r.quota_id,
         user_id: r.user_id,
-        numero: r.numero,
+        numero: r.quota_numero,
         pontos: r.pontos,
         exatos: r.exatos,
         resultados: r.resultados,
         posicao: r.posicao,
         variacao: r.variacao ?? null,
+        jec: r.jec ?? 0,
+        pex: r.pex ?? 0,
+        rdf: r.rdf ?? 0,
+        rgm: r.rgm ?? 0,
+        rgv: r.rgv ?? 0,
+        res: r.res ?? 0,
+        jzr: r.jzr ?? 0,
+        npt: r.npt ?? 0,
         palpites_validos: 0,
         palpites_possiveis: 0,
         elegivel_lanterna: false,
