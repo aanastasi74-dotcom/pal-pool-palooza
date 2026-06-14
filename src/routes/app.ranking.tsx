@@ -13,6 +13,27 @@ export const Route = createFileRoute("/app/ranking")({
   component: Ranking,
 });
 
+type Row = { id: string; user_id: string; pontos: number; numero: number; variacao?: number | null; profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null };
+
+function VariacaoRanking({ v }: { v: number | null | undefined }) {
+  if (v === null || v === undefined) return null;
+  if (v > 0) return (
+    <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-success" title="variação desde o último jogo encerrado">
+      <ArrowUp className="h-3 w-3" />+{v}
+    </span>
+  );
+  if (v < 0) return (
+    <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-destructive" title="variação desde o último jogo encerrado">
+      <ArrowDown className="h-3 w-3" />{v}
+    </span>
+  );
+  return (
+    <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-muted-foreground" title="variação desde o último jogo encerrado">
+      <Minus className="h-3 w-3" />
+    </span>
+  );
+}
+
 type Tab = "geral" | "diario";
 
 function Ranking() {
