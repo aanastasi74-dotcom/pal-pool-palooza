@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getUserTimezoneLabel } from "@/lib/user-timezone";
 import { useMemo, useState } from "react";
 import { ArrowLeft, Search, Lock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -144,7 +145,7 @@ function PalpitesDoJogo() {
         </div>
         {dataFmt && (
           <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
-            {dataFmt} (Brasília)
+            {dataFmt} ({getUserTimezoneLabel()})
           </p>
         )}
         <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">

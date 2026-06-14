@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getUserTimezoneLabel } from "@/lib/user-timezone";
 import { Sparkles, Trophy, Clock, Lock, CheckCircle2, AlertCircle, ChevronDown, ChevronRight, BarChart3 } from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
@@ -585,7 +586,7 @@ function PalpiteCard({
       </div>
       {dataFmt && (
         <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
-          {dataFmt} (Brasília)
+          {dataFmt} ({getUserTimezoneLabel()})
         </p>
       )}
       <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
