@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { getUserTimezoneLabel } from "@/lib/user-timezone";
 import { useMemo, useState } from "react";
 import { Lock, Radio, CalendarSearch, Users, BarChart3 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";

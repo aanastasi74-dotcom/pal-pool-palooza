@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getUserTimezoneLabel } from "@/lib/user-timezone";
 import { Sparkles, Trophy, Clock, Lock, CheckCircle2, AlertCircle, ChevronDown, ChevronRight, BarChart3 } from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
