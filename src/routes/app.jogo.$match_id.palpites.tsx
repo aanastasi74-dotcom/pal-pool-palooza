@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getUserTimezoneLabel } from "@/lib/user-timezone";
+import { useAuth } from "@/lib/auth-context";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Search, Lock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
