@@ -296,7 +296,7 @@ function PalpitesDoJogo() {
                       to="/app/pereba/$user_id"
                       params={{ user_id: l.user_id }}
                       className="font-semibold hover:underline"
-                      style={l.cor ? { color: l.cor } : undefined}
+                      style={l.user_id === user?.id && l.cor ? { color: l.cor } : undefined}
                     >
                       {l.apelido}
                     </Link>
