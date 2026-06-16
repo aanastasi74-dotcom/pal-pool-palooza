@@ -202,6 +202,17 @@ function PalpitesDoJogo() {
         </div>
       </article>
 
+      {aoVivo && (
+        <div className="flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+          </span>
+          <span className="uppercase tracking-wider">Ao vivo</span>
+          <span className="font-normal opacity-80">· Pontos provisórios com base no placar atual</span>
+        </div>
+      )}
+
       <div>
         <h1 className="font-display text-2xl font-extrabold">Todos os palpites</h1>
         <p className="mt-1 text-sm text-muted-foreground">
