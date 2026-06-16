@@ -290,7 +290,7 @@ function PalpitesDoJogo() {
             </TableHeader>
             <TableBody>
               {ordenadas.map((l) => (
-                <TableRow key={l.quota_id}>
+                <TableRow key={l.quota_id} className={l.user_id === user?.id ? "bg-secondary" : undefined}>
                   <TableCell>
                     <Link
                       to="/app/pereba/$user_id"
