@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getUserTimezoneLabel } from "@/lib/user-timezone";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Search, Lock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,10 +39,11 @@ type Linha = {
 };
 
 
-function usePalpitesJogo(match_id: string, enabled: boolean) {
+function usePalpitesJogo(match_id: string, enabled: boolean, aoVivo: boolean) {
   return useQuery({
     queryKey: ["palpites-jogo", match_id],
     enabled: enabled && !!match_id,
+    refetchInterval: aoVivo ? 15000 : false,
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("get_palpites_jogo", {
         p_match_id: match_id,
@@ -63,8 +64,27 @@ function PalpitesDoJogo() {
 
   const travado =
     !!match?.travado_em && new Date(match.travado_em).getTime() <= Date.now();
+  const aoVivo = match?.status === "ao-vivo";
 
-  const { data: linhas = [], isLoading: loadingP } = usePalpitesJogo(match_id, travado);
+  const { data: linhas = [], isLoading: loadingP, refetch: refetchPalpites } =
+    usePalpitesJogo(match_id, travado, aoVivo);
+
+  useEffect(() => {
+    if (!aoVivo || !match_id) return;
+    const channel = supabase
+      .channel(`match-${match_id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "matches", filter: `id=eq.${match_id}` },
+        () => {
+          refetchPalpites();
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [match_id, aoVivo, refetchPalpites]);
   const [busca, setBusca] = useState("");
   const [sort, setSort] = useState<"apelido" | "placar" | "ranking">("apelido");
 
@@ -181,6 +201,17 @@ function PalpitesDoJogo() {
           </div>
         </div>
       </article>
+
+      {aoVivo && (
+        <div className="flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+          </span>
+          <span className="uppercase tracking-wider">Ao vivo</span>
+          <span className="font-normal opacity-80">· Pontos provisórios com base no placar atual</span>
+        </div>
+      )}
 
       <div>
         <h1 className="font-display text-2xl font-extrabold">Todos os palpites</h1>
