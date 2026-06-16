@@ -312,7 +312,7 @@ function PalpitesDoJogo() {
                       : "—"}
                   </TableCell>
                   <TableCell className="text-right font-bold">
-                    {encerrado && l.pontos != null ? l.pontos : "—"}
+                    {(encerrado || aoVivo) && l.pontos != null ? l.pontos : "—"}
                   </TableCell>
                 </TableRow>
               ))}
