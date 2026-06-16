@@ -64,8 +64,27 @@ function PalpitesDoJogo() {
 
   const travado =
     !!match?.travado_em && new Date(match.travado_em).getTime() <= Date.now();
+  const aoVivo = match?.status === "ao-vivo";
 
-  const { data: linhas = [], isLoading: loadingP } = usePalpitesJogo(match_id, travado);
+  const { data: linhas = [], isLoading: loadingP, refetch: refetchPalpites } =
+    usePalpitesJogo(match_id, travado, aoVivo);
+
+  useEffect(() => {
+    if (!aoVivo || !match_id) return;
+    const channel = supabase
+      .channel(`match-${match_id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "matches", filter: `id=eq.${match_id}` },
+        () => {
+          refetchPalpites();
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [match_id, aoVivo, refetchPalpites]);
   const [busca, setBusca] = useState("");
   const [sort, setSort] = useState<"apelido" | "placar" | "ranking">("apelido");
 
