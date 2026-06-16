@@ -85,6 +85,13 @@ function PalpitesDoJogo() {
       supabase.removeChannel(channel);
     };
   }, [match_id, aoVivo, refetchPalpites]);
+
+  // Refetch imediato ao montar durante jogo ao vivo (dados provisórios)
+  useEffect(() => {
+    if (aoVivo) {
+      refetchPalpites();
+    }
+  }, [aoVivo, refetchPalpites]);
   const [busca, setBusca] = useState("");
   const [sort, setSort] = useState<"apelido" | "placar" | "ranking">("apelido");
 
@@ -305,7 +312,7 @@ function PalpitesDoJogo() {
                       : "—"}
                   </TableCell>
                   <TableCell className="text-right font-bold">
-                    {encerrado && l.pontos != null ? l.pontos : "—"}
+                    {(encerrado || aoVivo) && l.pontos != null ? l.pontos : "—"}
                   </TableCell>
                 </TableRow>
               ))}
