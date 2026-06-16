@@ -57,6 +57,7 @@ function usePalpitesJogo(match_id: string, enabled: boolean, aoVivo: boolean) {
 
 function PalpitesDoJogo() {
   const { match_id } = Route.useParams();
+  const { user } = useAuth();
   const { data: match, isLoading: loadingMatch } = useMatch(match_id);
   const { data: teams = [] } = useTeams();
   const { data: stadiums = [] } = useStadiums();
