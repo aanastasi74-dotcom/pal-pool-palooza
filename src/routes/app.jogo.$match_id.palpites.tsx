@@ -39,10 +39,11 @@ type Linha = {
 };
 
 
-function usePalpitesJogo(match_id: string, enabled: boolean) {
+function usePalpitesJogo(match_id: string, enabled: boolean, aoVivo: boolean) {
   return useQuery({
     queryKey: ["palpites-jogo", match_id],
     enabled: enabled && !!match_id,
+    refetchInterval: aoVivo ? 15000 : false,
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("get_palpites_jogo", {
         p_match_id: match_id,
