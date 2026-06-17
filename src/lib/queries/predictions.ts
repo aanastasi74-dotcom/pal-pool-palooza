@@ -13,6 +13,22 @@ export function useMyPredictions(quota_id?: string) {
   });
 }
 
+export function useAllMyPredictions(quota_ids: string[]) {
+  const key = [...quota_ids].sort().join(",");
+  return useQuery({
+    queryKey: ["predictions", "mine-all", key],
+    enabled: quota_ids.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("predictions")
+        .select("*, quota:quotas!inner(numero)")
+        .in("quota_id", quota_ids);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 export function usePredictionsForMatch(match_id?: string) {
   return useQuery({
     queryKey: ["predictions", "match", match_id],
