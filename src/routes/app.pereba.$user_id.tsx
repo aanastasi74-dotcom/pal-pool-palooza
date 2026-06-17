@@ -14,9 +14,13 @@ import { buildHeader, getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 import { EstatisticasPalpites } from "@/components/estatisticas-palpites";
 import { times as mockTimes } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/app/pereba/$user_id")({
   head: () => ({ meta: [{ title: "Perfil do pereba — Bolão dos Perebas" }] }),
+  validateSearch: (search: Record<string, unknown>): { quota?: number } => ({
+    quota: search.quota == null ? undefined : Number(search.quota),
+  }),
   component: PerebaPublicProfile,
 });
 
@@ -39,6 +43,7 @@ function PerebaPublicProfile() {
   const { user_id } = useParams({ from: "/app/pereba/$user_id" });
   const search = useSearch({ from: "/app/pereba/$user_id" });
   const navigate = useNavigate({ from: "/app/pereba/$user_id" });
+  const { user } = useAuth();
   const [tab, setTab] = useState<"jogos" | "top4">("jogos");
   const { data: header, isLoading: loadingH } = usePerebaPublic(user_id);
   const { data: jogos = [], isLoading: loadingJ } = usePalpitesPublicosJogos(user_id);
@@ -77,7 +82,8 @@ function PerebaPublicProfile() {
   if (loadingH) return <Skeleton className="h-64 w-full" />;
   if (!header?.profile) return <EmptyState icon={Trophy} title="Pereba não encontrado" description="Esse perfil não existe." />;
 
-  const cor = header.profile.cor ?? "oklch(0.6 0.16 200)";
+  const isMe = user_id === user?.id;
+  const cor = isMe && header.profile.cor ? header.profile.cor : "oklch(0.6 0.16 200)";
   const apelido = header.profile.apelido ?? "??";
   const nome = header.profile.nome;
   const sigla = (header.profile.sigla ?? apelido).slice(0, 3).toUpperCase();
