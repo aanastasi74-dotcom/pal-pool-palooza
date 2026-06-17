@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { getUserTimezoneLabel } from "@/lib/user-timezone";
 import { useMemo, useState } from "react";
-import { Lock, Radio, CalendarSearch, Users, BarChart3 } from "lucide-react";
+import { Lock, Radio, CalendarSearch, Users, BarChart3, ChevronDown } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useMatches } from "@/lib/queries/matches";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
@@ -279,6 +279,85 @@ function Jogos() {
             );
           })}
         </div>
+      )}
+    </div>
+  );
+}
+
+function fmtPalpite(p: { placar_casa: number | null; placar_fora: number | null }) {
+  if (p.placar_casa == null || p.placar_fora == null) return "—";
+  return `${p.placar_casa}×${p.placar_fora}`;
+}
+
+function MeusPalpitesBlock({
+  palpites,
+  totalQuotas,
+  fallbackPred,
+}: {
+  palpites: Array<{ quota_numero: number; placar_casa: number | null; placar_fora: number | null }>;
+  totalQuotas: number;
+  fallbackPred: any;
+}) {
+  const [open, setOpen] = useState(false);
+
+  // Pereba sem nenhuma quota: comportamento legado
+  if (totalQuotas <= 1) {
+    const p = palpites[0] ?? (fallbackPred
+      ? { quota_numero: 1, placar_casa: fallbackPred.placar_casa, placar_fora: fallbackPred.placar_fora }
+      : null);
+    return (
+      <div className="min-w-0">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Seu palpite</p>
+        <p className="font-display text-base font-bold">
+          {p && p.placar_casa != null
+            ? `${p.placar_casa} × ${p.placar_fora}`
+            : <span className="text-destructive">— sem palpite —</span>}
+        </p>
+      </div>
+    );
+  }
+
+  // 2+ quotas: monta lista completa (incluindo "sem palpite" pra quotas sem prediction)
+  const byNum = new Map(palpites.map((p) => [p.quota_numero, p]));
+  const numeros: number[] = [];
+  for (let i = 1; i <= totalQuotas; i++) numeros.push(i);
+  const lista = numeros.map((n) => byNum.get(n) ?? { quota_numero: n, placar_casa: null, placar_fora: null });
+
+  const compactInline = (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+      {lista.map((p) => {
+        const semPalpite = p.placar_casa == null;
+        return (
+          <span key={p.quota_numero} className={semPalpite ? "text-destructive" : ""}>
+            <span className="text-muted-foreground">#{p.quota_numero}</span>{" "}
+            <span className="font-display font-bold">{fmtPalpite(p)}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+
+  return (
+    <div className="min-w-0 flex-1">
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Seus palpites</p>
+      {/* Até 2 quotas: sempre inline. 3+: inline no desktop, recolhível no mobile */}
+      {totalQuotas <= 2 ? (
+        <div className="mt-0.5">{compactInline}</div>
+      ) : (
+        <>
+          <div className="mt-0.5 hidden sm:block">{compactInline}</div>
+          <div className="sm:hidden">
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-card px-2 py-1 text-xs font-bold"
+            >
+              {totalQuotas} quotas
+              <ChevronDown className={`h-3 w-3 transition ${open ? "rotate-180" : ""}`} />
+            </button>
+            {open && <div className="mt-2">{compactInline}</div>}
+          </div>
+        </>
       )}
     </div>
   );
