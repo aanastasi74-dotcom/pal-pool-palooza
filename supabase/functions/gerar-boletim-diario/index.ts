@@ -136,9 +136,20 @@ function montarPrompt(ctx: any): string {
       linhas.push(`- ${p.apelido ?? p.nome}: ${p.descricao}`);
     }
   }
+  if (ctx.boletinsAnteriores?.length) {
+    linhas.push("");
+    linhas.push("## Boletins anteriores (pra evitar repetir piadas e construir continuidade)");
+    for (const b of ctx.boletinsAnteriores) {
+      const dataBr = new Date(b.data_referencia + "T12:00:00Z")
+        .toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      linhas.push("");
+      linhas.push(`### Boletim de ${dataBr}`);
+      linhas.push(b.publicado_md);
+    }
+  }
   linhas.push("");
   linhas.push(
-    "Gere agora o boletim do dia em markdown, seguindo seu estilo. Comece com 'Boletim do dia DD/MM/26' (use a data acima). Use os fatos fornecidos, mas escreva com tom de zoeira/cronista. Se algum pereba tem perfil descrito, personalize a zoeira com ele.",
+    "Gere agora o boletim do dia em markdown, seguindo seu estilo. Comece com 'Boletim do dia DD/MM/26' (use a data atual). Use os fatos fornecidos, mas escreva com tom de zoeira/cronista. Construa continuidade com os boletins anteriores quando fizer sentido (CRISÃO segue líder pelo Nº dia? PATPEN ainda na lanterna? alguém em ascensão? alguém em queda livre?) MAS evite repetir as mesmas piadas e ângulos que já apareceram antes. Personagens recorrentes (Carla, perebas com perfil descrito) podem evoluir narrativamente.",
   );
   return linhas.join("\n");
 }
