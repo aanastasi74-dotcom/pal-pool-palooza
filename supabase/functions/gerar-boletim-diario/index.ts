@@ -250,6 +250,12 @@ Deno.serve(async (req) => {
     }
 
     const cfg = await fetchSettings();
+
+    // Boletins anteriores publicados (até 3 mais recentes antes de hoje)
+    const boletinsAnteriores = await sb(
+      `boletins?status=eq.publicado&data_referencia=lt.${dataRef}&select=data_referencia,publicado_md&order=data_referencia.desc&limit=3`,
+    );
+
     const userPrompt = montarPrompt({
       dataRef,
       jogosEncerrados,
@@ -258,9 +264,10 @@ Deno.serve(async (req) => {
       bottom5,
       perfis,
       palpitesCuriosos,
+      boletinsAnteriores: boletinsAnteriores ?? [],
     });
 
-    // Chama Anthropic
+    // Chama Anthropic (com web search habilitado)
     const anthropicResp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -273,6 +280,13 @@ Deno.serve(async (req) => {
         max_tokens: cfg.max_tokens,
         temperature: cfg.temperature,
         system: cfg.system_prompt,
+        tools: [
+          {
+            type: "web_search_20250305",
+            name: "web_search",
+            max_uses: 3,
+          },
+        ],
         messages: [{ role: "user", content: userPrompt }],
       }),
     });
@@ -283,7 +297,10 @@ Deno.serve(async (req) => {
     }
 
     const anthropicData = await anthropicResp.json();
-    const conteudo = anthropicData.content?.[0]?.text ?? "";
+    const conteudo = (anthropicData.content ?? [])
+      .filter((b: any) => b.type === "text")
+      .map((b: any) => b.text)
+      .join("\n");
     const tokensInput = anthropicData.usage?.input_tokens ?? 0;
     const tokensOutput = anthropicData.usage?.output_tokens ?? 0;
 
