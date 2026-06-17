@@ -147,8 +147,15 @@ export function HomeMatchCarousel() {
               const og = e?.detail === "Own Goal" ? " (GC)" : "";
               return `${min}${extra} ${nome}${og}`.trim();
             };
+            const linkProps = it.kind === "proximo"
+              ? { to: "/app/palpites" as const, search: { match_id: j.id } as any }
+              : { to: "/app/jogo/$match_id/detalhes" as const, params: { match_id: j.id } };
             return (
               <div key={it.id} className="min-w-0 flex-[0_0_100%] p-5">
+                <Link
+                  {...(linkProps as any)}
+                  className="block transition hover:scale-[1.01]"
+                >
                 <div className="flex items-center justify-between text-xs uppercase tracking-widest text-white/70">
                   <span className="flex items-center gap-2">
                     {it.kind === "resultado" ? (encerrado ? "Resultado" : "Em andamento") : "Próximo jogo"}
@@ -209,6 +216,7 @@ export function HomeMatchCarousel() {
                     )}
                   </div>
                 </div>
+                </Link>
               </div>
             );
 
