@@ -135,7 +135,7 @@ function Ranking() {
             const apelido = p.profile?.apelido ?? "—";
             const sigla = (p.profile?.sigla ?? p.profile?.apelido ?? "??").slice(0, 3).toUpperCase();
             const cor = isMe && p.profile?.cor ? p.profile.cor : "oklch(0.6 0.16 200)";
-            const showBreakdown = tab === "geral" && p.jec !== undefined;
+            const showBreakdown = p.jec !== undefined;
             const isOpen = expanded.has(p.id);
             return (
               <div
