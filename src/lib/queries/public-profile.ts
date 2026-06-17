@@ -7,18 +7,25 @@ export function useRankingDiario(data?: string) {
     queryFn: async () => {
       const { data: rows, error } = await (supabase as any).rpc(
         "get_ranking_diario",
-        data ? { data_referencia: data } : {},
+        data ? { p_data: data } : {},
       );
       if (error) throw error;
       return (rows ?? []).map((r: any) => ({
         id: r.quota_id,
         user_id: r.user_id,
-        numero: r.numero,
+        numero: r.quota_numero,
         pontos: Number(r.pontos ?? 0),
-        exatos: Number(r.exatos ?? 0),
-        resultados: Number(r.resultados ?? 0),
         posicao: r.posicao,
-        profile: { id: r.user_id, nome: r.nome, apelido: r.apelido, cor: r.cor, sigla: r.sigla },
+        variacao: r.variacao ?? null,
+        jec: r.jec ?? 0,
+        pex: r.pex ?? 0,
+        rdf: r.rdf ?? 0,
+        rgm: r.rgm ?? 0,
+        rgv: r.rgv ?? 0,
+        res: r.res ?? 0,
+        jzr: r.jzr ?? 0,
+        npt: r.npt ?? 0,
+        profile: { id: r.user_id, apelido: r.apelido, cor: r.cor, sigla: r.sigla },
       }));
     },
   });
