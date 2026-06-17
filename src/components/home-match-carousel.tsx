@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, MessageCircle, Sparkles } from "lucide-react";
 import { useMatches } from "@/lib/queries/matches";
