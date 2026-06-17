@@ -1250,19 +1250,25 @@ export type Database = {
         }[]
       }
       get_ranking_diario: {
-        Args: { data_referencia?: string }
+        Args: { p_data?: string }
         Returns: {
           apelido: string
           cor: string
-          exatos: number
-          nome: string
-          numero: number
+          jec: number
+          jzr: number
+          npt: number
+          pex: number
           pontos: number
           posicao: number
           quota_id: string
-          resultados: number
+          quota_numero: number
+          rdf: number
+          res: number
+          rgm: number
+          rgv: number
           sigla: string
           user_id: string
+          variacao: number
         }[]
       }
       get_ranking_geral: {
