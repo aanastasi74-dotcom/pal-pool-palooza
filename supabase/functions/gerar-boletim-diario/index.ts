@@ -136,9 +136,20 @@ function montarPrompt(ctx: any): string {
       linhas.push(`- ${p.apelido ?? p.nome}: ${p.descricao}`);
     }
   }
+  if (ctx.boletinsAnteriores?.length) {
+    linhas.push("");
+    linhas.push("## Boletins anteriores (pra evitar repetir piadas e construir continuidade)");
+    for (const b of ctx.boletinsAnteriores) {
+      const dataBr = new Date(b.data_referencia + "T12:00:00Z")
+        .toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      linhas.push("");
+      linhas.push(`### Boletim de ${dataBr}`);
+      linhas.push(b.publicado_md);
+    }
+  }
   linhas.push("");
   linhas.push(
-    "Gere agora o boletim do dia em markdown, seguindo seu estilo. Comece com 'Boletim do dia DD/MM/26' (use a data acima). Use os fatos fornecidos, mas escreva com tom de zoeira/cronista. Se algum pereba tem perfil descrito, personalize a zoeira com ele.",
+    "Gere agora o boletim do dia em markdown, seguindo seu estilo. Comece com 'Boletim do dia DD/MM/26' (use a data atual). Use os fatos fornecidos, mas escreva com tom de zoeira/cronista. Construa continuidade com os boletins anteriores quando fizer sentido (CRISÃO segue líder pelo Nº dia? PATPEN ainda na lanterna? alguém em ascensão? alguém em queda livre?) MAS evite repetir as mesmas piadas e ângulos que já apareceram antes. Personagens recorrentes (Carla, perebas com perfil descrito) podem evoluir narrativamente.",
   );
   return linhas.join("\n");
 }
@@ -239,6 +250,12 @@ Deno.serve(async (req) => {
     }
 
     const cfg = await fetchSettings();
+
+    // Boletins anteriores publicados (até 3 mais recentes antes de hoje)
+    const boletinsAnteriores = await sb(
+      `boletins?status=eq.publicado&data_referencia=lt.${dataRef}&select=data_referencia,publicado_md&order=data_referencia.desc&limit=3`,
+    );
+
     const userPrompt = montarPrompt({
       dataRef,
       jogosEncerrados,
@@ -247,9 +264,10 @@ Deno.serve(async (req) => {
       bottom5,
       perfis,
       palpitesCuriosos,
+      boletinsAnteriores: boletinsAnteriores ?? [],
     });
 
-    // Chama Anthropic
+    // Chama Anthropic (com web search habilitado)
     const anthropicResp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -262,6 +280,13 @@ Deno.serve(async (req) => {
         max_tokens: cfg.max_tokens,
         temperature: cfg.temperature,
         system: cfg.system_prompt,
+        tools: [
+          {
+            type: "web_search_20250305",
+            name: "web_search",
+            max_uses: 3,
+          },
+        ],
         messages: [{ role: "user", content: userPrompt }],
       }),
     });
@@ -272,7 +297,10 @@ Deno.serve(async (req) => {
     }
 
     const anthropicData = await anthropicResp.json();
-    const conteudo = anthropicData.content?.[0]?.text ?? "";
+    const conteudo = (anthropicData.content ?? [])
+      .filter((b: any) => b.type === "text")
+      .map((b: any) => b.text)
+      .join("\n");
     const tokensInput = anthropicData.usage?.input_tokens ?? 0;
     const tokensOutput = anthropicData.usage?.output_tokens ?? 0;
 
