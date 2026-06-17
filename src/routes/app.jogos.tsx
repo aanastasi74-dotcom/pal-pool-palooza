@@ -106,6 +106,23 @@ function Jogos() {
 
   const predMap = new Map((minhasPreds as any[]).map((p) => [p.match_id, p]));
 
+  // Mapa match_id -> palpites por quota (ordenado por número da quota)
+  const palpitesPorMatch = useMemo(() => {
+    const m = new Map<string, Array<{ quota_numero: number; placar_casa: number | null; placar_fora: number | null }>>();
+    for (const p of allPreds as any[]) {
+      const arr = m.get(p.match_id) ?? [];
+      arr.push({
+        quota_numero: p.quota?.numero ?? 0,
+        placar_casa: p.placar_casa,
+        placar_fora: p.placar_fora,
+      });
+      m.set(p.match_id, arr);
+    }
+    for (const arr of m.values()) arr.sort((a, b) => a.quota_numero - b.quota_numero);
+    return m;
+  }, [allPreds]);
+  const totalQuotas = quotas.length;
+
   return (
     <div className="space-y-6">
       <div>
@@ -197,13 +214,12 @@ function Jogos() {
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between rounded-xl bg-secondary p-3">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Seu palpite</p>
-                    <p className="font-display text-base font-bold">
-                      {pred && pred.placar_casa != null ? `${pred.placar_casa} × ${pred.placar_fora}` : <span className="text-destructive">— sem palpite —</span>}
-                    </p>
-                  </div>
+                <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-secondary p-3">
+                  <MeusPalpitesBlock
+                    palpites={palpitesPorMatch.get(j.id) ?? []}
+                    totalQuotas={totalQuotas}
+                    fallbackPred={pred}
+                  />
                   {(() => {
                     const palpitesVisiveis = !!j.travado_em && new Date(j.travado_em).getTime() <= Date.now();
                     const locked = j.status !== "agendado" || palpitesVisiveis;
