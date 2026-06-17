@@ -134,7 +134,7 @@ function Ranking() {
             const isMe = p.user_id === user?.id;
             const apelido = p.profile?.apelido ?? "—";
             const sigla = (p.profile?.sigla ?? p.profile?.apelido ?? "??").slice(0, 3).toUpperCase();
-            const cor = p.profile?.cor ?? "oklch(0.6 0.16 200)";
+            const cor = isMe && p.profile?.cor ? p.profile.cor : "oklch(0.6 0.16 200)";
             const showBreakdown = tab === "geral" && p.jec !== undefined;
             const isOpen = expanded.has(p.id);
             return (
