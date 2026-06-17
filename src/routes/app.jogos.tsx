@@ -5,7 +5,7 @@ import { Lock, Radio, CalendarSearch, Users, BarChart3 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useMatches } from "@/lib/queries/matches";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
-import { useMyPredictions } from "@/lib/queries/predictions";
+import { useMyPredictions, useAllMyPredictions } from "@/lib/queries/predictions";
 import { useTeams } from "@/lib/queries/teams";
 import { useStadiums } from "@/lib/queries/stadiums";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -55,7 +55,9 @@ function Jogos() {
   const { data: teams = [] } = useTeams();
   const { data: stadiums = [] } = useStadiums();
   const primeiraQuota = quotas[0];
+  const quotaIds = useMemo(() => (quotas as any[]).map((q) => q.id), [quotas]);
   const { data: minhasPreds = [] } = useMyPredictions(primeiraQuota?.id);
+  const { data: allPreds = [] } = useAllMyPredictions(quotaIds);
 
   const teamMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
   const stadiumMap = useMemo(() => new Map(stadiums.map((s) => [s.id, s])), [stadiums]);
