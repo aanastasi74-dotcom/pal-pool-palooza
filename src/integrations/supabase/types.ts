@@ -215,6 +215,41 @@ export type Database = {
         }
         Relationships: []
       }
+      fifa_ranking: {
+        Row: {
+          atualizado_em: string
+          created_at: string
+          fonte: string | null
+          pontos: number | null
+          posicao: number
+          team_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          created_at?: string
+          fonte?: string | null
+          pontos?: number | null
+          posicao: number
+          team_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          created_at?: string
+          fonte?: string | null
+          pontos?: number | null
+          posicao?: number
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fifa_ranking_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       frases_do_dia: {
         Row: {
           created_at: string
@@ -1137,6 +1172,28 @@ export type Database = {
       fase_atual_copa: { Args: never; Returns: string }
       get_arrecadacao_atual: { Args: never; Returns: number }
       get_arrecadacao_potencial: { Args: never; Returns: number }
+      get_classificacao_grupo: {
+        Args: { p_grupo: string }
+        Returns: {
+          bandeira_emoji: string
+          cartoes_amarelos: number
+          cartoes_segundo_amarelo: number
+          cartoes_vermelhos: number
+          classificado_top2: boolean
+          derrotas: number
+          empates: number
+          fair_play: number
+          gols_contra: number
+          gols_pro: number
+          jogos: number
+          pontos: number
+          posicao: number
+          saldo: number
+          team_id: string
+          team_nome: string
+          vitorias: number
+        }[]
+      }
       get_estatisticas_palpites: { Args: { p_match_id: string }; Returns: Json }
       get_invite_by_token: {
         Args: { p_token: string }
