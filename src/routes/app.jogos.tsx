@@ -75,7 +75,12 @@ function Jogos() {
   const lista = useMemo(() => {
     const arr = (matches as any[]).slice();
     let filtered = arr;
-    if (filtro === "Hoje") {
+    if (filtro === "Próximos") {
+      filtered = arr
+        .filter((j) => j.status === "ao-vivo" || j.status === "agendado")
+        .sort((a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime())
+        .slice(0, 5);
+    } else if (filtro === "Hoje") {
       const { start, end } = brtDayBounds(0);
       filtered = arr.filter((j) => {
         const t = new Date(j.data_jogo).getTime();
