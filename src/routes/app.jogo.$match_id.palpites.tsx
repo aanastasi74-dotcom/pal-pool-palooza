@@ -234,7 +234,8 @@ function PalpitesDoJogo() {
       <div>
         <h1 className="font-display text-2xl font-extrabold">Todos os palpites</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {linhas.length} palpite{linhas.length === 1 ? "" : "s"} de quotas ativas.
+          {totalPalpites} palpite{totalPalpites === 1 ? "" : "s"} de {totalQuotas} quota
+          {totalQuotas === 1 ? "" : "s"} ativa{totalQuotas === 1 ? "" : "s"}.
         </p>
       </div>
 
