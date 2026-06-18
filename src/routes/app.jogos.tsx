@@ -50,7 +50,7 @@ function travaEm(iso?: string | null) {
 
 function Jogos() {
   const navigate = useNavigate();
-  const [filtro, setFiltro] = useState<Filtro>("Todos");
+  const [filtro, setFiltro] = useState<Filtro>("Próximos");
   const { data: matches = [], isLoading } = useMatches();
   const { data: quotas = [] } = useMinhasQuotas();
   const { data: teams = [] } = useTeams();
