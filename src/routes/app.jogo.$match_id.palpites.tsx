@@ -299,35 +299,49 @@ function PalpitesDoJogo() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ordenadas.map((l) => (
-                <TableRow key={l.quota_id} className={l.user_id === user?.id ? "bg-secondary" : undefined}>
-                  <TableCell>
-                    <Link
-                      to="/app/pereba/$user_id"
-                      params={{ user_id: l.user_id }}
-                      className="font-semibold hover:underline"
-                      style={l.user_id === user?.id && l.cor ? { color: l.cor } : undefined}
-                    >
-                      {l.apelido}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
-                    {l.sigla ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-xs">#{l.quota_numero}</TableCell>
-                  <TableCell className="text-xs font-semibold">
-                    {l.posicao_ranking != null ? `#${l.posicao_ranking}` : "—"}
-                  </TableCell>
-                  <TableCell className="text-center font-display font-black">
-                    {l.placar_casa != null && l.placar_fora != null
-                      ? `${l.placar_casa} × ${l.placar_fora}`
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="text-right font-bold">
-                    {(encerrado || aoVivo) && l.pontos != null ? l.pontos : "—"}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {ordenadas.map((l) => {
+                const semPalpite = l.placar_casa == null || l.placar_fora == null;
+                return (
+                  <TableRow
+                    key={l.quota_id}
+                    className={`${l.user_id === user?.id ? "bg-secondary" : ""} ${semPalpite ? "opacity-60" : ""}`.trim() || undefined}
+                  >
+                    <TableCell>
+                      <Link
+                        to="/app/pereba/$user_id"
+                        params={{ user_id: l.user_id }}
+                        className="font-semibold hover:underline"
+                        style={l.user_id === user?.id && l.cor ? { color: l.cor } : undefined}
+                      >
+                        {l.apelido}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
+                      {l.sigla ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-xs">#{l.quota_numero}</TableCell>
+                    <TableCell className="text-xs font-semibold">
+                      {l.posicao_ranking != null ? `#${l.posicao_ranking}` : "—"}
+                    </TableCell>
+                    <TableCell className="text-center font-display font-black">
+                      {semPalpite ? (
+                        <span className="text-xs font-normal italic text-muted-foreground">
+                          — sem palpite —
+                        </span>
+                      ) : (
+                        `${l.placar_casa} × ${l.placar_fora}`
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right font-bold">
+                      {semPalpite
+                        ? "—"
+                        : (encerrado || aoVivo) && l.pontos != null
+                          ? l.pontos
+                          : "—"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
