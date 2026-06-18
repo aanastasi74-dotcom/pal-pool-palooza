@@ -147,8 +147,17 @@ function PalpitesDoJogo() {
       l.apelido?.toLowerCase().includes(buscaNorm) ||
       (l.sigla ?? "").toLowerCase().includes(buscaNorm),
   );
+  const totalPalpites = linhas.filter(
+    (l) => l.placar_casa != null && l.placar_fora != null,
+  ).length;
+  const totalQuotas = linhas.length;
   const ordenadas = [...filtradas].sort((a, b) => {
+    const aSem = a.placar_casa == null || a.placar_fora == null;
+    const bSem = b.placar_casa == null || b.placar_fora == null;
     if (sort === "placar") {
+      if (aSem && !bSem) return 1;
+      if (!aSem && bSem) return -1;
+      if (aSem && bSem) return a.apelido.localeCompare(b.apelido, "pt-BR");
       const ac = a.placar_casa ?? -1, af = a.placar_fora ?? -1;
       const bc = b.placar_casa ?? -1, bf = b.placar_fora ?? -1;
       if (ac !== bc) return bc - ac;
