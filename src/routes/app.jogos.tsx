@@ -22,6 +22,7 @@ const filtros = ["Próximos", "Hoje", "Amanhã", "Esta semana", "Encerrados", "T
 type Filtro = (typeof filtros)[number];
 
 
+
 // Retorna [start, end) em ms para um dia BRT (UTC-3, sem DST).
 function brtDayBounds(offsetDays: number) {
   // "Hoje BRT" = momento atual menos 3h, truncado pra meia-noite UTC, depois +3h.
