@@ -147,8 +147,17 @@ function PalpitesDoJogo() {
       l.apelido?.toLowerCase().includes(buscaNorm) ||
       (l.sigla ?? "").toLowerCase().includes(buscaNorm),
   );
+  const totalPalpites = linhas.filter(
+    (l) => l.placar_casa != null && l.placar_fora != null,
+  ).length;
+  const totalQuotas = linhas.length;
   const ordenadas = [...filtradas].sort((a, b) => {
+    const aSem = a.placar_casa == null || a.placar_fora == null;
+    const bSem = b.placar_casa == null || b.placar_fora == null;
     if (sort === "placar") {
+      if (aSem && !bSem) return 1;
+      if (!aSem && bSem) return -1;
+      if (aSem && bSem) return a.apelido.localeCompare(b.apelido, "pt-BR");
       const ac = a.placar_casa ?? -1, af = a.placar_fora ?? -1;
       const bc = b.placar_casa ?? -1, bf = b.placar_fora ?? -1;
       if (ac !== bc) return bc - ac;
@@ -225,7 +234,8 @@ function PalpitesDoJogo() {
       <div>
         <h1 className="font-display text-2xl font-extrabold">Todos os palpites</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {linhas.length} palpite{linhas.length === 1 ? "" : "s"} de quotas ativas.
+          {totalPalpites} palpite{totalPalpites === 1 ? "" : "s"} de {totalQuotas} quota
+          {totalQuotas === 1 ? "" : "s"} ativa{totalQuotas === 1 ? "" : "s"}.
         </p>
       </div>
 
@@ -289,35 +299,49 @@ function PalpitesDoJogo() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ordenadas.map((l) => (
-                <TableRow key={l.quota_id} className={l.user_id === user?.id ? "bg-secondary" : undefined}>
-                  <TableCell>
-                    <Link
-                      to="/app/pereba/$user_id"
-                      params={{ user_id: l.user_id }}
-                      className="font-semibold hover:underline"
-                      style={l.user_id === user?.id && l.cor ? { color: l.cor } : undefined}
-                    >
-                      {l.apelido}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
-                    {l.sigla ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-xs">#{l.quota_numero}</TableCell>
-                  <TableCell className="text-xs font-semibold">
-                    {l.posicao_ranking != null ? `#${l.posicao_ranking}` : "—"}
-                  </TableCell>
-                  <TableCell className="text-center font-display font-black">
-                    {l.placar_casa != null && l.placar_fora != null
-                      ? `${l.placar_casa} × ${l.placar_fora}`
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="text-right font-bold">
-                    {(encerrado || aoVivo) && l.pontos != null ? l.pontos : "—"}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {ordenadas.map((l) => {
+                const semPalpite = l.placar_casa == null || l.placar_fora == null;
+                return (
+                  <TableRow
+                    key={l.quota_id}
+                    className={`${l.user_id === user?.id ? "bg-secondary" : ""} ${semPalpite ? "opacity-60" : ""}`.trim() || undefined}
+                  >
+                    <TableCell>
+                      <Link
+                        to="/app/pereba/$user_id"
+                        params={{ user_id: l.user_id }}
+                        className="font-semibold hover:underline"
+                        style={l.user_id === user?.id && l.cor ? { color: l.cor } : undefined}
+                      >
+                        {l.apelido}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-xs text-muted-foreground">
+                      {l.sigla ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-xs">#{l.quota_numero}</TableCell>
+                    <TableCell className="text-xs font-semibold">
+                      {l.posicao_ranking != null ? `#${l.posicao_ranking}` : "—"}
+                    </TableCell>
+                    <TableCell className="text-center font-display font-black">
+                      {semPalpite ? (
+                        <span className="text-xs font-normal italic text-muted-foreground">
+                          — sem palpite —
+                        </span>
+                      ) : (
+                        `${l.placar_casa} × ${l.placar_fora}`
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right font-bold">
+                      {semPalpite
+                        ? "—"
+                        : (encerrado || aoVivo) && l.pontos != null
+                          ? l.pontos
+                          : "—"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
