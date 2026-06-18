@@ -159,11 +159,19 @@ function Jogos() {
           description="Jogos ainda não foram cadastrados. Aguarda os admins importarem o calendário, pereba."
         />
       ) : lista.length === 0 ? (
-        <EmptyState
-          icon={CalendarSearch}
-          title="Nenhum jogo nesse filtro"
-          description="Tenta mudar pro filtro de outra janela de tempo — a perebada não palpita no vazio."
-        />
+        filtro === "Próximos" ? (
+          <EmptyState
+            icon={CalendarSearch}
+            title="A Copa acabou, perebada!"
+            description="Confere o filtro Encerrados ou as estatísticas no Ranking pra matar saudades."
+          />
+        ) : (
+          <EmptyState
+            icon={CalendarSearch}
+            title="Nenhum jogo nesse filtro"
+            description="Tenta mudar pro filtro de outra janela de tempo — a perebada não palpita no vazio."
+          />
+        )
       ) : (
         <div className="space-y-3">
           {lista.map((j) => {
