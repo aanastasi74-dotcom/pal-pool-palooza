@@ -18,8 +18,10 @@ export const Route = createFileRoute("/app/jogos")({
   component: Jogos,
 });
 
-const filtros = ["Todos", "Hoje", "Amanhã", "Esta semana", "Encerrados"] as const;
+const filtros = ["Próximos", "Hoje", "Amanhã", "Esta semana", "Encerrados", "Todos"] as const;
 type Filtro = (typeof filtros)[number];
+
+
 
 // Retorna [start, end) em ms para um dia BRT (UTC-3, sem DST).
 function brtDayBounds(offsetDays: number) {
@@ -49,7 +51,7 @@ function travaEm(iso?: string | null) {
 
 function Jogos() {
   const navigate = useNavigate();
-  const [filtro, setFiltro] = useState<Filtro>("Todos");
+  const [filtro, setFiltro] = useState<Filtro>("Próximos");
   const { data: matches = [], isLoading } = useMatches();
   const { data: quotas = [] } = useMinhasQuotas();
   const { data: teams = [] } = useTeams();
@@ -74,7 +76,12 @@ function Jogos() {
   const lista = useMemo(() => {
     const arr = (matches as any[]).slice();
     let filtered = arr;
-    if (filtro === "Hoje") {
+    if (filtro === "Próximos") {
+      filtered = arr
+        .filter((j) => j.status === "ao-vivo" || j.status === "agendado")
+        .sort((a, b) => new Date(a.data_jogo).getTime() - new Date(b.data_jogo).getTime())
+        .slice(0, 5);
+    } else if (filtro === "Hoje") {
       const { start, end } = brtDayBounds(0);
       filtered = arr.filter((j) => {
         const t = new Date(j.data_jogo).getTime();
@@ -153,11 +160,19 @@ function Jogos() {
           description="Jogos ainda não foram cadastrados. Aguarda os admins importarem o calendário, pereba."
         />
       ) : lista.length === 0 ? (
-        <EmptyState
-          icon={CalendarSearch}
-          title="Nenhum jogo nesse filtro"
-          description="Tenta mudar pro filtro de outra janela de tempo — a perebada não palpita no vazio."
-        />
+        filtro === "Próximos" ? (
+          <EmptyState
+            icon={CalendarSearch}
+            title="A Copa acabou, perebada!"
+            description="Confere o filtro Encerrados ou as estatísticas no Ranking pra matar saudades."
+          />
+        ) : (
+          <EmptyState
+            icon={CalendarSearch}
+            title="Nenhum jogo nesse filtro"
+            description="Tenta mudar pro filtro de outra janela de tempo — a perebada não palpita no vazio."
+          />
+        )
       ) : (
         <div className="space-y-3">
           {lista.map((j) => {
