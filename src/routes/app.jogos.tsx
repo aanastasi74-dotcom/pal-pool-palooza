@@ -18,8 +18,9 @@ export const Route = createFileRoute("/app/jogos")({
   component: Jogos,
 });
 
-const filtros = ["Todos", "Hoje", "Amanhã", "Esta semana", "Encerrados"] as const;
+const filtros = ["Próximos", "Hoje", "Amanhã", "Esta semana", "Encerrados", "Todos"] as const;
 type Filtro = (typeof filtros)[number];
+
 
 // Retorna [start, end) em ms para um dia BRT (UTC-3, sem DST).
 function brtDayBounds(offsetDays: number) {
