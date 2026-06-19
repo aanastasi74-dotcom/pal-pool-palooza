@@ -202,6 +202,9 @@ function Jogos() {
                   <div className="flex items-center justify-end gap-3">
                     <div className="text-right">
                       <p className="font-display font-bold">{tCasa.nome}</p>
+                      {j.numero_jogo >= 73 && j.numero_jogo <= 88 && j.home_origem && (
+                        <p className="text-[10px] text-muted-foreground">{fmtOrigem(j.home_origem)}</p>
+                      )}
                     </div>
                     <span className="text-3xl">{tCasa.bandeira}</span>
                   </div>
@@ -225,6 +228,9 @@ function Jogos() {
                     <span className="text-3xl">{tFora.bandeira}</span>
                     <div>
                       <p className="font-display font-bold">{tFora.nome}</p>
+                      {j.numero_jogo >= 73 && j.numero_jogo <= 88 && j.away_origem && (
+                        <p className="text-[10px] text-muted-foreground">{fmtOrigem(j.away_origem)}</p>
+                      )}
                     </div>
                   </div>
                 </div>
