@@ -38,6 +38,13 @@ function fmtData(iso: string) {
 function fmtHora(iso: string) {
   return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
+const POSICAO_LABEL: Record<string, string> = { "1": "1º", "2": "2º", "3": "3º" };
+function fmtOrigem(origem: string): string {
+  const pos = POSICAO_LABEL[origem[0]];
+  const grupo = origem.slice(1);
+  if (!pos || !grupo) return origem;
+  return `${pos} Grupo ${grupo}`;
+}
 function travaEm(iso?: string | null) {
   if (!iso) return null;
   const diff = new Date(iso).getTime() - Date.now();
