@@ -411,6 +411,7 @@ export type Database = {
         Row: {
           alocacao_admin_override: boolean
           alocacao_provisoria: boolean
+          away_origem: string | null
           casa: string
           cidade: string | null
           created_at: string | null
@@ -421,6 +422,7 @@ export type Database = {
           eventos: Json | null
           fase: string
           fora: string
+          home_origem: string | null
           hora_definida: boolean
           id: string
           numero_jogo: number | null
@@ -442,6 +444,7 @@ export type Database = {
         Insert: {
           alocacao_admin_override?: boolean
           alocacao_provisoria?: boolean
+          away_origem?: string | null
           casa: string
           cidade?: string | null
           created_at?: string | null
@@ -452,6 +455,7 @@ export type Database = {
           eventos?: Json | null
           fase: string
           fora: string
+          home_origem?: string | null
           hora_definida?: boolean
           id?: string
           numero_jogo?: number | null
@@ -473,6 +477,7 @@ export type Database = {
         Update: {
           alocacao_admin_override?: boolean
           alocacao_provisoria?: boolean
+          away_origem?: string | null
           casa?: string
           cidade?: string | null
           created_at?: string | null
@@ -483,6 +488,7 @@ export type Database = {
           eventos?: Json | null
           fase?: string
           fora?: string
+          home_origem?: string | null
           hora_definida?: boolean
           id?: string
           numero_jogo?: number | null
@@ -1152,16 +1158,29 @@ export type Database = {
       }
     }
     Functions: {
-      _aplicar_alocacao_r32: {
-        Args: {
-          p_away: string
-          p_fase_completa: boolean
-          p_force_reset: boolean
-          p_home: string
-          p_numero_jogo: number
-        }
-        Returns: undefined
-      }
+      _aplicar_alocacao_r32:
+        | {
+            Args: {
+              p_away: string
+              p_fase_completa: boolean
+              p_force_reset: boolean
+              p_home: string
+              p_numero_jogo: number
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_away: string
+              p_away_origem?: string
+              p_fase_completa: boolean
+              p_force_reset: boolean
+              p_home: string
+              p_home_origem?: string
+              p_numero_jogo: number
+            }
+            Returns: undefined
+          }
       aceitar_regras: { Args: never; Returns: string }
       admin_clear_r32_override: { Args: { p_match_id: string }; Returns: Json }
       admin_list_usuarios: {
