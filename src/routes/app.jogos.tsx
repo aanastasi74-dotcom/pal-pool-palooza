@@ -229,6 +229,25 @@ function Jogos() {
                   </div>
                 </div>
 
+                {j.numero_jogo >= 73 && j.numero_jogo <= 88 && (
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    {j.alocacao_provisoria ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                        ⏳ Provisório · baseado na classificação atual
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                        ✓ Definido
+                      </span>
+                    )}
+                    {j.alocacao_admin_override && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-400">
+                        ✏️ Editado pelo admin
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-secondary p-3">
                   <MeusPalpitesBlock
                     palpites={palpitesPorMatch.get(j.id) ?? []}
