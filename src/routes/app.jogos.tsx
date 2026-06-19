@@ -38,6 +38,13 @@ function fmtData(iso: string) {
 function fmtHora(iso: string) {
   return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
+const POSICAO_LABEL: Record<string, string> = { "1": "1º", "2": "2º", "3": "3º" };
+function fmtOrigem(origem: string): string {
+  const pos = POSICAO_LABEL[origem[0]];
+  const grupo = origem.slice(1);
+  if (!pos || !grupo) return origem;
+  return `${pos} Grupo ${grupo}`;
+}
 function travaEm(iso?: string | null) {
   if (!iso) return null;
   const diff = new Date(iso).getTime() - Date.now();
@@ -202,6 +209,9 @@ function Jogos() {
                   <div className="flex items-center justify-end gap-3">
                     <div className="text-right">
                       <p className="font-display font-bold">{tCasa.nome}</p>
+                      {j.numero_jogo >= 73 && j.numero_jogo <= 88 && j.home_origem && (
+                        <p className="text-[10px] text-muted-foreground">{fmtOrigem(j.home_origem)}</p>
+                      )}
                     </div>
                     <span className="text-3xl">{tCasa.bandeira}</span>
                   </div>
@@ -225,6 +235,9 @@ function Jogos() {
                     <span className="text-3xl">{tFora.bandeira}</span>
                     <div>
                       <p className="font-display font-bold">{tFora.nome}</p>
+                      {j.numero_jogo >= 73 && j.numero_jogo <= 88 && j.away_origem && (
+                        <p className="text-[10px] text-muted-foreground">{fmtOrigem(j.away_origem)}</p>
+                      )}
                     </div>
                   </div>
                 </div>
