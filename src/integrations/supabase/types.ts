@@ -409,6 +409,8 @@ export type Database = {
       }
       matches: {
         Row: {
+          alocacao_admin_override: boolean
+          alocacao_provisoria: boolean
           casa: string
           cidade: string | null
           created_at: string | null
@@ -438,6 +440,8 @@ export type Database = {
           travado_em: string | null
         }
         Insert: {
+          alocacao_admin_override?: boolean
+          alocacao_provisoria?: boolean
           casa: string
           cidade?: string | null
           created_at?: string | null
@@ -467,6 +471,8 @@ export type Database = {
           travado_em?: string | null
         }
         Update: {
+          alocacao_admin_override?: boolean
+          alocacao_provisoria?: boolean
           casa?: string
           cidade?: string | null
           created_at?: string | null
@@ -847,6 +853,45 @@ export type Database = {
           },
         ]
       }
+      r32_terceiros_combinations: {
+        Row: {
+          grupos_qualificados: string[] | null
+          id: number
+          vs_1a: string
+          vs_1b: string
+          vs_1d: string
+          vs_1e: string
+          vs_1g: string
+          vs_1i: string
+          vs_1k: string
+          vs_1l: string
+        }
+        Insert: {
+          grupos_qualificados?: string[] | null
+          id: number
+          vs_1a: string
+          vs_1b: string
+          vs_1d: string
+          vs_1e: string
+          vs_1g: string
+          vs_1i: string
+          vs_1k: string
+          vs_1l: string
+        }
+        Update: {
+          grupos_qualificados?: string[] | null
+          id?: number
+          vs_1a?: string
+          vs_1b?: string
+          vs_1d?: string
+          vs_1e?: string
+          vs_1g?: string
+          vs_1i?: string
+          vs_1k?: string
+          vs_1l?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           autor_id: string | null
@@ -1107,7 +1152,18 @@ export type Database = {
       }
     }
     Functions: {
+      _aplicar_alocacao_r32: {
+        Args: {
+          p_away: string
+          p_fase_completa: boolean
+          p_force_reset: boolean
+          p_home: string
+          p_numero_jogo: number
+        }
+        Returns: undefined
+      }
       aceitar_regras: { Args: never; Returns: string }
+      admin_clear_r32_override: { Args: { p_match_id: string }; Returns: Json }
       admin_list_usuarios: {
         Args: never
         Returns: {
@@ -1133,6 +1189,10 @@ export type Database = {
       admin_set_ativo: {
         Args: { p_ativo: boolean; p_user_id: string }
         Returns: undefined
+      }
+      admin_set_r32_override: {
+        Args: { p_away_id: string; p_home_id: string; p_match_id: string }
+        Returns: Json
       }
       admin_set_role: {
         Args: { p_role: string; p_user_id: string }
@@ -1192,6 +1252,22 @@ export type Database = {
           team_id: string
           team_nome: string
           vitorias: number
+        }[]
+      }
+      get_classificacao_terceiros: {
+        Args: never
+        Returns: {
+          bandeira_emoji: string
+          classificado_r32: boolean
+          fair_play: number
+          fifa_ranking: number
+          gols_pro: number
+          grupo: string
+          pontos: number
+          posicao_geral: number
+          saldo: number
+          team_id: string
+          team_nome: string
         }[]
       }
       get_estatisticas_palpites: { Args: { p_match_id: string }; Returns: Json }
@@ -1364,6 +1440,10 @@ export type Database = {
       recompute_peso_jogos: { Args: never; Returns: undefined }
       rejeitar_lote: {
         Args: { p_lote_id: string; p_motivo: string }
+        Returns: Json
+      }
+      resolve_mata_mata_round_of_32: {
+        Args: { p_force_admin_override_reset?: boolean }
         Returns: Json
       }
       vencedor_real: { Args: { p_match_id: string }; Returns: string }
