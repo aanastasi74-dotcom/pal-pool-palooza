@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { times } from "@/lib/mock-data";
-import { Sparkles, TrendingUp, Trophy, Pencil, Lightbulb, AlertCircle, CheckCircle2, Newspaper } from "lucide-react";
+import { Sparkles, TrendingUp, Trophy, Pencil, Lightbulb, AlertCircle, CheckCircle2, Newspaper, Info } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { BoletimEditor } from "@/components/boletim-editor";
@@ -69,9 +70,9 @@ function Home() {
           </div>
         </div>
         <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-          <Stat label="Quotas" valor={String(minhasQuotas.length)} />
-          <Stat label="Placares exatos" valor="—" />
-          <Stat label="Aproveitamento" valor="—" />
+          <Stat label="Placares exatos" valor={minhaMelhor ? String(minhaMelhor.pex ?? 0) : "—"} />
+          <Stat label="Jogos pontuados" valor={minhaMelhor ? String((minhaMelhor.pex ?? 0) + (minhaMelhor.rdf ?? 0) + (minhaMelhor.rgm ?? 0) + (minhaMelhor.rgv ?? 0) + (minhaMelhor.res ?? 0)) : "—"} />
+          <StatAproveitamento q={minhaMelhor} />
         </div>
       </section>
 
@@ -131,6 +132,30 @@ function Stat({ label, valor }: { label: string; valor: string }) {
     <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
       <p className="font-display text-xl font-bold">{valor}</p>
       <p className="text-[10px] uppercase tracking-widest opacity-80">{label}</p>
+    </div>
+  );
+}
+
+function StatAproveitamento({ q }: { q: any }) {
+  const disputados = q ? (q.jec ?? 0) - (q.npt ?? 0) : 0;
+  const pontuados = q ? (q.pex ?? 0) + (q.rdf ?? 0) + (q.rgm ?? 0) + (q.rgv ?? 0) + (q.res ?? 0) : 0;
+  const valor = disputados > 0 ? `${Math.round((pontuados / disputados) * 100)}%` : "—";
+  return (
+    <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
+      <p className="font-display text-xl font-bold">{valor}</p>
+      <div className="flex items-center justify-center gap-1">
+        <p className="text-[10px] uppercase tracking-widest opacity-80">Aproveitamento</p>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="opacity-80 hover:opacity-100" aria-label="O que é aproveitamento?">
+              <Info className="h-3 w-3" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-64 text-xs text-foreground">
+            Aproveitamento = jogos onde você pontuou ÷ jogos disputados. Se palpitou em 36 jogos e pontuou em 30, aproveitamento é 83%.
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }

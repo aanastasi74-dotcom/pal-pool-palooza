@@ -19,6 +19,7 @@ type Row = {
   user_id: string;
   pontos: number;
   numero: number;
+  posicao?: number | null;
   variacao?: number | null;
   jec?: number;
   pex?: number;
@@ -143,11 +144,14 @@ function Ranking() {
                 className={`border-b border-border px-4 py-4 last:border-0 ${isMe ? "bg-secondary" : ""}`}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-8 text-center">
-                    {i < 3 ? (
-                      <Trophy className={`mx-auto h-5 w-5 ${i === 0 ? "text-accent" : i === 1 ? "text-muted-foreground" : "text-amber-700"}`} />
+                  <div className="w-10 text-center">
+                    {(p.posicao ?? i + 1) <= 3 ? (
+                      <div className="flex flex-col items-center">
+                        <Trophy className={`mx-auto h-5 w-5 ${(p.posicao ?? i + 1) === 1 ? "text-accent" : (p.posicao ?? i + 1) === 2 ? "text-muted-foreground" : "text-amber-700"}`} />
+                        <span className="font-display text-[10px] font-bold text-muted-foreground">{p.posicao ?? i + 1}º</span>
+                      </div>
                     ) : (
-                      <span className="font-display font-bold text-muted-foreground">{i + 1}</span>
+                      <span className="font-display font-bold text-muted-foreground">{p.posicao ?? i + 1}º</span>
                     )}
                   </div>
                   <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-xs font-bold text-white" style={{ background: cor }}>
