@@ -19,6 +19,7 @@ type Row = {
   user_id: string;
   pontos: number;
   numero: number;
+  posicao?: number | null;
   variacao?: number | null;
   jec?: number;
   pex?: number;
