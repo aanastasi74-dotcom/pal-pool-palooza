@@ -70,9 +70,9 @@ function Home() {
           </div>
         </div>
         <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-          <Stat label="Quotas" valor={String(minhasQuotas.length)} />
-          <Stat label="Placares exatos" valor="—" />
-          <Stat label="Aproveitamento" valor="—" />
+          <Stat label="Placares exatos" valor={minhaMelhor ? String(minhaMelhor.pex ?? 0) : "—"} />
+          <Stat label="Jogos pontuados" valor={minhaMelhor ? String((minhaMelhor.pex ?? 0) + (minhaMelhor.rdf ?? 0) + (minhaMelhor.rgm ?? 0) + (minhaMelhor.rgv ?? 0) + (minhaMelhor.res ?? 0)) : "—"} />
+          <StatAproveitamento q={minhaMelhor} />
         </div>
       </section>
 
