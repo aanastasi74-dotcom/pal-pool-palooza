@@ -136,6 +136,30 @@ function Stat({ label, valor }: { label: string; valor: string }) {
   );
 }
 
+function StatAproveitamento({ q }: { q: any }) {
+  const disputados = q ? (q.jec ?? 0) - (q.npt ?? 0) : 0;
+  const pontuados = q ? (q.pex ?? 0) + (q.rdf ?? 0) + (q.rgm ?? 0) + (q.rgv ?? 0) + (q.res ?? 0) : 0;
+  const valor = disputados > 0 ? `${Math.round((pontuados / disputados) * 100)}%` : "—";
+  return (
+    <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
+      <p className="font-display text-xl font-bold">{valor}</p>
+      <div className="flex items-center justify-center gap-1">
+        <p className="text-[10px] uppercase tracking-widest opacity-80">Aproveitamento</p>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="opacity-80 hover:opacity-100" aria-label="O que é aproveitamento?">
+              <Info className="h-3 w-3" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-64 text-xs text-foreground">
+            Aproveitamento = jogos onde você pontuou ÷ jogos disputados. Se palpitou em 36 jogos e pontuou em 30, aproveitamento é 83%.
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
+  );
+}
+
 function SectionHeader({ title, link }: { title: string; link: string }) {
   return (
     <div className="flex items-center justify-between">
