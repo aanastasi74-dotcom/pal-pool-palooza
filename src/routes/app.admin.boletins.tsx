@@ -37,6 +37,7 @@ function BoletinsAdmin() {
   const { data: boletins, isLoading } = useBoletinsL1();
   const gerar = useGerarBoletim();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const selected = (boletins ?? []).find((b) => b.id === selectedId) ?? null;
 
