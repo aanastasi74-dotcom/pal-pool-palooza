@@ -40,6 +40,15 @@ function fmtHora(iso: string) {
 }
 const POSICAO_LABEL: Record<string, string> = { "1": "1º", "2": "2º", "3": "3º" };
 function fmtOrigem(origem: string): string {
+  if (!origem) return origem;
+  if (origem.startsWith("V")) {
+    const n = origem.slice(1);
+    if (/^\d+$/.test(n)) return `Vencedor Jogo ${n}`;
+  }
+  if (origem.startsWith("P")) {
+    const n = origem.slice(1);
+    if (/^\d+$/.test(n)) return `Perdedor Jogo ${n}`;
+  }
   const pos = POSICAO_LABEL[origem[0]];
   const grupo = origem.slice(1);
   if (!pos || !grupo) return origem;
