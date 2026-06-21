@@ -277,7 +277,7 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
         </TabsContent>
       </Tabs>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="sticky bottom-0 -mx-5 -mb-5 mt-4 flex flex-wrap gap-2 border-t border-border bg-card/95 px-5 py-3 backdrop-blur lg:static lg:mx-0 lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         {!isPublicado && (
           <>
             <button
