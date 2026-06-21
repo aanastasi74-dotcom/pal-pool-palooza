@@ -14,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { MarkdownView } from "@/components/markdown-view";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/app/admin/boletins")({
   head: () => ({ meta: [{ title: "Admin — Boletins" }] }),
@@ -35,6 +37,7 @@ function BoletinsAdmin() {
   const { data: boletins, isLoading } = useBoletinsL1();
   const gerar = useGerarBoletim();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const selected = (boletins ?? []).find((b) => b.id === selectedId) ?? null;
 
@@ -100,7 +103,7 @@ function BoletinsAdmin() {
           )}
         </div>
 
-        <div>
+        <div className="hidden lg:block">
           {selected ? (
             <BoletimEditor boletim={selected} />
           ) : (
@@ -110,6 +113,24 @@ function BoletinsAdmin() {
           )}
         </div>
       </div>
+
+      {isMobile && (
+        <Sheet open={!!selected} onOpenChange={(o) => !o && setSelectedId(null)}>
+          <SheetContent
+            side="bottom"
+            className="flex h-[95vh] flex-col gap-0 overflow-hidden p-0"
+          >
+            <SheetHeader className="border-b border-border px-4 py-3 text-left">
+              <SheetTitle className="text-base">
+                Boletim — {selected ? new Date(`${selected.data_referencia}T12:00:00`).toLocaleDateString("pt-BR") : ""}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto px-4 py-4">
+              {selected && <BoletimEditor boletim={selected} />}
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
   );
 }
