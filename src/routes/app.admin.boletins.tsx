@@ -14,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { MarkdownView } from "@/components/markdown-view";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/app/admin/boletins")({
   head: () => ({ meta: [{ title: "Admin — Boletins" }] }),
