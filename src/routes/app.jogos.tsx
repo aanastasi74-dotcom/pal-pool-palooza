@@ -40,6 +40,15 @@ function fmtHora(iso: string) {
 }
 const POSICAO_LABEL: Record<string, string> = { "1": "1º", "2": "2º", "3": "3º" };
 function fmtOrigem(origem: string): string {
+  if (!origem) return origem;
+  if (origem.startsWith("V")) {
+    const n = origem.slice(1);
+    if (/^\d+$/.test(n)) return `Vencedor Jogo ${n}`;
+  }
+  if (origem.startsWith("P")) {
+    const n = origem.slice(1);
+    if (/^\d+$/.test(n)) return `Perdedor Jogo ${n}`;
+  }
   const pos = POSICAO_LABEL[origem[0]];
   const grupo = origem.slice(1);
   if (!pos || !grupo) return origem;
@@ -185,8 +194,13 @@ function Jogos() {
           {lista.map((j) => {
             const pred = predMap.get(j.id);
             const trava = travaEm(j.travado_em);
-            const tCasa = getTeamSide(j.team_home_id, j.slot_casa, j.casa, teamMap);
-            const tFora = getTeamSide(j.team_away_id, j.slot_visitante, j.fora, teamMap);
+            const isPosR32 = j.numero_jogo >= 89 && j.numero_jogo <= 104;
+            const isR32 = j.numero_jogo >= 73 && j.numero_jogo <= 88;
+            const showOrigem = isR32 || isPosR32;
+            let tCasa = getTeamSide(j.team_home_id, j.slot_casa, j.casa, teamMap);
+            let tFora = getTeamSide(j.team_away_id, j.slot_visitante, j.fora, teamMap);
+            if (isPosR32 && !j.team_home_id) tCasa = { nome: "Aguardando", bandeira: "🏳️", isSlot: true };
+            if (isPosR32 && !j.team_away_id) tFora = { nome: "Aguardando", bandeira: "🏳️", isSlot: true };
             const header = buildHeader(j, stadiumMap);
             return (
               <article key={j.id} className="rounded-2xl border border-border bg-card p-5 shadow-card">
@@ -209,7 +223,7 @@ function Jogos() {
                   <div className="flex items-center justify-end gap-3">
                     <div className="text-right">
                       <p className="font-display font-bold">{tCasa.nome}</p>
-                      {j.numero_jogo >= 73 && j.numero_jogo <= 88 && j.home_origem && (
+                      {showOrigem && j.home_origem && (
                         <p className="text-[10px] text-muted-foreground">{fmtOrigem(j.home_origem)}</p>
                       )}
                     </div>
@@ -235,14 +249,14 @@ function Jogos() {
                     <span className="text-3xl">{tFora.bandeira}</span>
                     <div>
                       <p className="font-display font-bold">{tFora.nome}</p>
-                      {j.numero_jogo >= 73 && j.numero_jogo <= 88 && j.away_origem && (
+                      {showOrigem && j.away_origem && (
                         <p className="text-[10px] text-muted-foreground">{fmtOrigem(j.away_origem)}</p>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {j.numero_jogo >= 73 && j.numero_jogo <= 88 && (
+                {isR32 && (
                   <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                     {j.alocacao_provisoria ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
@@ -258,6 +272,14 @@ function Jogos() {
                         ✏️ Editado pelo admin
                       </span>
                     )}
+                  </div>
+                )}
+
+                {isPosR32 && j.alocacao_admin_override && (
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-400">
+                      ✏️ Editado pelo admin
+                    </span>
                   </div>
                 )}
 

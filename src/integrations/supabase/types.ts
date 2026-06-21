@@ -1461,6 +1461,10 @@ export type Database = {
         Args: { p_lote_id: string; p_motivo: string }
         Returns: Json
       }
+      resolve_mata_mata_pos_r32: {
+        Args: { p_match_id_origem?: string }
+        Returns: Json
+      }
       resolve_mata_mata_round_of_32: {
         Args: { p_force_admin_override_reset?: boolean }
         Returns: Json
