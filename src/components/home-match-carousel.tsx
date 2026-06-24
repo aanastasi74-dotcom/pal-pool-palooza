@@ -56,9 +56,14 @@ export function HomeMatchCarousel() {
       .slice(0, 3)
       .map((j) => ({ id: `p-${j.id}`, kind: "proximo" as const, jogo: j }));
     const list: CardItem[] = [...encerrados, ...proximos];
+    list.push({ id: "simulador", kind: "simulador" });
     list.push({ id: "frase", kind: "frase" });
     return list;
   }, [matches]);
+
+  const [fraseSimulador] = useState(
+    () => FRASES_SIMULADOR[Math.floor(Math.random() * FRASES_SIMULADOR.length)],
+  );
 
 
 
