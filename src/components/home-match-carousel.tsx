@@ -1,16 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, MessageCircle, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle, Sparkles, Trophy } from "lucide-react";
 import { useMatches } from "@/lib/queries/matches";
 import { useTeams } from "@/lib/queries/teams";
 import { useFrasesDoDia } from "@/lib/queries/frases-do-dia";
 import { getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 
+const FRASES_SIMULADOR = [
+  "Simulador no ar! Faça sua Copa, descubra teu campeão... pelo menos no papel →",
+  "Pereba virou Galvão? Simulador disponível. Faça sua Copa do mundo →",
+];
+
 type CardItem =
   | { id: string; kind: "resultado" | "proximo"; jogo: any }
-  | { id: "frase"; kind: "frase" };
+  | { id: "frase"; kind: "frase" }
+  | { id: "simulador"; kind: "simulador" };
 
 const FALLBACK_FRASE = "Mais um dia de Copa, perebada. Confere teus palpites e boa rodada!";
 
