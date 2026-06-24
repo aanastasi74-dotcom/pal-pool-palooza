@@ -17,6 +17,7 @@ export type SimMatch = {
   penaltis_casa: number | null;
   penaltis_fora: number | null;
   eventos: any;
+  estatisticas: any;
   home_origem: string | null;
   away_origem: string | null;
   stadium_id: string | null;
@@ -87,7 +88,7 @@ export function calcularClassificacaoGrupo(
   grupo: string,
   jogosGrupo: SimMatch[], // jogos do grupo (todos os 6)
   palpitesGrupos: Record<number, PalpiteGrupo>,
-  timesDoGrupo: { id: string; nome_pt: string }[],
+  timesDoGrupo: { id: string; nome_pt: string; codigo_api?: number | null }[],
   fifaRanking: Record<string, number>,
 ): ClassLinha[] {
   const linhas: Record<string, ClassLinha> = {};
@@ -139,10 +140,30 @@ export function calcularClassificacaoGrupo(
   }
   for (const l of Object.values(linhas)) l.sg = l.gp - l.gc;
 
-  // Fair play: feed API hoje só traz type='Goal'. Quando type='Card' começar a aparecer,
-  // implementar dedução (1 por jogador/jogo, maior magnitude prevalece) mapeando
-  // ev.team.id -> team_id via teams.codigo_api. Por ora todos ficam com fair_play=0
-  // — neutro como desempate. Jogos simulados, por design, também ficam em 0.
+  // Fair play lê de matches.estatisticas (agregado por time/jogo). API-Football
+  // não retorna cartões individuais por jogador — aproximação suficiente pro
+  // propósito do bolão. Fórmula: -1 por amarelo, -4 por vermelho.
+  // Jogos simulados (não encerrados) não contribuem — mantém regra original.
+  const codigoApiPorTime: Record<number, string> = {};
+  for (const t of timesDoGrupo) {
+    if (t.codigo_api != null) codigoApiPorTime[t.codigo_api] = t.id;
+  }
+  for (const m of jogosGrupo) {
+    if (m.status !== "encerrado") continue;
+    const stats = m.estatisticas;
+    if (!Array.isArray(stats)) continue;
+    for (const ts of stats) {
+      const codigoApi = ts?.team?.id;
+      if (codigoApi == null) continue;
+      const teamId = codigoApiPorTime[codigoApi];
+      const linha = teamId ? linhas[teamId] : null;
+      if (!linha) continue;
+      const arr2: any[] = Array.isArray(ts.statistics) ? ts.statistics : [];
+      const yellow = Number(arr2.find((s) => s?.type === "Yellow Cards")?.value ?? 0) || 0;
+      const red = Number(arr2.find((s) => s?.type === "Red Cards")?.value ?? 0) || 0;
+      linha.fair_play += yellow * -1 + red * -4;
+    }
+  }
 
   // Sort
   const arr = Object.values(linhas);

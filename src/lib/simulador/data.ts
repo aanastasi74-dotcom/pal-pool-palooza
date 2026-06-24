@@ -8,7 +8,7 @@ export function useSimMatches() {
       const { data, error } = await (supabase as any)
         .from("matches")
         .select(
-          "id,numero_jogo,fase,data_jogo,status,team_home_id,team_away_id,casa,fora,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora,eventos,home_origem,away_origem,stadium_id",
+          "id,numero_jogo,fase,data_jogo,status,team_home_id,team_away_id,casa,fora,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora,eventos,estatisticas,home_origem,away_origem,stadium_id",
         )
         .gte("numero_jogo", 1)
         .lte("numero_jogo", 104)
