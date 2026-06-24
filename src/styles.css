@@ -123,3 +123,17 @@
   .shadow-card { box-shadow: var(--shadow-card); }
   .text-balance { text-wrap: balance; }
 }
+
+@media print {
+  header, footer, nav, [data-no-print] { display: none !important; }
+  button { display: none !important; }
+  body { background: white !important; color: black !important; }
+  .simulador-resultado, .simulador-resultado * {
+    color: black !important;
+    background: white !important;
+    box-shadow: none !important;
+    border-color: #999 !important;
+  }
+  .simulador-resultado { max-width: 100%; padding: 1rem; }
+  .simulador-resultado .hero-campeoes { border: 2px solid #000 !important; }
+}
