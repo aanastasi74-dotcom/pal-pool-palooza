@@ -17,6 +17,7 @@ export type SimMatch = {
   penaltis_casa: number | null;
   penaltis_fora: number | null;
   eventos: any;
+  estatisticas: any;
   home_origem: string | null;
   away_origem: string | null;
   stadium_id: string | null;
