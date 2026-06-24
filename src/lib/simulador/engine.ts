@@ -88,7 +88,7 @@ export function calcularClassificacaoGrupo(
   grupo: string,
   jogosGrupo: SimMatch[], // jogos do grupo (todos os 6)
   palpitesGrupos: Record<number, PalpiteGrupo>,
-  timesDoGrupo: { id: string; nome_pt: string }[],
+  timesDoGrupo: { id: string; nome_pt: string; codigo_api?: number | null }[],
   fifaRanking: Record<string, number>,
 ): ClassLinha[] {
   const linhas: Record<string, ClassLinha> = {};
