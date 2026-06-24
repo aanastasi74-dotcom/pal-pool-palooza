@@ -184,7 +184,7 @@ function SimuladorInner({
   const setPalpiteMM = (n: number, patch: Partial<PalpiteMataMata>) => {
     setPalpitesMM((prev) => ({
       ...prev,
-      [n]: { placar_casa: 0, placar_fora: 0, ...(prev[n] ?? {}), ...patch },
+      [n]: { placar_casa: 0, placar_fora: 0, ...(prev[n] ?? {}), ...patch } as PalpiteMataMata,
     }));
   };
 
