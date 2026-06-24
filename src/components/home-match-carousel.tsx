@@ -133,6 +133,29 @@ export function HomeMatchCarousel() {
                 </div>
               );
             }
+            if (it.kind === "simulador") {
+              return (
+                <div key={it.id} className="min-w-0 flex-[0_0_100%] p-5">
+                  <Link to="/app/simulador" className="block transition hover:scale-[1.01]">
+                    <div className="flex items-center justify-between text-xs uppercase tracking-widest text-white/70">
+                      <span className="flex items-center gap-1.5"><Trophy className="h-3 w-3" /> Novidade</span>
+                      <span className="rounded-full bg-accent/40 px-2 py-0.5 text-[10px] font-bold">🎮 Simulador</span>
+                    </div>
+                    <div className="my-6 rounded-2xl bg-accent/15 px-4 py-6 ring-1 ring-accent/30">
+                      <div className="mb-3 grid h-12 w-12 mx-auto place-items-center rounded-full bg-white/90 text-2xl shadow-glow">
+                        🏆
+                      </div>
+                      <p className="text-center font-display text-base font-bold leading-snug sm:text-lg">
+                        {fraseSimulador}
+                      </p>
+                    </div>
+                    <p className="text-center text-[10px] uppercase tracking-widest text-white/50">
+                      Toca pra simular
+                    </p>
+                  </Link>
+                </div>
+              );
+            }
             const j = it.jogo;
             const tCasa = getTeamSide(j.team_home_id, j.slot_casa, j.casa, teamMap);
             const tFora = getTeamSide(j.team_away_id, j.slot_visitante, j.fora, teamMap);
