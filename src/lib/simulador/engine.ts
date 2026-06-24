@@ -139,42 +139,10 @@ export function calcularClassificacaoGrupo(
   }
   for (const l of Object.values(linhas)) l.sg = l.gp - l.gc;
 
-  // Fair play: deduzir cartões dos jogos REAIS encerrados (1 por jogador/jogo, maior magnitude prevalece).
-  // Eventos.api hoje não traz cartões (apenas Goal), então isso fica 0 por enquanto. Quando os cartões
-  // chegarem (type='Card'), a lógica abaixo já está pronta.
-  // Pesos: yellow=-1, second_yellow=-3, red=-4, yellow_red=-5
-  const CARD_WEIGHT: Record<string, number> = {
-    yellow: -1,
-    second_yellow: -3,
-    red: -4,
-    yellow_red: -5,
-  };
-  for (const m of jogosGrupo) {
-    if (m.status !== "encerrado" || !Array.isArray(m.eventos)) continue;
-    // map api team id -> our team id (precisamos do team home/away)
-    type PlayerKey = string;
-    const playerWorst: Record<PlayerKey, number> = {};
-    for (const ev of m.eventos) {
-      if (ev?.type !== "Card") continue;
-      const detail = String(ev?.detail ?? "").toLowerCase();
-      let kind: keyof typeof CARD_WEIGHT | null = null;
-      if (detail.includes("second yellow")) kind = "second_yellow";
-      else if (detail.includes("yellow")) kind = "yellow";
-      else if (detail.includes("red")) kind = "red";
-      if (!kind) continue;
-      const apiTeamId = ev?.team?.id;
-      const playerId = ev?.player?.id ?? Math.random();
-      // Determine which side this team is using by comparing api id with home/away codes
-      // (we don't have codigo_api in our snapshot; conservative fallback: skip if unable to map)
-      // To avoid wrongly deducting, we only deduct when match has both team_home_id/away_id and
-      // we can resolve api id via lookup. Without the lookup we skip.
-      // (We'll be conservative and not deduct — preserving correctness when cards arrive needs codigo_api.)
-      void apiTeamId;
-      void playerId;
-      void kind;
-    }
-    void playerWorst;
-  }
+  // Fair play: feed API hoje só traz type='Goal'. Quando type='Card' começar a aparecer,
+  // implementar dedução (1 por jogador/jogo, maior magnitude prevalece) mapeando
+  // ev.team.id -> team_id via teams.codigo_api. Por ora todos ficam com fair_play=0
+  // — neutro como desempate. Jogos simulados, por design, também ficam em 0.
 
   // Sort
   const arr = Object.values(linhas);
