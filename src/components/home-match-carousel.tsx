@@ -1,16 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, MessageCircle, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle, Sparkles, Trophy } from "lucide-react";
 import { useMatches } from "@/lib/queries/matches";
 import { useTeams } from "@/lib/queries/teams";
 import { useFrasesDoDia } from "@/lib/queries/frases-do-dia";
 import { getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 
+const FRASES_SIMULADOR = [
+  "Simulador no ar! Faça sua Copa, descubra teu campeão... pelo menos no papel →",
+  "Pereba virou Galvão? Simulador disponível. Faça sua Copa do mundo →",
+];
+
 type CardItem =
   | { id: string; kind: "resultado" | "proximo"; jogo: any }
-  | { id: "frase"; kind: "frase" };
+  | { id: "frase"; kind: "frase" }
+  | { id: "simulador"; kind: "simulador" };
 
 const FALLBACK_FRASE = "Mais um dia de Copa, perebada. Confere teus palpites e boa rodada!";
 
@@ -50,9 +56,14 @@ export function HomeMatchCarousel() {
       .slice(0, 3)
       .map((j) => ({ id: `p-${j.id}`, kind: "proximo" as const, jogo: j }));
     const list: CardItem[] = [...encerrados, ...proximos];
+    list.push({ id: "simulador", kind: "simulador" });
     list.push({ id: "frase", kind: "frase" });
     return list;
   }, [matches]);
+
+  const [fraseSimulador] = useState(
+    () => FRASES_SIMULADOR[Math.floor(Math.random() * FRASES_SIMULADOR.length)],
+  );
 
 
 
@@ -119,6 +130,29 @@ export function HomeMatchCarousel() {
                   <p className="text-center text-[10px] uppercase tracking-widest text-white/50">
                     {fraseRow ? "Geradinha pra hoje" : "Bom dia, perebada"}
                   </p>
+                </div>
+              );
+            }
+            if (it.kind === "simulador") {
+              return (
+                <div key={it.id} className="min-w-0 flex-[0_0_100%] p-5">
+                  <Link to="/app/simulador" className="block transition hover:scale-[1.01]">
+                    <div className="flex items-center justify-between text-xs uppercase tracking-widest text-white/70">
+                      <span className="flex items-center gap-1.5"><Trophy className="h-3 w-3" /> Novidade</span>
+                      <span className="rounded-full bg-accent/40 px-2 py-0.5 text-[10px] font-bold">🎮 Simulador</span>
+                    </div>
+                    <div className="my-6 rounded-2xl bg-accent/15 px-4 py-6 ring-1 ring-accent/30">
+                      <div className="mb-3 grid h-12 w-12 mx-auto place-items-center rounded-full bg-white/90 text-2xl shadow-glow">
+                        🏆
+                      </div>
+                      <p className="text-center font-display text-base font-bold leading-snug sm:text-lg">
+                        {fraseSimulador}
+                      </p>
+                    </div>
+                    <p className="text-center text-[10px] uppercase tracking-widest text-white/50">
+                      Toca pra simular
+                    </p>
+                  </Link>
                 </div>
               );
             }
