@@ -180,6 +180,10 @@ function Top4Page() {
         </div>
       </section>
 
+      {temPalpiteAnterior && (
+        <Top4PotencialCard picks={picksAntigos} pesoPercentual={pesoAtual} />
+      )}
+
       {bloqueada && (
         <div className="flex items-center gap-2 rounded-2xl border border-muted-foreground/30 bg-muted/40 px-4 py-3 text-sm">
           <Lock className="h-4 w-4" /> A janela do Top 4 já fechou. Seu palpite atual permanece como registrado.
