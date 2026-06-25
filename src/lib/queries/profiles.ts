@@ -93,6 +93,7 @@ export function useRanking() {
         res: r.res ?? 0,
         jzr: r.jzr ?? 0,
         npt: r.npt ?? 0,
+        aproveitamento_pct: r.aproveitamento_pct ?? null,
         palpites_validos: 0,
         palpites_possiveis: 0,
         elegivel_lanterna: false,
