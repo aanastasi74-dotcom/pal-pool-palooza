@@ -7,9 +7,10 @@ import { useMyTop4, useUpdateTop4, useFaseAtual } from "@/lib/queries/top4";
 import { useTeams } from "@/lib/queries/teams";
 import { useSetting } from "@/lib/queries/settings";
 import { getRegraDaFase, TOP4_REGRA_DEFAULT, type Top4Regra } from "@/lib/top4-rules";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { Top4PotencialCard } from "@/components/top4-potencial-card";
+import { Top4ConfirmMudancaDialog } from "@/components/top4-confirm-mudanca-dialog";
 
 export const Route = createFileRoute("/app/palpites_/top4")({
   head: () => ({ meta: [{ title: "Top 4 — Bolão dos Perebas" }] }),
