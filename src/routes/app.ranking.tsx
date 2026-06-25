@@ -221,6 +221,16 @@ function Ranking() {
           })}
         </div>
       )}
+
+      {historicoOpen && (
+        <HistoricoRankingDialog
+          open={!!historicoOpen}
+          onOpenChange={(v) => !v && setHistoricoOpen(null)}
+          quotaId={historicoOpen.id}
+          numero={historicoOpen.numero}
+          apelido={historicoOpen.apelido}
+        />
+      )}
     </div>
   );
 }
