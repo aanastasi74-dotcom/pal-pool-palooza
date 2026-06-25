@@ -25,6 +25,7 @@ export function useRankingDiario(data?: string) {
         res: r.res ?? 0,
         jzr: r.jzr ?? 0,
         npt: r.npt ?? 0,
+        aproveitamento_pct: r.aproveitamento_pct ?? null,
         profile: { id: r.user_id, apelido: r.apelido, cor: r.cor, sigla: r.sigla },
       }));
     },

@@ -9,6 +9,9 @@ type Breakdown = {
   res: number;
   jzr: number;
   npt: number;
+  aproveitamento_pct?: number | null;
+  jogos_pontuados?: number;
+  jogos_disputados?: number;
 };
 
 type BadgeDef = {
@@ -99,6 +102,29 @@ export function RankingBreakdown({ b }: { b: Breakdown }) {
           </PopoverContent>
         </Popover>
       ))}
+      {b.aproveitamento_pct !== null && b.aproveitamento_pct !== undefined && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold transition hover:opacity-80 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-300/60 dark:border-emerald-500/40"
+              title="APROV — Aproveitamento"
+            >
+              <span>APROV</span>
+              <span className="font-bold tabular-nums">{b.aproveitamento_pct}%</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-64 text-xs">
+            <p className="font-display text-sm font-bold">APROV — Aproveitamento</p>
+            <p className="mt-1 text-muted-foreground">
+              Aproveitamento = jogos pontuados ÷ jogos disputados.
+              {b.jogos_pontuados !== undefined && b.jogos_disputados !== undefined
+                ? ` Quota pontuou em ${b.jogos_pontuados} de ${b.jogos_disputados} jogos.`
+                : ""}
+            </p>
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   );
 }
