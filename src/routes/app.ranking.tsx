@@ -198,6 +198,9 @@ function Ranking() {
                       res: p.res ?? 0,
                       jzr: p.jzr ?? 0,
                       npt: p.npt ?? 0,
+                      aproveitamento_pct: p.aproveitamento_pct ?? null,
+                      jogos_pontuados: (p.pex ?? 0) + (p.rdf ?? 0) + (p.rgm ?? 0) + (p.rgv ?? 0) + (p.res ?? 0),
+                      jogos_disputados: (p.pex ?? 0) + (p.rdf ?? 0) + (p.rgm ?? 0) + (p.rgv ?? 0) + (p.res ?? 0) + (p.jzr ?? 0),
                     }}
                   />
                 )}
