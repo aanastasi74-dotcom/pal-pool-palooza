@@ -1,0 +1,65 @@
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Trophy } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useTeams } from "@/lib/queries/teams";
+import { calcularPotencialMaximo, mensagemPorPotencial, type Top4Picks } from "@/lib/top4-potencial/engine";
+
+type Props = {
+  picks: Top4Picks;
+  pesoPercentual: number;
+};
+
+export function Top4PotencialCard({ picks, pesoPercentual }: Props) {
+  const { data: teams = [] } = useTeams();
+  const { data: matches = [] } = useQuery({
+    queryKey: ["matches", "top4-potencial"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("matches")
+        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status")
+        .order("numero_jogo", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 60_000,
+  });
+
+  const resultado = useMemo(
+    () => calcularPotencialMaximo(picks, matches as any, teams as any, pesoPercentual),
+    [picks, matches, teams, pesoPercentual],
+  );
+
+  if (!resultado.faseGruposCompleta) return null;
+
+  const pontos = resultado.pontos;
+  const max = 4000;
+  const fator = pesoPercentual / 100;
+  const max4Reais = Math.floor(max * fator);
+
+  return (
+    <section className="rounded-2xl border border-primary/30 bg-primary/5 p-4 shadow-card">
+      <div className="flex items-start gap-3">
+        <Trophy className="mt-1 h-5 w-5 text-primary" />
+        <div className="flex-1">
+          <p className="font-display text-sm font-bold uppercase tracking-wide text-primary">
+            Potencial máximo do Top 4
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Considerando o chaveamento atual do mata-mata, o melhor cenário pra você é:
+          </p>
+          <p className="mt-3 font-display text-2xl font-extrabold">
+            🏆 {pontos.toLocaleString("pt-BR")} pts
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
+              (de {max4Reais.toLocaleString("pt-BR")} — eficácia {pesoPercentual}%)
+            </span>
+          </p>
+          <p className="mt-2 text-sm font-semibold">{mensagemPorPotencial(pontos)}</p>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Atualiza automaticamente quando jogos do mata-mata forem encerrados.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -7,9 +7,10 @@ import { useMyTop4, useUpdateTop4, useFaseAtual } from "@/lib/queries/top4";
 import { useTeams } from "@/lib/queries/teams";
 import { useSetting } from "@/lib/queries/settings";
 import { getRegraDaFase, TOP4_REGRA_DEFAULT, type Top4Regra } from "@/lib/top4-rules";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { Top4PotencialCard } from "@/components/top4-potencial-card";
+import { Top4ConfirmMudancaDialog } from "@/components/top4-confirm-mudanca-dialog";
 
 export const Route = createFileRoute("/app/palpites_/top4")({
   head: () => ({ meta: [{ title: "Top 4 — Bolão dos Perebas" }] }),
@@ -110,8 +111,35 @@ function Top4Page() {
     );
   };
 
+  const picksAntigos = useMemo(
+    () => ({
+      campeao: top4?.posicao_1 ?? "",
+      vice: top4?.posicao_2 ?? "",
+      terceiro: top4?.posicao_3 ?? "",
+      quarto: top4?.posicao_4 ?? "",
+    }),
+    [top4],
+  );
+  const picksNovos = useMemo(
+    () => ({ campeao: picks[0], vice: picks[1], terceiro: picks[2], quarto: picks[3] }),
+    [picks],
+  );
+  const mudou =
+    picksAntigos.campeao !== picksNovos.campeao ||
+    picksAntigos.vice !== picksNovos.vice ||
+    picksAntigos.terceiro !== picksNovos.terceiro ||
+    picksAntigos.quarto !== picksNovos.quarto;
+  const temPalpiteAnterior = !!(top4?.posicao_1 && top4?.posicao_2 && top4?.posicao_3 && top4?.posicao_4);
+  const pesoAtual = top4?.peso_no_palpite ?? regra.eficacia;
+
   const handleClickSalvar = () => {
-    if (faseAtual === "antes_copa") {
+    // Sem mudança real → salva direto (sem dialog)
+    if (!mudou) {
+      salvar();
+      return;
+    }
+    // Primeiro palpite (ou antes da Copa, sem perda de eficácia) → sem dialog
+    if (!temPalpiteAnterior || faseAtual === "antes_copa") {
       salvar();
       return;
     }
@@ -151,6 +179,10 @@ function Top4Page() {
           </div>
         </div>
       </section>
+
+      {temPalpiteAnterior && (
+        <Top4PotencialCard picks={picksAntigos} pesoPercentual={pesoAtual} />
+      )}
 
       {bloqueada && (
         <div className="flex items-center gap-2 rounded-2xl border border-muted-foreground/30 bg-muted/40 px-4 py-3 text-sm">
@@ -206,13 +238,13 @@ function Top4Page() {
         </button>
       )}
 
-      <ConfirmDialog
+      <Top4ConfirmMudancaDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Tem certeza?"
-        description={`Você está alterando seu palpite Top 4 durante ${regra.label}. Isso reduz o potencial máximo para ${regra.max_pontos.toLocaleString("pt-BR")} pts (eficácia ${regra.eficacia}%). Tem certeza que quer mudar?`}
-        confirmLabel="Sim, alterar"
-        destructive
+        picksAntigos={picksAntigos}
+        picksNovos={picksNovos}
+        pesoAtual={pesoAtual}
+        pesoNovo={regra.eficacia}
         onConfirm={() => {
           setConfirmOpen(false);
           salvar();
