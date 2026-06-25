@@ -9,6 +9,9 @@ type Breakdown = {
   res: number;
   jzr: number;
   npt: number;
+  aproveitamento_pct?: number | null;
+  jogos_pontuados?: number;
+  jogos_disputados?: number;
 };
 
 type BadgeDef = {

@@ -1380,6 +1380,7 @@ export type Database = {
         Args: never
         Returns: {
           apelido: string
+          aproveitamento_pct: number
           cor: string
           exatos: number
           jec: number
@@ -1405,6 +1406,7 @@ export type Database = {
         Args: { p_data?: string }
         Returns: {
           apelido: string
+          aproveitamento_pct: number
           cor: string
           jec: number
           jzr: number
