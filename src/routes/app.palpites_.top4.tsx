@@ -238,13 +238,13 @@ function Top4Page() {
         </button>
       )}
 
-      <ConfirmDialog
+      <Top4ConfirmMudancaDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Tem certeza?"
-        description={`Você está alterando seu palpite Top 4 durante ${regra.label}. Isso reduz o potencial máximo para ${regra.max_pontos.toLocaleString("pt-BR")} pts (eficácia ${regra.eficacia}%). Tem certeza que quer mudar?`}
-        confirmLabel="Sim, alterar"
-        destructive
+        picksAntigos={picksAntigos}
+        picksNovos={picksNovos}
+        pesoAtual={pesoAtual}
+        pesoNovo={regra.eficacia}
         onConfirm={() => {
           setConfirmOpen(false);
           salvar();
