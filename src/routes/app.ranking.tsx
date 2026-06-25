@@ -29,6 +29,7 @@ type Row = {
   res?: number;
   jzr?: number;
   npt?: number;
+  aproveitamento_pct?: number | null;
   profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null;
 };
 
