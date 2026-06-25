@@ -177,16 +177,26 @@ function Ranking() {
                   </div>
                   <div className="text-right">
                     <p className="font-display text-lg font-bold">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
-                    {showBreakdown && (
+                    <div className="mt-1 flex items-center justify-end gap-3">
                       <button
                         type="button"
-                        onClick={() => toggleExpand(p.id)}
-                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
-                        aria-expanded={isOpen}
+                        onClick={() => setHistoricoOpen({ id: p.id, numero: p.numero, apelido })}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                        title="Ver evolução do ranking"
                       >
-                        {isOpen ? <><ChevronUp className="h-3 w-3" />Ocultar</> : <><ChevronDown className="h-3 w-3" />Detalhes</>}
+                        <TrendingUp className="h-3 w-3" />Evolução
                       </button>
-                    )}
+                      {showBreakdown && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(p.id)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                          aria-expanded={isOpen}
+                        >
+                          {isOpen ? <><ChevronUp className="h-3 w-3" />Ocultar</> : <><ChevronDown className="h-3 w-3" />Detalhes</>}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {showBreakdown && isOpen && (
