@@ -60,6 +60,7 @@ function Ranking() {
   const [tab, setTab] = useState<Tab>("geral");
   const [busca, setBusca] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [historicoOpen, setHistoricoOpen] = useState<null | { id: string; numero: number; apelido: string }>(null);
   const geral = useRanking();
   const diario = useRankingDiario();
   const active = tab === "geral" ? geral : diario;
