@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Minus, Trophy, Info, Users } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Minus, Trophy, Info, Users, TrendingUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRanking } from "@/lib/queries/profiles";
 import { useRankingDiario } from "@/lib/queries/public-profile";
@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RankingBreakdown } from "@/components/ranking-breakdown";
+import { HistoricoRankingDialog } from "@/components/historico-ranking-dialog";
 
 export const Route = createFileRoute("/app/ranking")({
   head: () => ({ meta: [{ title: "Ranking — Bolão dos Perebas" }] }),
@@ -59,6 +60,7 @@ function Ranking() {
   const [tab, setTab] = useState<Tab>("geral");
   const [busca, setBusca] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [historicoOpen, setHistoricoOpen] = useState<null | { id: string; numero: number; apelido: string }>(null);
   const geral = useRanking();
   const diario = useRankingDiario();
   const active = tab === "geral" ? geral : diario;
@@ -175,16 +177,26 @@ function Ranking() {
                   </div>
                   <div className="text-right">
                     <p className="font-display text-lg font-bold">{(p.pontos ?? 0).toLocaleString("pt-BR")}</p>
-                    {showBreakdown && (
+                    <div className="mt-1 flex items-center justify-end gap-3">
                       <button
                         type="button"
-                        onClick={() => toggleExpand(p.id)}
-                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
-                        aria-expanded={isOpen}
+                        onClick={() => setHistoricoOpen({ id: p.id, numero: p.numero, apelido })}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                        title="Ver evolução do ranking"
                       >
-                        {isOpen ? <><ChevronUp className="h-3 w-3" />Ocultar</> : <><ChevronDown className="h-3 w-3" />Detalhes</>}
+                        <TrendingUp className="h-3 w-3" />Evolução
                       </button>
-                    )}
+                      {showBreakdown && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(p.id)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                          aria-expanded={isOpen}
+                        >
+                          {isOpen ? <><ChevronUp className="h-3 w-3" />Ocultar</> : <><ChevronDown className="h-3 w-3" />Detalhes</>}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {showBreakdown && isOpen && (
@@ -208,6 +220,16 @@ function Ranking() {
             );
           })}
         </div>
+      )}
+
+      {historicoOpen && (
+        <HistoricoRankingDialog
+          open={!!historicoOpen}
+          onOpenChange={(v) => !v && setHistoricoOpen(null)}
+          quotaId={historicoOpen.id}
+          numero={historicoOpen.numero}
+          apelido={historicoOpen.apelido}
+        />
       )}
     </div>
   );
