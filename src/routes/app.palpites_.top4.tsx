@@ -111,8 +111,35 @@ function Top4Page() {
     );
   };
 
+  const picksAntigos = useMemo(
+    () => ({
+      campeao: top4?.posicao_1 ?? "",
+      vice: top4?.posicao_2 ?? "",
+      terceiro: top4?.posicao_3 ?? "",
+      quarto: top4?.posicao_4 ?? "",
+    }),
+    [top4],
+  );
+  const picksNovos = useMemo(
+    () => ({ campeao: picks[0], vice: picks[1], terceiro: picks[2], quarto: picks[3] }),
+    [picks],
+  );
+  const mudou =
+    picksAntigos.campeao !== picksNovos.campeao ||
+    picksAntigos.vice !== picksNovos.vice ||
+    picksAntigos.terceiro !== picksNovos.terceiro ||
+    picksAntigos.quarto !== picksNovos.quarto;
+  const temPalpiteAnterior = !!(top4?.posicao_1 && top4?.posicao_2 && top4?.posicao_3 && top4?.posicao_4);
+  const pesoAtual = top4?.peso_no_palpite ?? regra.eficacia;
+
   const handleClickSalvar = () => {
-    if (faseAtual === "antes_copa") {
+    // Sem mudança real → salva direto (sem dialog)
+    if (!mudou) {
+      salvar();
+      return;
+    }
+    // Primeiro palpite (ou antes da Copa, sem perda de eficácia) → sem dialog
+    if (!temPalpiteAnterior || faseAtual === "antes_copa") {
       salvar();
       return;
     }
