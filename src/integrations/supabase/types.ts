@@ -283,6 +283,54 @@ export type Database = {
         }
         Relationships: []
       }
+      historico_ranking_diario: {
+        Row: {
+          criado_em: string
+          data_snapshot: string
+          id: string
+          pontos: number
+          posicao: number
+          quota_id: string
+          total_quotas_ativas: number
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string
+          data_snapshot: string
+          id?: string
+          pontos: number
+          posicao: number
+          quota_id: string
+          total_quotas_ativas: number
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string
+          data_snapshot?: string
+          id?: string
+          pontos?: number
+          posicao?: number
+          quota_id?: string
+          total_quotas_ativas?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historico_ranking_diario_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historico_ranking_diario_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invites: {
         Row: {
           criado_por: string | null
@@ -1290,6 +1338,15 @@ export type Database = {
         }[]
       }
       get_estatisticas_palpites: { Args: { p_match_id: string }; Returns: Json }
+      get_historico_ranking_quota: {
+        Args: { p_quota_id: string }
+        Returns: {
+          data_snapshot: string
+          pontos: number
+          posicao: number
+          total_quotas_ativas: number
+        }[]
+      }
       get_invite_by_token: {
         Args: { p_token: string }
         Returns: {
@@ -1471,6 +1528,7 @@ export type Database = {
         Args: { p_force_admin_override_reset?: boolean }
         Returns: Json
       }
+      snapshot_ranking_diario: { Args: never; Returns: Json }
       vencedor_real: { Args: { p_match_id: string }; Returns: string }
     }
     Enums: {
