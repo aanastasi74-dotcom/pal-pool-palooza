@@ -134,7 +134,6 @@ function Top4Page() {
     picksAntigos.vice !== picksNovos.vice ||
     picksAntigos.terceiro !== picksNovos.terceiro ||
     picksAntigos.quarto !== picksNovos.quarto;
-  const temPalpiteAnterior = !!(top4?.posicao_1 && top4?.posicao_2 && top4?.posicao_3 && top4?.posicao_4);
   const pesoAtual = top4?.peso_no_palpite ?? regra.eficacia;
 
   const handleClickSalvar = () => {
