@@ -245,14 +245,33 @@ function Top4Page() {
         })}
       </div>
 
-      {!bloqueada && (
-        <button
-          onClick={handleClickSalvar}
-          disabled={update.isPending}
-          className="w-full rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-50"
-        >
-          {update.isPending ? "Salvando…" : "Salvar palpite Top 4"}
-        </button>
+      {!bloqueada && (!temPalpiteAnterior || editando) && (
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {temPalpiteAnterior && (
+            <button
+              onClick={() => {
+                setPicks([
+                  top4?.posicao_1 ?? "",
+                  top4?.posicao_2 ?? "",
+                  top4?.posicao_3 ?? "",
+                  top4?.posicao_4 ?? "",
+                ]);
+                setEditando(false);
+              }}
+              disabled={update.isPending}
+              className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-bold text-muted-foreground hover:bg-muted/40 sm:w-auto"
+            >
+              <X className="h-4 w-4" /> Cancelar
+            </button>
+          )}
+          <button
+            onClick={handleClickSalvar}
+            disabled={update.isPending}
+            className="flex-1 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+          >
+            {update.isPending ? "Salvando…" : "Salvar palpite Top 4"}
+          </button>
+        </div>
       )}
 
       <Top4ConfirmMudancaDialog
