@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { buildHeader, getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 import { EstatisticasPalpites } from "@/components/estatisticas-palpites";
+import { fmtOrigem } from "@/lib/jogos/origem-label";
+
 
 export const Route = createFileRoute("/app/jogos")({
   head: () => ({ meta: [{ title: "Jogos — Bolão dos Perebas" }] }),
