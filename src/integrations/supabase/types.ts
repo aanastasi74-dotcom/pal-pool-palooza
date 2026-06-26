@@ -852,6 +852,7 @@ export type Database = {
           posicao_anterior: number | null
           status: string
           tentativas_comprovante: number
+          top4_potencial_inicial: number | null
           user_id: string
         }
         Insert: {
@@ -870,6 +871,7 @@ export type Database = {
           posicao_anterior?: number | null
           status?: string
           tentativas_comprovante?: number
+          top4_potencial_inicial?: number | null
           user_id: string
         }
         Update: {
@@ -888,6 +890,7 @@ export type Database = {
           posicao_anterior?: number | null
           status?: string
           tentativas_comprovante?: number
+          top4_potencial_inicial?: number | null
           user_id?: string
         }
         Relationships: [
