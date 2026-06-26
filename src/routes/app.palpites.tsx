@@ -592,7 +592,12 @@ function PalpiteCard({
       )}
       <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
         <div className="flex items-center justify-end gap-2 sm:gap-3">
-          <p className="font-display text-sm font-bold sm:text-base text-right">{tCasa.nome}</p>
+          <div className="text-right">
+            <p className="font-display text-sm font-bold sm:text-base">{tCasa.nome}</p>
+            {jogo.numero_jogo >= 73 && jogo.numero_jogo <= 88 && jogo.home_origem && (
+              <p className="text-[10px] text-muted-foreground">{fmtOrigem(jogo.home_origem)}</p>
+            )}
+          </div>
           <span className="text-2xl sm:text-3xl">{tCasa.bandeira}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -602,9 +607,34 @@ function PalpiteCard({
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="text-2xl sm:text-3xl">{tFora.bandeira}</span>
-          <p className="font-display text-sm font-bold sm:text-base">{tFora.nome}</p>
+          <div>
+            <p className="font-display text-sm font-bold sm:text-base">{tFora.nome}</p>
+            {jogo.numero_jogo >= 73 && jogo.numero_jogo <= 88 && jogo.away_origem && (
+              <p className="text-[10px] text-muted-foreground">{fmtOrigem(jogo.away_origem)}</p>
+            )}
+          </div>
         </div>
       </div>
+
+      {jogo.numero_jogo >= 73 && jogo.numero_jogo <= 88 && (
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+          {jogo.alocacao_provisoria ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+              ⏳ Provisório · baseado na classificação atual
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+              ✓ Definido
+            </span>
+          )}
+          {jogo.alocacao_admin_override && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-400">
+              ✏️ Editado pelo admin
+            </span>
+          )}
+        </div>
+      )}
+
 
       <div className="mt-4 flex items-center justify-between gap-2">
         <div className="text-xs">
