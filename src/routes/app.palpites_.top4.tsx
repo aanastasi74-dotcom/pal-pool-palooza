@@ -224,7 +224,7 @@ function Top4Page() {
               <span className="text-3xl">{selectedTeam?.bandeira_emoji ?? "🏳️"}</span>
               <select
                 value={pick}
-                disabled={bloqueada}
+                disabled={travado}
                 onChange={(e) => setPos(i, e.target.value)}
                 className="flex-1 rounded-2xl border border-border bg-secondary px-3 py-2 font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60"
               >
