@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, AlertTriangle, Lock } from "lucide-react";
+import { Sparkles, AlertTriangle, Lock, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyTop4, useUpdateTop4, useFaseAtual } from "@/lib/queries/top4";
