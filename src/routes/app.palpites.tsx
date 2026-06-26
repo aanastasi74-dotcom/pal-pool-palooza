@@ -562,7 +562,6 @@ function PalpiteCard({
 
   const dataFmt = jogo.data_jogo
     ? new Date(jogo.data_jogo).toLocaleString("pt-BR", {
-        timeZone: "America/Sao_Paulo",
         day: "2-digit",
         month: "2-digit",
         weekday: "short",
