@@ -40,7 +40,8 @@ function fmtData(iso: string) {
 function fmtHora(iso: string) {
   return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
-import { fmtOrigem } from "@/lib/jogos/origem-label";
+
+
 
 function travaEm(iso?: string | null) {
   if (!iso) return null;
