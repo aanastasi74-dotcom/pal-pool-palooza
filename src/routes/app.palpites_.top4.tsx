@@ -68,9 +68,11 @@ function Top4Page() {
 
   const [picks, setPicks] = useState<string[]>(["", "", "", ""]);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editando, setEditando] = useState(false);
 
   useEffect(() => {
     setPicks([top4?.posicao_1 ?? "", top4?.posicao_2 ?? "", top4?.posicao_3 ?? "", top4?.posicao_4 ?? ""]);
+    setEditando(false);
   }, [top4, quotaId]);
 
   if (loadingQ || loadingF || loadingT || loadingTeams) return <Skeleton className="h-96 w-full" />;
