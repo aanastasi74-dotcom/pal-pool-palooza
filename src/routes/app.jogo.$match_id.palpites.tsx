@@ -130,7 +130,6 @@ function PalpitesDoJogo() {
   const header = buildHeader(match, stadiumMap);
   const dataFmt = match.data_jogo
     ? new Date(match.data_jogo).toLocaleString("pt-BR", {
-        timeZone: "America/Sao_Paulo",
         day: "2-digit",
         month: "2-digit",
         weekday: "short",
