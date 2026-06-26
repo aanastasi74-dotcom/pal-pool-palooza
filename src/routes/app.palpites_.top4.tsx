@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, AlertTriangle, Lock } from "lucide-react";
+import { Sparkles, AlertTriangle, Lock, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyTop4, useUpdateTop4, useFaseAtual } from "@/lib/queries/top4";
@@ -68,9 +68,11 @@ function Top4Page() {
 
   const [picks, setPicks] = useState<string[]>(["", "", "", ""]);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editando, setEditando] = useState(false);
 
   useEffect(() => {
     setPicks([top4?.posicao_1 ?? "", top4?.posicao_2 ?? "", top4?.posicao_3 ?? "", top4?.posicao_4 ?? ""]);
+    setEditando(false);
   }, [top4, quotaId]);
 
   if (loadingQ || loadingF || loadingT || loadingTeams) return <Skeleton className="h-96 w-full" />;
@@ -78,8 +80,11 @@ function Top4Page() {
     return <EmptyState icon={Sparkles} title="Sem quota ativa" description="Compra uma quota pra palpitar no Top 4." />;
   }
 
+  const temPalpiteAnterior = !!(top4?.posicao_1 && top4?.posicao_2 && top4?.posicao_3 && top4?.posicao_4);
+  const travado = bloqueada || (temPalpiteAnterior && !editando);
+
   const setPos = (i: number, v: string) => {
-    if (bloqueada) return;
+    if (travado) return;
     const idxAntigo = picks.indexOf(v);
     const next = [...picks];
     if (idxAntigo !== -1 && idxAntigo !== i) {
@@ -105,7 +110,7 @@ function Top4Page() {
     update.mutate(
       { quota_id: quota.id, posicao_1: picks[0], posicao_2: picks[1], posicao_3: picks[2], posicao_4: picks[3] },
       {
-        onSuccess: () => toast.success("Top 4 salvo. Boa sorte, perebada!"),
+        onSuccess: () => { setEditando(false); toast.success("Top 4 salvo. Boa sorte, perebada!"); },
         onError: (e: any) => toast.error(e?.message ?? "Não foi possível salvar."),
       },
     );
@@ -129,7 +134,6 @@ function Top4Page() {
     picksAntigos.vice !== picksNovos.vice ||
     picksAntigos.terceiro !== picksNovos.terceiro ||
     picksAntigos.quarto !== picksNovos.quarto;
-  const temPalpiteAnterior = !!(top4?.posicao_1 && top4?.posicao_2 && top4?.posicao_3 && top4?.posicao_4);
   const pesoAtual = top4?.peso_no_palpite ?? regra.eficacia;
 
   const handleClickSalvar = () => {
@@ -181,7 +185,11 @@ function Top4Page() {
       </section>
 
       {temPalpiteAnterior && (
-        <Top4PotencialCard picks={picksAntigos} pesoPercentual={pesoAtual} />
+        <Top4PotencialCard
+          picks={picksAntigos}
+          pesoPercentual={pesoAtual}
+          potencialInicial={(quota as any)?.top4_potencial_inicial ?? null}
+        />
       )}
 
       {bloqueada && (
@@ -190,7 +198,16 @@ function Top4Page() {
         </div>
       )}
 
-      {!bloqueada && faseAtual !== "antes_copa" && (
+      {!bloqueada && temPalpiteAnterior && !editando && (
+        <button
+          onClick={() => setEditando(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-primary/40 bg-card px-6 py-3 text-sm font-bold text-primary shadow-card hover:bg-primary/5"
+        >
+          <Pencil className="h-4 w-4" /> Editar palpite Top 4
+        </button>
+      )}
+
+      {!bloqueada && editando && faseAtual !== "antes_copa" && (
         <div className="flex items-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4" /> Mudar agora reduz o potencial para {regra.max_pontos.toLocaleString("pt-BR")} pts (eficácia {regra.eficacia}%).
         </div>
@@ -207,7 +224,7 @@ function Top4Page() {
               <span className="text-3xl">{selectedTeam?.bandeira_emoji ?? "🏳️"}</span>
               <select
                 value={pick}
-                disabled={bloqueada}
+                disabled={travado}
                 onChange={(e) => setPos(i, e.target.value)}
                 className="flex-1 rounded-2xl border border-border bg-secondary px-3 py-2 font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60"
               >
@@ -228,14 +245,33 @@ function Top4Page() {
         })}
       </div>
 
-      {!bloqueada && (
-        <button
-          onClick={handleClickSalvar}
-          disabled={update.isPending}
-          className="w-full rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-50"
-        >
-          {update.isPending ? "Salvando…" : "Salvar palpite Top 4"}
-        </button>
+      {!bloqueada && (!temPalpiteAnterior || editando) && (
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {temPalpiteAnterior && (
+            <button
+              onClick={() => {
+                setPicks([
+                  top4?.posicao_1 ?? "",
+                  top4?.posicao_2 ?? "",
+                  top4?.posicao_3 ?? "",
+                  top4?.posicao_4 ?? "",
+                ]);
+                setEditando(false);
+              }}
+              disabled={update.isPending}
+              className="flex items-center justify-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-bold text-muted-foreground hover:bg-muted/40 sm:w-auto"
+            >
+              <X className="h-4 w-4" /> Cancelar
+            </button>
+          )}
+          <button
+            onClick={handleClickSalvar}
+            disabled={update.isPending}
+            className="flex-1 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+          >
+            {update.isPending ? "Salvando…" : "Salvar palpite Top 4"}
+          </button>
+        </div>
       )}
 
       <Top4ConfirmMudancaDialog
