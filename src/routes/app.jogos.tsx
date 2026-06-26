@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { buildHeader, getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 import { EstatisticasPalpites } from "@/components/estatisticas-palpites";
+import { fmtOrigem } from "@/lib/jogos/origem-label";
+
 
 export const Route = createFileRoute("/app/jogos")({
   head: () => ({ meta: [{ title: "Jogos — Bolão dos Perebas" }] }),
@@ -38,22 +40,9 @@ function fmtData(iso: string) {
 function fmtHora(iso: string) {
   return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
-const POSICAO_LABEL: Record<string, string> = { "1": "1º", "2": "2º", "3": "3º" };
-function fmtOrigem(origem: string): string {
-  if (!origem) return origem;
-  if (origem.startsWith("V")) {
-    const n = origem.slice(1);
-    if (/^\d+$/.test(n)) return `Vencedor Jogo ${n}`;
-  }
-  if (origem.startsWith("P")) {
-    const n = origem.slice(1);
-    if (/^\d+$/.test(n)) return `Perdedor Jogo ${n}`;
-  }
-  const pos = POSICAO_LABEL[origem[0]];
-  const grupo = origem.slice(1);
-  if (!pos || !grupo) return origem;
-  return `${pos} Grupo ${grupo}`;
-}
+
+
+
 function travaEm(iso?: string | null) {
   if (!iso) return null;
   const diff = new Date(iso).getTime() - Date.now();
