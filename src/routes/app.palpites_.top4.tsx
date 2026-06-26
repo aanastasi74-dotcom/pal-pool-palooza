@@ -110,7 +110,7 @@ function Top4Page() {
     update.mutate(
       { quota_id: quota.id, posicao_1: picks[0], posicao_2: picks[1], posicao_3: picks[2], posicao_4: picks[3] },
       {
-        onSuccess: () => toast.success("Top 4 salvo. Boa sorte, perebada!"),
+        onSuccess: () => { setEditando(false); toast.success("Top 4 salvo. Boa sorte, perebada!"); },
         onError: (e: any) => toast.error(e?.message ?? "Não foi possível salvar."),
       },
     );
