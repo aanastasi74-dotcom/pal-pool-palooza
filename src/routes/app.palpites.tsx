@@ -12,6 +12,8 @@ import { useTeams } from "@/lib/queries/teams";
 import { useStadiums } from "@/lib/queries/stadiums";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildHeader, getTeamSide } from "@/lib/match-helpers";
+import { fmtOrigem } from "@/lib/jogos/origem-label";
+
 
 export const Route = createFileRoute("/app/palpites")({
   head: () => ({ meta: [{ title: "Palpites — Bolão dos Perebas" }] }),
