@@ -185,7 +185,11 @@ function Top4Page() {
       </section>
 
       {temPalpiteAnterior && (
-        <Top4PotencialCard picks={picksAntigos} pesoPercentual={pesoAtual} />
+        <Top4PotencialCard
+          picks={picksAntigos}
+          pesoPercentual={pesoAtual}
+          potencialInicial={(quota as any)?.top4_potencial_inicial ?? null}
+        />
       )}
 
       {bloqueada && (
@@ -194,7 +198,16 @@ function Top4Page() {
         </div>
       )}
 
-      {!bloqueada && faseAtual !== "antes_copa" && (
+      {!bloqueada && temPalpiteAnterior && !editando && (
+        <button
+          onClick={() => setEditando(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-primary/40 bg-card px-6 py-3 text-sm font-bold text-primary shadow-card hover:bg-primary/5"
+        >
+          <Pencil className="h-4 w-4" /> Editar palpite Top 4
+        </button>
+      )}
+
+      {!bloqueada && editando && faseAtual !== "antes_copa" && (
         <div className="flex items-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4" /> Mudar agora reduz o potencial para {regra.max_pontos.toLocaleString("pt-BR")} pts (eficácia {regra.eficacia}%).
         </div>
