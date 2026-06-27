@@ -31,14 +31,29 @@ export function useUpdateTop4() {
   });
 }
 
+// N.38: fase do Top 4 é calculada por prazos absolutos (não mais via RPC).
+// Prazos oficiais §8:
+//  - antes_copa  : até 2026-06-11 16:00 BRT (100%)
+//  - grupos      : até 2026-06-28 12:00 BRT (50%)
+//  - round_32    : até 2026-07-04 12:00 BRT (25%)
+//  - depois      : 'oitavas' (palpite travado)
+export const TOP4_INICIO_COPA = new Date("2026-06-11T16:00:00-03:00");
+export const TOP4_DEADLINE_GRUPOS = new Date("2026-06-28T12:00:00-03:00");
+export const TOP4_DEADLINE_R32 = new Date("2026-07-04T12:00:00-03:00");
+
+export function calcularFaseTop4(agora: Date = new Date()): string {
+  if (agora < TOP4_INICIO_COPA) return "antes_copa";
+  if (agora < TOP4_DEADLINE_GRUPOS) return "grupos";
+  if (agora < TOP4_DEADLINE_R32) return "round_32";
+  return "oitavas";
+}
+
 export function useFaseAtual() {
   return useQuery({
     queryKey: ["fase-atual"],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("fase_atual_copa");
-      if (error) throw error;
-      return (data as string) ?? "antes_copa";
-    },
+    queryFn: async () => calcularFaseTop4(),
     staleTime: 60_000,
+    refetchInterval: 60_000,
   });
 }
+
