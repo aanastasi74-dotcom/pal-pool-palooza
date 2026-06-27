@@ -145,6 +145,11 @@ function Top4Page() {
     setConfirmOpen(true);
   };
 
+  if (loadingQ || loadingF || loadingT || loadingTeams) return <Skeleton className="h-96 w-full" />;
+  if (!quota) {
+    return <EmptyState icon={Sparkles} title="Sem quota ativa" description="Compra uma quota pra palpitar no Top 4." />;
+  }
+
   return (
     <div className="space-y-6">
       <div>
