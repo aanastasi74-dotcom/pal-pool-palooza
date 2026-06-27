@@ -171,6 +171,7 @@ export function AppShell() {
       <BugReportFAB />
       {profile && <BoasVindasCopaDialog />}
       {profile && <EsclarecimentoEmpateDialog />}
+      {profile && <AjustePrazosTop4Dialog />}
     </div>
   );
 }
