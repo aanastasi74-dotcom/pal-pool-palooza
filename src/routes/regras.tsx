@@ -282,11 +282,14 @@ function RegrasPage() {
               </thead>
               <tbody>
                 <tr><td className="border border-border px-3 py-2">Até o início do primeiro jogo (11/06/2026 às 16h BRT)</td><td className="border border-border px-3 py-2 font-semibold">1.000 pts</td><td className="border border-border px-3 py-2">400 pts</td></tr>
-                <tr><td className="border border-border px-3 py-2">Até 23:59 de 27/06/2026 (grupos)</td><td className="border border-border px-3 py-2">500 pts (50%)</td><td className="border border-border px-3 py-2">200 pts (50%)</td></tr>
-                <tr><td className="border border-border px-3 py-2">Até 23:59 de 03/07/2026 (round of 32)</td><td className="border border-border px-3 py-2">250 pts (25%)</td><td className="border border-border px-3 py-2">100 pts (25%)</td></tr>
-                <tr><td className="border border-border px-3 py-2">Depois de 03/07/2026</td><td className="border border-border px-3 py-2" colSpan={2}>Palpite travado</td></tr>
+                <tr><td className="border border-border px-3 py-2">Até 12:00 BRT de 28/06/2026 (antes do início do Round of 32)</td><td className="border border-border px-3 py-2">500 pts (50%)</td><td className="border border-border px-3 py-2">200 pts (50%)</td></tr>
+                <tr><td className="border border-border px-3 py-2">Até 12:00 BRT de 04/07/2026 (antes do início das oitavas)</td><td className="border border-border px-3 py-2">250 pts (25%)</td><td className="border border-border px-3 py-2">100 pts (25%)</td></tr>
+                <tr><td className="border border-border px-3 py-2">Depois de 12:00 BRT de 04/07/2026</td><td className="border border-border px-3 py-2" colSpan={2}>Palpite travado</td></tr>
               </tbody>
             </table>
+          </div>
+          <div className="mt-3 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            <strong>Adendo (27/06/2026):</strong> os prazos finais de 50% e 25% foram ajustados de 23:59 pra 12:00 do dia seguinte (28/06 e 04/07, respectivamente). Razão: os prazos antigos terminavam antes do final da fase posterior, contrariando o espírito da regra.
           </div>
           <p className="mt-3">
             <strong>Atenção (regra importante):</strong> qualquer alteração no palpite Top 4 — mesmo de uma única
@@ -294,9 +297,10 @@ function RegrasPage() {
             apenas o palpite modificado. Exemplo: se você modificar apenas o Vice durante a fase de grupos, todos
             os 4 palpites passam a valer 50% (mesmo os que você não tocou). Acerto em posição errada (palpitou
             Brasil como Campeão e Brasil terminou em 3º) vale 400 pts no início, com os mesmos redutores. Pontuação
-            máxima do Top 4 (mantido inalterado antes do início da Copa) é 4 × 1.000 = 4.000 pts. Após 03/07/2026,
+            máxima do Top 4 (mantido inalterado antes do início da Copa) é 4 × 1.000 = 4.000 pts. Após 12:00 BRT de 04/07/2026,
             palpite Top 4 fica travado até o fim da Copa.
           </p>
+
         </Secao>
 
         <Secao n="9" titulo="Ranking e Desempate">

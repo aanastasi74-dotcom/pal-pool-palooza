@@ -13,6 +13,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { BugReportFAB } from "./bug-report-fab";
 import { MaintenanceBanner } from "./maintenance-banner";
 import { EsclarecimentoEmpateDialog } from "./esclarecimento-empate-dialog";
+import { AjustePrazosTop4Dialog } from "./ajuste-prazos-top4-dialog";
 import { BoasVindasCopaDialog } from "./boas-vindas-copa-dialog";
 import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { useAuth } from "@/lib/auth-context";
@@ -170,6 +171,7 @@ export function AppShell() {
       <BugReportFAB />
       {profile && <BoasVindasCopaDialog />}
       {profile && <EsclarecimentoEmpateDialog />}
+      {profile && <AjustePrazosTop4Dialog />}
     </div>
   );
 }
