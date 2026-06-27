@@ -75,11 +75,6 @@ function Top4Page() {
     setEditando(false);
   }, [top4, quotaId]);
 
-  if (loadingQ || loadingF || loadingT || loadingTeams) return <Skeleton className="h-96 w-full" />;
-  if (!quota) {
-    return <EmptyState icon={Sparkles} title="Sem quota ativa" description="Compra uma quota pra palpitar no Top 4." />;
-  }
-
   const temPalpiteAnterior = !!(top4?.posicao_1 && top4?.posicao_2 && top4?.posicao_3 && top4?.posicao_4);
   const travado = bloqueada || (temPalpiteAnterior && !editando);
 
@@ -149,6 +144,11 @@ function Top4Page() {
     }
     setConfirmOpen(true);
   };
+
+  if (loadingQ || loadingF || loadingT || loadingTeams) return <Skeleton className="h-96 w-full" />;
+  if (!quota) {
+    return <EmptyState icon={Sparkles} title="Sem quota ativa" description="Compra uma quota pra palpitar no Top 4." />;
+  }
 
   return (
     <div className="space-y-6">
