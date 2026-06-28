@@ -1,5 +1,10 @@
 // Lógica de cálculo do potencial máximo do Top 4 considerando o chaveamento
 // do mata-mata. Tudo client-side; não escreve nada no banco.
+//
+// ⚠️ ATENÇÃO: a edge function supabase/functions/snapshot-top4-potenciais-iniciais
+// tem uma cópia desse algoritmo (Deno). Se mudar aqui, FIXE LÁ TAMBÉM.
+// Bug do N.39/N.40 surgiu exatamente dessa duplicação silenciosamente
+// desincronizada.
 
 export type Top4Picks = {
   // bracket_position codes (ex: "GA1") — mesmo formato salvo em top4_predictions
