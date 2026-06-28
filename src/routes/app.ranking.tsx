@@ -1,14 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Minus, Trophy, Info, Users, TrendingUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRanking } from "@/lib/queries/profiles";
 import { useRankingDiario } from "@/lib/queries/public-profile";
+import { useTeams } from "@/lib/queries/teams";
+import { useSetting } from "@/lib/queries/settings";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RankingBreakdown } from "@/components/ranking-breakdown";
 import { HistoricoRankingDialog } from "@/components/historico-ranking-dialog";
+import { Top4QuotaDetalheDialog } from "@/components/top4-quota-detalhe-dialog";
+import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
 
 export const Route = createFileRoute("/app/ranking")({
   head: () => ({ meta: [{ title: "Ranking — Bolão dos Perebas" }] }),
@@ -31,6 +37,11 @@ type Row = {
   jzr?: number;
   npt?: number;
   aproveitamento_pct?: number | null;
+  top4_p1?: string | null;
+  top4_p2?: string | null;
+  top4_p3?: string | null;
+  top4_p4?: string | null;
+  top4_peso?: number | null;
   profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null;
 };
 
