@@ -93,6 +93,24 @@ function Ranking() {
     },
     staleTime: 60_000,
   });
+
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const channel = supabase
+      .channel("ranking-matches-realtime")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "matches" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["matches", "ranking-pot"] });
+          queryClient.invalidateQueries({ queryKey: ["matches", "top4-potencial"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
   const { data: publicoAt } = useSetting<string>("top4_publico_a_partir_de");
   const top4Clickable = useMemo(() => {
     if (!publicoAt) return false;
