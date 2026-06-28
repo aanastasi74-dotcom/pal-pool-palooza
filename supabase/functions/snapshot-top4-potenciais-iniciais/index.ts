@@ -3,6 +3,10 @@
 // pra cada quota com palpite salvo e grava em quotas.top4_potencial_inicial.
 // Disparada pelo trigger trg_snapshot_top4_potencial_inicial quando o 72º
 // jogo da fase de grupos é encerrado. Idempotente (UPDATE WHERE id).
+//
+// ⚠️ ATENÇÃO: este arquivo é uma cópia do algoritmo em
+// src/lib/top4-potencial/engine.ts. Se mudar a lógica aqui, FIXE LÁ TAMBÉM
+// (e vice-versa). Bug do N.39/N.40 surgiu exatamente dessa duplicação.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -49,7 +53,11 @@ type TeamLike = { id: string; bracket_position: string };
 
 const VALOR_ACERTO_POSICAO = 1000;
 const VALOR_POSICAO_ERRADA = 400;
+const PLACEHOLDER = "__placeholder__";
 const PESO_INICIAL_PERCENTUAL = 100; // snapshot tirado no fim da fase de grupos → eficácia plena
+
+type SlotKey = "campeao" | "vice" | "terceiro" | "quarto";
+const SLOTS: SlotKey[] = ["campeao", "vice", "terceiro", "quarto"];
 
 function derivarChaveamento(matches: MatchLike[]) {
   const byNumero = new Map<number, MatchLike>();
@@ -106,14 +114,25 @@ function derivarChaveamento(matches: MatchLike[]) {
   return { chaves, ladoDaChave };
 }
 
-function permutar<T>(arr: T[]): T[][] {
-  if (arr.length <= 1) return [arr];
-  const out: T[][] = [];
-  for (let i = 0; i < arr.length; i++) {
-    const rest = [...arr.slice(0, i), ...arr.slice(i + 1)];
-    for (const p of permutar(rest)) out.push([arr[i], ...p]);
+function calcularPontosCenario(
+  picksTeamIds: Record<SlotKey, string>,
+  cenario: Record<SlotKey, string>,
+  fator: number,
+): number {
+  const escolhasPereba = new Map<string, SlotKey>();
+  for (const s of SLOTS) escolhasPereba.set(picksTeamIds[s], s);
+
+  const posicoesReais = new Map<string, SlotKey>();
+  for (const s of SLOTS) posicoesReais.set(cenario[s], s);
+
+  let pontos = 0;
+  for (const [teamId, slotPereba] of escolhasPereba) {
+    if (teamId === PLACEHOLDER) continue;
+    const slotReal = posicoesReais.get(teamId);
+    if (!slotReal) continue;
+    pontos += slotReal === slotPereba ? VALOR_ACERTO_POSICAO : VALOR_POSICAO_ERRADA;
   }
-  return out;
+  return Math.floor(pontos * fator);
 }
 
 function calcularPotencialMaximo(
@@ -131,53 +150,55 @@ function calcularPotencialMaximo(
   if (!chav) return 0;
 
   const idDeBp = new Map(teams.map((t) => [t.bracket_position, t.id]));
-  const slots = ["campeao", "vice", "terceiro", "quarto"] as const;
-  const loc = {} as Record<typeof slots[number], Chave | "fora">;
-  for (const k of slots) {
-    const teamId = idDeBp.get(picks[k]);
-    if (!teamId) { loc[k] = "fora"; continue; }
-    const c = (["A", "B", "C", "D"] as Chave[]).find((ch) => chav.chaves[ch].has(teamId));
-    loc[k] = c ?? "fora";
+  const picksTeamIds: Record<SlotKey, string> = {
+    campeao: idDeBp.get(picks.campeao) ?? PLACEHOLDER,
+    vice: idDeBp.get(picks.vice) ?? PLACEHOLDER,
+    terceiro: idDeBp.get(picks.terceiro) ?? PLACEHOLDER,
+    quarto: idDeBp.get(picks.quarto) ?? PLACEHOLDER,
+  };
+
+  const teamIds = SLOTS.map((s) => picksTeamIds[s]).filter((id) => id !== PLACEHOLDER);
+  const localizacao = new Map<string, Chave | "fora">();
+  for (const tid of teamIds) {
+    const chave = (["A", "B", "C", "D"] as Chave[]).find((c) => chav.chaves[c].has(tid));
+    localizacao.set(tid, chave ?? "fora");
   }
 
+  const candidatos: Record<Chave, string[]> = { A: [], B: [], C: [], D: [] };
+  for (const tid of teamIds) {
+    const loc = localizacao.get(tid);
+    if (loc && loc !== "fora") candidatos[loc].push(tid);
+  }
+
+  const opcoes = (c: Chave) => (candidatos[c].length > 0 ? candidatos[c] : [PLACEHOLDER]);
   const fator = pesoPercentual / 100;
-  const picksDistintos = Array.from(new Set(slots.map((s) => picks[s]).filter(Boolean)));
   let melhor = 0;
 
-  for (const perm of permutar(picksDistintos)) {
-    const atrib: Partial<Record<typeof slots[number], string>> = {};
-    for (let i = 0; i < perm.length && i < slots.length; i++) atrib[slots[i]] = perm[i];
-
-    let viavel = true;
-    const usadas = new Set<Chave>();
-    for (const s of slots) {
-      const bp = atrib[s];
-      if (!bp) continue;
-      const k = slots.find((sl) => picks[sl] === bp)!;
-      const cv = loc[k];
-      if (cv === "fora") { viavel = false; break; }
-      if (usadas.has(cv as Chave)) { viavel = false; break; }
-      usadas.add(cv as Chave);
+  for (const semiA of opcoes("A")) {
+    for (const semiB of opcoes("B")) {
+      for (const semiC of opcoes("C")) {
+        for (const semiD of opcoes("D")) {
+          for (const venceuS1 of [semiA, semiB]) {
+            const perdeuS1 = venceuS1 === semiA ? semiB : semiA;
+            for (const venceuS2 of [semiC, semiD]) {
+              const perdeuS2 = venceuS2 === semiC ? semiD : semiC;
+              for (const campeao of [venceuS1, venceuS2]) {
+                const vice = campeao === venceuS1 ? venceuS2 : venceuS1;
+                for (const terceiro of [perdeuS1, perdeuS2]) {
+                  const quarto = terceiro === perdeuS1 ? perdeuS2 : perdeuS1;
+                  const pts = calcularPontosCenario(
+                    picksTeamIds,
+                    { campeao, vice, terceiro, quarto },
+                    fator,
+                  );
+                  if (pts > melhor) melhor = pts;
+                }
+              }
+            }
+          }
+        }
+      }
     }
-    if (!viavel) continue;
-
-    const bpC = atrib.campeao;
-    const bpV = atrib.vice;
-    if (bpC && bpV) {
-      const kC = slots.find((sl) => picks[sl] === bpC)!;
-      const kV = slots.find((sl) => picks[sl] === bpV)!;
-      if (chav.ladoDaChave[loc[kC] as Chave] === chav.ladoDaChave[loc[kV] as Chave]) continue;
-    }
-
-    let pontos = 0;
-    for (const s of slots) {
-      const bp = atrib[s];
-      if (!bp) continue;
-      const kOrig = slots.find((sl) => picks[sl] === bp)!;
-      pontos += kOrig === s ? VALOR_ACERTO_POSICAO : VALOR_POSICAO_ERRADA;
-    }
-    pontos = Math.floor(pontos * fator);
-    if (pontos > melhor) melhor = pontos;
   }
   return melhor;
 }
@@ -191,7 +212,6 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-  // Defensivo: só roda se os 72 jogos da fase de grupos estiverem encerrados
   const { count: encerrados, error: errCount } = await supabase
     .from("matches")
     .select("id", { count: "exact", head: true })
@@ -214,7 +234,6 @@ Deno.serve(async (req) => {
 
   let processadas = 0;
   let erros = 0;
-  const detalhes: Array<{ quota_id: string; potencial: number }> = [];
 
   for (const p of preds ?? []) {
     const picks: Top4Picks = {
@@ -242,7 +261,6 @@ Deno.serve(async (req) => {
       console.error("update quota falhou", p.quota_id, errU.message);
     } else {
       processadas++;
-      detalhes.push({ quota_id: p.quota_id, potencial });
     }
   }
 
