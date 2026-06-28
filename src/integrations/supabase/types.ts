@@ -1458,6 +1458,11 @@ export type Database = {
           rgm: number
           rgv: number
           sigla: string
+          top4_p1: string
+          top4_p2: string
+          top4_p3: string
+          top4_p4: string
+          top4_peso: number
           user_id: string
           variacao: number
         }[]
@@ -1481,6 +1486,11 @@ export type Database = {
           rgm: number
           rgv: number
           sigla: string
+          top4_p1: string
+          top4_p2: string
+          top4_p3: string
+          top4_p4: string
+          top4_peso: number
           user_id: string
           variacao: number
         }[]
