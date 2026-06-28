@@ -264,6 +264,15 @@ function Ranking() {
                       jogos_pontuados: (p.pex ?? 0) + (p.rdf ?? 0) + (p.rgm ?? 0) + (p.rgv ?? 0) + (p.res ?? 0),
                       jogos_disputados: (p.pex ?? 0) + (p.rdf ?? 0) + (p.rgm ?? 0) + (p.rgv ?? 0) + (p.res ?? 0) + (p.jzr ?? 0),
                     }}
+                    pot={
+                      potencialPorQuota.has(p.id)
+                        ? {
+                            valor: potencialPorQuota.get(p.id) ?? 0,
+                            clickable: top4Clickable,
+                            onClick: top4Clickable ? () => setTop4Open({ id: p.id }) : undefined,
+                          }
+                        : null
+                    }
                   />
                 )}
               </div>
