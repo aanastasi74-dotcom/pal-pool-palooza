@@ -97,34 +97,41 @@ export function derivarChaveamento(matches: MatchLike[]): {
   return { chaves, ladoDaChave };
 }
 
-/** Localiza cada pick (bracket_position) na chave correspondente. */
-function localizarPicks(
-  picks: Top4Picks,
-  teams: TeamLike[],
-  chaves: Record<Chave, Set<string>>,
-): Record<keyof Top4Picks, Chave | "fora"> {
-  const idDeBp = new Map(teams.map((t) => [t.bracket_position, t.id]));
-  const loc = {} as Record<keyof Top4Picks, Chave | "fora">;
-  for (const k of ["campeao", "vice", "terceiro", "quarto"] as const) {
-    const teamId = idDeBp.get(picks[k]);
-    if (!teamId) {
-      loc[k] = "fora";
-      continue;
-    }
-    const chave = (["A", "B", "C", "D"] as Chave[]).find((c) => chaves[c].has(teamId));
-    loc[k] = chave ?? "fora";
-  }
-  return loc;
-}
-
 const VALOR_ACERTO_POSICAO = 1000;
 const VALOR_POSICAO_ERRADA = 400;
+const PLACEHOLDER = "__placeholder__";
+
+type SlotKey = "campeao" | "vice" | "terceiro" | "quarto";
+const SLOTS: SlotKey[] = ["campeao", "vice", "terceiro", "quarto"];
+
+function calcularPontosCenario(
+  picksTeamIds: Record<SlotKey, string>,
+  cenario: Record<SlotKey, string>,
+  fator: number,
+): number {
+  // mapa teamId -> slot escolhido pelo pereba
+  const escolhasPereba = new Map<string, SlotKey>();
+  for (const s of SLOTS) escolhasPereba.set(picksTeamIds[s], s);
+
+  // mapa teamId -> slot no cenário real
+  const posicoesReais = new Map<string, SlotKey>();
+  for (const s of SLOTS) posicoesReais.set(cenario[s], s);
+
+  let pontos = 0;
+  for (const [teamId, slotPereba] of escolhasPereba) {
+    if (teamId === PLACEHOLDER) continue;
+    const slotReal = posicoesReais.get(teamId);
+    if (!slotReal) continue;
+    pontos += slotReal === slotPereba ? VALOR_ACERTO_POSICAO : VALOR_POSICAO_ERRADA;
+  }
+  return Math.floor(pontos * fator);
+}
 
 /**
- * Calcula o potencial máximo (em pts) do Top 4 do pereba dado o chaveamento.
- * Enumera todas as 24 permutações; mantém só as viáveis no bracket.
+ * Calcula o potencial máximo (em pts) do Top 4 enumerando cenários
+ * do bracket (semifinalistas por chave + matchings de final/3º lugar).
  */
-export function calcularPotencialMaximo(
+export function calcularPotencialMaximoTop4(
   picks: Top4Picks,
   matches: MatchLike[],
   teams: TeamLike[],
@@ -139,70 +146,67 @@ export function calcularPotencialMaximo(
   const chav = derivarChaveamento(matches);
   if (!chav) return { pontos: 0, faseGruposCompleta };
 
-  const loc = localizarPicks(picks, teams, chav.chaves);
-  const fator = pesoPercentual / 100;
-
-  const slots = ["campeao", "vice", "terceiro", "quarto"] as const;
-  const valores = picks;
-
-  const permutar = <T,>(arr: T[]): T[][] => {
-    if (arr.length <= 1) return [arr];
-    const out: T[][] = [];
-    for (let i = 0; i < arr.length; i++) {
-      const rest = [...arr.slice(0, i), ...arr.slice(i + 1)];
-      for (const p of permutar(rest)) out.push([arr[i], ...p]);
-    }
-    return out;
+  const idDeBp = new Map(teams.map((t) => [t.bracket_position, t.id]));
+  const picksTeamIds: Record<SlotKey, string> = {
+    campeao: idDeBp.get(picks.campeao) ?? PLACEHOLDER,
+    vice: idDeBp.get(picks.vice) ?? PLACEHOLDER,
+    terceiro: idDeBp.get(picks.terceiro) ?? PLACEHOLDER,
+    quarto: idDeBp.get(picks.quarto) ?? PLACEHOLDER,
   };
 
+  // Localiza cada time do pereba em uma chave
+  const teamIds = SLOTS.map((s) => picksTeamIds[s]).filter((id) => id !== PLACEHOLDER);
+  const localizacao = new Map<string, Chave | "fora">();
+  for (const tid of teamIds) {
+    const chave = (["A", "B", "C", "D"] as Chave[]).find((c) => chav.chaves[c].has(tid));
+    localizacao.set(tid, chave ?? "fora");
+  }
+
+  // Candidatos por chave (times do pereba presentes na chave)
+  const candidatos: Record<Chave, string[]> = { A: [], B: [], C: [], D: [] };
+  for (const tid of teamIds) {
+    const loc = localizacao.get(tid);
+    if (loc && loc !== "fora") candidatos[loc].push(tid);
+  }
+
+  const opcoes = (c: Chave) => (candidatos[c].length > 0 ? candidatos[c] : [PLACEHOLDER]);
+  const fator = pesoPercentual / 100;
   let melhor = 0;
-  const picksDistintos = Array.from(new Set(slots.map((s) => valores[s]).filter(Boolean)));
 
-  for (const perm of permutar(picksDistintos)) {
-    // Atribui perm[i] à posição slots[i] (ou nenhum se perm é menor)
-    const atrib: Partial<Record<typeof slots[number], string>> = {};
-    for (let i = 0; i < perm.length && i < slots.length; i++) atrib[slots[i]] = perm[i];
-
-    // Viabilidade
-    let viavel = true;
-    const chavesUsadas = new Set<Chave>();
-    for (const s of slots) {
-      const bp = atrib[s];
-      if (!bp) continue;
-      const k = slots.find((sl) => valores[sl] === bp)!;
-      const cv = loc[k];
-      if (cv === "fora") { viavel = false; break; }
-      if (chavesUsadas.has(cv)) { viavel = false; break; }
-      chavesUsadas.add(cv);
+  // Enumera 1 semifinalista por chave
+  for (const semiA of opcoes("A")) {
+    for (const semiB of opcoes("B")) {
+      for (const semiC of opcoes("C")) {
+        for (const semiD of opcoes("D")) {
+          // Semi 1: A vs B; Semi 2: C vs D
+          for (const venceuS1 of [semiA, semiB]) {
+            const perdeuS1 = venceuS1 === semiA ? semiB : semiA;
+            for (const venceuS2 of [semiC, semiD]) {
+              const perdeuS2 = venceuS2 === semiC ? semiD : semiC;
+              for (const campeao of [venceuS1, venceuS2]) {
+                const vice = campeao === venceuS1 ? venceuS2 : venceuS1;
+                for (const terceiro of [perdeuS1, perdeuS2]) {
+                  const quarto = terceiro === perdeuS1 ? perdeuS2 : perdeuS1;
+                  const pts = calcularPontosCenario(
+                    picksTeamIds,
+                    { campeao, vice, terceiro, quarto },
+                    fator,
+                  );
+                  if (pts > melhor) melhor = pts;
+                }
+              }
+            }
+          }
+        }
+      }
     }
-    if (!viavel) continue;
-
-    // Campeão e vice em lados opostos
-    const bpCamp = atrib.campeao;
-    const bpVice = atrib.vice;
-    if (bpCamp && bpVice) {
-      const kCamp = slots.find((sl) => valores[sl] === bpCamp)!;
-      const kVice = slots.find((sl) => valores[sl] === bpVice)!;
-      const ladoC = chav.ladoDaChave[loc[kCamp] as Chave];
-      const ladoV = chav.ladoDaChave[loc[kVice] as Chave];
-      if (ladoC === ladoV) continue;
-    }
-
-    // Pontos: o pick original do pereba pra esse bp vs a posição atribuída
-    let pontos = 0;
-    for (const s of slots) {
-      const bp = atrib[s];
-      if (!bp) continue;
-      const kOriginal = slots.find((sl) => valores[sl] === bp)!;
-      if (kOriginal === s) pontos += VALOR_ACERTO_POSICAO;
-      else pontos += VALOR_POSICAO_ERRADA;
-    }
-    pontos = Math.floor(pontos * fator);
-    if (pontos > melhor) melhor = pontos;
   }
 
   return { pontos: melhor, faseGruposCompleta };
 }
+
+// Backward-compat: nome antigo usado pelos componentes
+export const calcularPotencialMaximo = calcularPotencialMaximoTop4;
 
 export function mensagemPorPotencial(pts: number): string {
   if (pts >= 4000) return "🏆 Cenário perfeito ainda possível!";
