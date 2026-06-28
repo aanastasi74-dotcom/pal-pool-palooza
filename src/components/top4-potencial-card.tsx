@@ -18,7 +18,7 @@ export function Top4PotencialCard({ picks, pesoPercentual, potencialInicial }: P
     queryFn: async () => {
       const { data, error } = await supabase
         .from("matches")
-        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status")
+        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora")
         .order("numero_jogo", { ascending: true });
       if (error) throw error;
       return data ?? [];
