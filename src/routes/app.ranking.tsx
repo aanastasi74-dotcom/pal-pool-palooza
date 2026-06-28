@@ -290,6 +290,24 @@ function Ranking() {
           apelido={historicoOpen.apelido}
         />
       )}
+      {top4Row && top4Row.top4_p1 && top4Row.top4_p2 && top4Row.top4_p3 && top4Row.top4_p4 && (
+        <Top4QuotaDetalheDialog
+          open={!!top4Open}
+          onOpenChange={(v) => !v && setTop4Open(null)}
+          apelido={top4Row.profile?.apelido ?? "—"}
+          numero={top4Row.numero}
+          picks={{
+            campeao: top4Row.top4_p1,
+            vice: top4Row.top4_p2,
+            terceiro: top4Row.top4_p3,
+            quarto: top4Row.top4_p4,
+          }}
+          teams={teams as any}
+          matches={matches as any}
+          potencial={potencialPorQuota.get(top4Row.id) ?? 0}
+          peso={top4Row.top4_peso ?? 100}
+        />
+      )}
     </div>
   );
 }
