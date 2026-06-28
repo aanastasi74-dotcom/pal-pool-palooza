@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Minus, Trophy, Info, Users, TrendingUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRanking } from "@/lib/queries/profiles";
@@ -86,13 +86,31 @@ function Ranking() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("matches")
-        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status")
+        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora")
         .order("numero_jogo", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
     staleTime: 60_000,
   });
+
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const channel = supabase
+      .channel("ranking-matches-realtime")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "matches" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["matches", "ranking-pot"] });
+          queryClient.invalidateQueries({ queryKey: ["matches", "top4-potencial"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
   const { data: publicoAt } = useSetting<string>("top4_publico_a_partir_de");
   const top4Clickable = useMemo(() => {
     if (!publicoAt) return false;
