@@ -26,6 +26,11 @@ export function useRankingDiario(data?: string) {
         jzr: r.jzr ?? 0,
         npt: r.npt ?? 0,
         aproveitamento_pct: r.aproveitamento_pct ?? null,
+        top4_p1: r.top4_p1 ?? null,
+        top4_p2: r.top4_p2 ?? null,
+        top4_p3: r.top4_p3 ?? null,
+        top4_p4: r.top4_p4 ?? null,
+        top4_peso: r.top4_peso ?? null,
         profile: { id: r.user_id, apelido: r.apelido, cor: r.cor, sigla: r.sigla },
       }));
     },
