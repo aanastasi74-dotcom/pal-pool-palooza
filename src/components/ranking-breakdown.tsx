@@ -81,7 +81,22 @@ const BADGES: BadgeDef[] = [
   },
 ];
 
-export function RankingBreakdown({ b }: { b: Breakdown }) {
+export function RankingBreakdown({
+  b,
+  pot,
+}: {
+  b: Breakdown;
+  pot?: { valor: number; clickable: boolean; onClick?: () => void } | null;
+}) {
+  const potCls =
+    pot == null
+      ? ""
+      : pot.valor >= 2000
+        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-300/60 dark:border-emerald-500/40"
+        : pot.valor >= 1000
+          ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border-amber-300/60 dark:border-amber-500/40"
+          : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border-rose-300/60 dark:border-rose-500/40";
+
   return (
     <div className="mt-3 flex flex-wrap gap-1.5">
       {BADGES.map((bd) => (
@@ -125,6 +140,31 @@ export function RankingBreakdown({ b }: { b: Breakdown }) {
           </PopoverContent>
         </Popover>
       )}
+      {pot != null && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              onClick={pot.clickable ? pot.onClick : undefined}
+              role={pot.clickable ? "button" : undefined}
+              aria-disabled={!pot.clickable}
+              className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold transition ${potCls} ${pot.clickable ? "cursor-pointer hover:opacity-80" : "cursor-default"}`}
+              title="POT — Potencial máximo do Top 4"
+            >
+              <span>POT</span>
+              <span className="font-bold tabular-nums">{pot.valor.toLocaleString("pt-BR")}</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-64 text-xs">
+            <p className="font-display text-sm font-bold">POT — Potencial do Top 4</p>
+            <p className="mt-1 text-muted-foreground">
+              Potencial máximo do Top 4 considerando o chaveamento atual do mata-mata. Atualiza após cada jogo encerrar.
+              {pot.clickable ? " Toque pra ver os 4 times palpitados." : ""}
+            </p>
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   );
 }
+

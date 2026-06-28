@@ -1,14 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Minus, Trophy, Info, Users, TrendingUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRanking } from "@/lib/queries/profiles";
 import { useRankingDiario } from "@/lib/queries/public-profile";
+import { useTeams } from "@/lib/queries/teams";
+import { useSetting } from "@/lib/queries/settings";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RankingBreakdown } from "@/components/ranking-breakdown";
 import { HistoricoRankingDialog } from "@/components/historico-ranking-dialog";
+import { Top4QuotaDetalheDialog } from "@/components/top4-quota-detalhe-dialog";
+import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
 
 export const Route = createFileRoute("/app/ranking")({
   head: () => ({ meta: [{ title: "Ranking — Bolão dos Perebas" }] }),
@@ -31,6 +37,11 @@ type Row = {
   jzr?: number;
   npt?: number;
   aproveitamento_pct?: number | null;
+  top4_p1?: string | null;
+  top4_p2?: string | null;
+  top4_p3?: string | null;
+  top4_p4?: string | null;
+  top4_peso?: number | null;
   profile?: { nome?: string; apelido?: string; cor?: string; sigla?: string | null } | null;
 };
 
@@ -61,12 +72,49 @@ function Ranking() {
   const [busca, setBusca] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [historicoOpen, setHistoricoOpen] = useState<null | { id: string; numero: number; apelido: string }>(null);
+  const [top4Open, setTop4Open] = useState<null | { id: string }>(null);
   const geral = useRanking();
   const diario = useRankingDiario();
   const active = tab === "geral" ? geral : diario;
   const isLoading = active.isLoading;
 
   const rows = (active.data ?? []) as Row[];
+
+  const { data: teams = [] } = useTeams();
+  const { data: matches = [] } = useQuery({
+    queryKey: ["matches", "ranking-pot"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("matches")
+        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status,vencedor")
+        .order("numero_jogo", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 60_000,
+  });
+  const { data: publicoAt } = useSetting<string>("top4_publico_a_partir_de");
+  const top4Clickable = useMemo(() => {
+    if (!publicoAt) return false;
+    return Date.now() >= new Date(publicoAt).getTime();
+  }, [publicoAt]);
+
+  const potencialPorQuota = useMemo(() => {
+    const map = new Map<string, number>();
+    if (!matches.length || !teams.length) return map;
+    for (const p of rows) {
+      if (!p.top4_p1 || !p.top4_p2 || !p.top4_p3 || !p.top4_p4) continue;
+      const peso = p.top4_peso ?? 100;
+      const r = calcularPotencialMaximoTop4(
+        { campeao: p.top4_p1, vice: p.top4_p2, terceiro: p.top4_p3, quarto: p.top4_p4 },
+        matches as any,
+        teams as any,
+        peso,
+      );
+      if (r.faseGruposCompleta) map.set(p.id, r.pontos);
+    }
+    return map;
+  }, [rows, matches, teams]);
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => {
@@ -82,6 +130,8 @@ function Ranking() {
     if (!q) return true;
     return (p.profile?.apelido ?? "").toLowerCase().includes(q) || (p.profile?.nome ?? "").toLowerCase().includes(q);
   });
+
+  const top4Row = top4Open ? rows.find((r) => r.id === top4Open.id) : null;
 
   return (
     <div className="space-y-6">
@@ -214,6 +264,15 @@ function Ranking() {
                       jogos_pontuados: (p.pex ?? 0) + (p.rdf ?? 0) + (p.rgm ?? 0) + (p.rgv ?? 0) + (p.res ?? 0),
                       jogos_disputados: (p.pex ?? 0) + (p.rdf ?? 0) + (p.rgm ?? 0) + (p.rgv ?? 0) + (p.res ?? 0) + (p.jzr ?? 0),
                     }}
+                    pot={
+                      potencialPorQuota.has(p.id)
+                        ? {
+                            valor: potencialPorQuota.get(p.id) ?? 0,
+                            clickable: top4Clickable,
+                            onClick: top4Clickable ? () => setTop4Open({ id: p.id }) : undefined,
+                          }
+                        : null
+                    }
                   />
                 )}
               </div>
@@ -229,6 +288,24 @@ function Ranking() {
           quotaId={historicoOpen.id}
           numero={historicoOpen.numero}
           apelido={historicoOpen.apelido}
+        />
+      )}
+      {top4Row && top4Row.top4_p1 && top4Row.top4_p2 && top4Row.top4_p3 && top4Row.top4_p4 && (
+        <Top4QuotaDetalheDialog
+          open={!!top4Open}
+          onOpenChange={(v) => !v && setTop4Open(null)}
+          apelido={top4Row.profile?.apelido ?? "—"}
+          numero={top4Row.numero}
+          picks={{
+            campeao: top4Row.top4_p1,
+            vice: top4Row.top4_p2,
+            terceiro: top4Row.top4_p3,
+            quarto: top4Row.top4_p4,
+          }}
+          teams={teams as any}
+          matches={matches as any}
+          potencial={potencialPorQuota.get(top4Row.id) ?? 0}
+          peso={top4Row.top4_peso ?? 100}
         />
       )}
     </div>

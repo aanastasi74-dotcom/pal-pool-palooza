@@ -97,6 +97,11 @@ export function useRanking() {
         palpites_validos: 0,
         palpites_possiveis: 0,
         elegivel_lanterna: false,
+        top4_p1: r.top4_p1 ?? null,
+        top4_p2: r.top4_p2 ?? null,
+        top4_p3: r.top4_p3 ?? null,
+        top4_p4: r.top4_p4 ?? null,
+        top4_peso: r.top4_peso ?? null,
         profile: { id: r.user_id, nome: r.nome, apelido: r.apelido, cor: r.cor, sigla: r.sigla },
       }));
     },
