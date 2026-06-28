@@ -86,7 +86,7 @@ function Ranking() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("matches")
-        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status,vencedor")
+        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status")
         .order("numero_jogo", { ascending: true });
       if (error) throw error;
       return data ?? [];
