@@ -22,13 +22,17 @@ export function BoletimCard() {
     );
   }
 
+  const isExtra = boletim.tipo === "extraordinario";
   const dataFmt = new Date(`${boletim.data_referencia}T12:00:00`).toLocaleDateString("pt-BR");
+  const titulo = isExtra
+    ? (boletim.titulo_customizado ?? `Boletim Extraordinário — ${dataFmt}`)
+    : `Boletim do dia ${dataFmt}`;
   const preview = (boletim.publicado_md ?? "").replace(/^#+\s*/gm, "").slice(0, 200);
 
   const compartilhar = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const cabec = `📰 Boletim do dia ${dataFmt}\n\n`;
+    const cabec = isExtra ? `✨ ${titulo}\n\n` : `📰 ${titulo}\n\n`;
     const url = `https://wa.me/?text=${encodeURIComponent(cabec + (boletim.publicado_md ?? ""))}`;
     window.open(url, "_blank");
   };
@@ -36,9 +40,11 @@ export function BoletimCard() {
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-primary">
+        <div className={`flex items-center gap-2 ${isExtra ? "text-accent" : "text-primary"}`}>
           <Newspaper className="h-4 w-4" />
-          <p className="text-xs font-bold uppercase tracking-widest">Boletim do dia {dataFmt}</p>
+          <p className="text-xs font-bold uppercase tracking-widest">
+            {isExtra ? `✨ Extra · ${dataFmt}` : `Boletim do dia ${dataFmt}`}
+          </p>
         </div>
         <button
           onClick={compartilhar}
@@ -47,14 +53,19 @@ export function BoletimCard() {
           <Share2 className="h-3 w-3" /> WhatsApp
         </button>
       </div>
+      {isExtra && boletim.titulo_customizado && (
+        <p className="mt-2 text-sm font-bold">{boletim.titulo_customizado}</p>
+      )}
       <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{preview}…</p>
       <Link
         to="/app/boletim/$data"
         params={{ data: boletim.data_referencia }}
-        className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary"
+        search={isExtra ? { tipo: "extraordinario" } : { tipo: undefined }}
+        className={`mt-4 inline-flex items-center gap-1 text-xs font-bold ${isExtra ? "text-accent" : "text-primary"}`}
       >
         Ler completo <ArrowRight className="h-3 w-3" />
       </Link>
     </div>
   );
 }
+
