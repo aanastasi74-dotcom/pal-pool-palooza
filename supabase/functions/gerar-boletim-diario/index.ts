@@ -116,13 +116,27 @@ function montarPrompt(ctx: any): string {
     linhas.push(`- ${r.posicao}º ${r.apelido ?? r.nome} (#${r.numero}) — ${r.pontos} pts`);
   }
   linhas.push("");
-  linhas.push("## Últimos 5 (lanterninhas)");
-  for (const r of ctx.bottom5) {
+  linhas.push("## Lanterninhas (perebas no fundo do ranking — pode ter empate)");
+  for (const r of ctx.bottomDinamico) {
     linhas.push(`- ${r.posicao}º ${r.apelido ?? r.nome} (#${r.numero}) — ${r.pontos} pts`);
+  }
+  linhas.push("");
+  linhas.push(`## Profetas do dia (placar exato — CITAR TODOS, SEM EXCEÇÃO)`);
+  linhas.push(`Total: ${ctx.profetasExatos.length} profetas com placar exato hoje.`);
+  if (!ctx.profetasExatos.length) {
+    linhas.push("- (nenhum profeta hoje)");
+  } else {
+    for (const p of ctx.profetasExatos) {
+      const pos = p.posicao_ranking ? `#${p.posicao_ranking} no ranking` : "sem posição";
+      const ptsTot = p.pontos_totais != null ? `, ${p.pontos_totais} pts` : "";
+      linhas.push(
+        `- @${p.apelido ?? p.nome} (quota #${p.numero}) — ${p.jogo} ${p.placar_casa}×${p.placar_fora} [${pos}${ptsTot}]`,
+      );
+    }
   }
   if (ctx.palpitesCuriosos.length) {
     linhas.push("");
-    linhas.push("## Palpites curiosos do dia");
+    linhas.push("## Quase-profetas (8-9 pts — top 10 mais curiosos)");
     for (const p of ctx.palpitesCuriosos) {
       linhas.push(
         `- ${p.apelido ?? p.nome} (#${p.numero}) palpitou ${p.placar_casa} x ${p.placar_fora} em ${p.jogo} — placar real ${p.real_casa} x ${p.real_fora} — ganhou ${p.pontos} pts`,
