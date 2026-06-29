@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
     if (!boletim_id) return json({ error: "boletim_id required" }, 400);
 
     const [boletim] = await sbGet(
-      `boletins?id=eq.${boletim_id}&select=id,data_referencia,status,publicado_md,enviado_em,publicado_por`,
+      `boletins?id=eq.${boletim_id}&select=id,data_referencia,tipo,titulo_customizado,status,publicado_md,enviado_em,publicado_por`,
     );
     if (!boletim) return json({ error: "Boletim não encontrado" }, 404);
     if (boletim.status !== "publicado") return json({ error: "Boletim não publicado" }, 400);
@@ -142,9 +142,15 @@ Deno.serve(async (req) => {
 
     const appUrl = await getAppUrl();
     const dataLabel = formatarData(boletim.data_referencia);
-    const subject = `Boletim do dia ${dataLabel} — Bolão dos Perebas`;
+    const isExtra = boletim.tipo === "extraordinario";
+    const subject = boletim.titulo_customizado
+      ? (isExtra ? `🙏 ${boletim.titulo_customizado}` : boletim.titulo_customizado)
+      : (isExtra
+          ? `🙏 Boletim Extra — ${dataLabel}`
+          : `Boletim do dia ${dataLabel} — Bolão dos Perebas`);
     const htmlConteudo = await marked.parse(boletim.publicado_md);
     const html = emailShell(htmlConteudo as string, appUrl, dataLabel);
+
 
     let sucessos = 0;
     const falhas_detalhe: Array<{ email: string; erro: string }> = [];
