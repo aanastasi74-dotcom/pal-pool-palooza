@@ -2,6 +2,7 @@
 // POST { invite_id: uuid } → envia e-mail de convite via Resend.
 
 const RESEND_API_URL = "https://api.resend.com/emails";
+import { requireAdmin } from "../_shared/require-admin.ts";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
