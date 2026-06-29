@@ -152,18 +152,24 @@ function derivar(fixture: any): Derived {
     placar_casa = goals.home ?? null;
     placar_fora = goals.away ?? null;
   } else if (["ET", "BT", "P"].includes(apiStatus)) {
-    // Ao vivo na prorrogação: tempo normal = fulltime (já fechado), prorrogação = placar corrente acumulado
+    // Ao vivo na prorrogação: tempo normal = fulltime (já fechado);
+    // prorrogação = DELTA (goals acumulado − fulltime). goals.home/away vem ACUMULADO pela API.
     placar_casa = ft.home ?? null;
     placar_fora = ft.away ?? null;
-    placar_casa_prorrogacao = goals.home ?? null;
-    placar_fora_prorrogacao = goals.away ?? null;
+    if (goals.home != null && ft.home != null) {
+      placar_casa_prorrogacao = Math.max(0, goals.home - ft.home);
+    }
+    if (goals.away != null && ft.away != null) {
+      placar_fora_prorrogacao = Math.max(0, goals.away - ft.away);
+    }
   } else if (["AET", "PEN", "FT"].includes(apiStatus)) {
     placar_casa = ft.home ?? goals.home ?? null;
     placar_fora = ft.away ?? goals.away ?? null;
     if (et.home != null || et.away != null) {
-      // API entrega só os gols DURANTE a prorrogação — somar com fulltime pra obter o acumulado
-      placar_casa_prorrogacao = (ft.home ?? 0) + (et.home ?? 0);
-      placar_fora_prorrogacao = (ft.away ?? 0) + (et.away ?? 0);
+      // API-Football: score.extratime vem ACUMULADO após 120min (inclui tempo normal).
+      // Convenção do bolão exige DELTA (só os gols da prorrogação).
+      placar_casa_prorrogacao = Math.max(0, (et.home ?? 0) - (ft.home ?? 0));
+      placar_fora_prorrogacao = Math.max(0, (et.away ?? 0) - (ft.away ?? 0));
     }
     if (pen.home != null || pen.away != null) {
       penaltis_casa = pen.home ?? null;
