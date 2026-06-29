@@ -165,6 +165,17 @@ function montarPrompt(ctx: any): string {
   linhas.push(
     "Gere agora o boletim do dia em markdown, seguindo seu estilo. Comece com 'Boletim do dia DD/MM/26' (use a data atual). Use os fatos fornecidos, mas escreva com tom de zoeira/cronista. Construa continuidade com os boletins anteriores quando fizer sentido (CRISÃO segue líder pelo Nº dia? PATPEN ainda na lanterna? alguém em ascensão? alguém em queda livre?) MAS evite repetir as mesmas piadas e ângulos que já apareceram antes. Personagens recorrentes (Carla, perebas com perfil descrito) podem evoluir narrativamente.",
   );
+  linhas.push("");
+  linhas.push("INSTRUÇÃO IMPORTANTE — PROFETAS:");
+  linhas.push("Cite TODOS os apelidos listados na seção 'Profetas do dia'. NENHUM pereba pode ficar de fora — perebada gosta de ser citada e omissão gera chateação.");
+  linhas.push("Estratégia recomendada:");
+  linhas.push("- Use narrativa rica (1-2 frases por pereba) APENAS para 3 a 5 destaques: líderes do ranking, comebacks notáveis, casos engraçados/recorrentes (perebas que já apareceram em boletins anteriores acertando).");
+  linhas.push("- Os demais profetas entram em LISTA COMPACTA ao final da seção, ex.: 'E ainda cravaram: @X, @Y, @Z, @W...'");
+  linhas.push("- Se houver muitos profetas (>15), agrupe TODOS os não-destacados numa única linha corrida de apelidos separados por vírgula.");
+  linhas.push("- Lista compacta NÃO deve omitir ninguém da lista de exatos acima.");
+  linhas.push("");
+  linhas.push("INSTRUÇÃO IMPORTANTE — LANTERNINHAS:");
+  linhas.push("Cite TODOS os perebas listados na seção 'Lanterninhas'. Mesma lógica: 1-2 destaques narrados, resto em lista compacta.");
   return linhas.join("\n");
 }
 
