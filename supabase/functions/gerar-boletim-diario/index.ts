@@ -226,7 +226,24 @@ Deno.serve(async (req) => {
 
     const ranking = (await rpc("get_ranking_geral", {})) as any[];
     const top10 = ranking.slice(0, 10);
-    const bottom5 = ranking.slice(-5);
+
+    // Bottom dinâmico: pega todos perebas com pontuação <= pior + tolerância (mín 5, máx 15)
+    function calcularBottom(rk: any[]) {
+      if (!rk.length) return [];
+      const pior = rk[rk.length - 1].pontos;
+      const tolerancia = 50;
+      let b = rk.filter((r: any) => r.pontos <= pior + tolerancia);
+      if (b.length < 5) b = rk.slice(-5);
+      else if (b.length > 15) b = b.slice(0, 15);
+      return b;
+    }
+    const bottomDinamico = calcularBottom(ranking);
+
+    // Mapa user_id → posição no ranking (pra enriquecer profetas)
+    const rankPosMap = new Map<string, { posicao: number; pontos: number }>();
+    for (const r of ranking) {
+      if (r.user_id) rankPosMap.set(r.user_id, { posicao: r.posicao, pontos: r.pontos });
+    }
 
     // Perfis com descrição
     const perfisRows = await sb(
@@ -243,15 +260,31 @@ Deno.serve(async (req) => {
       }));
     }
 
-    // Palpites curiosos: predictions dos jogos encerrados com pontuação alta (>=8)
+    // Profetas (placar exato) e quase-profetas (8-9 pts): TODAS predictions dos jogos encerrados, sem limit
+    let profetasExatos: any[] = [];
     let palpitesCuriosos: any[] = [];
     if (jogosEncerrados.length) {
       const matchIds = jogosEncerrados.map((m: any) => m.id);
-      const preds = await sb(
-        `predictions?match_id=in.(${matchIds.join(",")})&pontos_calculados=gte.8&select=quota_id,match_id,placar_casa,placar_fora,pontos_calculados&order=pontos_calculados.desc&limit=10`,
+      const todasPredictions = await sb(
+        `predictions?match_id=in.(${matchIds.join(",")})&select=quota_id,match_id,placar_casa,placar_fora,pontos_calculados&order=pontos_calculados.desc`,
       );
-      if ((preds ?? []).length) {
-        const quotaIds = [...new Set(preds.map((p: any) => p.quota_id))];
+      const mMap = Object.fromEntries(jogosEncerrados.map((m: any) => [m.id, m]));
+
+      const exatosRaw = (todasPredictions ?? []).filter((p: any) => {
+        const m = mMap[p.match_id];
+        return m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
+      });
+      const curiososRaw = (todasPredictions ?? [])
+        .filter((p: any) => {
+          const m = mMap[p.match_id];
+          const ehExato = m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
+          return !ehExato && (p.pontos_calculados ?? 0) >= 8;
+        })
+        .slice(0, 10);
+
+      const allPreds = [...exatosRaw, ...curiososRaw];
+      if (allPreds.length) {
+        const quotaIds = [...new Set(allPreds.map((p: any) => p.quota_id))];
         const quotas = await sb(`quotas?id=in.(${quotaIds.join(",")})&select=id,user_id,numero`);
         const userIds = [...new Set((quotas ?? []).map((q: any) => q.user_id))];
         const profs = userIds.length
@@ -259,11 +292,12 @@ Deno.serve(async (req) => {
           : [];
         const qMap = Object.fromEntries((quotas ?? []).map((q: any) => [q.id, q]));
         const pMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p]));
-        const mMap = Object.fromEntries(jogosEncerrados.map((m: any) => [m.id, m]));
-        palpitesCuriosos = preds.map((pr: any) => {
+
+        const enriquecer = (pr: any) => {
           const q = qMap[pr.quota_id] ?? {};
           const pf = pMap[q.user_id] ?? {};
           const m = mMap[pr.match_id] ?? {};
+          const rk = q.user_id ? rankPosMap.get(q.user_id) : null;
           return {
             apelido: pf.apelido,
             nome: pf.nome,
@@ -274,8 +308,12 @@ Deno.serve(async (req) => {
             real_fora: m.placar_fora,
             jogo: `${m.casa} x ${m.fora}`,
             pontos: pr.pontos_calculados,
+            posicao_ranking: rk?.posicao,
+            pontos_totais: rk?.pontos,
           };
-        });
+        };
+        profetasExatos = exatosRaw.map(enriquecer);
+        palpitesCuriosos = curiososRaw.map(enriquecer);
       }
     }
 
@@ -291,8 +329,9 @@ Deno.serve(async (req) => {
       jogosEncerrados,
       jogosAmanha: jogosAmanha ?? [],
       top10,
-      bottom5,
+      bottomDinamico,
       perfis,
+      profetasExatos,
       palpitesCuriosos,
       boletinsAnteriores: boletinsAnteriores ?? [],
     });
