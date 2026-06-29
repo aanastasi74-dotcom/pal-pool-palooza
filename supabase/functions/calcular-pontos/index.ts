@@ -1,6 +1,8 @@
 // Edge function: calcular-pontos
 // POST { match_id: uuid } → recalcula pontos do match e atualiza quotas.
 
+import { requireCronOrAdmin } from "../_shared/require-cron-or-admin.ts";
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -68,6 +70,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
+    const auth = await requireCronOrAdmin(req);
+    if (!auth.ok) return auth.res;
+
     const { match_id } = await req.json();
     if (!match_id) return json({ error: "match_id required" }, 400);
 
@@ -149,7 +154,7 @@ Deno.serve(async (req) => {
         acao: "calculou_pontos",
         entidade: "match",
         entidade_id: match_id,
-        ator_nome: "system",
+        ator_nome: auth.via === "admin" ? `admin:${auth.userId}` : "system",
         payload: { predictions_atualizadas: predsCount, quotas_atualizadas: quotasCount },
       }),
     });
