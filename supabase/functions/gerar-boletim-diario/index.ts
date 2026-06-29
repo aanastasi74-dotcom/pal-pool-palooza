@@ -375,6 +375,7 @@ Deno.serve(async (req) => {
 
     const payload = {
       data_referencia: dataRef,
+      tipo: "regular",
       rascunho_md: conteudo,
       status: "pendente_revisao",
       modelo_usado: cfg.modelo,
@@ -382,6 +383,7 @@ Deno.serve(async (req) => {
       tokens_output: tokensOutput,
       updated_at: new Date().toISOString(),
     };
+
 
     let boletimId: string;
     if (existing.length > 0) {
