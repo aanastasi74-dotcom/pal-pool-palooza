@@ -43,8 +43,11 @@ function BoletinsAdmin() {
   const { data: boletins, isLoading } = useBoletinsL1();
   const gerar = useGerarBoletim();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [openExtraDialog, setOpenExtraDialog] = useState(false);
   const isMobile = useIsMobile();
 
+  const regulares = (boletins ?? []).filter((b) => (b.tipo ?? "regular") === "regular");
+  const extras = (boletins ?? []).filter((b) => b.tipo === "extraordinario");
   const selected = (boletins ?? []).find((b) => b.id === selectedId) ?? null;
 
   const gerarHoje = async () => {
@@ -61,7 +64,7 @@ function BoletinsAdmin() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-extrabold">Boletins</h1>
@@ -82,10 +85,10 @@ function BoletinsAdmin() {
         <div className="space-y-2">
           {isLoading ? (
             <Skeleton className="h-64" />
-          ) : (boletins ?? []).length === 0 ? (
+          ) : regulares.length === 0 ? (
             <EmptyState icon={Newspaper} title="Nenhum boletim ainda" description="Clique em 'Gerar boletim de hoje'." />
           ) : (
-            (boletins ?? []).map((b) => (
+            regulares.map((b) => (
               <button
                 key={b.id}
                 onClick={() => setSelectedId(b.id)}
@@ -120,6 +123,61 @@ function BoletinsAdmin() {
         </div>
       </div>
 
+      {/* Boletins Extraordinários */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-t border-border pt-6">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-accent" />
+              <h2 className="font-display text-xl font-extrabold">Boletins Extraordinários</h2>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Erratas, comunicados especiais, homenagens. Aparecem no /app/boletim ao lado dos regulares com badge "EXTRA".
+            </p>
+          </div>
+          <button
+            onClick={() => setOpenExtraDialog(true)}
+            className="flex items-center gap-1 rounded-full border-2 border-accent bg-accent/10 px-4 py-2 text-xs font-bold text-accent"
+          >
+            <Plus className="h-3 w-3" /> Novo boletim extraordinário
+          </button>
+        </div>
+
+        {extras.length === 0 ? (
+          <p className="text-xs text-muted-foreground italic">Nenhum boletim extraordinário ainda.</p>
+        ) : (
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {extras.map((b) => (
+              <li key={b.id}>
+                <button
+                  onClick={() => setSelectedId(b.id)}
+                  className={`w-full rounded-2xl border p-3 text-left shadow-card transition ${
+                    selectedId === b.id ? "border-accent bg-accent/5" : "border-border bg-card hover:bg-muted/30"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-accent">
+                      ✨ EXTRA
+                    </span>
+                    <span className="text-muted-foreground">
+                      {new Date(`${b.data_referencia}T12:00:00`).toLocaleDateString("pt-BR")}
+                    </span>
+                  </div>
+                  <p className="mt-2 line-clamp-1 text-sm font-bold">
+                    {b.titulo_customizado ?? "Boletim Extraordinário"}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                    {(b.publicado_md || b.rascunho_md || "").slice(0, 120)}
+                  </p>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <NovoBoletimExtraDialog open={openExtraDialog} onOpenChange={setOpenExtraDialog} />
+
       {isMobile && (
         <Sheet open={!!selected} onOpenChange={(o) => !o && setSelectedId(null)}>
           <SheetContent
@@ -140,6 +198,139 @@ function BoletinsAdmin() {
     </div>
   );
 }
+
+function todayBRT(): string {
+  // YYYY-MM-DD em BRT (UTC-3)
+  const now = new Date();
+  const brt = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+  return brt.toISOString().slice(0, 10);
+}
+
+function NovoBoletimExtraDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
+  const criar = useCriarBoletimExtraordinario();
+  const [titulo, setTitulo] = useState("");
+  const [markdown, setMarkdown] = useState("");
+  const [dataRef, setDataRef] = useState(todayBRT());
+
+  useEffect(() => {
+    if (open) {
+      setTitulo("");
+      setMarkdown("");
+      setDataRef(todayBRT());
+    }
+  }, [open]);
+
+  const publicar = async () => {
+    if (!titulo.trim() || !markdown.trim()) return;
+    const t = toast.loading("Publicando e enviando email…");
+    try {
+      const r = await criar.mutateAsync({
+        data_referencia: dataRef,
+        titulo: titulo.trim(),
+        conteudo: markdown,
+      });
+      toast.dismiss(t);
+      const envio = (r as any)?.envio;
+      if (envio?.skipped) {
+        toast.success("Boletim extraordinário publicado (email já enviado anteriormente).");
+      } else if ((envio?.falhas ?? 0) > 0) {
+        toast.warning(`Publicado. Email pra ${envio?.sucessos ?? 0} de ${envio?.destinatarios_total ?? 0} (${envio?.falhas} falhas).`);
+      } else {
+        toast.success(`Publicado e enviado pra ${envio?.sucessos ?? 0} perebas!`);
+      }
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.dismiss(t);
+      const msg = e?.message ?? "desconhecido";
+      if (msg.includes("duplicate") || msg.includes("unique")) {
+        toast.error("Já existe um boletim extraordinário pra essa data. Apenas 1 por dia.");
+      } else {
+        toast.error(`Erro: ${msg}`);
+      }
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[95vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-accent" /> Novo Boletim Extraordinário
+          </DialogTitle>
+          <DialogDescription>
+            Errata, comunicado, homenagem. Será publicado imediatamente e enviado por email pra todos os perebas com quota ativa.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Tabs defaultValue="colar">
+          <TabsList>
+            <TabsTrigger value="colar">Colar conteúdo</TabsTrigger>
+            <TabsTrigger value="ia" disabled>Gerar por IA (em breve)</TabsTrigger>
+          </TabsList>
+          <TabsContent value="colar" className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
+              <div>
+                <Label htmlFor="extra-titulo">Título customizado</Label>
+                <Input
+                  id="extra-titulo"
+                  placeholder="ex: Aos Profetas Injustiçados de Domingo"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  maxLength={140}
+                />
+              </div>
+              <div>
+                <Label htmlFor="extra-data">Data de referência</Label>
+                <Input
+                  id="extra-data"
+                  type="date"
+                  value={dataRef}
+                  onChange={(e) => setDataRef(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="extra-md">Conteúdo (Markdown)</Label>
+              <Textarea
+                id="extra-md"
+                rows={16}
+                placeholder="Cole o markdown completo do boletim aqui…"
+                value={markdown}
+                onChange={(e) => setMarkdown(e.target.value)}
+                className="font-mono text-sm"
+              />
+            </div>
+
+            <DialogFooter>
+              <button
+                onClick={() => onOpenChange(false)}
+                className="rounded-full border border-border px-4 py-2 text-xs font-bold"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={publicar}
+                disabled={!titulo.trim() || !markdown.trim() || criar.isPending}
+                className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+              >
+                <Send className="h-3 w-3" /> Publicar e enviar por email
+              </button>
+            </DialogFooter>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 
 function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
   const update = useUpdateBoletimL1();
