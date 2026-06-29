@@ -321,7 +321,7 @@ Deno.serve(async (req) => {
 
     // Boletins anteriores publicados (até 3 mais recentes antes de hoje)
     const boletinsAnteriores = await sb(
-      `boletins?status=eq.publicado&data_referencia=lt.${dataRef}&select=data_referencia,publicado_md&order=data_referencia.desc&limit=3`,
+      `boletins?status=eq.publicado&tipo=eq.regular&data_referencia=lt.${dataRef}&select=data_referencia,publicado_md&order=data_referencia.desc&limit=3`,
     );
 
     const userPrompt = montarPrompt({
