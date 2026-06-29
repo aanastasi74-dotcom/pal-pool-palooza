@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
     const forceRegenerate: boolean = body.force_regenerate ?? false;
 
     // 1. Boletim existente?
-    const existing = await sb(`boletins?data_referencia=eq.${dataRef}&select=*`);
+    const existing = await sb(`boletins?data_referencia=eq.${dataRef}&tipo=eq.regular&select=*`);
     if (existing.length > 0 && existing[0].status === "publicado" && !forceRegenerate) {
       return json({ ok: true, skipped: true, motivo: "boletim já publicado", boletim_id: existing[0].id });
     }
