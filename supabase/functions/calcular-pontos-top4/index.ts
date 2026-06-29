@@ -73,6 +73,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
+    const auth = await requireAdmin(req);
+    if (!auth.ok) return auth.res;
+
     const settings = await sb(`settings?key=eq.top4_oficial&select=value`);
     const oficial: Oficial = settings[0]?.value;
     if (!oficial || !oficial.campeao || !oficial.vice || !oficial.terceiro || !oficial.quarto) {
