@@ -116,13 +116,27 @@ function montarPrompt(ctx: any): string {
     linhas.push(`- ${r.posicao}º ${r.apelido ?? r.nome} (#${r.numero}) — ${r.pontos} pts`);
   }
   linhas.push("");
-  linhas.push("## Últimos 5 (lanterninhas)");
-  for (const r of ctx.bottom5) {
+  linhas.push("## Lanterninhas (perebas no fundo do ranking — pode ter empate)");
+  for (const r of ctx.bottomDinamico) {
     linhas.push(`- ${r.posicao}º ${r.apelido ?? r.nome} (#${r.numero}) — ${r.pontos} pts`);
+  }
+  linhas.push("");
+  linhas.push(`## Profetas do dia (placar exato — CITAR TODOS, SEM EXCEÇÃO)`);
+  linhas.push(`Total: ${ctx.profetasExatos.length} profetas com placar exato hoje.`);
+  if (!ctx.profetasExatos.length) {
+    linhas.push("- (nenhum profeta hoje)");
+  } else {
+    for (const p of ctx.profetasExatos) {
+      const pos = p.posicao_ranking ? `#${p.posicao_ranking} no ranking` : "sem posição";
+      const ptsTot = p.pontos_totais != null ? `, ${p.pontos_totais} pts` : "";
+      linhas.push(
+        `- @${p.apelido ?? p.nome} (quota #${p.numero}) — ${p.jogo} ${p.placar_casa}×${p.placar_fora} [${pos}${ptsTot}]`,
+      );
+    }
   }
   if (ctx.palpitesCuriosos.length) {
     linhas.push("");
-    linhas.push("## Palpites curiosos do dia");
+    linhas.push("## Quase-profetas (8-9 pts — top 10 mais curiosos)");
     for (const p of ctx.palpitesCuriosos) {
       linhas.push(
         `- ${p.apelido ?? p.nome} (#${p.numero}) palpitou ${p.placar_casa} x ${p.placar_fora} em ${p.jogo} — placar real ${p.real_casa} x ${p.real_fora} — ganhou ${p.pontos} pts`,
@@ -151,6 +165,17 @@ function montarPrompt(ctx: any): string {
   linhas.push(
     "Gere agora o boletim do dia em markdown, seguindo seu estilo. Comece com 'Boletim do dia DD/MM/26' (use a data atual). Use os fatos fornecidos, mas escreva com tom de zoeira/cronista. Construa continuidade com os boletins anteriores quando fizer sentido (CRISÃO segue líder pelo Nº dia? PATPEN ainda na lanterna? alguém em ascensão? alguém em queda livre?) MAS evite repetir as mesmas piadas e ângulos que já apareceram antes. Personagens recorrentes (Carla, perebas com perfil descrito) podem evoluir narrativamente.",
   );
+  linhas.push("");
+  linhas.push("INSTRUÇÃO IMPORTANTE — PROFETAS:");
+  linhas.push("Cite TODOS os apelidos listados na seção 'Profetas do dia'. NENHUM pereba pode ficar de fora — perebada gosta de ser citada e omissão gera chateação.");
+  linhas.push("Estratégia recomendada:");
+  linhas.push("- Use narrativa rica (1-2 frases por pereba) APENAS para 3 a 5 destaques: líderes do ranking, comebacks notáveis, casos engraçados/recorrentes (perebas que já apareceram em boletins anteriores acertando).");
+  linhas.push("- Os demais profetas entram em LISTA COMPACTA ao final da seção, ex.: 'E ainda cravaram: @X, @Y, @Z, @W...'");
+  linhas.push("- Se houver muitos profetas (>15), agrupe TODOS os não-destacados numa única linha corrida de apelidos separados por vírgula.");
+  linhas.push("- Lista compacta NÃO deve omitir ninguém da lista de exatos acima.");
+  linhas.push("");
+  linhas.push("INSTRUÇÃO IMPORTANTE — LANTERNINHAS:");
+  linhas.push("Cite TODOS os perebas listados na seção 'Lanterninhas'. Mesma lógica: 1-2 destaques narrados, resto em lista compacta.");
   return linhas.join("\n");
 }
 
@@ -201,7 +226,24 @@ Deno.serve(async (req) => {
 
     const ranking = (await rpc("get_ranking_geral", {})) as any[];
     const top10 = ranking.slice(0, 10);
-    const bottom5 = ranking.slice(-5);
+
+    // Bottom dinâmico: pega todos perebas com pontuação <= pior + tolerância (mín 5, máx 15)
+    function calcularBottom(rk: any[]) {
+      if (!rk.length) return [];
+      const pior = rk[rk.length - 1].pontos;
+      const tolerancia = 50;
+      let b = rk.filter((r: any) => r.pontos <= pior + tolerancia);
+      if (b.length < 5) b = rk.slice(-5);
+      else if (b.length > 15) b = b.slice(0, 15);
+      return b;
+    }
+    const bottomDinamico = calcularBottom(ranking);
+
+    // Mapa user_id → posição no ranking (pra enriquecer profetas)
+    const rankPosMap = new Map<string, { posicao: number; pontos: number }>();
+    for (const r of ranking) {
+      if (r.user_id) rankPosMap.set(r.user_id, { posicao: r.posicao, pontos: r.pontos });
+    }
 
     // Perfis com descrição
     const perfisRows = await sb(
@@ -218,15 +260,31 @@ Deno.serve(async (req) => {
       }));
     }
 
-    // Palpites curiosos: predictions dos jogos encerrados com pontuação alta (>=8)
+    // Profetas (placar exato) e quase-profetas (8-9 pts): TODAS predictions dos jogos encerrados, sem limit
+    let profetasExatos: any[] = [];
     let palpitesCuriosos: any[] = [];
     if (jogosEncerrados.length) {
       const matchIds = jogosEncerrados.map((m: any) => m.id);
-      const preds = await sb(
-        `predictions?match_id=in.(${matchIds.join(",")})&pontos_calculados=gte.8&select=quota_id,match_id,placar_casa,placar_fora,pontos_calculados&order=pontos_calculados.desc&limit=10`,
+      const todasPredictions = await sb(
+        `predictions?match_id=in.(${matchIds.join(",")})&select=quota_id,match_id,placar_casa,placar_fora,pontos_calculados&order=pontos_calculados.desc`,
       );
-      if ((preds ?? []).length) {
-        const quotaIds = [...new Set(preds.map((p: any) => p.quota_id))];
+      const mMap = Object.fromEntries(jogosEncerrados.map((m: any) => [m.id, m]));
+
+      const exatosRaw = (todasPredictions ?? []).filter((p: any) => {
+        const m = mMap[p.match_id];
+        return m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
+      });
+      const curiososRaw = (todasPredictions ?? [])
+        .filter((p: any) => {
+          const m = mMap[p.match_id];
+          const ehExato = m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
+          return !ehExato && (p.pontos_calculados ?? 0) >= 8;
+        })
+        .slice(0, 10);
+
+      const allPreds = [...exatosRaw, ...curiososRaw];
+      if (allPreds.length) {
+        const quotaIds = [...new Set(allPreds.map((p: any) => p.quota_id))];
         const quotas = await sb(`quotas?id=in.(${quotaIds.join(",")})&select=id,user_id,numero`);
         const userIds = [...new Set((quotas ?? []).map((q: any) => q.user_id))];
         const profs = userIds.length
@@ -234,11 +292,12 @@ Deno.serve(async (req) => {
           : [];
         const qMap = Object.fromEntries((quotas ?? []).map((q: any) => [q.id, q]));
         const pMap = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p]));
-        const mMap = Object.fromEntries(jogosEncerrados.map((m: any) => [m.id, m]));
-        palpitesCuriosos = preds.map((pr: any) => {
+
+        const enriquecer = (pr: any) => {
           const q = qMap[pr.quota_id] ?? {};
           const pf = pMap[q.user_id] ?? {};
           const m = mMap[pr.match_id] ?? {};
+          const rk = q.user_id ? rankPosMap.get(q.user_id) : null;
           return {
             apelido: pf.apelido,
             nome: pf.nome,
@@ -249,8 +308,12 @@ Deno.serve(async (req) => {
             real_fora: m.placar_fora,
             jogo: `${m.casa} x ${m.fora}`,
             pontos: pr.pontos_calculados,
+            posicao_ranking: rk?.posicao,
+            pontos_totais: rk?.pontos,
           };
-        });
+        };
+        profetasExatos = exatosRaw.map(enriquecer);
+        palpitesCuriosos = curiososRaw.map(enriquecer);
       }
     }
 
@@ -266,8 +329,9 @@ Deno.serve(async (req) => {
       jogosEncerrados,
       jogosAmanha: jogosAmanha ?? [],
       top10,
-      bottom5,
+      bottomDinamico,
       perfis,
+      profetasExatos,
       palpitesCuriosos,
       boletinsAnteriores: boletinsAnteriores ?? [],
     });
