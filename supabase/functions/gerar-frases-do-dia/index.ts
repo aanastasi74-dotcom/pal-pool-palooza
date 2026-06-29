@@ -151,8 +151,13 @@ function normalizeN(frases: string[]): string[] {
   return arr;
 }
 
+import { requireCronSecret } from "../_shared/require-cron-secret.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const cronGate = requireCronSecret(req);
+  if (cronGate) return cronGate;
+
 
   try {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
