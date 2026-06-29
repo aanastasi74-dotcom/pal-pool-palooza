@@ -70,6 +70,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
+    const auth = await requireCronOrAdmin(req);
+    if (!auth.ok) return auth.res;
+
     const { match_id } = await req.json();
     if (!match_id) return json({ error: "match_id required" }, 400);
 
