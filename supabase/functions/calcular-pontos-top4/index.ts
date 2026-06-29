@@ -3,6 +3,7 @@
 // (somando jogos + top4).
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+import { requireAdmin } from "../_shared/require-admin.ts";
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
@@ -72,6 +73,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
+    const auth = await requireAdmin(req);
+    if (!auth.ok) return auth.res;
+
     const settings = await sb(`settings?key=eq.top4_oficial&select=value`);
     const oficial: Oficial = settings[0]?.value;
     if (!oficial || !oficial.campeao || !oficial.vice || !oficial.terceiro || !oficial.quarto) {

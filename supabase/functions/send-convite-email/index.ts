@@ -2,6 +2,7 @@
 // POST { invite_id: uuid } → envia e-mail de convite via Resend.
 
 const RESEND_API_URL = "https://api.resend.com/emails";
+import { requireAdmin } from "../_shared/require-admin.ts";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
@@ -34,6 +35,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
+    const auth = await requireAdmin(req);
+    if (!auth.ok) return auth.res;
+
     const { invite_id } = await req.json();
     if (!invite_id) return json({ error: "invite_id required" }, 400);
 
