@@ -428,7 +428,12 @@ function BoletimEditor({ boletim }: { boletim: BoletimL1 }) {
               </span>
             )}
           </p>
-          <h2 className="font-display text-xl font-bold">{statusLabel[boletim.status]}</h2>
+          <h2 className="font-display text-xl font-bold">
+            {boletim.tipo === "extraordinario" && boletim.titulo_customizado
+              ? `✨ ${boletim.titulo_customizado}`
+              : statusLabel[boletim.status]}
+          </h2>
+
         </div>
         <div className="flex flex-wrap gap-2">
           {isPublicado && !editandoPublicado && (
