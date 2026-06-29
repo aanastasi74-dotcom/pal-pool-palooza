@@ -67,6 +67,8 @@ export type Database = {
           publicado_por: string | null
           rascunho_md: string | null
           status: string
+          tipo: string
+          titulo_customizado: string | null
           tokens_input: number | null
           tokens_output: number | null
           updated_at: string
@@ -82,6 +84,8 @@ export type Database = {
           publicado_por?: string | null
           rascunho_md?: string | null
           status?: string
+          tipo?: string
+          titulo_customizado?: string | null
           tokens_input?: number | null
           tokens_output?: number | null
           updated_at?: string
@@ -97,6 +101,8 @@ export type Database = {
           publicado_por?: string | null
           rascunho_md?: string | null
           status?: string
+          tipo?: string
+          titulo_customizado?: string | null
           tokens_input?: number | null
           tokens_output?: number | null
           updated_at?: string

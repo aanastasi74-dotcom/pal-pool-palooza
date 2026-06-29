@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
     const forceRegenerate: boolean = body.force_regenerate ?? false;
 
     // 1. Boletim existente?
-    const existing = await sb(`boletins?data_referencia=eq.${dataRef}&select=*`);
+    const existing = await sb(`boletins?data_referencia=eq.${dataRef}&tipo=eq.regular&select=*`);
     if (existing.length > 0 && existing[0].status === "publicado" && !forceRegenerate) {
       return json({ ok: true, skipped: true, motivo: "boletim já publicado", boletim_id: existing[0].id });
     }
@@ -321,7 +321,7 @@ Deno.serve(async (req) => {
 
     // Boletins anteriores publicados (até 3 mais recentes antes de hoje)
     const boletinsAnteriores = await sb(
-      `boletins?status=eq.publicado&data_referencia=lt.${dataRef}&select=data_referencia,publicado_md&order=data_referencia.desc&limit=3`,
+      `boletins?status=eq.publicado&tipo=eq.regular&data_referencia=lt.${dataRef}&select=data_referencia,publicado_md&order=data_referencia.desc&limit=3`,
     );
 
     const userPrompt = montarPrompt({
@@ -375,6 +375,7 @@ Deno.serve(async (req) => {
 
     const payload = {
       data_referencia: dataRef,
+      tipo: "regular",
       rascunho_md: conteudo,
       status: "pendente_revisao",
       modelo_usado: cfg.modelo,
@@ -382,6 +383,7 @@ Deno.serve(async (req) => {
       tokens_output: tokensOutput,
       updated_at: new Date().toISOString(),
     };
+
 
     let boletimId: string;
     if (existing.length > 0) {
