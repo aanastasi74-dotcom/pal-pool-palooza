@@ -1,6 +1,8 @@
 // Edge function: calcular-pontos
 // POST { match_id: uuid } → recalcula pontos do match e atualiza quotas.
 
+import { requireCronOrAdmin } from "../_shared/require-cron-or-admin.ts";
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
