@@ -53,21 +53,70 @@ export function useBoletimPublicadoMaisRecente() {
   });
 }
 
-export function useBoletimPorData(dataRef: string | undefined) {
+export function useBoletimPorData(
+  dataRef: string | undefined,
+  tipo: "regular" | "extraordinario" = "regular",
+) {
   return useQuery({
-    queryKey: ["boletim-l1", dataRef],
+    queryKey: ["boletim-l1", dataRef, tipo],
     enabled: !!dataRef,
     queryFn: async () => {
       const { data, error } = await sb
         .from("boletins")
         .select("*")
         .eq("data_referencia", dataRef)
+        .eq("tipo", tipo)
         .maybeSingle();
       if (error) throw error;
       return data as BoletimL1 | null;
     },
   });
 }
+
+export function useCriarBoletimExtraordinario() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async ({
+      data_referencia,
+      titulo,
+      conteudo,
+    }: {
+      data_referencia: string;
+      titulo: string;
+      conteudo: string;
+    }) => {
+      const { data, error } = await sb
+        .from("boletins")
+        .insert({
+          data_referencia,
+          tipo: "extraordinario",
+          titulo_customizado: titulo,
+          rascunho_md: conteudo,
+          publicado_md: conteudo,
+          status: "publicado",
+          publicado_em: new Date().toISOString(),
+          publicado_por: user?.id ?? null,
+          modelo_usado: "manual",
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      const { data: envio, error: envioErr } = await supabase.functions.invoke("enviar-boletim", {
+        body: { boletim_id: (data as any).id },
+      });
+      if (envioErr) throw envioErr;
+      if ((envio as any)?.error) throw new Error((envio as any).error);
+      return { boletim: data as BoletimL1, envio };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["boletins-l1"] });
+      qc.invalidateQueries({ queryKey: ["boletim-l1-publicado-recente"] });
+    },
+  });
+}
+
 
 export function useUpdateBoletimL1() {
   const qc = useQueryClient();
