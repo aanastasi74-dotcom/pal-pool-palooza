@@ -3,6 +3,7 @@
 // Envia o publicado_md por email pra todos os perebas com quota ativa.
 
 import { marked } from "https://esm.sh/marked@12.0.2";
+import { requireAdmin } from "../_shared/require-admin.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
