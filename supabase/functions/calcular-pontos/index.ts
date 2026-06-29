@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
         acao: "calculou_pontos",
         entidade: "match",
         entidade_id: match_id,
-        ator_nome: "system",
+        ator_nome: auth.via === "admin" ? `admin:${auth.userId}` : "system",
         payload: { predictions_atualizadas: predsCount, quotas_atualizadas: quotasCount },
       }),
     });
