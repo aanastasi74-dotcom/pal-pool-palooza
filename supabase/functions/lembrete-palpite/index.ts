@@ -39,9 +39,14 @@ async function sb(path: string) {
   return r.json();
 }
 
+import { requireCronSecret } from "../_shared/require-cron-secret.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  const cronGate = requireCronSecret(req);
+  if (cronGate) return cronGate;
+
 
   try {
     const SITE_URL = await getAppUrl();

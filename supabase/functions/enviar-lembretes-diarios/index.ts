@@ -200,8 +200,13 @@ function montarEmailVespera(
   return { subject, html: emailShell(inner, apelido) };
 }
 
+import { requireCronSecret } from "../_shared/require-cron-secret.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const cronGate = requireCronSecret(req);
+  if (cronGate) return cronGate;
+
 
   try {
     const appUrl = (await getSetting("app_url_publico")) as string | null;
