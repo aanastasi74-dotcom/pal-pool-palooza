@@ -3,6 +3,7 @@
 // (somando jogos + top4).
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+import { requireAdmin } from "../_shared/require-admin.ts";
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
