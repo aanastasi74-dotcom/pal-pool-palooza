@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.gerar-frases-do-dia]
 verify_jwt = false
+
+[functions.snapshot-top4-potenciais-iniciais]
+verify_jwt = false
