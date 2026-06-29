@@ -7,6 +7,8 @@ const sb = supabase as any;
 export type BoletimL1 = {
   id: string;
   data_referencia: string;
+  tipo: "regular" | "extraordinario";
+  titulo_customizado: string | null;
   rascunho_md: string | null;
   publicado_md: string | null;
   status: "pendente_revisao" | "publicado" | "arquivado";
@@ -19,6 +21,7 @@ export type BoletimL1 = {
   created_at: string;
   updated_at: string;
 };
+
 
 export function useBoletinsL1() {
   return useQuery({
