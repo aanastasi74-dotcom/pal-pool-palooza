@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil, Mail } from "lucide-react";
+import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil, Mail, Sparkles, Plus } from "lucide-react";
 import {
   useBoletinsL1,
   useGerarBoletim,
   usePublicarBoletim,
   useReenviarBoletim,
   useUpdateBoletimL1,
+  useCriarBoletimExtraordinario,
   type BoletimL1,
 } from "@/lib/queries/boletins-l1";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +16,12 @@ import { EmptyState } from "@/components/empty-state";
 import { MarkdownView } from "@/components/markdown-view";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "@/hooks/use-mobile";
+
 
 export const Route = createFileRoute("/app/admin/boletins")({
   head: () => ({ meta: [{ title: "Admin — Boletins" }] }),
