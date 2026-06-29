@@ -211,6 +211,9 @@ function calcularPotencialMaximo(
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const cronCheck = requireCronSecret(req);
+  if (cronCheck) return cronCheck;
+
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
   const { count: encerrados, error: errCount } = await supabase
