@@ -105,6 +105,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
+    const auth = await requireAdmin(req);
+    if (!auth.ok) return auth.res;
+
     const { boletim_id, force_resend } = await req.json();
     if (!boletim_id) return json({ error: "boletim_id required" }, 400);
 
