@@ -258,7 +258,7 @@ Deno.serve(async (req) => {
 
     // Profetas (placar exato) e quase-profetas (8-9 pts): TODAS predictions dos jogos encerrados, sem limit
     let profetasExatos: any[] = [];
-    let palpitesCuriosos: any[] = [];
+    
     if (jogosEncerrados.length) {
       const matchIds = jogosEncerrados.map((m: any) => m.id);
       const todasPredictions = await sb(
