@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
         return m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
       });
 
-      const allPreds = [...exatosRaw, ...curiososRaw];
+      const allPreds = exatosRaw;
       if (allPreds.length) {
         const quotaIds = [...new Set(allPreds.map((p: any) => p.quota_id))];
         const quotas = await sb(`quotas?id=in.(${quotaIds.join(",")})&select=id,user_id,numero`);
