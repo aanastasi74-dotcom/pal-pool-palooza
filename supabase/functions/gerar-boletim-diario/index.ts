@@ -179,12 +179,14 @@ function montarPrompt(ctx: any): string {
   return linhas.join("\n");
 }
 
-import { requireCronSecret } from "../_shared/require-cron-secret.ts";
+import { requireCronOrAdmin } from "../_shared/require-cron-or-admin.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  const cronGate = requireCronSecret(req);
-  if (cronGate) return cronGate;
+  const auth = await requireCronOrAdmin(req);
+  if (!auth.ok) return auth.res;
+
+
 
 
   try {
