@@ -134,15 +134,6 @@ function montarPrompt(ctx: any): string {
       );
     }
   }
-  if (ctx.palpitesCuriosos.length) {
-    linhas.push("");
-    linhas.push("## Quase-profetas (8-9 pts — top 10 mais curiosos)");
-    for (const p of ctx.palpitesCuriosos) {
-      linhas.push(
-        `- ${p.apelido ?? p.nome} (#${p.numero}) palpitou ${p.placar_casa} x ${p.placar_fora} em ${p.jogo} — placar real ${p.real_casa} x ${p.real_fora} — ganhou ${p.pontos} pts`,
-      );
-    }
-  }
   if (ctx.perfis.length) {
     linhas.push("");
     linhas.push("## Perfis de personalidade da perebada");
