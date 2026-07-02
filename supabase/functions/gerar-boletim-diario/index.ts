@@ -134,15 +134,6 @@ function montarPrompt(ctx: any): string {
       );
     }
   }
-  if (ctx.palpitesCuriosos.length) {
-    linhas.push("");
-    linhas.push("## Quase-profetas (8-9 pts — top 10 mais curiosos)");
-    for (const p of ctx.palpitesCuriosos) {
-      linhas.push(
-        `- ${p.apelido ?? p.nome} (#${p.numero}) palpitou ${p.placar_casa} x ${p.placar_fora} em ${p.jogo} — placar real ${p.real_casa} x ${p.real_fora} — ganhou ${p.pontos} pts`,
-      );
-    }
-  }
   if (ctx.perfis.length) {
     linhas.push("");
     linhas.push("## Perfis de personalidade da perebada");
@@ -168,11 +159,14 @@ function montarPrompt(ctx: any): string {
   linhas.push("");
   linhas.push("INSTRUÇÃO IMPORTANTE — PROFETAS:");
   linhas.push("Cite TODOS os apelidos listados na seção 'Profetas do dia'. NENHUM pereba pode ficar de fora — perebada gosta de ser citada e omissão gera chateação.");
-  linhas.push("Estratégia recomendada:");
-  linhas.push("- Use narrativa rica (1-2 frases por pereba) APENAS para 3 a 5 destaques: líderes do ranking, comebacks notáveis, casos engraçados/recorrentes (perebas que já apareceram em boletins anteriores acertando).");
-  linhas.push("- Os demais profetas entram em LISTA COMPACTA ao final da seção, ex.: 'E ainda cravaram: @X, @Y, @Z, @W...'");
-  linhas.push("- Se houver muitos profetas (>15), agrupe TODOS os não-destacados numa única linha corrida de apelidos separados por vírgula.");
-  linhas.push("- Lista compacta NÃO deve omitir ninguém da lista de exatos acima.");
+  linhas.push("Estratégia obrigatória:");
+  linhas.push("- Destaque nominalmente com narrativa curta (1-2 frases por pereba) APENAS 5 a 7 profetas.");
+  linhas.push("  Critérios de escolha dos destaques: líderes do ranking, comebacks notáveis (perebas de baixa posição que acertaram), casos engraçados ou recorrentes (perebas que aparecem em boletins anteriores), múltiplos acertos no dia (pereba que cravou 2+ jogos).");
+  linhas.push("- Os DEMAIS profetas entram em UMA lista compacta ao final da seção, formato:");
+  linhas.push("  'E ainda cravaram: @X (jogo1), @Y (jogo2), @Z (jogo1 + jogo2), ...'");
+  linhas.push("  Nenhum pereba pode ficar de fora. TODOS os apelidos da lista de exatos acima devem aparecer.");
+  linhas.push("- Não crie subseção separada de 'quase-profetas' — a seção é única, só profetas exatos.");
+  linhas.push("- Máximo 7 destaques narrados. Resto em lista compacta.");
   linhas.push("");
   linhas.push("INSTRUÇÃO IMPORTANTE — LANTERNINHAS:");
   linhas.push("Cite TODOS os perebas listados na seção 'Lanterninhas'. Mesma lógica: 1-2 destaques narrados, resto em lista compacta.");
@@ -262,9 +256,9 @@ Deno.serve(async (req) => {
       }));
     }
 
-    // Profetas (placar exato) e quase-profetas (8-9 pts): TODAS predictions dos jogos encerrados, sem limit
+    // Profetas (placar exato): TODAS predictions dos jogos encerrados, sem limit
     let profetasExatos: any[] = [];
-    let palpitesCuriosos: any[] = [];
+    
     if (jogosEncerrados.length) {
       const matchIds = jogosEncerrados.map((m: any) => m.id);
       const todasPredictions = await sb(
@@ -276,15 +270,8 @@ Deno.serve(async (req) => {
         const m = mMap[p.match_id];
         return m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
       });
-      const curiososRaw = (todasPredictions ?? [])
-        .filter((p: any) => {
-          const m = mMap[p.match_id];
-          const ehExato = m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
-          return !ehExato && (p.pontos_calculados ?? 0) >= 8;
-        })
-        .slice(0, 10);
 
-      const allPreds = [...exatosRaw, ...curiososRaw];
+      const allPreds = exatosRaw;
       if (allPreds.length) {
         const quotaIds = [...new Set(allPreds.map((p: any) => p.quota_id))];
         const quotas = await sb(`quotas?id=in.(${quotaIds.join(",")})&select=id,user_id,numero`);
@@ -315,7 +302,7 @@ Deno.serve(async (req) => {
           };
         };
         profetasExatos = exatosRaw.map(enriquecer);
-        palpitesCuriosos = curiososRaw.map(enriquecer);
+        
       }
     }
 
@@ -334,7 +321,6 @@ Deno.serve(async (req) => {
       bottomDinamico,
       perfis,
       profetasExatos,
-      palpitesCuriosos,
       boletinsAnteriores: boletinsAnteriores ?? [],
     });
 
