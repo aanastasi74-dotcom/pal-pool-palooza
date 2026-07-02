@@ -270,13 +270,6 @@ Deno.serve(async (req) => {
         const m = mMap[p.match_id];
         return m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
       });
-      const curiososRaw = (todasPredictions ?? [])
-        .filter((p: any) => {
-          const m = mMap[p.match_id];
-          const ehExato = m && p.placar_casa === m.placar_casa && p.placar_fora === m.placar_fora;
-          return !ehExato && (p.pontos_calculados ?? 0) >= 8;
-        })
-        .slice(0, 10);
 
       const allPreds = [...exatosRaw, ...curiososRaw];
       if (allPreds.length) {
