@@ -302,7 +302,7 @@ Deno.serve(async (req) => {
           };
         };
         profetasExatos = exatosRaw.map(enriquecer);
-        palpitesCuriosos = curiososRaw.map(enriquecer);
+        
       }
     }
 
