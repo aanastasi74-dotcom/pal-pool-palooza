@@ -321,7 +321,6 @@ Deno.serve(async (req) => {
       bottomDinamico,
       perfis,
       profetasExatos,
-      palpitesCuriosos,
       boletinsAnteriores: boletinsAnteriores ?? [],
     });
 
