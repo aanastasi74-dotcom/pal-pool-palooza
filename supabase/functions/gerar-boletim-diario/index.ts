@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
       }));
     }
 
-    // Profetas (placar exato) e quase-profetas (8-9 pts): TODAS predictions dos jogos encerrados, sem limit
+    // Profetas (placar exato): TODAS predictions dos jogos encerrados, sem limit
     let profetasExatos: any[] = [];
     
     if (jogosEncerrados.length) {
