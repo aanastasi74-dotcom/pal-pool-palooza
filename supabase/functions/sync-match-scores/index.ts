@@ -256,13 +256,17 @@ async function actionSync(modo: string, season: string, action: string) {
   let jogos_atualizados = 0;
   const mudancas: any[] = [];
 
-  // Filtro de relevância (cron): jogo não-encerrado com início em [agora-4h, agora+10min]
+  // Filtro de relevância (cron): jogo não-encerrado em janela [agora-4h, agora+10min],
+  // OU jogo encerrado recentemente (updated_at nos últimos 15 min) — permite capturar
+  // updates tardios da API (ex.: score.extratime propaga depois do status AET).
   if (action === "cron") {
     const agora = new Date();
     const inicio = new Date(agora.getTime() - 4 * 60 * 60 * 1000).toISOString();
     const fim = new Date(agora.getTime() + 10 * 60 * 1000).toISOString();
+    const grace = new Date(agora.getTime() - 15 * 60 * 1000).toISOString();
     const relevantes: any[] = await sb(
-      `matches?select=id&status=neq.encerrado&data_jogo=gte.${inicio}&data_jogo=lte.${fim}`,
+      `matches?select=id&data_jogo=gte.${inicio}&data_jogo=lte.${fim}` +
+        `&or=(status.neq.encerrado,updated_at.gte.${grace})`,
     );
     if ((relevantes?.length ?? 0) === 0) {
       return { skipped: true, motivo: "sem_jogo_relevante", chamadas_api, jogos_verificados, jogos_atualizados, mudancas };
@@ -280,8 +284,10 @@ async function actionSync(modo: string, season: string, action: string) {
   for (const t of teams) if (t.codigo_api) teamByCodigo[t.codigo_api] = t.id;
 
   const matches: any[] = await sb(
-    "matches?select=id,team_home_id,team_away_id,status,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora",
+    "matches?select=id,team_home_id,team_away_id,status,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora,tentativas_encerramento",
   );
+
+  const MAX_TENTATIVAS_ENCERRAMENTO = 3;
 
   for (const f of fixtures) {
     const homeApi = f.teams?.home?.id;
@@ -297,11 +303,62 @@ async function actionSync(modo: string, season: string, action: string) {
     jogos_verificados++;
 
     const derived = derivar(f);
+
+    // Grace period: API-Football às vezes flipa pra AET/PEN antes de popular
+    // score.extratime.home/away. Se aceitarmos como final agora, prorrogação fica 0/0
+    // congelado (bug do M82). Segurar por até N ciclos até et propagar.
+    const apiStatus = f.fixture?.status?.short ?? "NS";
+    const precisaProrrogacao = ["AET", "PEN"].includes(apiStatus);
+    const et = f.score?.extratime ?? {};
+    const extratimeVazio = et.home == null && et.away == null;
+    const vaiEncerrar = derived.status === "encerrado" && match.status !== "encerrado";
+
+    let tentativasPatch: number | null = null;
+    let adiarEncerramento = false;
+
+    if (precisaProrrogacao && extratimeVazio && vaiEncerrar) {
+      const tent = (match.tentativas_encerramento ?? 0) + 1;
+      if (tent < MAX_TENTATIVAS_ENCERRAMENTO) {
+        adiarEncerramento = true;
+        tentativasPatch = tent;
+        // Não flipa status, não sobrescreve prorrogação com nada
+        derived.status = match.status;
+        derived.placar_casa_prorrogacao = match.placar_casa_prorrogacao;
+        derived.placar_fora_prorrogacao = match.placar_fora_prorrogacao;
+        derived.penaltis_casa = match.penaltis_casa;
+        derived.penaltis_fora = match.penaltis_fora;
+      } else {
+        // Fallback: aceita como final mesmo assim (evita travar em ao-vivo)
+        tentativasPatch = 0;
+      }
+    } else if (vaiEncerrar && (match.tentativas_encerramento ?? 0) > 0) {
+      // Encerramento normal — zera contador se estava incrementado
+      tentativasPatch = 0;
+    }
+
     const patch = diffMatch(match, derived);
-    if (!patch) continue;
+    const patchFinal: any = patch ? { ...patch } : null;
+    if (tentativasPatch !== null && tentativasPatch !== (match.tentativas_encerramento ?? 0)) {
+      (patchFinal ?? (({} as any))).tentativas_encerramento = tentativasPatch;
+    }
+    if (!patchFinal && tentativasPatch === null) continue;
+    if (!patch && tentativasPatch !== null) {
+      // Só o contador mudou; ainda queremos gravar
+      const somenteContador: any = { tentativas_encerramento: tentativasPatch };
+      jogos_atualizados++;
+      mudancas.push({ match_id: match.id, antes: match, depois: somenteContador, fixture_id: f.fixture?.id, grace: adiarEncerramento });
+      if (modo === "live") {
+        await sb(`matches?id=eq.${match.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(somenteContador),
+        });
+      }
+      continue;
+    }
 
     jogos_atualizados++;
-    mudancas.push({ match_id: match.id, antes: match, depois: patch, fixture_id: f.fixture?.id });
+    mudancas.push({ match_id: match.id, antes: match, depois: patchFinal, fixture_id: f.fixture?.id, grace: adiarEncerramento });
+
 
     if (modo === "live") {
       // Buscar eventos quando o placar mudou
