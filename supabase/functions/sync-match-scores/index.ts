@@ -363,10 +363,10 @@ async function actionSync(modo: string, season: string, action: string) {
     if (modo === "live") {
       // Buscar eventos quando o placar mudou
       const placarMudou =
-        patch.placar_casa !== undefined ||
-        patch.placar_fora !== undefined ||
-        patch.placar_casa_prorrogacao !== undefined ||
-        patch.placar_fora_prorrogacao !== undefined;
+        patchFinal.placar_casa !== undefined ||
+        patchFinal.placar_fora !== undefined ||
+        patchFinal.placar_casa_prorrogacao !== undefined ||
+        patchFinal.placar_fora_prorrogacao !== undefined;
       let eventos: any = undefined;
       if (placarMudou && f.fixture?.id) {
         try {
@@ -377,13 +377,14 @@ async function actionSync(modo: string, season: string, action: string) {
           console.warn("falha eventos:", e);
         }
       }
-      const finalPatch: any = { ...patch };
-      if (eventos !== undefined) finalPatch.eventos = eventos;
+      const payloadWrite: any = { ...patchFinal };
+      if (eventos !== undefined) payloadWrite.eventos = eventos;
       await sb(`matches?id=eq.${match.id}`, {
         method: "PATCH",
-        body: JSON.stringify(finalPatch),
+        body: JSON.stringify(payloadWrite),
       });
     }
+
   }
 
   return { chamadas_api, jogos_verificados, jogos_atualizados, mudancas, modo };
