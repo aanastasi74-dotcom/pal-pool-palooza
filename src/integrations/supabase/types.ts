@@ -493,7 +493,9 @@ export type Database = {
           status: string
           team_away_id: string | null
           team_home_id: string | null
+          tentativas_encerramento: number
           travado_em: string | null
+          updated_at: string
         }
         Insert: {
           alocacao_admin_override?: boolean
@@ -526,7 +528,9 @@ export type Database = {
           status?: string
           team_away_id?: string | null
           team_home_id?: string | null
+          tentativas_encerramento?: number
           travado_em?: string | null
+          updated_at?: string
         }
         Update: {
           alocacao_admin_override?: boolean
@@ -559,7 +563,9 @@ export type Database = {
           status?: string
           team_away_id?: string | null
           team_home_id?: string | null
+          tentativas_encerramento?: number
           travado_em?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
