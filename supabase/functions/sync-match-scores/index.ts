@@ -337,24 +337,13 @@ async function actionSync(modo: string, season: string, action: string) {
     }
 
     const patch = diffMatch(match, derived);
-    const patchFinal: any = patch ? { ...patch } : null;
-    if (tentativasPatch !== null && tentativasPatch !== (match.tentativas_encerramento ?? 0)) {
-      (patchFinal ?? (({} as any))).tentativas_encerramento = tentativasPatch;
-    }
-    if (!patchFinal && tentativasPatch === null) continue;
-    if (!patch && tentativasPatch !== null) {
-      // Só o contador mudou; ainda queremos gravar
-      const somenteContador: any = { tentativas_encerramento: tentativasPatch };
-      jogos_atualizados++;
-      mudancas.push({ match_id: match.id, antes: match, depois: somenteContador, fixture_id: f.fixture?.id, grace: adiarEncerramento });
-      if (modo === "live") {
-        await sb(`matches?id=eq.${match.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(somenteContador),
-        });
-      }
-      continue;
-    }
+    const contadorMudou =
+      tentativasPatch !== null && tentativasPatch !== (match.tentativas_encerramento ?? 0);
+    if (!patch && !contadorMudou) continue;
+
+    const patchFinal: any = patch ? { ...patch } : {};
+    if (contadorMudou) patchFinal.tentativas_encerramento = tentativasPatch;
+
 
     jogos_atualizados++;
     mudancas.push({ match_id: match.id, antes: match, depois: patchFinal, fixture_id: f.fixture?.id, grace: adiarEncerramento });
