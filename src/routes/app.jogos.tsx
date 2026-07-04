@@ -13,6 +13,7 @@ import { buildHeader, getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 import { EstatisticasPalpites } from "@/components/estatisticas-palpites";
 import { fmtOrigem } from "@/lib/jogos/origem-label";
+import { TempoJogoLive } from "@/components/jogo/TempoJogoLive";
 
 
 export const Route = createFileRoute("/app/jogos")({
@@ -201,6 +202,12 @@ function Jogos() {
                         <Radio className="h-3 w-3 animate-pulse" /> AO VIVO
                       </span>
                     )}
+                    <TempoJogoLive
+                      status={j.status}
+                      status_api={j.status_api}
+                      minuto_atual={j.minuto_atual}
+                      minuto_extra={j.minuto_extra}
+                    />
                     <span>peso {j.peso}</span>
                   </span>
                 </div>

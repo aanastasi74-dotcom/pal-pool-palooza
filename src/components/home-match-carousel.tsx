@@ -7,6 +7,7 @@ import { useTeams } from "@/lib/queries/teams";
 import { useFrasesDoDia } from "@/lib/queries/frases-do-dia";
 import { getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
+import { TempoJogoLive } from "@/components/jogo/TempoJogoLive";
 
 const FRASES_SIMULADOR = [
   "Simulador no ar! Faça sua Copa, descubra teu campeão... pelo menos no papel →",
@@ -194,10 +195,19 @@ export function HomeMatchCarousel() {
                   <span className="flex items-center gap-2">
                     {it.kind === "resultado" ? (encerrado ? "Resultado" : "Em andamento") : "Próximo jogo"}
                     {aoVivo && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
-                        AO VIVO
-                      </span>
+                      <>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
+                          AO VIVO
+                        </span>
+                        <TempoJogoLive
+                          status={j.status}
+                          status_api={(j as any).status_api}
+                          minuto_atual={(j as any).minuto_atual}
+                          minuto_extra={(j as any).minuto_extra}
+                          className="!bg-white/20 !text-white"
+                        />
+                      </>
                     )}
                     {encerrado && (
                       <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold">ENCERRADO</span>

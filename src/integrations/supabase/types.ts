@@ -479,6 +479,8 @@ export type Database = {
           home_origem: string | null
           hora_definida: boolean
           id: string
+          minuto_atual: number | null
+          minuto_extra: number | null
           numero_jogo: number | null
           penaltis_casa: number | null
           penaltis_fora: number | null
@@ -491,6 +493,7 @@ export type Database = {
           slot_visitante: string | null
           stadium_id: string | null
           status: string
+          status_api: string | null
           team_away_id: string | null
           team_home_id: string | null
           tentativas_encerramento: number
@@ -514,6 +517,8 @@ export type Database = {
           home_origem?: string | null
           hora_definida?: boolean
           id?: string
+          minuto_atual?: number | null
+          minuto_extra?: number | null
           numero_jogo?: number | null
           penaltis_casa?: number | null
           penaltis_fora?: number | null
@@ -526,6 +531,7 @@ export type Database = {
           slot_visitante?: string | null
           stadium_id?: string | null
           status?: string
+          status_api?: string | null
           team_away_id?: string | null
           team_home_id?: string | null
           tentativas_encerramento?: number
@@ -549,6 +555,8 @@ export type Database = {
           home_origem?: string | null
           hora_definida?: boolean
           id?: string
+          minuto_atual?: number | null
+          minuto_extra?: number | null
           numero_jogo?: number | null
           penaltis_casa?: number | null
           penaltis_fora?: number | null
@@ -561,6 +569,7 @@ export type Database = {
           slot_visitante?: string | null
           stadium_id?: string | null
           status?: string
+          status_api?: string | null
           team_away_id?: string | null
           team_home_id?: string | null
           tentativas_encerramento?: number
