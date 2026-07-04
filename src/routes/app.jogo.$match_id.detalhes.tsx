@@ -177,6 +177,12 @@ function DetalhesDoJogo() {
           </span>
           <span className="flex items-center gap-2">
             {statusBadge(match.status)}
+            <TempoJogoLive
+              status={match.status}
+              status_api={(match as any).status_api}
+              minuto_atual={(match as any).minuto_atual}
+              minuto_extra={(match as any).minuto_extra}
+            />
             <span>peso {match.peso}</span>
           </span>
         </div>
