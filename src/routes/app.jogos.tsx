@@ -13,6 +13,7 @@ import { buildHeader, getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
 import { EstatisticasPalpites } from "@/components/estatisticas-palpites";
 import { fmtOrigem } from "@/lib/jogos/origem-label";
+import { TempoJogoLive } from "@/components/jogo/TempoJogoLive";
 
 
 export const Route = createFileRoute("/app/jogos")({
