@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { vencedorDoJogo } from "@/lib/top4-potencial/engine";
 import type { Team } from "@/lib/queries/teams";
 
 type MatchLike = {
@@ -8,7 +9,14 @@ type MatchLike = {
   team_home_id: string | null;
   team_away_id: string | null;
   status: string | null;
-  vencedor?: string | null;
+  placar_casa?: number | null;
+  placar_fora?: number | null;
+  placar_casa_prorrogacao?: number | null;
+  placar_fora_prorrogacao?: number | null;
+  penaltis_casa?: number | null;
+  penaltis_fora?: number | null;
+  home_origem?: string | null;
+  away_origem?: string | null;
 };
 
 type Props = {
