@@ -7,6 +7,7 @@ import { useTeams } from "@/lib/queries/teams";
 import { useFrasesDoDia } from "@/lib/queries/frases-do-dia";
 import { getTeamSide } from "@/lib/match-helpers";
 import { PlacarJogo } from "@/components/placar-jogo";
+import { TempoJogoLive } from "@/components/jogo/TempoJogoLive";
 
 const FRASES_SIMULADOR = [
   "Simulador no ar! Faça sua Copa, descubra teu campeão... pelo menos no papel →",
