@@ -402,3 +402,35 @@ function ErrataLembretesPanel() {
     </div>
   );
 }
+
+function RecalcTop4AutoButton() {
+  const [loading, setLoading] = useState(false);
+  const disparar = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("calcular-pontos-top4-auto", {
+        method: "POST",
+        body: { trigger: "admin_manual" },
+      });
+      if (error) throw error;
+      const d = data as any;
+      toast.success(
+        `Recalculado: ${d?.palpites_atualizados ?? 0} palpites, ${d?.quotas_atualizadas ?? 0} quotas. Semifinalistas: ${d?.semifinalistas ?? 0}.`,
+      );
+    } catch (e: any) {
+      toast.error(`Falhou: ${e?.message ?? e}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <button
+      onClick={disparar}
+      disabled={loading}
+      className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+    >
+      {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+      Recalcular Top 4 parcial agora
+    </button>
+  );
+}
