@@ -302,7 +302,7 @@ async function actionSync(modo: string, season: string, action: string) {
   for (const t of teams) if (t.codigo_api) teamByCodigo[t.codigo_api] = t.id;
 
   const matches: any[] = await sb(
-    "matches?select=id,team_home_id,team_away_id,status,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora,tentativas_encerramento",
+    "matches?select=id,team_home_id,team_away_id,status,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora,tentativas_encerramento,status_api,minuto_atual,minuto_extra",
   );
 
   const MAX_TENTATIVAS_ENCERRAMENTO = 3;
