@@ -43,32 +43,30 @@ function statusDoTime(teamId: string | undefined, matches: MatchLike[]): { label
 
   const final = matches.find((m) => m.numero_jogo === 104);
   const terceiroJogo = matches.find((m) => m.numero_jogo === 103);
-  if (final?.status === "encerrado" && final.vencedor) {
+  const vencFinal = final ? vencedorDoJogo(final) : null;
+  if (final?.status === "encerrado" && vencFinal) {
     const perdedorFinal =
-      final.team_home_id === final.vencedor ? final.team_away_id : final.team_home_id;
-    if (final.vencedor === teamId) return { label: "🏆 Campeão", cls: "text-success" };
+      final.team_home_id === vencFinal ? final.team_away_id : final.team_home_id;
+    if (vencFinal === teamId) return { label: "🏆 Campeão", cls: "text-success" };
     if (perdedorFinal === teamId) return { label: "🥈 Vice", cls: "text-success" };
   }
-  if (terceiroJogo?.status === "encerrado" && terceiroJogo.vencedor) {
+  const venc3 = terceiroJogo ? vencedorDoJogo(terceiroJogo) : null;
+  if (terceiroJogo?.status === "encerrado" && venc3) {
     const perdedor3 =
-      terceiroJogo.team_home_id === terceiroJogo.vencedor
-        ? terceiroJogo.team_away_id
-        : terceiroJogo.team_home_id;
-    if (terceiroJogo.vencedor === teamId) return { label: "🥉 3º lugar", cls: "text-success" };
+      terceiroJogo.team_home_id === venc3 ? terceiroJogo.team_away_id : terceiroJogo.team_home_id;
+    if (venc3 === teamId) return { label: "🥉 3º lugar", cls: "text-success" };
     if (perdedor3 === teamId) return { label: "4º lugar", cls: "text-muted-foreground" };
   }
 
-  // Encontra o último jogo encerrado em que o time perdeu
+  // Último jogo encerrado em que o time perdeu
   const eliminado = matches
-    .filter(
-      (m) =>
-        m.numero_jogo != null &&
-        m.numero_jogo >= 73 &&
-        m.status === "encerrado" &&
-        m.vencedor &&
-        (m.team_home_id === teamId || m.team_away_id === teamId) &&
-        m.vencedor !== teamId,
-    )
+    .filter((m) => {
+      if (m.numero_jogo == null || m.numero_jogo < 73) return false;
+      if (m.status !== "encerrado") return false;
+      if (m.team_home_id !== teamId && m.team_away_id !== teamId) return false;
+      const v = vencedorDoJogo(m);
+      return !!v && v !== teamId;
+    })
     .sort((a, b) => (b.numero_jogo ?? 0) - (a.numero_jogo ?? 0))[0];
 
   if (eliminado) {
