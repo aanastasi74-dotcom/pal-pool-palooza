@@ -130,11 +130,16 @@ type Derived = {
   penaltis_casa: number | null;
   penaltis_fora: number | null;
   status: string;
+  status_api: string | null;
+  minuto_atual: number | null;
+  minuto_extra: number | null;
 };
 
 function derivar(fixture: any): Derived {
   const apiStatus = fixture.fixture?.status?.short ?? "NS";
   const status = statusFromApi(apiStatus);
+  const elapsed = fixture.fixture?.status?.elapsed;
+  const extra = fixture.fixture?.status?.extra;
   const goals = fixture.goals ?? {};
   const score = fixture.score ?? {};
   const ft = score.fulltime ?? {};
@@ -176,6 +181,12 @@ function derivar(fixture: any): Derived {
       penaltis_fora = pen.away ?? null;
     }
   }
+
+  // Tempo de jogo: só faz sentido em andamento. Jogos finalizados/agendados zeram.
+  const emAndamento = ["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT"].includes(apiStatus);
+  const minuto_atual = emAndamento ? (elapsed ?? null) : null;
+  const minuto_extra = emAndamento ? (extra ?? null) : null;
+
   return {
     placar_casa,
     placar_fora,
@@ -184,6 +195,9 @@ function derivar(fixture: any): Derived {
     penaltis_casa,
     penaltis_fora,
     status,
+    status_api: apiStatus ?? null,
+    minuto_atual,
+    minuto_extra,
   };
 }
 
@@ -196,6 +210,9 @@ function diffMatch(atual: any, novo: Derived): Partial<Derived> | null {
     "penaltis_casa",
     "penaltis_fora",
     "status",
+    "status_api",
+    "minuto_atual",
+    "minuto_extra",
   ];
   const patch: any = {};
   for (const f of fields) {
@@ -203,6 +220,7 @@ function diffMatch(atual: any, novo: Derived): Partial<Derived> | null {
   }
   return Object.keys(patch).length === 0 ? null : patch;
 }
+
 
 async function actionMapear(season: string) {
   const data = await apiFootball(`/teams?league=1&season=${season}`);
