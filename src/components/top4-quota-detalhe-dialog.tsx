@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { vencedorDoJogo } from "@/lib/top4-potencial/engine";
 import type { Team } from "@/lib/queries/teams";
 
 type MatchLike = {
@@ -8,7 +9,14 @@ type MatchLike = {
   team_home_id: string | null;
   team_away_id: string | null;
   status: string | null;
-  vencedor?: string | null;
+  placar_casa?: number | null;
+  placar_fora?: number | null;
+  placar_casa_prorrogacao?: number | null;
+  placar_fora_prorrogacao?: number | null;
+  penaltis_casa?: number | null;
+  penaltis_fora?: number | null;
+  home_origem?: string | null;
+  away_origem?: string | null;
 };
 
 type Props = {
@@ -35,32 +43,30 @@ function statusDoTime(teamId: string | undefined, matches: MatchLike[]): { label
 
   const final = matches.find((m) => m.numero_jogo === 104);
   const terceiroJogo = matches.find((m) => m.numero_jogo === 103);
-  if (final?.status === "encerrado" && final.vencedor) {
+  const vencFinal = final ? vencedorDoJogo(final as any) : null;
+  if (final?.status === "encerrado" && vencFinal) {
     const perdedorFinal =
-      final.team_home_id === final.vencedor ? final.team_away_id : final.team_home_id;
-    if (final.vencedor === teamId) return { label: "🏆 Campeão", cls: "text-success" };
+      final.team_home_id === vencFinal ? final.team_away_id : final.team_home_id;
+    if (vencFinal === teamId) return { label: "🏆 Campeão", cls: "text-success" };
     if (perdedorFinal === teamId) return { label: "🥈 Vice", cls: "text-success" };
   }
-  if (terceiroJogo?.status === "encerrado" && terceiroJogo.vencedor) {
+  const venc3 = terceiroJogo ? vencedorDoJogo(terceiroJogo as any) : null;
+  if (terceiroJogo?.status === "encerrado" && venc3) {
     const perdedor3 =
-      terceiroJogo.team_home_id === terceiroJogo.vencedor
-        ? terceiroJogo.team_away_id
-        : terceiroJogo.team_home_id;
-    if (terceiroJogo.vencedor === teamId) return { label: "🥉 3º lugar", cls: "text-success" };
+      terceiroJogo.team_home_id === venc3 ? terceiroJogo.team_away_id : terceiroJogo.team_home_id;
+    if (venc3 === teamId) return { label: "🥉 3º lugar", cls: "text-success" };
     if (perdedor3 === teamId) return { label: "4º lugar", cls: "text-muted-foreground" };
   }
 
-  // Encontra o último jogo encerrado em que o time perdeu
+  // Último jogo encerrado em que o time perdeu
   const eliminado = matches
-    .filter(
-      (m) =>
-        m.numero_jogo != null &&
-        m.numero_jogo >= 73 &&
-        m.status === "encerrado" &&
-        m.vencedor &&
-        (m.team_home_id === teamId || m.team_away_id === teamId) &&
-        m.vencedor !== teamId,
-    )
+    .filter((m) => {
+      if (m.numero_jogo == null || m.numero_jogo < 73) return false;
+      if (m.status !== "encerrado") return false;
+      if (m.team_home_id !== teamId && m.team_away_id !== teamId) return false;
+      const v = vencedorDoJogo(m as any);
+      return !!v && v !== teamId;
+    })
     .sort((a, b) => (b.numero_jogo ?? 0) - (a.numero_jogo ?? 0))[0];
 
   if (eliminado) {

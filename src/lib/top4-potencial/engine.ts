@@ -40,7 +40,7 @@ type TeamLike = { id: string; bracket_position: string };
  * pênaltis. Retorna null se não houver vencedor determinável (jogo em aberto
  * ou empate sem desempate).
  */
-function vencedorDoJogo(m: MatchLike): string | null {
+export function vencedorDoJogo(m: MatchLike): string | null {
   if (m.status !== "encerrado") return null;
   const home = m.team_home_id;
   const away = m.team_away_id;
