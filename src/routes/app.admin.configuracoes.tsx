@@ -146,6 +146,32 @@ function Configuracoes() {
             </AccordionContent>
           </AccordionItem>
 
+          <AccordionItem value="top4-auto">
+            <AccordionTrigger>Top 4 — cálculo automático parcial (P.4)</AccordionTrigger>
+            <AccordionContent className="space-y-3">
+              <div className="flex items-start gap-2 rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
+                <p>
+                  Quando ativado, após cada jogo das <b>Quartas</b>, <b>Final</b> e <b>Disputa de 3º</b> encerrar, os pontos do Top 4 são recalculados automaticamente e somados em <code>quotas.pontos</code>. Regra: <b>+400 × fator</b> por palpite que bate com um semifinalista confirmado, <b>+600 × fator</b> de top-up quando a posição exata é confirmada. Fator vem do <code>peso_no_palpite</code> congelado no palpite (25/50/100 → 0.25/0.50/1.00). O botão <b>Encerrar Copa</b> (K.3.3) continua sendo o veredito final e sobrescreve tudo.
+                </p>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">Ativar cálculo automático parcial</p>
+                  <p className="text-xs text-muted-foreground">Trigger dispara após encerrar jogos de Quartas/Final/Disputa 3º.</p>
+                </div>
+                <Switch
+                  checked={!!settings?.top4_auto_parcial_enabled}
+                  onCheckedChange={async (v) => {
+                    await update.mutateAsync({ key: "top4_auto_parcial_enabled", value: v });
+                    toast.success(v ? "Cálculo automático parcial ativado." : "Cálculo automático parcial desativado.");
+                  }}
+                />
+              </div>
+              <RecalcTop4AutoButton />
+            </AccordionContent>
+          </AccordionItem>
+
+
           <AccordionItem value="boletim">
             <AccordionTrigger>Boletim</AccordionTrigger>
             <AccordionContent className="space-y-3">
@@ -374,5 +400,37 @@ function ErrataLembretesPanel() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+function RecalcTop4AutoButton() {
+  const [loading, setLoading] = useState(false);
+  const disparar = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("calcular-pontos-top4-auto", {
+        method: "POST",
+        body: { trigger: "admin_manual" },
+      });
+      if (error) throw error;
+      const d = data as any;
+      toast.success(
+        `Recalculado: ${d?.palpites_atualizados ?? 0} palpites, ${d?.quotas_atualizadas ?? 0} quotas. Semifinalistas: ${d?.semifinalistas ?? 0}.`,
+      );
+    } catch (e: any) {
+      toast.error(`Falhou: ${e?.message ?? e}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <button
+      onClick={disparar}
+      disabled={loading}
+      className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow disabled:opacity-50"
+    >
+      {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+      Recalcular Top 4 parcial agora
+    </button>
   );
 }
