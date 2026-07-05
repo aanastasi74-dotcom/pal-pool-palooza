@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy, Eye } from "lucide-react";
+import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyTop4, useUpdateTop4, useFaseAtual } from "@/lib/queries/top4";
@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { Top4PotencialCard } from "@/components/top4-potencial-card";
 import { Top4ConfirmMudancaDialog } from "@/components/top4-confirm-mudanca-dialog";
-import { Top4QuotaDetalheDialog } from "@/components/top4-quota-detalhe-dialog";
+import { Top4QuotaContent } from "@/components/top4-quota-detalhe-dialog";
 import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
 
 export const Route = createFileRoute("/app/palpites_/top4")({
@@ -344,7 +344,6 @@ function PublicoOutrosSection({
   const [ordem, setOrdem] = useState<"ranking" | "alfabetico">("ranking");
   const [userSel, setUserSel] = useState<string>("");
   const [quotaSel, setQuotaSel] = useState<string>("");
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [initialHandled, setInitialHandled] = useState(false);
 
   const comPalpite = useMemo(
@@ -399,7 +398,6 @@ function PublicoOutrosSection({
     }
     setUserSel(alvo.user_id);
     setQuotaSel(alvo.id);
-    setDialogOpen(true);
   }, [initialQuotaId, rows, publico, dataAbertura, initialHandled, onConsumeInitial]);
 
   const potencial = useMemo(() => {
@@ -488,39 +486,30 @@ function PublicoOutrosSection({
       </div>
 
       {quotaAtiva && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            onClick={() => setDialogOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow"
-          >
-            <Eye className="h-3.5 w-3.5" /> Ver Top 4
-          </button>
-          <button
-            onClick={copiarLink}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-bold text-foreground hover:bg-muted/40"
-          >
-            <Copy className="h-3.5 w-3.5" /> Copiar link
-          </button>
+        <div className="mt-4 rounded-2xl border border-border bg-background p-3">
+          <Top4QuotaContent
+            apelido={perebaSel?.apelido ?? "—"}
+            numero={quotaAtiva.numero}
+            picks={{
+              campeao: quotaAtiva.top4_p1,
+              vice: quotaAtiva.top4_p2,
+              terceiro: quotaAtiva.top4_p3,
+              quarto: quotaAtiva.top4_p4,
+            }}
+            teams={teams as any}
+            matches={matches as any}
+            potencial={potencial}
+            peso={quotaAtiva.top4_peso ?? 100}
+            headerRight={
+              <button
+                onClick={copiarLink}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold text-foreground hover:bg-muted/40"
+              >
+                <Copy className="h-3.5 w-3.5" /> Copiar link
+              </button>
+            }
+          />
         </div>
-      )}
-
-      {quotaAtiva && (
-        <Top4QuotaDetalheDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          apelido={perebaSel?.apelido ?? "—"}
-          numero={quotaAtiva.numero}
-          picks={{
-            campeao: quotaAtiva.top4_p1,
-            vice: quotaAtiva.top4_p2,
-            terceiro: quotaAtiva.top4_p3,
-            quarto: quotaAtiva.top4_p4,
-          }}
-          teams={teams as any}
-          matches={matches as any}
-          potencial={potencial}
-          peso={quotaAtiva.top4_peso ?? 100}
-        />
       )}
     </section>
   );
