@@ -344,7 +344,6 @@ function PublicoOutrosSection({
   const [ordem, setOrdem] = useState<"ranking" | "alfabetico">("ranking");
   const [userSel, setUserSel] = useState<string>("");
   const [quotaSel, setQuotaSel] = useState<string>("");
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [initialHandled, setInitialHandled] = useState(false);
 
   const comPalpite = useMemo(
