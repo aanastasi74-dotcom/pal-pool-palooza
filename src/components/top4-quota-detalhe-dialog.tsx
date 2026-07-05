@@ -85,9 +85,7 @@ function statusDoTime(teamId: string | undefined, matches: MatchLike[]): { label
   return { label: "Ainda na disputa", cls: "text-primary" };
 }
 
-export function Top4QuotaDetalheDialog({
-  open,
-  onOpenChange,
+export function Top4QuotaContent({
   apelido,
   numero,
   picks,
@@ -95,7 +93,8 @@ export function Top4QuotaDetalheDialog({
   matches,
   potencial,
   peso,
-}: Props) {
+  headerRight,
+}: ContentProps & { headerRight?: React.ReactNode }) {
   const teamByBp = useMemo(() => {
     const map = new Map<string, Team>();
     for (const t of teams) map.set(t.bracket_position, t);
@@ -110,6 +109,49 @@ export function Top4QuotaDetalheDialog({
   });
 
   return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="font-display font-bold">
+          Top 4 de {apelido} <span className="text-muted-foreground font-normal">· Quota #{numero}</span>
+        </div>
+        {headerRight}
+      </div>
+      <div className="space-y-2">
+        {linhas.map(({ slot, team, st }) => (
+          <div
+            key={slot}
+            className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2"
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground w-16">
+                {SLOT_LABEL[slot]}
+              </span>
+              <span className="text-xl">{team?.bandeira_emoji ?? "🏳️"}</span>
+              <span className="truncate font-display font-bold">{team?.nome_pt ?? "—"}</span>
+            </div>
+            <span className={`shrink-0 text-xs font-semibold ${st.cls}`}>{st.label}</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Potencial atual: <strong>{potencial.toLocaleString("pt-BR")} pts</strong> · Eficácia {peso}%
+      </p>
+    </div>
+  );
+}
+
+export function Top4QuotaDetalheDialog({
+  open,
+  onOpenChange,
+  apelido,
+  numero,
+  picks,
+  teams,
+  matches,
+  potencial,
+  peso,
+}: Props) {
+  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -117,27 +159,16 @@ export function Top4QuotaDetalheDialog({
             Top 4 de {apelido} <span className="text-muted-foreground">· Quota #{numero}</span>
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-2">
-          {linhas.map(({ slot, team, st }) => (
-            <div
-              key={slot}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2"
-            >
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground w-16">
-                  {SLOT_LABEL[slot]}
-                </span>
-                <span className="text-xl">{team?.bandeira_emoji ?? "🏳️"}</span>
-                <span className="truncate font-display font-bold">{team?.nome_pt ?? "—"}</span>
-              </div>
-              <span className={`shrink-0 text-xs font-semibold ${st.cls}`}>{st.label}</span>
-            </div>
-          ))}
-        </div>
-        <DialogFooter className="sm:justify-between">
-          <p className="text-xs text-muted-foreground">
-            Potencial atual: <strong>{potencial.toLocaleString("pt-BR")} pts</strong> · Eficácia {peso}%
-          </p>
+        <Top4QuotaContent
+          apelido={apelido}
+          numero={numero}
+          picks={picks}
+          teams={teams}
+          matches={matches}
+          potencial={potencial}
+          peso={peso}
+        />
+        <DialogFooter className="sm:justify-end">
           <DialogClose asChild>
             <Button variant="secondary" size="sm">Fechar</Button>
           </DialogClose>
