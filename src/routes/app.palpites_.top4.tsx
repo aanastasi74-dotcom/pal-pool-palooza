@@ -398,7 +398,6 @@ function PublicoOutrosSection({
     }
     setUserSel(alvo.user_id);
     setQuotaSel(alvo.id);
-    setDialogOpen(true);
   }, [initialQuotaId, rows, publico, dataAbertura, initialHandled, onConsumeInitial]);
 
   const potencial = useMemo(() => {
