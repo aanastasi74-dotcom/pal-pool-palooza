@@ -170,6 +170,7 @@ export function Top4QuotaDetalheDialog({
           matches={matches}
           potencial={potencial}
           peso={peso}
+          hideHeader
         />
         <DialogFooter className="sm:justify-end">
           <DialogClose asChild>
