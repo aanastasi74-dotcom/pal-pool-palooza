@@ -94,7 +94,8 @@ export function Top4QuotaContent({
   potencial,
   peso,
   headerRight,
-}: ContentProps & { headerRight?: React.ReactNode }) {
+  hideHeader = false,
+}: ContentProps & { headerRight?: ReactNode; hideHeader?: boolean }) {
   const teamByBp = useMemo(() => {
     const map = new Map<string, Team>();
     for (const t of teams) map.set(t.bracket_position, t);
@@ -110,12 +111,14 @@ export function Top4QuotaContent({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="font-display font-bold">
-          Top 4 de {apelido} <span className="text-muted-foreground font-normal">· Quota #{numero}</span>
+      {!hideHeader && (
+        <div className="flex items-start justify-between gap-3">
+          <div className="font-display font-bold">
+            Top 4 de {apelido} <span className="text-muted-foreground font-normal">· Quota #{numero}</span>
+          </div>
+          {headerRight}
         </div>
-        {headerRight}
-      </div>
+      )}
       <div className="space-y-2">
         {linhas.map(({ slot, team, st }) => (
           <div
