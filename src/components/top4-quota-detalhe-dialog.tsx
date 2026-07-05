@@ -19,9 +19,7 @@ type MatchLike = {
   away_origem?: string | null;
 };
 
-type Props = {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
+type ContentProps = {
   apelido: string;
   numero: number;
   picks: { campeao: string; vice: string; terceiro: string; quarto: string };
@@ -29,6 +27,11 @@ type Props = {
   matches: MatchLike[];
   potencial: number;
   peso: number;
+};
+
+type Props = ContentProps & {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
 };
 
 const SLOT_LABEL: Record<"campeao" | "vice" | "terceiro" | "quarto", string> = {
