@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { Top4PotencialCard } from "@/components/top4-potencial-card";
 import { Top4ConfirmMudancaDialog } from "@/components/top4-confirm-mudanca-dialog";
-import { Top4QuotaDetalheDialog } from "@/components/top4-quota-detalhe-dialog";
+import { Top4QuotaContent } from "@/components/top4-quota-detalhe-dialog";
 import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
 
 export const Route = createFileRoute("/app/palpites_/top4")({
