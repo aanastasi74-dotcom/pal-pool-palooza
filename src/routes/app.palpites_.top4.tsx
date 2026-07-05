@@ -297,6 +297,231 @@ function Top4Page() {
           salvar();
         }}
       />
+
+      <PublicoOutrosSection
+        publicoAt={publicoAt ?? null}
+        teams={teams}
+        initialQuotaId={search.q ?? null}
+        onConsumeInitial={() => navigate({ search: (prev: any) => ({ ...prev, q: undefined }), replace: true })}
+      />
     </div>
+  );
+}
+
+function PublicoOutrosSection({
+  publicoAt,
+  teams,
+  initialQuotaId,
+  onConsumeInitial,
+}: {
+  publicoAt: string | null;
+  teams: any[];
+  initialQuotaId: string | null;
+  onConsumeInitial: () => void;
+}) {
+  const publico = useMemo(() => {
+    if (!publicoAt) return false;
+    return Date.now() >= new Date(publicoAt).getTime();
+  }, [publicoAt]);
+
+  const dataAbertura = publicoAt ? new Date(publicoAt) : null;
+
+  const { data: rows = [] } = useRanking();
+  const { data: matches = [] } = useQuery({
+    queryKey: ["matches", "top4-publico-outros"],
+    enabled: publico,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("matches")
+        .select("numero_jogo,team_home_id,team_away_id,home_origem,away_origem,status,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora")
+        .order("numero_jogo", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 60_000,
+  });
+
+  const [ordem, setOrdem] = useState<"ranking" | "alfabetico">("ranking");
+  const [userSel, setUserSel] = useState<string>("");
+  const [quotaSel, setQuotaSel] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [initialHandled, setInitialHandled] = useState(false);
+
+  const comPalpite = useMemo(
+    () => (rows as any[]).filter((r) => r.top4_p1 && r.top4_p2 && r.top4_p3 && r.top4_p4),
+    [rows],
+  );
+
+  const perebas = useMemo(() => {
+    const byUser = new Map<string, { user_id: string; apelido: string; quotas: any[]; melhorPos: number }>();
+    for (const r of comPalpite) {
+      const u = r.user_id;
+      const cur = byUser.get(u);
+      const apelido = r.profile?.apelido ?? "—";
+      const pos = r.posicao ?? 9999;
+      if (cur) {
+        cur.quotas.push(r);
+        if (pos < cur.melhorPos) cur.melhorPos = pos;
+      } else {
+        byUser.set(u, { user_id: u, apelido, quotas: [r], melhorPos: pos });
+      }
+    }
+    const arr = Array.from(byUser.values());
+    arr.forEach((p) => p.quotas.sort((a, b) => (a.posicao ?? 9999) - (b.posicao ?? 9999)));
+    if (ordem === "ranking") arr.sort((a, b) => a.melhorPos - b.melhorPos);
+    else arr.sort((a, b) => a.apelido.localeCompare(b.apelido, "pt-BR", { sensitivity: "base" }));
+    return arr;
+  }, [comPalpite, ordem]);
+
+  const perebaSel = useMemo(() => perebas.find((p) => p.user_id === userSel) ?? null, [perebas, userSel]);
+  const quotaAtiva = useMemo(() => {
+    if (!perebaSel) return null;
+    return perebaSel.quotas.find((q) => q.id === quotaSel) ?? perebaSel.quotas[0] ?? null;
+  }, [perebaSel, quotaSel]);
+
+  // Deep-link: ?q=<quotaId>
+  useEffect(() => {
+    if (initialHandled) return;
+    if (!initialQuotaId) return;
+    if (!rows.length) return;
+    setInitialHandled(true);
+    if (!publico) {
+      const dt = dataAbertura ? dataAbertura.toLocaleString("pt-BR") : "em breve";
+      toast.info(`Top 4 dos outros perebas fica público a partir de ${dt}.`);
+      onConsumeInitial();
+      return;
+    }
+    const alvo = (rows as any[]).find((r) => r.id === initialQuotaId);
+    if (!alvo || !alvo.top4_p1) {
+      toast.error("Quota não encontrada ou sem Top 4 registrado.");
+      onConsumeInitial();
+      return;
+    }
+    setUserSel(alvo.user_id);
+    setQuotaSel(alvo.id);
+    setDialogOpen(true);
+  }, [initialQuotaId, rows, publico, dataAbertura, initialHandled, onConsumeInitial]);
+
+  const potencial = useMemo(() => {
+    if (!quotaAtiva || !matches.length || !teams.length) return 0;
+    const r = calcularPotencialMaximoTop4(
+      {
+        campeao: quotaAtiva.top4_p1,
+        vice: quotaAtiva.top4_p2,
+        terceiro: quotaAtiva.top4_p3,
+        quarto: quotaAtiva.top4_p4,
+      },
+      matches as any,
+      teams as any,
+      quotaAtiva.top4_peso ?? 100,
+    );
+    return r.faseGruposCompleta ? r.pontos : 0;
+  }, [quotaAtiva, matches, teams]);
+
+  const copiarLink = async () => {
+    if (!quotaAtiva) return;
+    const url = `${window.location.origin}/app/palpites/top4?q=${quotaAtiva.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado!");
+    } catch {
+      toast.error("Não foi possível copiar. Copia manualmente da barra de endereço.");
+    }
+  };
+
+  if (!publico) return null;
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="mb-3 flex items-center gap-2">
+        <Users className="h-4 w-4 text-primary" />
+        <h2 className="font-display text-lg font-bold">Ver Top 4 de outros perebas</h2>
+      </div>
+
+      <div className="mb-3 inline-flex rounded-full border border-border bg-secondary p-0.5 text-xs font-semibold">
+        {(["ranking", "alfabetico"] as const).map((o) => (
+          <button
+            key={o}
+            onClick={() => setOrdem(o)}
+            className={`rounded-full px-3 py-1 transition ${
+              ordem === o ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {o === "ranking" ? "Por ranking" : "Alfabético"}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <select
+          value={userSel}
+          onChange={(e) => {
+            setUserSel(e.target.value);
+            setQuotaSel("");
+          }}
+          className="flex-1 rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
+        >
+          <option value="">— escolher pereba —</option>
+          {perebas.map((p) => (
+            <option key={p.user_id} value={p.user_id}>
+              {ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : ""}
+              {p.apelido}
+              {p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : ""}
+            </option>
+          ))}
+        </select>
+
+        {perebaSel && perebaSel.quotas.length > 1 && (
+          <select
+            value={quotaAtiva?.id ?? ""}
+            onChange={(e) => setQuotaSel(e.target.value)}
+            className="rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
+          >
+            {perebaSel.quotas.map((q) => (
+              <option key={q.id} value={q.id}>
+                Quota #{q.numero}
+                {q.posicao ? ` · ${q.posicao}º` : ""}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {quotaAtiva && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            onClick={() => setDialogOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow"
+          >
+            <Eye className="h-3.5 w-3.5" /> Ver Top 4
+          </button>
+          <button
+            onClick={copiarLink}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-bold text-foreground hover:bg-muted/40"
+          >
+            <Copy className="h-3.5 w-3.5" /> Copiar link
+          </button>
+        </div>
+      )}
+
+      {quotaAtiva && (
+        <Top4QuotaDetalheDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          apelido={perebaSel?.apelido ?? "—"}
+          numero={quotaAtiva.numero}
+          picks={{
+            campeao: quotaAtiva.top4_p1,
+            vice: quotaAtiva.top4_p2,
+            terceiro: quotaAtiva.top4_p3,
+            quarto: quotaAtiva.top4_p4,
+          }}
+          teams={teams as any}
+          matches={matches as any}
+          potencial={potencial}
+          peso={quotaAtiva.top4_peso ?? 100}
+        />
+      )}
+    </section>
   );
 }
