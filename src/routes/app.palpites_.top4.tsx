@@ -1,19 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, AlertTriangle, Lock, Pencil, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyTop4, useUpdateTop4, useFaseAtual } from "@/lib/queries/top4";
 import { useTeams } from "@/lib/queries/teams";
 import { useSetting } from "@/lib/queries/settings";
+import { useRanking } from "@/lib/queries/profiles";
+import { supabase } from "@/integrations/supabase/client";
 import { getRegraDaFase, TOP4_REGRA_DEFAULT, type Top4Regra } from "@/lib/top4-rules";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { Top4PotencialCard } from "@/components/top4-potencial-card";
 import { Top4ConfirmMudancaDialog } from "@/components/top4-confirm-mudanca-dialog";
+import { Top4QuotaDetalheDialog } from "@/components/top4-quota-detalhe-dialog";
+import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
 
 export const Route = createFileRoute("/app/palpites_/top4")({
   head: () => ({ meta: [{ title: "Top 4 — Bolão dos Perebas" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    q: typeof s.q === "string" ? s.q : undefined,
+  }),
   component: Top4Page,
 });
 
