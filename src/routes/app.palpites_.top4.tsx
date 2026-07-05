@@ -45,6 +45,8 @@ function bannerTexto(fase: string, bloqueada: boolean, lockData?: string | null)
 }
 
 function Top4Page() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const { data: quotas = [], isLoading: loadingQ } = useMinhasQuotas();
   const [quotaId, setQuotaId] = useState<string | undefined>(undefined);
   const quota = useMemo(
@@ -57,6 +59,7 @@ function Top4Page() {
 
   const { data: faseAtual = "antes_copa", isLoading: loadingF } = useFaseAtual();
   const { data: top4Windows } = useSetting<Top4Regra[]>("top4_windows");
+  const { data: publicoAt } = useSetting<string>("top4_publico_a_partir_de");
   const { data: top4, isLoading: loadingT } = useMyTop4(quota?.id);
   const { data: teams = [], isLoading: loadingTeams } = useTeams();
   const update = useUpdateTop4();
