@@ -154,6 +154,7 @@ function Ranking() {
 
   return (
     <div className="space-y-6">
+      <RankingStatusBanner />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-extrabold">Ranking da perebada</h1>
