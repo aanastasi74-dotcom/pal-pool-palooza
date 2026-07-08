@@ -139,11 +139,13 @@ function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) 
         ? `inclui ${fmtBRLPrem(premios.primeiro_bonus)} de bônus de sobra`
         : undefined,
     variant: "primeiro",
+    vencedor: winnerLabel("primeiro"),
+    categoria: "primeiro",
   });
-  cards.push({ key: "2", label: "2º colocado", valor: premios.segundo, variant: "podio" });
-  cards.push({ key: "3", label: "3º colocado", valor: premios.terceiro, variant: "podio" });
-  if (premios.quarto > 0) cards.push({ key: "4", label: "4º colocado", valor: premios.quarto, variant: "extra" });
-  if (premios.quinto > 0) cards.push({ key: "5", label: "5º colocado", valor: premios.quinto, variant: "extra" });
+  cards.push({ key: "2", label: "2º colocado", valor: premios.segundo, variant: "podio", vencedor: winnerLabel("segundo"), categoria: "segundo" });
+  cards.push({ key: "3", label: "3º colocado", valor: premios.terceiro, variant: "podio", vencedor: winnerLabel("terceiro"), categoria: "terceiro" });
+  if (premios.quarto > 0) cards.push({ key: "4", label: "4º colocado", valor: premios.quarto, variant: "extra", vencedor: winnerLabel("quarto"), categoria: "quarto" });
+  if (premios.quinto > 0) cards.push({ key: "5", label: "5º colocado", valor: premios.quinto, variant: "extra", vencedor: winnerLabel("quinto"), categoria: "quinto" });
   if (premios.sexto_decimo_cada > 0) {
     cards.push({
       key: "6-10",
@@ -163,7 +165,7 @@ function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) 
       variant: "devolucao",
     });
   }
-  cards.push({ key: "lanterna", label: "Lanterninha", valor: premios.lanterninha, variant: "lanterna" });
+  cards.push({ key: "lanterna", label: "Lanterninha", valor: premios.lanterninha, variant: "lanterna", vencedor: winnerLabel("lanterninha"), categoria: "lanterninha" });
 
   return (
     <section>
