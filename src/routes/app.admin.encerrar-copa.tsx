@@ -58,13 +58,24 @@ function EncerrarCopaPage() {
       </div>
 
       <div className="space-y-3">
-        <Section num={1} label="Top 4 oficial" done={top4Completo} defaultOpen={!top4Completo && !rankingCongelado}>
+        <Section
+          num={1}
+          label="Top 4 oficial (opcional — backup manual)"
+          done={top4Completo || m104Encerrado}
+          defaultOpen={!top4Completo && !rankingCongelado && !m104Encerrado}
+        >
           <Top4OficialForm teams={teams} oficial={oficial} />
         </Section>
 
-        <Section num={2} label="Congelar ranking oficial" done={rankingCongelado} disabled={!top4Completo}>
+        <Section
+          num={2}
+          label="Congelar ranking oficial"
+          done={rankingCongelado}
+          disabled={!m104Encerrado && !top4Completo}
+        >
           <EtapaCongelarRanking />
         </Section>
+
 
         <Section num={3} label="Notificar premiados" done={todosNotificados} disabled={!rankingCongelado}>
           <EtapaNotificarPremiados />
