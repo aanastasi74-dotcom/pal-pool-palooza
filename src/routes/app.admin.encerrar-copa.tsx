@@ -67,6 +67,7 @@ function EncerrarCopaPage() {
           num={1}
           label="Top 4 oficial (opcional — backup manual)"
           done={top4Completo || m104Encerrado}
+          disabled={rankingCongelado}
           defaultOpen={!top4Completo && !rankingCongelado && !m104Encerrado}
         >
           <Top4OficialForm teams={teams} oficial={oficial} />
