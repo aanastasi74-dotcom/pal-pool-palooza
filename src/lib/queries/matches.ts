@@ -6,7 +6,10 @@ export function useMatches() {
   return useQuery({
     queryKey: ["matches"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("matches").select("*").order("data_jogo", { ascending: true });
+      const { data, error } = await supabase
+        .from("matches")
+        .select("*")
+        .order("data_jogo", { ascending: true });
       if (error) throw error;
       return data ?? [];
     },
@@ -18,7 +21,11 @@ export function useMatch(id?: string) {
     queryKey: ["matches", id],
     enabled: !!id,
     queryFn: async () => {
-      const { data, error } = await supabase.from("matches").select("*").eq("id", id!).maybeSingle();
+      const { data, error } = await supabase
+        .from("matches")
+        .select("*")
+        .eq("id", id!)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -41,7 +48,12 @@ export function useUpdateMatch() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: any) => {
-      const { data, error } = await supabase.from("matches").update(patch).eq("id", id).select().single();
+      const { data, error } = await supabase
+        .from("matches")
+        .update(patch)
+        .eq("id", id)
+        .select()
+        .single();
       if (error) throw error;
       if (data?.status === "encerrado" && data.placar_casa != null && data.placar_fora != null) {
         try {
@@ -89,4 +101,3 @@ export function useM104Encerrado() {
     refetchInterval: 60_000,
   });
 }
-
