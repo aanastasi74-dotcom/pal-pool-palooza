@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Crown, AlertTriangle } from "lucide-react";
+import { Crown, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeams } from "@/lib/queries/teams";
 import { useSetting, useUpdateSetting } from "@/lib/queries/settings";
+import { useM104Encerrado } from "@/lib/queries/matches";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Section } from "@/components/encerrar-copa/section";
@@ -32,12 +33,19 @@ function EncerrarCopaPage() {
   const { data: oficial, isLoading: loadingS } = useSetting<Top4Oficial>("top4_oficial");
   const { data: copaEncerrada } = useSetting<boolean>("copa_encerrada");
   const { data: premiados = [] } = usePremiados();
+  const { data: m104Encerrado = false } = useM104Encerrado();
 
   if (loadingTeams || loadingS) return <Skeleton className="h-96 w-full" />;
 
-  const top4Completo = !!(oficial?.campeao && oficial?.vice && oficial?.terceiro && oficial?.quarto);
+  const top4Completo = !!(
+    oficial?.campeao &&
+    oficial?.vice &&
+    oficial?.terceiro &&
+    oficial?.quarto
+  );
   const rankingCongelado = !!copaEncerrada;
-  const todosNotificados = rankingCongelado && premiados.length > 0 && premiados.every((p) => !!p.data_notificacao);
+  const todosNotificados =
+    rankingCongelado && premiados.length > 0 && premiados.every((p) => !!p.data_notificacao);
 
   return (
     <div className="space-y-6">
@@ -48,21 +56,37 @@ function EncerrarCopaPage() {
         <div>
           <h1 className="font-display text-3xl font-extrabold">Encerrar Copa</h1>
           <p className="text-sm text-muted-foreground">
-            Jornada oficial: fecha o Top 4, congela o ranking, notifica os premiados e publica o boletim de encerramento.
+            Jornada oficial: fecha o Top 4, congela o ranking, notifica os premiados e publica o
+            boletim de encerramento.
           </p>
         </div>
       </div>
 
       <div className="space-y-3">
-        <Section num={1} label="Top 4 oficial" done={top4Completo} defaultOpen={!top4Completo && !rankingCongelado}>
+        <Section
+          num={1}
+          label="Top 4 oficial (opcional — backup manual)"
+          done={top4Completo || m104Encerrado}
+          defaultOpen={!top4Completo && !rankingCongelado && !m104Encerrado}
+        >
           <Top4OficialForm teams={teams} oficial={oficial} />
         </Section>
 
-        <Section num={2} label="Congelar ranking oficial" done={rankingCongelado} disabled={!top4Completo}>
+        <Section
+          num={2}
+          label="Congelar ranking oficial"
+          done={rankingCongelado}
+          disabled={!m104Encerrado && !top4Completo}
+        >
           <EtapaCongelarRanking />
         </Section>
 
-        <Section num={3} label="Notificar premiados" done={todosNotificados} disabled={!rankingCongelado}>
+        <Section
+          num={3}
+          label="Notificar premiados"
+          done={todosNotificados}
+          disabled={!rankingCongelado}
+        >
           <EtapaNotificarPremiados />
         </Section>
 
@@ -74,7 +98,13 @@ function EncerrarCopaPage() {
   );
 }
 
-function Top4OficialForm({ teams, oficial }: { teams: any[]; oficial: Top4Oficial | null | undefined }) {
+function Top4OficialForm({
+  teams,
+  oficial,
+}: {
+  teams: any[];
+  oficial: Top4Oficial | null | undefined;
+}) {
   const updateSetting = useUpdateSetting();
   const [picks, setPicks] = useState<string[]>(["", "", "", ""]);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -153,13 +183,39 @@ function Top4OficialForm({ teams, oficial }: { teams: any[]; oficial: Top4Oficia
 
   return (
     <div className="space-y-4">
+      <section className="rounded-2xl border border-primary/30 bg-primary/5 p-4 text-sm">
+        <div className="flex items-start gap-2">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div className="space-y-1.5">
+            <p className="font-bold">P.4 automático já cuida disso</p>
+            <p className="text-muted-foreground">
+              A distribuição de pontos do Top 4 é automática quando M97-M104 encerrarem (edge{" "}
+              <code>calcular-pontos-top4-auto</code>). Este formulário é{" "}
+              <strong>backup manual</strong> — só use se o P.4 automático falhar ou você quiser
+              forçar recálculo. Você provavelmente não precisa preencher.
+            </p>
+            <p className="text-muted-foreground">
+              <strong>Ao salvar</strong>, os pontos calculados pelo P.4 auto são sobrescritos com
+              base no Top 4 que você definiu aqui.
+            </p>
+            <p className="text-muted-foreground">
+              <strong>Atenção</strong>: se o P.4 auto rodar de novo depois (algum jogo do mata-mata
+              encerrar), ele vai reverter pro cálculo automático. Pra manter override permanente,
+              desligar <code>top4_auto_parcial_enabled=false</code> em Configurações ANTES de salvar
+              aqui.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
         <div className="flex items-start gap-2 text-destructive">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-bold">Ação afeta o ranking</p>
             <p className="text-destructive/80">
-              Vai recalcular {countPalpites ?? "—"} palpites Top 4 e atualizar quotas.pontos. Pode reeditar depois.
+              Vai recalcular {countPalpites ?? "—"} palpites Top 4 e atualizar quotas.pontos. Pode
+              reeditar depois.
             </p>
           </div>
         </div>
