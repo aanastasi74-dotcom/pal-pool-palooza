@@ -14,7 +14,6 @@ import { EtapaNotificarPremiados } from "@/components/encerrar-copa/etapa-notifi
 import { EtapaBoletimEncerramento } from "@/components/encerrar-copa/etapa-boletim-encerramento";
 import { usePremiados } from "@/lib/queries/premiados";
 
-
 export const Route = createFileRoute("/app/admin/encerrar-copa")({
   head: () => ({ meta: [{ title: "Encerrar Copa — Admin" }] }),
   component: EncerrarCopaPage,
