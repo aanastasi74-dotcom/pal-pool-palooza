@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { REGRA_LANTERNINHA } from "@/lib/lanterninha";
 import { usePremio } from "@/lib/queries/premio";
 import { usePremiacao, fmtBRL as fmtBRLPrem } from "@/lib/queries/premiacao";
+import { usePremiados, CATEGORIA_META, CategoriaPremiado } from "@/lib/queries/premiados";
+import { useSetting } from "@/lib/queries/settings";
 import { useRecentApprovedPayments } from "@/lib/queries/payments";
 import { Skeleton } from "@/components/ui/skeleton";
 
