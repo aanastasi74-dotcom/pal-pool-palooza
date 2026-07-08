@@ -168,7 +168,32 @@ function Top4OficialForm({ teams, oficial }: { teams: any[]; oficial: Top4Oficia
 
   return (
     <div className="space-y-4">
+      <section className="rounded-2xl border border-primary/30 bg-primary/5 p-4 text-sm">
+        <div className="flex items-start gap-2">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div className="space-y-1.5">
+            <p className="font-bold">P.4 automático já cuida disso</p>
+            <p className="text-muted-foreground">
+              A distribuição de pontos do Top 4 é automática quando M97-M104 encerrarem
+              (edge <code>calcular-pontos-top4-auto</code>). Este formulário é <strong>backup manual</strong> —
+              só use se o P.4 automático falhar ou você quiser forçar recálculo.
+              Você provavelmente não precisa preencher.
+            </p>
+            <p className="text-muted-foreground">
+              <strong>Ao salvar</strong>, os pontos calculados pelo P.4 auto são sobrescritos com base
+              no Top 4 que você definiu aqui.
+            </p>
+            <p className="text-muted-foreground">
+              <strong>Atenção</strong>: se o P.4 auto rodar de novo depois (algum jogo do mata-mata
+              encerrar), ele vai reverter pro cálculo automático. Pra manter override permanente,
+              desligar <code>top4_auto_parcial_enabled=false</code> em Configurações ANTES de salvar aqui.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
+
         <div className="flex items-start gap-2 text-destructive">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
