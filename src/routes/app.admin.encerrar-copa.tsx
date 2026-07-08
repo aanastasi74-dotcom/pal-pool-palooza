@@ -7,6 +7,11 @@ import { useTeams } from "@/lib/queries/teams";
 import { useSetting, useUpdateSetting } from "@/lib/queries/settings";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Section } from "@/components/encerrar-copa/section";
+import { EtapaCongelarRanking } from "@/components/encerrar-copa/etapa-congelar-ranking";
+import { EtapaNotificarPremiados } from "@/components/encerrar-copa/etapa-notificar-premiados";
+import { EtapaBoletimEncerramento } from "@/components/encerrar-copa/etapa-boletim-encerramento";
+import { usePremiados } from "@/lib/queries/premiados";
 
 export const Route = createFileRoute("/app/admin/encerrar-copa")({
   head: () => ({ meta: [{ title: "Encerrar Copa — Admin" }] }),
@@ -21,11 +26,55 @@ type Top4Oficial = {
 };
 
 const LABELS = ["Campeão", "Vice", "3º lugar", "4º lugar"] as const;
-const KEYS: (keyof Top4Oficial)[] = ["campeao", "vice", "terceiro", "quarto"];
 
 function EncerrarCopaPage() {
   const { data: teams = [], isLoading: loadingTeams } = useTeams();
   const { data: oficial, isLoading: loadingS } = useSetting<Top4Oficial>("top4_oficial");
+  const { data: copaEncerrada } = useSetting<boolean>("copa_encerrada");
+  const { data: premiados = [] } = usePremiados();
+
+  if (loadingTeams || loadingS) return <Skeleton className="h-96 w-full" />;
+
+  const top4Completo = !!(oficial?.campeao && oficial?.vice && oficial?.terceiro && oficial?.quarto);
+  const rankingCongelado = !!copaEncerrada;
+  const todosNotificados = rankingCongelado && premiados.length > 0 && premiados.every((p) => !!p.data_notificacao);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gold text-gold-foreground">
+          <Crown className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="font-display text-3xl font-extrabold">Encerrar Copa</h1>
+          <p className="text-sm text-muted-foreground">
+            Jornada oficial: fecha o Top 4, congela o ranking, notifica os premiados e publica o boletim de encerramento.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <Section num={1} label="Top 4 oficial" done={top4Completo} defaultOpen={!top4Completo && !rankingCongelado}>
+          <Top4OficialForm teams={teams} oficial={oficial} />
+        </Section>
+
+        <Section num={2} label="Congelar ranking oficial" done={rankingCongelado} disabled={!top4Completo}>
+          <EtapaCongelarRanking />
+        </Section>
+
+        <Section num={3} label="Notificar premiados" done={todosNotificados} disabled={!rankingCongelado}>
+          <EtapaNotificarPremiados />
+        </Section>
+
+        <Section num={4} label="Boletim de encerramento" disabled={!rankingCongelado}>
+          <EtapaBoletimEncerramento />
+        </Section>
+      </div>
+    </div>
+  );
+}
+
+function Top4OficialForm({ teams, oficial }: { teams: any[]; oficial: Top4Oficial | null | undefined }) {
   const updateSetting = useUpdateSetting();
   const [picks, setPicks] = useState<string[]>(["", "", "", ""]);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -52,8 +101,6 @@ function EncerrarCopaPage() {
     () => [...teams].sort((a, b) => a.nome_pt.localeCompare(b.nome_pt, "pt-BR")),
     [teams],
   );
-
-  if (loadingTeams || loadingS) return <Skeleton className="h-96 w-full" />;
 
   const setPos = (i: number, v: string) => {
     const idxAntigo = picks.indexOf(v);
@@ -105,27 +152,14 @@ function EncerrarCopaPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gold text-gold-foreground">
-          <Crown className="h-6 w-6" />
-        </div>
-        <div>
-          <h1 className="font-display text-3xl font-extrabold">Encerrar Copa — Top 4</h1>
-          <p className="text-sm text-muted-foreground">
-            Defina o pódio oficial. Ao salvar, os pontos do Top 4 de todas as quotas são recalculados.
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-4">
       <section className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
         <div className="flex items-start gap-2 text-destructive">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-bold">Ação afeta o ranking</p>
             <p className="text-destructive/80">
-              Vai recalcular {countPalpites ?? "—"} palpites Top 4 e atualizar quotas.pontos (jogos + top 4). Pode reeditar
-              depois — recalcula novamente.
+              Vai recalcular {countPalpites ?? "—"} palpites Top 4 e atualizar quotas.pontos. Pode reeditar depois.
             </p>
           </div>
         </div>
@@ -181,7 +215,7 @@ function EncerrarCopaPage() {
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Confirmar encerramento"
+        title="Confirmar Top 4 oficial"
         description={`Isso vai recalcular pontos de ${countPalpites ?? "—"} palpites Top 4. O ranking vai mudar imediatamente. Confirmar?`}
         confirmLabel="Sim, calcular"
         destructive
