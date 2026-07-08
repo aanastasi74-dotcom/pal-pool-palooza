@@ -72,3 +72,22 @@ export function useDeleteMatch() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["matches"] }),
   });
 }
+
+export function useM104Encerrado() {
+  const { data: numeroFinal } = useSetting<number>("jogo_final_numero");
+  const numJogo = numeroFinal ?? 104;
+  return useQuery({
+    queryKey: ["matches", "final-encerrado", numJogo],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("matches")
+        .select("status")
+        .eq("numero_jogo", numJogo)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.status === "encerrado";
+    },
+    refetchInterval: 60_000,
+  });
+}
+
