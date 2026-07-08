@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Crown, AlertTriangle } from "lucide-react";
+import { Crown, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeams } from "@/lib/queries/teams";
 import { useSetting, useUpdateSetting } from "@/lib/queries/settings";
+import { useM104Encerrado } from "@/lib/queries/matches";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Section } from "@/components/encerrar-copa/section";
@@ -12,6 +13,7 @@ import { EtapaCongelarRanking } from "@/components/encerrar-copa/etapa-congelar-
 import { EtapaNotificarPremiados } from "@/components/encerrar-copa/etapa-notificar-premiados";
 import { EtapaBoletimEncerramento } from "@/components/encerrar-copa/etapa-boletim-encerramento";
 import { usePremiados } from "@/lib/queries/premiados";
+
 
 export const Route = createFileRoute("/app/admin/encerrar-copa")({
   head: () => ({ meta: [{ title: "Encerrar Copa — Admin" }] }),
