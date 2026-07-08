@@ -104,14 +104,27 @@ type DistCard = {
   valor: number;
   sublabel?: string;
   variant: "primeiro" | "podio" | "extra" | "devolucao" | "lanterna";
+  vencedor?: string;
+  categoria?: CategoriaPremiado;
 };
 
 function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) {
   const { data, isLoading } = usePremiacao();
+  const { data: copaEncerrada } = useSetting<boolean>("copa_encerrada");
+  const { data: premiados = [] } = usePremiados();
 
   if (isLoading || !data) {
     return <Skeleton className="h-48 w-full rounded-3xl" />;
   }
+
+  const winnerLabel = (cat: CategoriaPremiado): string | undefined => {
+    if (!copaEncerrada) return undefined;
+    const p = premiados.find((x) => x.categoria === cat);
+    if (!p) return undefined;
+    return `${p.apelido} · #${p.numero_quota}`;
+  };
+
+
 
   const { premios, bruta, proxima_faixa } = data;
   const pct = (v: number) => (bruta > 0 ? (v / bruta) * 100 : 0);
