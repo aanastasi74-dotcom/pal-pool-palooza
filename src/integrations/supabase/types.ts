@@ -802,6 +802,59 @@ export type Database = {
           },
         ]
       }
+      premiados: {
+        Row: {
+          apelido: string
+          categoria: string
+          criado_em: string
+          dados_bancarios_recebidos: boolean
+          data_notificacao: string | null
+          numero_quota: number
+          posicao: number | null
+          quota_id: string | null
+          user_id: string | null
+          valor_bonus_primeiro: number
+          valor_bruto: number
+          valor_total: number
+        }
+        Insert: {
+          apelido: string
+          categoria: string
+          criado_em?: string
+          dados_bancarios_recebidos?: boolean
+          data_notificacao?: string | null
+          numero_quota: number
+          posicao?: number | null
+          quota_id?: string | null
+          user_id?: string | null
+          valor_bonus_primeiro?: number
+          valor_bruto: number
+          valor_total: number
+        }
+        Update: {
+          apelido?: string
+          categoria?: string
+          criado_em?: string
+          dados_bancarios_recebidos?: boolean
+          data_notificacao?: string | null
+          numero_quota?: number
+          posicao?: number | null
+          quota_id?: string | null
+          user_id?: string | null
+          valor_bonus_primeiro?: number
+          valor_bruto?: number
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "premiados_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: false
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           aceitou_regras_em: string | null
@@ -969,6 +1022,47 @@ export type Database = {
           vs_1l?: string
         }
         Relationships: []
+      }
+      ranking_final: {
+        Row: {
+          apelido: string
+          congelado_em: string
+          elegivel_lanterna: boolean
+          numero_quota: number
+          pontos_finais: number
+          posicao_oficial: number
+          quota_id: string
+          user_id: string | null
+        }
+        Insert: {
+          apelido: string
+          congelado_em?: string
+          elegivel_lanterna: boolean
+          numero_quota: number
+          pontos_finais: number
+          posicao_oficial: number
+          quota_id: string
+          user_id?: string | null
+        }
+        Update: {
+          apelido?: string
+          congelado_em?: string
+          elegivel_lanterna?: boolean
+          numero_quota?: number
+          pontos_finais?: number
+          posicao_oficial?: number
+          quota_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_final_quota_id_fkey"
+            columns: ["quota_id"]
+            isOneToOne: true
+            referencedRelation: "quotas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reports: {
         Row: {
@@ -1306,6 +1400,7 @@ export type Database = {
       check_capacidade: { Args: never; Returns: Json }
       cleanup_quotas_incompletas: { Args: never; Returns: number }
       compute_default_sigla: { Args: { p_nome: string }; Returns: string }
+      congelar_ranking_oficial: { Args: never; Returns: Json }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
       derivar_periodo: { Args: { p_minuto: string }; Returns: string }
       encerrar_lote_por_decisao: {
