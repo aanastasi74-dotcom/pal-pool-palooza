@@ -196,6 +196,11 @@ function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) 
               </div>
               <p className="mt-3 font-display text-3xl font-black">{pct(c.valor).toFixed(0)}%</p>
               <p className="mt-1 text-xs opacity-80">{fmtBRLPrem(c.valor)}</p>
+              {c.vencedor && (
+                <p className="mt-2 text-[11px] font-bold uppercase tracking-widest">
+                  🏅 {c.vencedor}
+                </p>
+              )}
               {c.sublabel && <p className="mt-1 text-[11px] opacity-80">{c.sublabel}</p>}
               {isLanterna && (
                 <button
