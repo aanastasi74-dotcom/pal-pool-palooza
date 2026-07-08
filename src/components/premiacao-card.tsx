@@ -1,12 +1,55 @@
 import { Link } from "@tanstack/react-router";
-import { Trophy, Medal, Award, Users, Sparkles, Lightbulb, Wallet } from "lucide-react";
+import { Trophy, Medal, Award, Users, Sparkles, Lightbulb, Wallet, Crown } from "lucide-react";
 import { usePremiacao, fmtBRL } from "@/lib/queries/premiacao";
+import { usePremiados, CATEGORIA_META, CATEGORIAS_ORDER } from "@/lib/queries/premiados";
+import { useSetting } from "@/lib/queries/settings";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = { showInviteCta?: boolean };
 
 export function PremiacaoCard({ showInviteCta = true }: Props) {
+  const { data: copaEncerrada } = useSetting<boolean>("copa_encerrada");
   const { data, isLoading } = usePremiacao();
+  const { data: premiados = [], isLoading: loadingPremiados } = usePremiados();
+
+  if (copaEncerrada) {
+    if (loadingPremiados) return <Skeleton className="h-72 w-full rounded-3xl" />;
+    const total = premiados.reduce((s, p) => s + Number(p.valor_total || 0), 0);
+    return (
+      <div className="rounded-3xl border border-accent bg-card p-5 shadow-card md:p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Crown className="h-5 w-5 text-accent" />
+            <h2 className="font-display text-lg font-bold">Prêmio oficial · Copa encerrada</h2>
+          </div>
+          <span className="rounded-full bg-accent/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent">
+            Final
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">Total distribuído: {fmtBRL(total)}</p>
+
+        <ul className="mt-4 divide-y divide-border">
+          {CATEGORIAS_ORDER.map((cat) => {
+            const p = premiados.find((x) => x.categoria === cat);
+            const meta = CATEGORIA_META[cat];
+            if (!p) return null;
+            return (
+              <li key={cat} className="flex items-center justify-between py-2.5 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">{meta.emoji}</span>
+                  <div className="leading-tight">
+                    <p className="font-semibold">{p.apelido} <span className="text-xs text-muted-foreground">#{p.numero_quota}</span></p>
+                    <p className="text-[11px] text-muted-foreground">{meta.label}</p>
+                  </div>
+                </div>
+                <p className="font-display font-bold">{fmtBRL(Number(p.valor_total))}</p>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return <Skeleton className="h-72 w-full rounded-3xl" />;

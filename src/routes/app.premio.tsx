@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { REGRA_LANTERNINHA } from "@/lib/lanterninha";
 import { usePremio } from "@/lib/queries/premio";
 import { usePremiacao, fmtBRL as fmtBRLPrem } from "@/lib/queries/premiacao";
+import { usePremiados, CATEGORIA_META, CategoriaPremiado } from "@/lib/queries/premiados";
+import { useSetting } from "@/lib/queries/settings";
 import { useRecentApprovedPayments } from "@/lib/queries/payments";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -102,14 +104,27 @@ type DistCard = {
   valor: number;
   sublabel?: string;
   variant: "primeiro" | "podio" | "extra" | "devolucao" | "lanterna";
+  vencedor?: string;
+  categoria?: CategoriaPremiado;
 };
 
 function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) {
   const { data, isLoading } = usePremiacao();
+  const { data: copaEncerrada } = useSetting<boolean>("copa_encerrada");
+  const { data: premiados = [] } = usePremiados();
 
   if (isLoading || !data) {
     return <Skeleton className="h-48 w-full rounded-3xl" />;
   }
+
+  const winnerLabel = (cat: CategoriaPremiado): string | undefined => {
+    if (!copaEncerrada) return undefined;
+    const p = premiados.find((x) => x.categoria === cat);
+    if (!p) return undefined;
+    return `${p.apelido} · #${p.numero_quota}`;
+  };
+
+
 
   const { premios, bruta, proxima_faixa } = data;
   const pct = (v: number) => (bruta > 0 ? (v / bruta) * 100 : 0);
@@ -124,11 +139,13 @@ function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) 
         ? `inclui ${fmtBRLPrem(premios.primeiro_bonus)} de bônus de sobra`
         : undefined,
     variant: "primeiro",
+    vencedor: winnerLabel("primeiro"),
+    categoria: "primeiro",
   });
-  cards.push({ key: "2", label: "2º colocado", valor: premios.segundo, variant: "podio" });
-  cards.push({ key: "3", label: "3º colocado", valor: premios.terceiro, variant: "podio" });
-  if (premios.quarto > 0) cards.push({ key: "4", label: "4º colocado", valor: premios.quarto, variant: "extra" });
-  if (premios.quinto > 0) cards.push({ key: "5", label: "5º colocado", valor: premios.quinto, variant: "extra" });
+  cards.push({ key: "2", label: "2º colocado", valor: premios.segundo, variant: "podio", vencedor: winnerLabel("segundo"), categoria: "segundo" });
+  cards.push({ key: "3", label: "3º colocado", valor: premios.terceiro, variant: "podio", vencedor: winnerLabel("terceiro"), categoria: "terceiro" });
+  if (premios.quarto > 0) cards.push({ key: "4", label: "4º colocado", valor: premios.quarto, variant: "extra", vencedor: winnerLabel("quarto"), categoria: "quarto" });
+  if (premios.quinto > 0) cards.push({ key: "5", label: "5º colocado", valor: premios.quinto, variant: "extra", vencedor: winnerLabel("quinto"), categoria: "quinto" });
   if (premios.sexto_decimo_cada > 0) {
     cards.push({
       key: "6-10",
@@ -148,7 +165,7 @@ function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) 
       variant: "devolucao",
     });
   }
-  cards.push({ key: "lanterna", label: "Lanterninha", valor: premios.lanterninha, variant: "lanterna" });
+  cards.push({ key: "lanterna", label: "Lanterninha", valor: premios.lanterninha, variant: "lanterna", vencedor: winnerLabel("lanterninha"), categoria: "lanterninha" });
 
   return (
     <section>
@@ -179,6 +196,11 @@ function DistribuicaoPorColocacao({ onOpenRegra }: { onOpenRegra: () => void }) 
               </div>
               <p className="mt-3 font-display text-3xl font-black">{pct(c.valor).toFixed(0)}%</p>
               <p className="mt-1 text-xs opacity-80">{fmtBRLPrem(c.valor)}</p>
+              {c.vencedor && (
+                <p className="mt-2 text-[11px] font-bold uppercase tracking-widest">
+                  🏅 {c.vencedor}
+                </p>
+              )}
               {c.sublabel && <p className="mt-1 text-[11px] opacity-80">{c.sublabel}</p>}
               {isLanterna && (
                 <button

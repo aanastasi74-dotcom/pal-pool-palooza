@@ -15,6 +15,7 @@ import { RankingBreakdown } from "@/components/ranking-breakdown";
 import { HistoricoRankingDialog } from "@/components/historico-ranking-dialog";
 import { Top4QuotaDetalheDialog } from "@/components/top4-quota-detalhe-dialog";
 import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
+import { RankingStatusBanner } from "@/components/ranking-status-banner";
 
 export const Route = createFileRoute("/app/ranking")({
   head: () => ({ meta: [{ title: "Ranking — Bolão dos Perebas" }] }),
@@ -153,6 +154,7 @@ function Ranking() {
 
   return (
     <div className="space-y-6">
+      <RankingStatusBanner />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-extrabold">Ranking da perebada</h1>
