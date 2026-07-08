@@ -34,8 +34,10 @@ function EncerrarCopaPage() {
   const { data: oficial, isLoading: loadingS } = useSetting<Top4Oficial>("top4_oficial");
   const { data: copaEncerrada } = useSetting<boolean>("copa_encerrada");
   const { data: premiados = [] } = usePremiados();
+  const { data: m104Encerrado = false } = useM104Encerrado();
 
   if (loadingTeams || loadingS) return <Skeleton className="h-96 w-full" />;
+
 
   const top4Completo = !!(oficial?.campeao && oficial?.vice && oficial?.terceiro && oficial?.quarto);
   const rankingCongelado = !!copaEncerrada;
