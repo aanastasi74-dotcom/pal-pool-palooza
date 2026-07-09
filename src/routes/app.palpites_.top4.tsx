@@ -416,6 +416,8 @@ function PublicoOutrosSection({
     return r.faseGruposCompleta ? r.pontos : 0;
   }, [quotaAtiva, matches, teams]);
 
+  const { data: pontosCalculados } = useTop4Pontos(quotaAtiva?.id);
+
   const copiarLink = async () => {
     if (!quotaAtiva) return;
     const url = `${window.location.origin}/app/palpites/top4?q=${quotaAtiva.id}`;
