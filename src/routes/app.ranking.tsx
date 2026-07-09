@@ -328,6 +328,7 @@ function Ranking() {
           matches={matches as any}
           potencial={potencialPorQuota.get(top4Row.id) ?? 0}
           peso={top4Row.top4_peso ?? 100}
+          pontosCalculados={top4Pontos ?? 0}
         />
       )}
     </div>
