@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
-import { useMyTop4, useUpdateTop4, useFaseAtual } from "@/lib/queries/top4";
+import { useMyTop4, useUpdateTop4, useFaseAtual, useTop4Pontos } from "@/lib/queries/top4";
 import { useTeams } from "@/lib/queries/teams";
 import { useSetting } from "@/lib/queries/settings";
 import { useRanking } from "@/lib/queries/profiles";
