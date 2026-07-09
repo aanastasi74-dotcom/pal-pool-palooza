@@ -15,7 +15,7 @@ import { RankingBreakdown } from "@/components/ranking-breakdown";
 import { HistoricoRankingDialog } from "@/components/historico-ranking-dialog";
 import { Top4QuotaDetalheDialog } from "@/components/top4-quota-detalhe-dialog";
 import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
-import { useTop4Pontos } from "@/lib/queries/top4";
+import { useTop4Pontos, useTop4PontosBatch } from "@/lib/queries/top4";
 import { RankingStatusBanner } from "@/components/ranking-status-banner";
 
 export const Route = createFileRoute("/app/ranking")({
