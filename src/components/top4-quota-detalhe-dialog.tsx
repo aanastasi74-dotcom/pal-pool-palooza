@@ -27,6 +27,7 @@ type ContentProps = {
   matches: MatchLike[];
   potencial: number;
   peso: number;
+  pontosCalculados?: number;
 };
 
 type Props = ContentProps & {
