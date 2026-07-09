@@ -96,7 +96,9 @@ function Ranking() {
     staleTime: 60_000,
   });
 
+  const queryClient = useQueryClient();
   const { data: top4PontosMap } = useTop4PontosBatch();
+
   useEffect(() => {
     const channel = supabase
       .channel("ranking-matches-realtime")
