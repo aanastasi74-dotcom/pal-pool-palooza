@@ -84,18 +84,23 @@ const BADGES: BadgeDef[] = [
 export function RankingBreakdown({
   b,
   pot,
+  top4Pontos,
 }: {
   b: Breakdown;
   pot?: { valor: number; clickable: boolean; onClick?: () => void } | null;
+  top4Pontos?: number;
 }) {
+  const temTop4Ganho = typeof top4Pontos === "number" && top4Pontos > 0;
+  const potDisplay = pot != null ? (temTop4Ganho ? Math.max(0, pot.valor - (top4Pontos as number)) : pot.valor) : 0;
   const potCls =
     pot == null
       ? ""
-      : pot.valor >= 2000
+      : potDisplay >= 2000
         ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-300/60 dark:border-emerald-500/40"
-        : pot.valor >= 1000
+        : potDisplay >= 1000
           ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border-amber-300/60 dark:border-amber-500/40"
           : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border-rose-300/60 dark:border-rose-500/40";
+
 
   return (
     <div className="mt-3 flex flex-wrap gap-1.5">
@@ -140,6 +145,26 @@ export function RankingBreakdown({
           </PopoverContent>
         </Popover>
       )}
+      {temTop4Ganho && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-semibold transition hover:opacity-80 bg-success/15 text-success border-success/40"
+              title="TOP4 — Pontos já conquistados no Top 4"
+            >
+              <span>TOP4</span>
+              <span className="font-bold tabular-nums">{(top4Pontos as number).toLocaleString("pt-BR")}</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-64 text-xs">
+            <p className="font-display text-sm font-bold">TOP4 — Pontos conquistados</p>
+            <p className="mt-1 text-muted-foreground">
+              Pontos já garantidos pela P.4 auto (times acertados como semifinalistas, campeão, etc). Somam ao ranking imediatamente após cada jogo do mata-mata encerrar.
+            </p>
+          </PopoverContent>
+        </Popover>
+      )}
       {pot != null && (
         <Popover>
           <PopoverTrigger asChild>
@@ -152,18 +177,23 @@ export function RankingBreakdown({
               title="POT — Potencial máximo do Top 4"
             >
               <span>POT</span>
-              <span className="font-bold tabular-nums">{pot.valor.toLocaleString("pt-BR")}</span>
+              <span className="font-bold tabular-nums">{potDisplay.toLocaleString("pt-BR")}</span>
             </button>
           </PopoverTrigger>
           <PopoverContent side="top" className="w-64 text-xs">
             <p className="font-display text-sm font-bold">POT — Potencial do Top 4</p>
             <p className="mt-1 text-muted-foreground">
-              Potencial máximo do Top 4 considerando o chaveamento atual do mata-mata. Atualiza após cada jogo encerrar.
+              {temTop4Ganho ? (
+                <>Potencial <strong>adicional</strong> máximo do Top 4 daqui pra frente (já descontou os {(top4Pontos as number).toLocaleString("pt-BR")} pts da pílula TOP4). Atualiza após cada jogo encerrar.</>
+              ) : (
+                <>Potencial máximo do Top 4 considerando o chaveamento atual do mata-mata. Atualiza após cada jogo encerrar.</>
+              )}
               {pot.clickable ? " Toque pra ver os 4 times palpitados." : ""}
             </p>
           </PopoverContent>
         </Popover>
       )}
+
     </div>
   );
 }

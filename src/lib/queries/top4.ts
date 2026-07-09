@@ -74,3 +74,24 @@ export function useFaseAtual() {
   });
 }
 
+export function useTop4PontosBatch() {
+  return useQuery({
+    queryKey: ["top4-pontos-batch"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("top4_predictions")
+        .select("quota_id,pontos_calculados");
+      if (error) throw error;
+      const map = new Map<string, number>();
+      for (const row of (data ?? []) as Array<{ quota_id: string | null; pontos_calculados: number | null }>) {
+        if (row.quota_id != null) {
+          map.set(row.quota_id, row.pontos_calculados ?? 0);
+        }
+      }
+      return map;
+    },
+    refetchInterval: 60_000,
+  });
+}
+
+
