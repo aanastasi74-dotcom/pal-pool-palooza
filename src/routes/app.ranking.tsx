@@ -152,6 +152,7 @@ function Ranking() {
   });
 
   const top4Row = top4Open ? rows.find((r) => r.id === top4Open.id) : null;
+  const { data: top4Pontos } = useTop4Pontos(top4Row?.id);
 
   return (
     <div className="space-y-6">
