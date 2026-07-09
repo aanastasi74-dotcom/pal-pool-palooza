@@ -84,18 +84,23 @@ const BADGES: BadgeDef[] = [
 export function RankingBreakdown({
   b,
   pot,
+  top4Pontos,
 }: {
   b: Breakdown;
   pot?: { valor: number; clickable: boolean; onClick?: () => void } | null;
+  top4Pontos?: number;
 }) {
+  const temTop4Ganho = typeof top4Pontos === "number" && top4Pontos > 0;
+  const potDisplay = pot != null ? (temTop4Ganho ? Math.max(0, pot.valor - (top4Pontos as number)) : pot.valor) : 0;
   const potCls =
     pot == null
       ? ""
-      : pot.valor >= 2000
+      : potDisplay >= 2000
         ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border-emerald-300/60 dark:border-emerald-500/40"
-        : pot.valor >= 1000
+        : potDisplay >= 1000
           ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border-amber-300/60 dark:border-amber-500/40"
           : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border-rose-300/60 dark:border-rose-500/40";
+
 
   return (
     <div className="mt-3 flex flex-wrap gap-1.5">
