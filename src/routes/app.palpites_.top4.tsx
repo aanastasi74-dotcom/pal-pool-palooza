@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
-import { useMyTop4, useUpdateTop4, useFaseAtual } from "@/lib/queries/top4";
+import { useMyTop4, useUpdateTop4, useFaseAtual, useTop4Pontos } from "@/lib/queries/top4";
 import { useTeams } from "@/lib/queries/teams";
 import { useSetting } from "@/lib/queries/settings";
 import { useRanking } from "@/lib/queries/profiles";
@@ -416,6 +416,8 @@ function PublicoOutrosSection({
     return r.faseGruposCompleta ? r.pontos : 0;
   }, [quotaAtiva, matches, teams]);
 
+  const { data: pontosCalculados } = useTop4Pontos(quotaAtiva?.id);
+
   const copiarLink = async () => {
     if (!quotaAtiva) return;
     const url = `${window.location.origin}/app/palpites/top4?q=${quotaAtiva.id}`;
@@ -500,6 +502,7 @@ function PublicoOutrosSection({
             matches={matches as any}
             potencial={potencial}
             peso={quotaAtiva.top4_peso ?? 100}
+            pontosCalculados={pontosCalculados ?? 0}
             headerRight={
               <button
                 onClick={copiarLink}

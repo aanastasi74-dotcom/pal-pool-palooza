@@ -48,6 +48,23 @@ export function calcularFaseTop4(agora: Date = new Date()): string {
   return "oitavas";
 }
 
+export function useTop4Pontos(quota_id?: string) {
+  return useQuery({
+    queryKey: ["top4-pontos", quota_id],
+    enabled: !!quota_id,
+    queryFn: async (): Promise<number> => {
+      const { data, error } = await supabase
+        .from("top4_predictions")
+        .select("pontos_calculados")
+        .eq("quota_id", quota_id!)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as any)?.pontos_calculados ?? 0;
+    },
+    refetchInterval: 60_000,
+  });
+}
+
 export function useFaseAtual() {
   return useQuery({
     queryKey: ["fase-atual"],

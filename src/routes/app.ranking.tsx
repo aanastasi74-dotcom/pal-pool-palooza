@@ -15,6 +15,7 @@ import { RankingBreakdown } from "@/components/ranking-breakdown";
 import { HistoricoRankingDialog } from "@/components/historico-ranking-dialog";
 import { Top4QuotaDetalheDialog } from "@/components/top4-quota-detalhe-dialog";
 import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
+import { useTop4Pontos } from "@/lib/queries/top4";
 import { RankingStatusBanner } from "@/components/ranking-status-banner";
 
 export const Route = createFileRoute("/app/ranking")({
@@ -151,6 +152,7 @@ function Ranking() {
   });
 
   const top4Row = top4Open ? rows.find((r) => r.id === top4Open.id) : null;
+  const { data: top4Pontos } = useTop4Pontos(top4Row?.id);
 
   return (
     <div className="space-y-6">
@@ -326,6 +328,7 @@ function Ranking() {
           matches={matches as any}
           potencial={potencialPorQuota.get(top4Row.id) ?? 0}
           peso={top4Row.top4_peso ?? 100}
+          pontosCalculados={top4Pontos ?? 0}
         />
       )}
     </div>

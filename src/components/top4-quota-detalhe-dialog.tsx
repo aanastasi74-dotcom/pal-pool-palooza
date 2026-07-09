@@ -27,6 +27,7 @@ type ContentProps = {
   matches: MatchLike[];
   potencial: number;
   peso: number;
+  pontosCalculados?: number;
 };
 
 type Props = ContentProps & {
@@ -104,6 +105,7 @@ export function Top4QuotaContent({
   matches,
   potencial,
   peso,
+  pontosCalculados,
   headerRight,
   hideHeader = false,
 }: ContentProps & { headerRight?: ReactNode; hideHeader?: boolean }) {
@@ -148,7 +150,18 @@ export function Top4QuotaContent({
         ))}
       </div>
       <p className="text-xs text-muted-foreground">
-        Potencial atual: <strong>{potencial.toLocaleString("pt-BR")} pts</strong> · Eficácia {peso}%
+        {pontosCalculados !== undefined ? (
+          <>
+            Pontuação atual: <strong className="text-success">{pontosCalculados.toLocaleString("pt-BR")} pts</strong>
+            {" · Potencial máx.: "}
+            <strong>{potencial.toLocaleString("pt-BR")} pts</strong>
+            {" · Eficácia "}{peso}%
+          </>
+        ) : (
+          <>
+            Potencial atual: <strong>{potencial.toLocaleString("pt-BR")} pts</strong> · Eficácia {peso}%
+          </>
+        )}
       </p>
     </div>
   );
@@ -164,6 +177,7 @@ export function Top4QuotaDetalheDialog({
   matches,
   potencial,
   peso,
+  pontosCalculados,
 }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -181,6 +195,7 @@ export function Top4QuotaDetalheDialog({
           matches={matches}
           potencial={potencial}
           peso={peso}
+          pontosCalculados={pontosCalculados}
           hideHeader
         />
         <DialogFooter className="sm:justify-end">
