@@ -59,7 +59,7 @@ export function Top4PotencialCard({ picks, pesoPercentual, potencialInicial, pon
     : "";
 
   return (
-    <>
+    <div className="space-y-3">
       {pontosCalculados !== undefined && (
         <section className="rounded-2xl border border-success/40 bg-success/5 p-4 shadow-card">
           <div className="flex items-center gap-3">
@@ -131,6 +131,6 @@ export function Top4PotencialCard({ picks, pesoPercentual, potencialInicial, pon
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
