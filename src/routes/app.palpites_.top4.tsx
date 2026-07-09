@@ -502,6 +502,7 @@ function PublicoOutrosSection({
             matches={matches as any}
             potencial={potencial}
             peso={quotaAtiva.top4_peso ?? 100}
+            pontosCalculados={pontosCalculados ?? 0}
             headerRight={
               <button
                 onClick={copiarLink}
