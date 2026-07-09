@@ -150,7 +150,18 @@ export function Top4QuotaContent({
         ))}
       </div>
       <p className="text-xs text-muted-foreground">
-        Potencial atual: <strong>{potencial.toLocaleString("pt-BR")} pts</strong> · Eficácia {peso}%
+        {pontosCalculados !== undefined ? (
+          <>
+            Pontuação atual: <strong className="text-success">{pontosCalculados.toLocaleString("pt-BR")} pts</strong>
+            {" · Potencial máx.: "}
+            <strong>{potencial.toLocaleString("pt-BR")} pts</strong>
+            {" · Eficácia "}{peso}%
+          </>
+        ) : (
+          <>
+            Potencial atual: <strong>{potencial.toLocaleString("pt-BR")} pts</strong> · Eficácia {peso}%
+          </>
+        )}
       </p>
     </div>
   );
