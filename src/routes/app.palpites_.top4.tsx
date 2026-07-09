@@ -200,6 +200,7 @@ function Top4Page() {
           picks={picksAntigos}
           pesoPercentual={pesoAtual}
           potencialInicial={(quota as any)?.top4_potencial_inicial ?? null}
+          pontosCalculados={top4?.pontos_calculados ?? 0}
         />
       )}
 

@@ -9,9 +9,10 @@ type Props = {
   picks: Top4Picks;
   pesoPercentual: number;
   potencialInicial?: number | null;
+  pontosCalculados?: number;
 };
 
-export function Top4PotencialCard({ picks, pesoPercentual, potencialInicial }: Props) {
+export function Top4PotencialCard({ picks, pesoPercentual, potencialInicial, pontosCalculados }: Props) {
   const { data: teams = [] } = useTeams();
   const { data: matches = [] } = useQuery({
     queryKey: ["matches", "top4-potencial"],
