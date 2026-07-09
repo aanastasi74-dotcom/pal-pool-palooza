@@ -105,6 +105,7 @@ export function Top4QuotaContent({
   matches,
   potencial,
   peso,
+  pontosCalculados,
   headerRight,
   hideHeader = false,
 }: ContentProps & { headerRight?: ReactNode; hideHeader?: boolean }) {
