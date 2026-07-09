@@ -177,6 +177,7 @@ export function Top4QuotaDetalheDialog({
   matches,
   potencial,
   peso,
+  pontosCalculados,
 }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -194,6 +195,7 @@ export function Top4QuotaDetalheDialog({
           matches={matches}
           potencial={potencial}
           peso={peso}
+          pontosCalculados={pontosCalculados}
           hideHeader
         />
         <DialogFooter className="sm:justify-end">
