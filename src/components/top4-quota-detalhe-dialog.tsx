@@ -82,6 +82,17 @@ function statusDoTime(teamId: string | undefined, matches: MatchLike[]): { label
     return { label: `Eliminado ${fase}`, cls: "text-destructive" };
   }
 
+  const apareceNoMataMata = matches.some(
+    (m) =>
+      m.numero_jogo != null &&
+      m.numero_jogo >= 73 &&
+      (m.team_home_id === teamId || m.team_away_id === teamId),
+  );
+
+  if (!apareceNoMataMata) {
+    return { label: "Eliminado na fase de grupos", cls: "text-destructive" };
+  }
+
   return { label: "Ainda na disputa", cls: "text-primary" };
 }
 
