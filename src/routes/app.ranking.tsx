@@ -297,7 +297,9 @@ function Ranking() {
                           }
                         : null
                     }
+                    top4Pontos={top4PontosMap?.get(p.id) ?? 0}
                   />
+
                 )}
               </div>
             );
