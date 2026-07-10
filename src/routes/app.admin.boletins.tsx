@@ -295,14 +295,64 @@ function NovoBoletimExtraDialog({
   const [titulo, setTitulo] = useState("");
   const [markdown, setMarkdown] = useState("");
   const [dataRef, setDataRef] = useState(todayBRT());
+  const [tabAtiva, setTabAtiva] = useState<"colar" | "ia">("colar");
+  const [contextoIA, setContextoIA] = useState("");
+  const [tamanho, setTamanho] = useState<"curto" | "medio" | "longo">("medio");
+  const [incluir, setIncluir] = useState({
+    ranking: false,
+    jogos_recentes: false,
+    perfis: false,
+    boletins_anteriores: false,
+  });
+  const [gerandoIA, setGerandoIA] = useState(false);
 
   useEffect(() => {
     if (open) {
       setTitulo("");
       setMarkdown("");
       setDataRef(todayBRT());
+      setTabAtiva("colar");
+      setContextoIA("");
+      setTamanho("medio");
+      setIncluir({ ranking: false, jogos_recentes: false, perfis: false, boletins_anteriores: false });
+      setGerandoIA(false);
     }
   }, [open]);
+
+  const gerarViaIA = async () => {
+    if (!titulo.trim()) {
+      toast.error("Preenche o título antes de gerar.");
+      return;
+    }
+    if (!contextoIA.trim()) {
+      toast.error("Descreve o contexto que quer que o boletim aborde.");
+      return;
+    }
+    setGerandoIA(true);
+    const t = toast.loading("Gerando rascunho via Sonnet…");
+    try {
+      const { data, error } = await supabase.functions.invoke("gerar-boletim-extraordinario", {
+        body: {
+          titulo: titulo.trim(),
+          contexto: contextoIA.trim(),
+          incluir,
+          tamanho,
+        },
+      });
+      toast.dismiss(t);
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      if (!(data as any)?.markdown) throw new Error("resposta vazia da IA");
+      setMarkdown((data as any).markdown);
+      setTabAtiva("colar");
+      toast.success(`Rascunho gerado (${(data as any).tokens?.output ?? 0} tokens out). Revise e publique.`);
+    } catch (e: any) {
+      toast.dismiss(t);
+      toast.error(`Erro ao gerar: ${e?.message ?? "desconhecido"}`);
+    } finally {
+      setGerandoIA(false);
+    }
+  };
 
   const handlePasteMarkdown = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const html = e.clipboardData.getData("text/html");
