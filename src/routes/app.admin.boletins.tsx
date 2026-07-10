@@ -302,6 +302,24 @@ function NovoBoletimExtraDialog({
     }
   }, [open]);
 
+  const handlePasteMarkdown = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const html = e.clipboardData.getData("text/html");
+    if (!html || !html.trim()) return;
+
+    e.preventDefault();
+    const md = htmlToMarkdown(html);
+    const target = e.currentTarget;
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+    const novo = markdown.slice(0, start) + md + markdown.slice(end);
+    setMarkdown(novo);
+
+    requestAnimationFrame(() => {
+      target.selectionStart = target.selectionEnd = start + md.length;
+    });
+  };
+
+
   const publicar = async () => {
     if (!titulo.trim() || !markdown.trim()) return;
     const t = toast.loading("Publicando e enviando email…");
