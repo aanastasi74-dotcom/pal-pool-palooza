@@ -414,10 +414,10 @@ function NovoBoletimExtraDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="colar">
+        <Tabs value={tabAtiva} onValueChange={(v) => setTabAtiva(v as "colar" | "ia")}>
           <TabsList>
             <TabsTrigger value="colar">Colar conteúdo</TabsTrigger>
-            <TabsTrigger value="ia" disabled>Gerar por IA (em breve)</TabsTrigger>
+            <TabsTrigger value="ia">Gerar por IA</TabsTrigger>
           </TabsList>
           <TabsContent value="colar" className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
