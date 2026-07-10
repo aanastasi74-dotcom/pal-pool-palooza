@@ -398,6 +398,7 @@ function NovoBoletimExtraDialog({
                 placeholder="Cole o markdown completo do boletim aqui…"
                 value={markdown}
                 onChange={(e) => setMarkdown(e.target.value)}
+                onPaste={handlePasteMarkdown}
                 className="font-mono text-sm"
               />
             </div>
