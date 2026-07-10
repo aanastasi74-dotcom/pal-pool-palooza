@@ -488,6 +488,122 @@ function NovoBoletimExtraDialog({
               </button>
             </DialogFooter>
           </TabsContent>
+
+          <TabsContent value="ia" className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
+              <div>
+                <Label htmlFor="ia-titulo">Título customizado</Label>
+                <Input
+                  id="ia-titulo"
+                  placeholder="ex: Homenagem ao Marrocos"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  maxLength={140}
+                />
+              </div>
+              <div>
+                <Label htmlFor="ia-data">Data de referência</Label>
+                <Input
+                  id="ia-data"
+                  type="date"
+                  value={dataRef}
+                  onChange={(e) => setDataRef(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="ia-contexto">
+                Contexto (o que você quer que o boletim aborde)
+              </Label>
+              <Textarea
+                id="ia-contexto"
+                rows={6}
+                placeholder="ex: Falar sobre a campanha do Marrocos. Mencionar Regragui como técnico. Comparar com 2022 quando também caíram pra França. Tom respeitoso e emotivo, mas com humor característico do bolão."
+                value={contextoIA}
+                onChange={(e) => setContextoIA(e.target.value)}
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Descreva livremente. O Sonnet usa isso como fonte principal do boletim.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-muted/30 p-3">
+              <p className="text-xs font-bold">Incluir contexto do app (opcional)</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                Marque se quiser que o Sonnet tenha acesso a esses dados. Não obrigatório.
+              </p>
+              <div className="mt-2 space-y-1.5">
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={incluir.ranking}
+                    onChange={(e) => setIncluir((prev) => ({ ...prev, ranking: e.target.checked }))}
+                    className="h-3.5 w-3.5"
+                  />
+                  <span>Ranking atual (top 10 + fundo)</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={incluir.jogos_recentes}
+                    onChange={(e) => setIncluir((prev) => ({ ...prev, jogos_recentes: e.target.checked }))}
+                    className="h-3.5 w-3.5"
+                  />
+                  <span>Jogos encerrados nos últimos 3 dias</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={incluir.perfis}
+                    onChange={(e) => setIncluir((prev) => ({ ...prev, perfis: e.target.checked }))}
+                    className="h-3.5 w-3.5"
+                  />
+                  <span>Perfis de personalidade dos perebas</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={incluir.boletins_anteriores}
+                    onChange={(e) => setIncluir((prev) => ({ ...prev, boletins_anteriores: e.target.checked }))}
+                    className="h-3.5 w-3.5"
+                  />
+                  <span>Últimos 3 boletins publicados (continuidade narrativa)</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="ia-tamanho">Tamanho</Label>
+              <select
+                id="ia-tamanho"
+                value={tamanho}
+                onChange={(e) => setTamanho(e.target.value as "curto" | "medio" | "longo")}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="curto">Curto (~300 palavras)</option>
+                <option value="medio">Médio (~600 palavras)</option>
+                <option value="longo">Longo (~1000-1500 palavras)</option>
+              </select>
+            </div>
+
+            <DialogFooter>
+              <button
+                onClick={() => onOpenChange(false)}
+                className="rounded-full border border-border px-4 py-2 text-xs font-bold"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={gerarViaIA}
+                disabled={!titulo.trim() || !contextoIA.trim() || gerandoIA}
+                className="flex items-center gap-1 rounded-full bg-accent px-4 py-2 text-xs font-bold text-accent-foreground shadow-glow disabled:opacity-50"
+              >
+                <Sparkles className="h-3 w-3" />
+                {gerandoIA ? "Gerando…" : "Gerar rascunho via IA"}
+              </button>
+            </DialogFooter>
+          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
