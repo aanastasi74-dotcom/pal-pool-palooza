@@ -206,6 +206,82 @@ function todayBRT(): string {
   return brt.toISOString().slice(0, 10);
 }
 
+function htmlToMarkdown(html: string): string {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  function convertNode(node: Node): string {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent ?? "";
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+
+    const el = node as HTMLElement;
+    const tag = el.tagName.toLowerCase();
+    const inner = Array.from(el.childNodes).map(convertNode).join("");
+    const trimmed = inner.trim();
+
+    switch (tag) {
+      case "p":
+        return `\n\n${inner}`;
+      case "br":
+        return "\n";
+      case "strong":
+      case "b":
+        return trimmed ? `**${inner}**` : inner;
+      case "em":
+      case "i":
+        return trimmed ? `_${inner}_` : inner;
+      case "h1":
+        return `\n\n# ${inner}\n`;
+      case "h2":
+        return `\n\n## ${inner}\n`;
+      case "h3":
+        return `\n\n### ${inner}\n`;
+      case "h4":
+        return `\n\n#### ${inner}\n`;
+      case "h5":
+      case "h6":
+        return `\n\n##### ${inner}\n`;
+      case "ul":
+      case "ol":
+        return `\n${inner}\n`;
+      case "li":
+        return `- ${inner}\n`;
+      case "a": {
+        const href = el.getAttribute("href") ?? "";
+        return href ? `[${inner}](${href})` : inner;
+      }
+      case "code":
+        return `\`${inner}\``;
+      case "pre":
+        return `\n\`\`\`\n${inner}\n\`\`\`\n`;
+      case "blockquote":
+        return `\n> ${inner}\n`;
+      case "hr":
+        return `\n\n---\n\n`;
+      case "script":
+      case "style":
+      case "meta":
+      case "head":
+        return "";
+      default:
+        return inner;
+    }
+  }
+
+  let md = convertNode(doc.body);
+
+  md = md
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  return md;
+}
+
+
 function NovoBoletimExtraDialog({
   open,
   onOpenChange,
