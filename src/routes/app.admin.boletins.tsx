@@ -393,15 +393,32 @@ function NovoBoletimExtraDialog({
 
             <div>
               <Label htmlFor="extra-md">Conteúdo (Markdown)</Label>
-              <Textarea
-                id="extra-md"
-                rows={16}
-                placeholder="Cole o markdown completo do boletim aqui…"
-                value={markdown}
-                onChange={(e) => setMarkdown(e.target.value)}
-                onPaste={handlePasteMarkdown}
-                className="font-mono text-sm"
-              />
+              <Tabs defaultValue="editar" className="mt-1">
+                <TabsList>
+                  <TabsTrigger value="editar">
+                    <Pencil className="mr-1 h-3 w-3" /> Editar
+                  </TabsTrigger>
+                  <TabsTrigger value="preview">
+                    <Eye className="mr-1 h-3 w-3" /> Preview
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="editar">
+                  <Textarea
+                    id="extra-md"
+                    rows={16}
+                    placeholder="Cole o markdown completo do boletim aqui…"
+                    value={markdown}
+                    onChange={(e) => setMarkdown(e.target.value)}
+                    onPaste={handlePasteMarkdown}
+                    className="font-mono text-sm"
+                  />
+                </TabsContent>
+                <TabsContent value="preview">
+                  <div className="min-h-[400px] rounded-lg border border-border bg-background p-4">
+                    <MarkdownView>{markdown || "_(vazio)_"}</MarkdownView>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
 
             <DialogFooter>
