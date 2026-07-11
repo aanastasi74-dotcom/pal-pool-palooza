@@ -206,3 +206,35 @@ function ElegibilidadeLanterna() {
     </section>
   );
 }
+
+function PesquisaCard() {
+  const { data: pesquisa } = usePesquisaAtiva();
+  const { data: participacao } = useMinhaParticipacao(pesquisa?.id);
+  if (!pesquisa) return null;
+  if (participacao?.status === "concluida") return null;
+  const encerrada = new Date(pesquisa.encerra_em) < new Date();
+  return (
+    <section className="rounded-2xl border border-accent/40 bg-accent/5 p-4 shadow-card">
+      <div className="flex items-start gap-3">
+        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+        <div className="flex-1">
+          <p className="font-display font-bold">{pesquisa.titulo}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {encerrada
+              ? "Pesquisa encerrada — obrigado a quem participou."
+              : `Ajuda a gente. Prazo: ${new Date(pesquisa.encerra_em).toLocaleDateString("pt-BR")}.`}
+          </p>
+          {!encerrada && (
+            <Link
+              to="/app/pesquisa/$slug"
+              params={{ slug: pesquisa.slug }}
+              className="mt-2 inline-flex rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground"
+            >
+              Responder pesquisa
+            </Link>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
