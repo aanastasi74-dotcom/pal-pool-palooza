@@ -458,23 +458,65 @@ function PublicoOutrosSection({
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <select
-          value={userSel}
-          onChange={(e) => {
-            setUserSel(e.target.value);
-            setQuotaSel("");
-          }}
-          className="flex-1 rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
-        >
-          <option value="">— escolher pereba —</option>
-          {perebas.map((p) => (
-            <option key={p.user_id} value={p.user_id}>
-              {ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : ""}
-              {p.apelido}
-              {p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : ""}
-            </option>
-          ))}
-        </select>
+        <Popover open={comboAberto} onOpenChange={setComboAberto}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              role="combobox"
+              aria-expanded={comboAberto}
+              className="flex flex-1 items-center justify-between rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              <span className="truncate">
+                {(() => {
+                  const p = perebas.find((x) => x.user_id === userSel);
+                  if (!p) return "— escolher pereba —";
+                  const prefixo = ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : "";
+                  const sufixo = p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : "";
+                  return `${prefixo}${p.apelido}${sufixo}`;
+                })()}
+              </span>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+            <Command
+              filter={(value, search) => {
+                return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+              }}
+            >
+              <CommandInput placeholder="Buscar pereba…" />
+              <CommandList>
+                <CommandEmpty>Nenhum pereba encontrado.</CommandEmpty>
+                <CommandGroup>
+                  {perebas.map((p) => {
+                    const prefixo = ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : "";
+                    const sufixo = p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : "";
+                    const label = `${prefixo}${p.apelido}${sufixo}`;
+                    return (
+                      <CommandItem
+                        key={p.user_id}
+                        value={p.apelido}
+                        onSelect={() => {
+                          setUserSel(p.user_id);
+                          setQuotaSel("");
+                          setComboAberto(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            userSel === p.user_id ? "opacity-100" : "opacity-0",
+                          )}
+                        />
+                        <span className="truncate">{label}</span>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
 
         {perebaSel && perebaSel.quotas.length > 1 && (
           <select
