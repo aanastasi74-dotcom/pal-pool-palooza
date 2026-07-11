@@ -682,6 +682,21 @@ function PublicoOutrosSection({
 
       {quotaAtiva && (
         <div className="mt-4 rounded-2xl border border-border bg-background p-3">
+          <div className="mb-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                setUserSel("");
+                setQuotaSel("");
+                // NÃO limpar timeSel — se veio da lista de time, volta pra lista
+              }}
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-[11px] font-bold text-muted-foreground hover:bg-muted/40"
+              title={timeSel ? "Voltar à lista de perebas com o time selecionado" : "Fechar Top 4"}
+            >
+              <X className="h-3 w-3" />
+              {timeSel ? "Voltar à lista" : "Fechar"}
+            </button>
+          </div>
           <Top4QuotaContent
             apelido={perebaSel?.apelido ?? "—"}
             numero={quotaAtiva.numero}
