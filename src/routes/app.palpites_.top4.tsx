@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy } from "lucide-react";
+import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyTop4, useUpdateTop4, useFaseAtual, useTop4Pontos } from "@/lib/queries/top4";
@@ -16,6 +16,9 @@ import { Top4PotencialCard } from "@/components/top4-potencial-card";
 import { Top4ConfirmMudancaDialog } from "@/components/top4-confirm-mudanca-dialog";
 import { Top4QuotaContent } from "@/components/top4-quota-detalhe-dialog";
 import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
+import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 
 export const Route = createFileRoute("/app/palpites_/top4")({
   head: () => ({ meta: [{ title: "Top 4 — Bolão dos Perebas" }] }),
@@ -345,6 +348,7 @@ function PublicoOutrosSection({
   const [ordem, setOrdem] = useState<"ranking" | "alfabetico">("ranking");
   const [userSel, setUserSel] = useState<string>("");
   const [quotaSel, setQuotaSel] = useState<string>("");
+  const [comboAberto, setComboAberto] = useState(false);
   const [initialHandled, setInitialHandled] = useState(false);
 
   const comPalpite = useMemo(
@@ -454,23 +458,65 @@ function PublicoOutrosSection({
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <select
-          value={userSel}
-          onChange={(e) => {
-            setUserSel(e.target.value);
-            setQuotaSel("");
-          }}
-          className="flex-1 rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
-        >
-          <option value="">— escolher pereba —</option>
-          {perebas.map((p) => (
-            <option key={p.user_id} value={p.user_id}>
-              {ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : ""}
-              {p.apelido}
-              {p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : ""}
-            </option>
-          ))}
-        </select>
+        <Popover open={comboAberto} onOpenChange={setComboAberto}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              role="combobox"
+              aria-expanded={comboAberto}
+              className="flex flex-1 items-center justify-between rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              <span className="truncate">
+                {(() => {
+                  const p = perebas.find((x) => x.user_id === userSel);
+                  if (!p) return "— escolher pereba —";
+                  const prefixo = ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : "";
+                  const sufixo = p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : "";
+                  return `${prefixo}${p.apelido}${sufixo}`;
+                })()}
+              </span>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+            <Command
+              filter={(value, search) => {
+                return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+              }}
+            >
+              <CommandInput placeholder="Buscar pereba…" />
+              <CommandList>
+                <CommandEmpty>Nenhum pereba encontrado.</CommandEmpty>
+                <CommandGroup>
+                  {perebas.map((p) => {
+                    const prefixo = ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : "";
+                    const sufixo = p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : "";
+                    const label = `${prefixo}${p.apelido}${sufixo}`;
+                    return (
+                      <CommandItem
+                        key={p.user_id}
+                        value={p.apelido}
+                        onSelect={() => {
+                          setUserSel(p.user_id);
+                          setQuotaSel("");
+                          setComboAberto(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            userSel === p.user_id ? "opacity-100" : "opacity-0",
+                          )}
+                        />
+                        <span className="truncate">{label}</span>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
 
         {perebaSel && perebaSel.quotas.length > 1 && (
           <select
