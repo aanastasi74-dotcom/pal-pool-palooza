@@ -39,6 +39,7 @@ import { Route as AppComprarQuotaRouteImport } from './routes/app.comprar-quota'
 import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
+import { Route as AppPesquisaSlugRouteImport } from './routes/app.pesquisa.$slug'
 import { Route as AppPerebaUser_idRouteImport } from './routes/app.pereba.$user_id'
 import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4'
 import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
@@ -212,6 +213,11 @@ const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppPesquisaSlugRoute = AppPesquisaSlugRouteImport.update({
+  id: '/pesquisa/$slug',
+  path: '/pesquisa/$slug',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPerebaUser_idRoute = AppPerebaUser_idRouteImport.update({
   id: '/pereba/$user_id',
   path: '/pereba/$user_id',
@@ -374,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
+  '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin/': typeof AppAdminIndexRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
@@ -425,6 +432,7 @@ export interface FileRoutesByTo {
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
+  '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin': typeof AppAdminIndexRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
@@ -480,6 +488,7 @@ export interface FileRoutesById {
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites_/top4': typeof AppPalpitesTop4Route
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
+  '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin/': typeof AppAdminIndexRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
@@ -536,6 +545,7 @@ export interface FileRouteTypes {
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
     | '/app/pereba/$user_id'
+    | '/app/pesquisa/$slug'
     | '/app/admin/'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
@@ -587,6 +597,7 @@ export interface FileRouteTypes {
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
     | '/app/pereba/$user_id'
+    | '/app/pesquisa/$slug'
     | '/app/admin'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
@@ -641,6 +652,7 @@ export interface FileRouteTypes {
     | '/app/pagamento/$quota_id'
     | '/app/palpites_/top4'
     | '/app/pereba/$user_id'
+    | '/app/pesquisa/$slug'
     | '/app/admin/'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
@@ -871,6 +883,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminIndexRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/pesquisa/$slug': {
+      id: '/app/pesquisa/$slug'
+      path: '/pesquisa/$slug'
+      fullPath: '/app/pesquisa/$slug'
+      preLoaderRoute: typeof AppPesquisaSlugRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/pereba/$user_id': {
       id: '/app/pereba/$user_id'
       path: '/pereba/$user_id'
@@ -1089,6 +1108,7 @@ interface AppRouteChildren {
   AppPagamentoQuota_idRoute: typeof AppPagamentoQuota_idRoute
   AppPalpitesTop4Route: typeof AppPalpitesTop4Route
   AppPerebaUser_idRoute: typeof AppPerebaUser_idRoute
+  AppPesquisaSlugRoute: typeof AppPesquisaSlugRoute
   AppJogoMatch_idDetalhesRoute: typeof AppJogoMatch_idDetalhesRoute
   AppJogoMatch_idPalpitesRoute: typeof AppJogoMatch_idPalpitesRoute
 }
@@ -1112,6 +1132,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPagamentoQuota_idRoute: AppPagamentoQuota_idRoute,
   AppPalpitesTop4Route: AppPalpitesTop4Route,
   AppPerebaUser_idRoute: AppPerebaUser_idRoute,
+  AppPesquisaSlugRoute: AppPesquisaSlugRoute,
   AppJogoMatch_idDetalhesRoute: AppJogoMatch_idDetalhesRoute,
   AppJogoMatch_idPalpitesRoute: AppJogoMatch_idPalpitesRoute,
 }

@@ -751,6 +751,179 @@ export type Database = {
           },
         ]
       }
+      pesquisa_participacao: {
+        Row: {
+          concluida_em: string | null
+          id: string
+          identificou_se: boolean
+          iniciada_em: string
+          lembrar_depois_em: string | null
+          pesquisa_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          concluida_em?: string | null
+          id?: string
+          identificou_se?: boolean
+          iniciada_em?: string
+          lembrar_depois_em?: string | null
+          pesquisa_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          concluida_em?: string | null
+          id?: string
+          identificou_se?: boolean
+          iniciada_em?: string
+          lembrar_depois_em?: string | null
+          pesquisa_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pesquisa_participacao_pesquisa_id_fkey"
+            columns: ["pesquisa_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pesquisa_perguntas: {
+        Row: {
+          descricao: string | null
+          id: string
+          obrigatoria: boolean
+          opcoes: Json | null
+          ordem: number
+          permite_outros: boolean
+          pesquisa_id: string
+          texto: string
+          tipo: string
+        }
+        Insert: {
+          descricao?: string | null
+          id?: string
+          obrigatoria?: boolean
+          opcoes?: Json | null
+          ordem: number
+          permite_outros?: boolean
+          pesquisa_id: string
+          texto: string
+          tipo: string
+        }
+        Update: {
+          descricao?: string | null
+          id?: string
+          obrigatoria?: boolean
+          opcoes?: Json | null
+          ordem?: number
+          permite_outros?: boolean
+          pesquisa_id?: string
+          texto?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pesquisa_perguntas_pesquisa_id_fkey"
+            columns: ["pesquisa_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pesquisa_respostas: {
+        Row: {
+          id: string
+          participacao_id: string
+          pergunta_id: string
+          pesquisa_id: string
+          respondido_em: string
+          resposta: Json
+          resposta_texto_outros: string | null
+        }
+        Insert: {
+          id?: string
+          participacao_id: string
+          pergunta_id: string
+          pesquisa_id: string
+          respondido_em?: string
+          resposta: Json
+          resposta_texto_outros?: string | null
+        }
+        Update: {
+          id?: string
+          participacao_id?: string
+          pergunta_id?: string
+          pesquisa_id?: string
+          respondido_em?: string
+          resposta?: Json
+          resposta_texto_outros?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pesquisa_respostas_participacao_id_fkey"
+            columns: ["participacao_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisa_participacao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pesquisa_respostas_pergunta_id_fkey"
+            columns: ["pergunta_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisa_perguntas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pesquisa_respostas_pesquisa_id_fkey"
+            columns: ["pesquisa_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pesquisas: {
+        Row: {
+          abre_em: string
+          ativa: boolean
+          criada_em: string
+          descricao: string | null
+          encerra_em: string
+          id: string
+          permite_identificar: boolean
+          slug: string
+          titulo: string
+        }
+        Insert: {
+          abre_em?: string
+          ativa?: boolean
+          criada_em?: string
+          descricao?: string | null
+          encerra_em: string
+          id?: string
+          permite_identificar?: boolean
+          slug: string
+          titulo: string
+        }
+        Update: {
+          abre_em?: string
+          ativa?: boolean
+          criada_em?: string
+          descricao?: string | null
+          encerra_em?: string
+          id?: string
+          permite_identificar?: boolean
+          slug?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
       predictions: {
         Row: {
           created_at: string | null
