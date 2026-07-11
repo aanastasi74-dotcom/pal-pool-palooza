@@ -1,12 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
+import { CheckCircle2, AlertCircle, Lightbulb, Sparkles } from "lucide-react";
 import { calcularEngajamento, isElegivelLanterna, razaoNaoElegivel, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
 import { useProfile, useUpdateProfile } from "@/lib/queries/profiles";
 import { useMinhasQuotas, useTotalQuotas } from "@/lib/queries/quotas";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePesquisaAtiva, useMinhaParticipacao } from "@/lib/queries/pesquisas";
 
 export const Route = createFileRoute("/app/perfil")({
   head: () => ({ meta: [{ title: "Meu perfil — Bolão dos Perebas" }] }),
@@ -115,6 +116,9 @@ function Perfil() {
       </section>
 
       <ElegibilidadeLanterna />
+
+      <PesquisaCard />
+
 
       <button
         disabled={updateProfile.isPending}

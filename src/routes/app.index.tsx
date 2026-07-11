@@ -124,6 +124,7 @@ function Home() {
         </div>
       </section>
 
+      <PesquisaPopup />
     </div>
   );
 }
