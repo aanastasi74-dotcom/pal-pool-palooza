@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { PremiacaoCard } from "@/components/premiacao-card";
 import { HomeCarouselCollapsible } from "@/components/home-carousel-collapsible";
+import { PesquisaPopup } from "@/components/pesquisa-popup";
 
 
 export const Route = createFileRoute("/app/")({
