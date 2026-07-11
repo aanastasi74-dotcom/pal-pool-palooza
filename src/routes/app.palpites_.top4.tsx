@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy } from "lucide-react";
+import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyTop4, useUpdateTop4, useFaseAtual, useTop4Pontos } from "@/lib/queries/top4";
@@ -16,6 +16,9 @@ import { Top4PotencialCard } from "@/components/top4-potencial-card";
 import { Top4ConfirmMudancaDialog } from "@/components/top4-confirm-mudanca-dialog";
 import { Top4QuotaContent } from "@/components/top4-quota-detalhe-dialog";
 import { calcularPotencialMaximoTop4 } from "@/lib/top4-potencial/engine";
+import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 
 export const Route = createFileRoute("/app/palpites_/top4")({
   head: () => ({ meta: [{ title: "Top 4 — Bolão dos Perebas" }] }),
@@ -345,6 +348,7 @@ function PublicoOutrosSection({
   const [ordem, setOrdem] = useState<"ranking" | "alfabetico">("ranking");
   const [userSel, setUserSel] = useState<string>("");
   const [quotaSel, setQuotaSel] = useState<string>("");
+  const [comboAberto, setComboAberto] = useState(false);
   const [initialHandled, setInitialHandled] = useState(false);
 
   const comPalpite = useMemo(
