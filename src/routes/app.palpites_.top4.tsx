@@ -350,6 +350,8 @@ function PublicoOutrosSection({
   const [quotaSel, setQuotaSel] = useState<string>("");
   const [comboAberto, setComboAberto] = useState(false);
   const [initialHandled, setInitialHandled] = useState(false);
+  const [timeSel, setTimeSel] = useState<string>(""); // bracket_position do time
+  const [comboTimeAberto, setComboTimeAberto] = useState(false);
 
   const comPalpite = useMemo(
     () => (rows as any[]).filter((r) => r.top4_p1 && r.top4_p2 && r.top4_p3 && r.top4_p4),
@@ -457,82 +459,226 @@ function PublicoOutrosSection({
         ))}
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Popover open={comboAberto} onOpenChange={setComboAberto}>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              role="combobox"
-              aria-expanded={comboAberto}
-              className="flex flex-1 items-center justify-between rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
-            >
-              <span className="truncate">
-                {(() => {
-                  const p = perebas.find((x) => x.user_id === userSel);
-                  if (!p) return "— escolher pereba —";
-                  const prefixo = ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : "";
-                  const sufixo = p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : "";
-                  return `${prefixo}${p.apelido}${sufixo}`;
-                })()}
-              </span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-            <Command
-              filter={(value, search) => {
-                return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
-              }}
-            >
-              <CommandInput placeholder="Buscar pereba…" />
-              <CommandList>
-                <CommandEmpty>Nenhum pereba encontrado.</CommandEmpty>
-                <CommandGroup>
-                  {perebas.map((p) => {
+      <div className="space-y-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Popover open={comboAberto} onOpenChange={setComboAberto}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                role="combobox"
+                aria-expanded={comboAberto}
+                className="flex flex-1 items-center justify-between rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                <span className="truncate">
+                  {(() => {
+                    const p = perebas.find((x) => x.user_id === userSel);
+                    if (!p) return "— escolher pereba —";
                     const prefixo = ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : "";
                     const sufixo = p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : "";
-                    const label = `${prefixo}${p.apelido}${sufixo}`;
-                    return (
-                      <CommandItem
-                        key={p.user_id}
-                        value={p.apelido}
-                        onSelect={() => {
-                          setUserSel(p.user_id);
-                          setQuotaSel("");
-                          setComboAberto(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            userSel === p.user_id ? "opacity-100" : "opacity-0",
-                          )}
-                        />
-                        <span className="truncate">{label}</span>
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+                    return `${prefixo}${p.apelido}${sufixo}`;
+                  })()}
+                </span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <Command
+                filter={(value, search) => {
+                  return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                }}
+              >
+                <CommandInput placeholder="Buscar pereba…" />
+                <CommandList>
+                  <CommandEmpty>Nenhum pereba encontrado.</CommandEmpty>
+                  <CommandGroup>
+                    {perebas.map((p) => {
+                      const prefixo = ordem === "ranking" && p.melhorPos < 9999 ? `${p.melhorPos}º · ` : "";
+                      const sufixo = p.quotas.length > 1 ? ` (${p.quotas.length} quotas)` : "";
+                      const label = `${prefixo}${p.apelido}${sufixo}`;
+                      return (
+                        <CommandItem
+                          key={p.user_id}
+                          value={p.apelido}
+                          onSelect={() => {
+                            setUserSel(p.user_id);
+                            setQuotaSel("");
+                            setComboAberto(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              userSel === p.user_id ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                          <span className="truncate">{label}</span>
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
-        {perebaSel && perebaSel.quotas.length > 1 && (
-          <select
-            value={quotaAtiva?.id ?? ""}
-            onChange={(e) => setQuotaSel(e.target.value)}
-            className="rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
-          >
-            {perebaSel.quotas.map((q) => (
-              <option key={q.id} value={q.id}>
-                Quota #{q.numero}
-                {q.posicao ? ` · ${q.posicao}º` : ""}
-              </option>
-            ))}
-          </select>
-        )}
+          {perebaSel && perebaSel.quotas.length > 1 && (
+            <select
+              value={quotaAtiva?.id ?? ""}
+              onChange={(e) => setQuotaSel(e.target.value)}
+              className="rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              {perebaSel.quotas.map((q) => (
+                <option key={q.id} value={q.id}>
+                  Quota #{q.numero}
+                  {q.posicao ? ` · ${q.posicao}º` : ""}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Popover open={comboTimeAberto} onOpenChange={setComboTimeAberto}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                role="combobox"
+                aria-expanded={comboTimeAberto}
+                className="flex flex-1 items-center justify-between rounded-2xl border border-border bg-secondary px-3 py-2 text-sm font-display font-bold focus:outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                <span className="truncate">
+                  {(() => {
+                    const t = teams.find((x: any) => x.bracket_position === timeSel);
+                    if (!t) return "— buscar por time —";
+                    return `${t.bandeira_emoji ?? "🏳️"} ${t.nome_pt}`;
+                  })()}
+                </span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <Command
+                filter={(value, search) => {
+                  return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                }}
+              >
+                <CommandInput placeholder="Buscar time…" />
+                <CommandList>
+                  <CommandEmpty>Nenhum time encontrado.</CommandEmpty>
+                  <CommandGroup>
+                    {[...teams]
+                      .sort((a: any, b: any) => a.nome_pt.localeCompare(b.nome_pt, "pt-BR"))
+                      .map((t: any) => (
+                        <CommandItem
+                          key={t.bracket_position}
+                          value={t.nome_pt}
+                          onSelect={() => {
+                            setTimeSel(t.bracket_position);
+                            setComboTimeAberto(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              timeSel === t.bracket_position ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                          <span className="mr-2 text-lg">{t.bandeira_emoji ?? "🏳️"}</span>
+                          <span className="truncate">{t.nome_pt}</span>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          {timeSel && (
+            <button
+              type="button"
+              onClick={() => setTimeSel("")}
+              className="rounded-full border border-border bg-card px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted/40"
+              title="Limpar time"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
+
+      {timeSel && !userSel && (() => {
+        // Perebas que colocaram esse time em qualquer posição do Top 4
+        const timeSelecionado = teams.find((t: any) => t.bracket_position === timeSel);
+        const perebasComEsseTime = (rows as any[])
+          .filter((r) =>
+            r.top4_p1 === timeSel || r.top4_p2 === timeSel ||
+            r.top4_p3 === timeSel || r.top4_p4 === timeSel
+          )
+          .map((r) => {
+            let posicao: string = "";
+            if (r.top4_p1 === timeSel) posicao = "Campeão";
+            else if (r.top4_p2 === timeSel) posicao = "Vice";
+            else if (r.top4_p3 === timeSel) posicao = "3º lugar";
+            else if (r.top4_p4 === timeSel) posicao = "4º lugar";
+            return { row: r, posicao };
+          });
+
+        // Ordenar respeitando o toggle
+        if (ordem === "ranking") {
+          perebasComEsseTime.sort((a, b) => (a.row.posicao ?? 9999) - (b.row.posicao ?? 9999));
+        } else {
+          perebasComEsseTime.sort((a, b) => (a.row.profile?.apelido ?? "").localeCompare(b.row.profile?.apelido ?? "", "pt-BR", { sensitivity: "base" }));
+        }
+
+        return (
+          <div className="mt-3 rounded-2xl border border-border bg-background p-3">
+            <p className="mb-2 text-sm font-bold">
+              {timeSelecionado?.bandeira_emoji ?? "🏳️"} {timeSelecionado?.nome_pt ?? "—"} no Top 4 de{" "}
+              <span className="text-primary">{perebasComEsseTime.length}</span>{" "}
+              quota{perebasComEsseTime.length === 1 ? "" : "s"}
+            </p>
+
+            {perebasComEsseTime.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic">
+                Nenhum pereba palpitou nesse time.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {perebasComEsseTime.map(({ row, posicao }) => {
+                  const apelido = row.profile?.apelido ?? "—";
+                  const peso = row.top4_peso ?? 100;
+                  return (
+                    <li key={row.id} className="flex items-center justify-between gap-2 py-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserSel(row.user_id);
+                          setQuotaSel(row.id);
+                          // Não limpar timeSel — mantém filtro pro admin voltar
+                        }}
+                        className="flex flex-1 items-center gap-2 text-left hover:opacity-70"
+                      >
+                        {row.posicao != null && (
+                          <span className="w-8 text-right font-display font-bold text-muted-foreground">
+                            {row.posicao}º
+                          </span>
+                        )}
+                        <span className="font-display font-bold">{apelido}</span>
+                        <span className="text-muted-foreground">#{row.numero}</span>
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-accent">
+                          {posicao}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">{peso}%</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        );
+      })()}
 
       {quotaAtiva && (
         <div className="mt-4 rounded-2xl border border-border bg-background p-3">
