@@ -350,6 +350,8 @@ function PublicoOutrosSection({
   const [quotaSel, setQuotaSel] = useState<string>("");
   const [comboAberto, setComboAberto] = useState(false);
   const [initialHandled, setInitialHandled] = useState(false);
+  const [timeSel, setTimeSel] = useState<string>(""); // bracket_position do time
+  const [comboTimeAberto, setComboTimeAberto] = useState(false);
 
   const comPalpite = useMemo(
     () => (rows as any[]).filter((r) => r.top4_p1 && r.top4_p2 && r.top4_p3 && r.top4_p4),
