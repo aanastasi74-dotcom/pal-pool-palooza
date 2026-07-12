@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy, Check, ChevronsUpDown } from "lucide-react";
+import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy, Check, ChevronsUpDown, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyTop4, useUpdateTop4, useFaseAtual, useTop4Pontos } from "@/lib/queries/top4";
@@ -169,6 +169,12 @@ function Top4Page() {
       <div>
         <h1 className="font-display text-3xl font-extrabold">Top 4 da Copa</h1>
         <p className="mt-1 text-sm text-muted-foreground">Quem leva a taça e quem fica no quase. Vale até 4.000 pts.</p>
+        <Link
+          to="/app/palpites/top4/estatisticas"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted/60"
+        >
+          <BarChart3 className="h-3.5 w-3.5" /> Ver estatísticas do bolão
+        </Link>
       </div>
 
       {quotas.length > 1 && (
