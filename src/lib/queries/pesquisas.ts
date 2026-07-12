@@ -93,10 +93,13 @@ export function useMinhaParticipacao(pesquisaId?: string) {
     queryKey: ["pesquisa-participacao", pesquisaId],
     enabled: !!pesquisaId,
     queryFn: async (): Promise<Participacao | null> => {
+      const { data: userRes } = await supabase.auth.getUser();
+      if (!userRes.user) return null;
       const { data, error } = await supabase
         .from("pesquisa_participacao")
         .select("*")
         .eq("pesquisa_id", pesquisaId!)
+        .eq("user_id", userRes.user.id)
         .maybeSingle();
       if (error && (error as any).code !== "PGRST116") throw error;
       return (data ?? null) as Participacao | null;
@@ -114,21 +117,22 @@ export function useUpsertParticipacao() {
       lembrar_depois_em?: string | null;
       concluida_em?: string | null;
     }) => {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error("não autenticado");
+      const { data: userRes } = await supabase.auth.getUser();
+      if (!userRes.user) throw new Error("não autenticado");
+
+      // Monta o row só com os campos definidos no payload (MERGE, não OVERWRITE)
+      const row: Record<string, any> = {
+        pesquisa_id: payload.pesquisa_id,
+        user_id: userRes.user.id,
+        status: payload.status,
+      };
+      if (payload.identificou_se !== undefined) row.identificou_se = payload.identificou_se;
+      if (payload.lembrar_depois_em !== undefined) row.lembrar_depois_em = payload.lembrar_depois_em;
+      if (payload.concluida_em !== undefined) row.concluida_em = payload.concluida_em;
+
       const { data, error } = await supabase
         .from("pesquisa_participacao")
-        .upsert(
-          {
-            pesquisa_id: payload.pesquisa_id,
-            user_id: user.user.id,
-            status: payload.status,
-            identificou_se: payload.identificou_se ?? false,
-            lembrar_depois_em: payload.lembrar_depois_em ?? null,
-            concluida_em: payload.concluida_em ?? null,
-          },
-          { onConflict: "pesquisa_id,user_id" },
-        )
+        .upsert(row, { onConflict: "pesquisa_id,user_id" })
         .select()
         .single();
       if (error) throw error;
