@@ -8,12 +8,13 @@ import { usePesquisaAtiva, useMinhaParticipacao, useUpsertParticipacao } from "@
 export function PesquisaPopup() {
   const navigate = useNavigate();
   const { data: pesquisa } = usePesquisaAtiva();
-  const { data: participacao } = useMinhaParticipacao(pesquisa?.id);
+  const { data: participacao, isLoading: loadingParticipacao } = useMinhaParticipacao(pesquisa?.id);
   const upsert = useUpsertParticipacao();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!pesquisa) return;
+    if (loadingParticipacao) return;   // aguarda a query resolver antes de decidir
     if (participacao?.status === "concluida" || participacao?.status === "opt_out") {
       setOpen(false);
       return;
@@ -23,7 +24,7 @@ export function PesquisaPopup() {
       return;
     }
     setOpen(true);
-  }, [pesquisa, participacao]);
+  }, [pesquisa, participacao, loadingParticipacao]);
 
   if (!pesquisa) return null;
 
