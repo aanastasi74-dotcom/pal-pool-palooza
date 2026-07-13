@@ -1544,6 +1544,25 @@ export type Database = {
           ultimo_acesso: string
         }[]
       }
+      admin_pesquisa_respostas_flat: {
+        Args: { p_pesquisa_id: string }
+        Returns: {
+          apelido: string
+          codigo_respondente: string
+          concluida_em: string
+          ordem: number
+          outros: string
+          pergunta: string
+          respondido_em: string
+          resposta: string
+          status_participacao: string
+          tipo: string
+        }[]
+      }
+      admin_pesquisa_resultados: {
+        Args: { p_pesquisa_id: string }
+        Returns: Json
+      }
       admin_set_ativo: {
         Args: { p_ativo: boolean; p_user_id: string }
         Returns: undefined
