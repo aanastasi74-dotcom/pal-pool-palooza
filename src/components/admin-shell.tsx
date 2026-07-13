@@ -42,6 +42,7 @@ const items = [
   { to: "/app/admin/relatorios", label: "Relatórios", icon: FileBarChart },
   { to: "/app/admin/saude", label: "Saúde", icon: Activity },
   { to: "/app/admin/reportes", label: "Reportes", icon: Bug },
+  { to: "/app/admin/pesquisas", label: "Pesquisas", icon: ClipboardList },
   { to: "/app/admin/sync", label: "Sync placares", icon: RefreshCw },
 ] as const;
 
