@@ -51,6 +51,7 @@ import { Route as AppAdminReportesRouteImport } from './routes/app.admin.reporte
 import { Route as AppAdminRelatoriosRouteImport } from './routes/app.admin.relatorios'
 import { Route as AppAdminQuotasRouteImport } from './routes/app.admin.quotas'
 import { Route as AppAdminPremiacaoRouteImport } from './routes/app.admin.premiacao'
+import { Route as AppAdminPesquisasRouteImport } from './routes/app.admin.pesquisas'
 import { Route as AppAdminPerfisPersonalidadeRouteImport } from './routes/app.admin.perfis-personalidade'
 import { Route as AppAdminPerfisRouteImport } from './routes/app.admin.perfis'
 import { Route as AppAdminPagamentosRouteImport } from './routes/app.admin.pagamentos'
@@ -63,6 +64,7 @@ import { Route as AppAdminAuditoriaRouteImport } from './routes/app.admin.audito
 import { Route as AppPalpitesTop4EstatisticasRouteImport } from './routes/app.palpites_.top4_.estatisticas'
 import { Route as AppJogoMatch_idPalpitesRouteImport } from './routes/app.jogo.$match_id.palpites'
 import { Route as AppJogoMatch_idDetalhesRouteImport } from './routes/app.jogo.$match_id.detalhes'
+import { Route as AppAdminPesquisasIdRouteImport } from './routes/app.admin.pesquisas.$id'
 
 const RegrasRoute = RegrasRouteImport.update({
   id: '/regras',
@@ -274,6 +276,11 @@ const AppAdminPremiacaoRoute = AppAdminPremiacaoRouteImport.update({
   path: '/premiacao',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminPesquisasRoute = AppAdminPesquisasRouteImport.update({
+  id: '/pesquisas',
+  path: '/pesquisas',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminPerfisPersonalidadeRoute =
   AppAdminPerfisPersonalidadeRouteImport.update({
     id: '/perfis-personalidade',
@@ -336,6 +343,11 @@ const AppJogoMatch_idDetalhesRoute = AppJogoMatch_idDetalhesRouteImport.update({
   path: '/jogo/$match_id/detalhes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminPesquisasIdRoute = AppAdminPesquisasIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppAdminPesquisasRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -376,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
+  '/app/admin/pesquisas': typeof AppAdminPesquisasRouteWithChildren
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
@@ -389,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin/': typeof AppAdminIndexRoute
+  '/app/admin/pesquisas/$id': typeof AppAdminPesquisasIdRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
   '/app/palpites/top4/estatisticas': typeof AppPalpitesTop4EstatisticasRoute
@@ -429,6 +443,7 @@ export interface FileRoutesByTo {
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
+  '/app/admin/pesquisas': typeof AppAdminPesquisasRouteWithChildren
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
@@ -442,6 +457,7 @@ export interface FileRoutesByTo {
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin': typeof AppAdminIndexRoute
+  '/app/admin/pesquisas/$id': typeof AppAdminPesquisasIdRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
   '/app/palpites/top4/estatisticas': typeof AppPalpitesTop4EstatisticasRoute
@@ -486,6 +502,7 @@ export interface FileRoutesById {
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
+  '/app/admin/pesquisas': typeof AppAdminPesquisasRouteWithChildren
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
@@ -499,6 +516,7 @@ export interface FileRoutesById {
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin/': typeof AppAdminIndexRoute
+  '/app/admin/pesquisas/$id': typeof AppAdminPesquisasIdRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
   '/app/palpites_/top4_/estatisticas': typeof AppPalpitesTop4EstatisticasRoute
@@ -544,6 +562,7 @@ export interface FileRouteTypes {
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
+    | '/app/admin/pesquisas'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
@@ -557,6 +576,7 @@ export interface FileRouteTypes {
     | '/app/pereba/$user_id'
     | '/app/pesquisa/$slug'
     | '/app/admin/'
+    | '/app/admin/pesquisas/$id'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
     | '/app/palpites/top4/estatisticas'
@@ -597,6 +617,7 @@ export interface FileRouteTypes {
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
+    | '/app/admin/pesquisas'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
@@ -610,6 +631,7 @@ export interface FileRouteTypes {
     | '/app/pereba/$user_id'
     | '/app/pesquisa/$slug'
     | '/app/admin'
+    | '/app/admin/pesquisas/$id'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
     | '/app/palpites/top4/estatisticas'
@@ -653,6 +675,7 @@ export interface FileRouteTypes {
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
+    | '/app/admin/pesquisas'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
@@ -666,6 +689,7 @@ export interface FileRouteTypes {
     | '/app/pereba/$user_id'
     | '/app/pesquisa/$slug'
     | '/app/admin/'
+    | '/app/admin/pesquisas/$id'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
     | '/app/palpites_/top4_/estatisticas'
@@ -980,6 +1004,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminPremiacaoRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/admin/pesquisas': {
+      id: '/app/admin/pesquisas'
+      path: '/pesquisas'
+      fullPath: '/app/admin/pesquisas'
+      preLoaderRoute: typeof AppAdminPesquisasRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/admin/perfis-personalidade': {
       id: '/app/admin/perfis-personalidade'
       path: '/perfis-personalidade'
@@ -1064,8 +1095,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppJogoMatch_idDetalhesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin/pesquisas/$id': {
+      id: '/app/admin/pesquisas/$id'
+      path: '/$id'
+      fullPath: '/app/admin/pesquisas/$id'
+      preLoaderRoute: typeof AppAdminPesquisasIdRouteImport
+      parentRoute: typeof AppAdminPesquisasRoute
+    }
   }
 }
+
+interface AppAdminPesquisasRouteChildren {
+  AppAdminPesquisasIdRoute: typeof AppAdminPesquisasIdRoute
+}
+
+const AppAdminPesquisasRouteChildren: AppAdminPesquisasRouteChildren = {
+  AppAdminPesquisasIdRoute: AppAdminPesquisasIdRoute,
+}
+
+const AppAdminPesquisasRouteWithChildren =
+  AppAdminPesquisasRoute._addFileChildren(AppAdminPesquisasRouteChildren)
 
 interface AppAdminRouteChildren {
   AppAdminAuditoriaRoute: typeof AppAdminAuditoriaRoute
@@ -1077,6 +1126,7 @@ interface AppAdminRouteChildren {
   AppAdminPagamentosRoute: typeof AppAdminPagamentosRoute
   AppAdminPerfisRoute: typeof AppAdminPerfisRoute
   AppAdminPerfisPersonalidadeRoute: typeof AppAdminPerfisPersonalidadeRoute
+  AppAdminPesquisasRoute: typeof AppAdminPesquisasRouteWithChildren
   AppAdminPremiacaoRoute: typeof AppAdminPremiacaoRoute
   AppAdminQuotasRoute: typeof AppAdminQuotasRoute
   AppAdminRelatoriosRoute: typeof AppAdminRelatoriosRoute
@@ -1096,6 +1146,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminPagamentosRoute: AppAdminPagamentosRoute,
   AppAdminPerfisRoute: AppAdminPerfisRoute,
   AppAdminPerfisPersonalidadeRoute: AppAdminPerfisPersonalidadeRoute,
+  AppAdminPesquisasRoute: AppAdminPesquisasRouteWithChildren,
   AppAdminPremiacaoRoute: AppAdminPremiacaoRoute,
   AppAdminQuotasRoute: AppAdminQuotasRoute,
   AppAdminRelatoriosRoute: AppAdminRelatoriosRoute,

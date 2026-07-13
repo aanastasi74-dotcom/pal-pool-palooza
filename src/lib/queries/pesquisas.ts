@@ -171,3 +171,203 @@ export function useInserirRespostas() {
     },
   });
 }
+
+// ========== ADMIN ==========
+
+export type PesquisaAdminRow = Pesquisa & {
+  criada_em: string;
+  participantes_total?: number;
+};
+
+export function useAdminPesquisas() {
+  return useQuery({
+    queryKey: ["admin-pesquisas"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pesquisas")
+        .select("*, pesquisa_participacao(status)")
+        .order("criada_em", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((p: any) => {
+        const parts = (p.pesquisa_participacao ?? []) as { status: string }[];
+        return {
+          ...p,
+          concluidas: parts.filter((x) => x.status === "concluida").length,
+          iniciadas: parts.filter((x) => x.status === "iniciada").length,
+          opt_out: parts.filter((x) => x.status === "opt_out").length,
+          total_interacoes: parts.length,
+        };
+      });
+    },
+  });
+}
+
+export type PesquisaResultadoPergunta = {
+  id: string;
+  ordem: number;
+  texto: string;
+  tipo: "escala_1_10" | "single" | "multi" | "texto";
+  opcoes: string[] | null;
+  n_respostas: number;
+  agregado: any;
+  textos: { texto: string; apelido: string | null; respondido_em: string }[] | null;
+  outros: string[] | null;
+};
+
+export type PesquisaResultados = {
+  pesquisa: {
+    id: string;
+    slug: string;
+    titulo: string;
+    ativa: boolean;
+    abre_em: string;
+    encerra_em: string;
+    permite_identificar: boolean;
+  };
+  funil: {
+    universo_perebas: number;
+    concluidas: number;
+    iniciadas: number;
+    opt_out: number;
+    identificados: number;
+    sem_interacao: number;
+  };
+  perguntas: PesquisaResultadoPergunta[];
+};
+
+export function useAdminResultados(pesquisaId?: string) {
+  return useQuery({
+    queryKey: ["admin-pesquisa-resultados", pesquisaId],
+    enabled: !!pesquisaId,
+    queryFn: async (): Promise<PesquisaResultados> => {
+      const { data, error } = await (supabase as any).rpc("admin_pesquisa_resultados", {
+        p_pesquisa_id: pesquisaId,
+      });
+      if (error) throw error;
+      return data as PesquisaResultados;
+    },
+  });
+}
+
+export async function fetchAdminRespostasFlat(pesquisaId: string): Promise<any[]> {
+  const { data, error } = await (supabase as any).rpc("admin_pesquisa_respostas_flat", {
+    p_pesquisa_id: pesquisaId,
+  });
+  if (error) throw error;
+  return (data ?? []) as any[];
+}
+
+export function useSavePesquisa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      p: Partial<Pesquisa> & { id?: string },
+    ): Promise<Pesquisa> => {
+      const payload: any = {
+        slug: p.slug,
+        titulo: p.titulo,
+        descricao: p.descricao ?? null,
+        ativa: p.ativa ?? false,
+        abre_em: p.abre_em,
+        encerra_em: p.encerra_em,
+        permite_identificar: p.permite_identificar ?? true,
+      };
+      if (p.id) {
+        const { data, error } = await supabase
+          .from("pesquisas")
+          .update(payload)
+          .eq("id", p.id)
+          .select()
+          .single();
+        if (error) throw error;
+        return data as Pesquisa;
+      }
+      const { data, error } = await supabase
+        .from("pesquisas")
+        .insert(payload)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Pesquisa;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-pesquisas"] });
+      qc.invalidateQueries({ queryKey: ["admin-pesquisa-resultados"] });
+      qc.invalidateQueries({ queryKey: ["pesquisa-slug"] });
+    },
+  });
+}
+
+export function useDeletePesquisa() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("pesquisas").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-pesquisas"] }),
+  });
+}
+
+export function useSavePergunta() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      p: Partial<Pergunta> & { pesquisa_id: string; id?: string },
+    ) => {
+      const payload: any = {
+        pesquisa_id: p.pesquisa_id,
+        ordem: p.ordem ?? 0,
+        texto: p.texto,
+        descricao: p.descricao ?? null,
+        tipo: p.tipo,
+        opcoes: p.tipo === "single" || p.tipo === "multi" ? p.opcoes ?? [] : null,
+        permite_outros: p.permite_outros ?? false,
+        obrigatoria: p.obrigatoria ?? false,
+      };
+      if (p.id) {
+        const { error } = await supabase
+          .from("pesquisa_perguntas")
+          .update(payload)
+          .eq("id", p.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("pesquisa_perguntas").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["pesquisa-perguntas", v.pesquisa_id] });
+    },
+  });
+}
+
+export function useUpdateOrdemPergunta() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ordem, pesquisa_id: _pid }: { id: string; ordem: number; pesquisa_id: string }) => {
+      const { error } = await supabase
+        .from("pesquisa_perguntas")
+        .update({ ordem })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["pesquisa-perguntas", v.pesquisa_id] });
+    },
+  });
+}
+
+export function useDeletePergunta() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, pesquisa_id: _pid }: { id: string; pesquisa_id: string }) => {
+      const { error } = await supabase.from("pesquisa_perguntas").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["pesquisa-perguntas", v.pesquisa_id] });
+    },
+  });
+}
+
