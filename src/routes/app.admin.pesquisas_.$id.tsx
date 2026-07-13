@@ -20,7 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
-export const Route = createFileRoute("/app/admin/pesquisas/$id")({
+export const Route = createFileRoute("/app/admin/pesquisas_/$id")({
   head: () => ({ meta: [{ title: "Admin — Pesquisa" }] }),
   component: PesquisaDetail,
 });
