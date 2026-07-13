@@ -17,6 +17,7 @@ import {
   Bug,
   Crown,
   RefreshCw,
+  ClipboardList,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
