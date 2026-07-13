@@ -51,6 +51,7 @@ import { Route as AppAdminReportesRouteImport } from './routes/app.admin.reporte
 import { Route as AppAdminRelatoriosRouteImport } from './routes/app.admin.relatorios'
 import { Route as AppAdminQuotasRouteImport } from './routes/app.admin.quotas'
 import { Route as AppAdminPremiacaoRouteImport } from './routes/app.admin.premiacao'
+import { Route as AppAdminPesquisasRouteImport } from './routes/app.admin.pesquisas'
 import { Route as AppAdminPerfisPersonalidadeRouteImport } from './routes/app.admin.perfis-personalidade'
 import { Route as AppAdminPerfisRouteImport } from './routes/app.admin.perfis'
 import { Route as AppAdminPagamentosRouteImport } from './routes/app.admin.pagamentos'
@@ -274,6 +275,11 @@ const AppAdminPremiacaoRoute = AppAdminPremiacaoRouteImport.update({
   path: '/premiacao',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminPesquisasRoute = AppAdminPesquisasRouteImport.update({
+  id: '/pesquisas',
+  path: '/pesquisas',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminPerfisPersonalidadeRoute =
   AppAdminPerfisPersonalidadeRouteImport.update({
     id: '/perfis-personalidade',
@@ -376,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
+  '/app/admin/pesquisas': typeof AppAdminPesquisasRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
@@ -429,6 +436,7 @@ export interface FileRoutesByTo {
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
+  '/app/admin/pesquisas': typeof AppAdminPesquisasRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
@@ -486,6 +494,7 @@ export interface FileRoutesById {
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
+  '/app/admin/pesquisas': typeof AppAdminPesquisasRoute
   '/app/admin/premiacao': typeof AppAdminPremiacaoRoute
   '/app/admin/quotas': typeof AppAdminQuotasRoute
   '/app/admin/relatorios': typeof AppAdminRelatoriosRoute
@@ -544,6 +553,7 @@ export interface FileRouteTypes {
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
+    | '/app/admin/pesquisas'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
@@ -597,6 +607,7 @@ export interface FileRouteTypes {
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
+    | '/app/admin/pesquisas'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
@@ -653,6 +664,7 @@ export interface FileRouteTypes {
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
+    | '/app/admin/pesquisas'
     | '/app/admin/premiacao'
     | '/app/admin/quotas'
     | '/app/admin/relatorios'
@@ -980,6 +992,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminPremiacaoRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/admin/pesquisas': {
+      id: '/app/admin/pesquisas'
+      path: '/pesquisas'
+      fullPath: '/app/admin/pesquisas'
+      preLoaderRoute: typeof AppAdminPesquisasRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/admin/perfis-personalidade': {
       id: '/app/admin/perfis-personalidade'
       path: '/perfis-personalidade'
@@ -1077,6 +1096,7 @@ interface AppAdminRouteChildren {
   AppAdminPagamentosRoute: typeof AppAdminPagamentosRoute
   AppAdminPerfisRoute: typeof AppAdminPerfisRoute
   AppAdminPerfisPersonalidadeRoute: typeof AppAdminPerfisPersonalidadeRoute
+  AppAdminPesquisasRoute: typeof AppAdminPesquisasRoute
   AppAdminPremiacaoRoute: typeof AppAdminPremiacaoRoute
   AppAdminQuotasRoute: typeof AppAdminQuotasRoute
   AppAdminRelatoriosRoute: typeof AppAdminRelatoriosRoute
@@ -1096,6 +1116,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminPagamentosRoute: AppAdminPagamentosRoute,
   AppAdminPerfisRoute: AppAdminPerfisRoute,
   AppAdminPerfisPersonalidadeRoute: AppAdminPerfisPersonalidadeRoute,
+  AppAdminPesquisasRoute: AppAdminPesquisasRoute,
   AppAdminPremiacaoRoute: AppAdminPremiacaoRoute,
   AppAdminQuotasRoute: AppAdminQuotasRoute,
   AppAdminRelatoriosRoute: AppAdminRelatoriosRoute,
