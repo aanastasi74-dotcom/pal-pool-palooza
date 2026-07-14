@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, BarChart3, Lock, XCircle } from "lucide-react";
+import { ChevronLeft, BarChart3, Lock } from "lucide-react";
 import { useTop4Estatisticas, type TeamStat } from "@/lib/queries/top4-estatisticas";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { LABEL_ESTADO, corDoEstado, estaEliminadoDaCopa, type PosicaoApostada } from "@/lib/top4-status";
 
 export const Route = createFileRoute("/app/palpites_/top4_/estatisticas")({
   head: () => ({ meta: [{ title: "Estatísticas Top 4 — Bolão dos Perebas" }] }),
