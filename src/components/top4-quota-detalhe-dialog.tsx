@@ -81,7 +81,7 @@ export function Top4QuotaContent({
         </div>
       )}
       <div className="space-y-2">
-        {linhas.map(({ slot, team, st }) => (
+        {linhas.map(({ slot, team, label, cls }) => (
           <div
             key={slot}
             className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2"
@@ -93,7 +93,7 @@ export function Top4QuotaContent({
               <span className="text-xl">{team?.bandeira_emoji ?? "🏳️"}</span>
               <span className="truncate font-display font-bold">{team?.nome_pt ?? "—"}</span>
             </div>
-            <span className={`shrink-0 text-xs font-semibold ${st.cls}`}>{st.label}</span>
+            <span className={`shrink-0 text-xs font-semibold ${cls}`}>{label}</span>
           </div>
         ))}
       </div>
