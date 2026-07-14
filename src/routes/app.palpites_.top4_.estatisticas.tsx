@@ -58,11 +58,11 @@ function EstatisticasTop4Page() {
         </p>
       </div>
 
-      <BlocoStats titulo="🏆 Times mais escolhidos" subtitulo="Qualquer posição no Top 4 (soma ≈ 400%)" stats={data.qualquer_posicao} base={data.base_quotas} />
-      <BlocoStats titulo="🥇 Escolhas para CAMPEÃO" subtitulo="Soma = 100%" stats={data.campeao} base={data.base_quotas} />
-      <BlocoStats titulo="🥈 Escolhas para VICE" subtitulo="Soma = 100%" stats={data.vice} base={data.base_quotas} />
-      <BlocoStats titulo="🥉 Escolhas para 3º LUGAR" subtitulo="Soma = 100%" stats={data.terceiro} base={data.base_quotas} />
-      <BlocoStats titulo="4️⃣ Escolhas para 4º LUGAR" subtitulo="Soma = 100%" stats={data.quarto} base={data.base_quotas} />
+      <BlocoStats titulo="🏆 Times mais escolhidos" subtitulo="Qualquer posição no Top 4 (soma ≈ 400%)" stats={data.qualquer_posicao} base={data.base_quotas} posicaoRef="qualquer" />
+      <BlocoStats titulo="🥇 Escolhas para CAMPEÃO" subtitulo="Soma = 100%" stats={data.campeao} base={data.base_quotas} posicaoRef="campeao" />
+      <BlocoStats titulo="🥈 Escolhas para VICE" subtitulo="Soma = 100%" stats={data.vice} base={data.base_quotas} posicaoRef="vice" />
+      <BlocoStats titulo="🥉 Escolhas para 3º LUGAR" subtitulo="Soma = 100%" stats={data.terceiro} base={data.base_quotas} posicaoRef="terceiro" />
+      <BlocoStats titulo="4️⃣ Escolhas para 4º LUGAR" subtitulo="Soma = 100%" stats={data.quarto} base={data.base_quotas} posicaoRef="quarto" />
     </div>
   );
 }
@@ -72,11 +72,13 @@ function BlocoStats({
   subtitulo,
   stats,
   base,
+  posicaoRef,
 }: {
   titulo: string;
   subtitulo: string;
   stats: TeamStat[];
   base: number;
+  posicaoRef: PosicaoApostada | "qualquer";
 }) {
   const maxPct = stats[0]?.percentual ?? 0;
   return (
@@ -89,33 +91,47 @@ function BlocoStats({
         <p className="text-xs text-muted-foreground">Ninguém escolheu ainda.</p>
       ) : (
         <ul className="space-y-2">
-          {stats.map((s) => (
-            <li key={s.bracket_position} className="flex items-center gap-2">
-              {s.bandeira_emoji && <span className="text-base leading-none">{s.bandeira_emoji}</span>}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span
-                    className={`text-sm font-medium ${s.eliminado ? "line-through text-muted-foreground" : "text-foreground"}`}
-                  >
-                    {s.nome_pt}
-                    {s.eliminado && <XCircle className="inline ml-1 h-3 w-3 text-destructive" />}
-                  </span>
-                  <span className="text-xs tabular-nums text-muted-foreground">
-                    <strong className="text-foreground">
-                      {s.percentual.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%
-                    </strong>{" "}
-                    ({s.votos}/{base})
-                  </span>
+          {stats.map((s) => {
+            const foraDaCopa = estaEliminadoDaCopa(s.estado);
+            const clsLabel = posicaoRef === "qualquer"
+              ? (foraDaCopa ? "text-destructive" : "text-success")
+              : corDoEstado(s.estado, posicaoRef as PosicaoApostada);
+            const barCls = clsLabel.includes("destructive")
+              ? "bg-destructive/60"
+              : clsLabel.includes("success")
+                ? "bg-success"
+                : "bg-primary";
+            const labelStatus = s.estado ? LABEL_ESTADO[s.estado] : "";
+            return (
+              <li key={s.bracket_position} className="flex items-center gap-2">
+                {s.bandeira_emoji && <span className="text-base leading-none">{s.bandeira_emoji}</span>}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className={`text-sm font-medium ${foraDaCopa ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                      {s.nome_pt}
+                      {labelStatus && (
+                        <span className={`ml-1.5 text-[10px] font-semibold ${clsLabel}`}>
+                          · {labelStatus}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      <strong className="text-foreground">
+                        {s.percentual.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%
+                      </strong>{" "}
+                      ({s.votos}/{base})
+                    </span>
+                  </div>
+                  <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={`h-full rounded-full ${barCls}`}
+                      style={{ width: `${maxPct > 0 ? (s.percentual / maxPct) * 100 : 0}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={`h-full rounded-full ${s.eliminado ? "bg-muted-foreground/40" : "bg-primary"}`}
-                    style={{ width: `${maxPct > 0 ? (s.percentual / maxPct) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
