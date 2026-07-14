@@ -64,8 +64,10 @@ export function Top4QuotaContent({
   const linhas = (["campeao", "vice", "terceiro", "quarto"] as const).map((slot) => {
     const bp = picks[slot];
     const team = teamByBp.get(bp);
-    const st = statusDoTime(team?.id, matches);
-    return { slot, team, st };
+    const estado = estadoDoTime(team?.id, matches);
+    const label = estado ? LABEL_ESTADO[estado] : "—";
+    const cls = corDoEstado(estado, slot as PosicaoApostada);
+    return { slot, team, label, cls };
   });
 
   return (
