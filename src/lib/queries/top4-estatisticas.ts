@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { vencedorDoJogo } from "@/lib/top4-potencial/engine";
+import { estadoDoTime, type EstadoTime } from "@/lib/top4-status";
 
 export type TeamStat = {
   team_id: string;
   bracket_position: string;
   nome_pt: string;
   bandeira_emoji: string | null;
-  eliminado: boolean;
+  estado: EstadoTime | null;
   votos: number;
   percentual: number;
 };
