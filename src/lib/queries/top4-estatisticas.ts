@@ -84,30 +84,10 @@ export function useTop4Estatisticas() {
         if (t.bracket_position) teamByBP.set(t.bracket_position, t);
       });
 
-      // Set de teamIds eliminados (perdeu num jogo encerrado >=73 OU nunca aparece em jogo >=73 com times definidos)
-      const eliminados = new Set<string>();
-      const apareceMataMata = new Set<string>();
-      const algumMataMataComTimes = matches.some(
-        (m: any) => m.numero_jogo != null && m.numero_jogo >= 73 && (m.team_home_id || m.team_away_id),
-      );
-      matches.forEach((m: any) => {
-        if (m.numero_jogo == null || m.numero_jogo < 73) return;
-        if (m.team_home_id) apareceMataMata.add(m.team_home_id);
-        if (m.team_away_id) apareceMataMata.add(m.team_away_id);
-        if (m.status === "encerrado") {
-          const v = vencedorDoJogo(m as any);
-          if (v) {
-            const perdedor = m.team_home_id === v ? m.team_away_id : m.team_home_id;
-            if (perdedor) eliminados.add(perdedor);
-          }
-        }
+      const estadoByTeamId = new Map<string, EstadoTime | null>();
+      teams.forEach((t: any) => {
+        estadoByTeamId.set(t.id, estadoDoTime(t.id, matches as any));
       });
-
-      const isEliminado = (teamId: string): boolean => {
-        if (eliminados.has(teamId)) return true;
-        if (algumMataMataComTimes && !apareceMataMata.has(teamId)) return true;
-        return false;
-      };
 
       const build = (contagem: Map<string, number>): TeamStat[] =>
         Array.from(contagem.entries())
@@ -119,7 +99,7 @@ export function useTop4Estatisticas() {
               bracket_position: bp,
               nome_pt: t.nome_pt ?? bp,
               bandeira_emoji: t.bandeira_emoji ?? null,
-              eliminado: isEliminado(t.id),
+              estado: estadoByTeamId.get(t.id) ?? null,
               votos,
               percentual: Math.round((votos / base) * 1000) / 10,
             } as TeamStat;
