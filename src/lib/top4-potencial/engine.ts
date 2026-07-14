@@ -194,14 +194,19 @@ export function calcularPotencialMaximoTop4(
   // Eliminações
   const eliminadosFull = new Set<string>(); // não pode aparecer em nenhum slot
   const eliminadosTopDois = new Set<string>(); // perdeu semi → só 3º/4º
+  const finalistasConfirmados = new Set<string>(); // venceu semi → só campeão/vice
   for (let n = 73; n <= 102; n++) {
     const m = byNumero.get(n);
     if (!m || m.status !== "encerrado") continue;
     const venc = vencedorDoJogo(m);
     if (!venc || !m.team_home_id || !m.team_away_id) continue;
     const perdedor = venc === m.team_home_id ? m.team_away_id : m.team_home_id;
-    if (n === 101 || n === 102) eliminadosTopDois.add(perdedor);
-    else eliminadosFull.add(perdedor);
+    if (n === 101 || n === 102) {
+      eliminadosTopDois.add(perdedor);
+      finalistasConfirmados.add(venc);
+    } else {
+      eliminadosFull.add(perdedor);
+    }
   }
 
   // Posições já travadas
@@ -264,6 +269,9 @@ export function calcularPotencialMaximoTop4(
     if (teamId === PLACEHOLDER) return true;
     if (slot === "campeao" || slot === "vice") {
       if (eliminadosTopDois.has(teamId)) return false;
+    }
+    if (slot === "terceiro" || slot === "quarto") {
+      if (finalistasConfirmados.has(teamId)) return false;
     }
     if (slot === "campeao" && campeaoReal && teamId !== campeaoReal) return false;
     if (slot === "vice" && viceReal && teamId !== viceReal) return false;
