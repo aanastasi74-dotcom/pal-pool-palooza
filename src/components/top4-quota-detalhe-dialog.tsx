@@ -42,60 +42,6 @@ const SLOT_LABEL: Record<"campeao" | "vice" | "terceiro" | "quarto", string> = {
   quarto: "4º lugar",
 };
 
-function statusDoTime(teamId: string | undefined, matches: MatchLike[]): { label: string; cls: string } {
-  if (!teamId) return { label: "—", cls: "text-muted-foreground" };
-
-  const final = matches.find((m) => m.numero_jogo === 104);
-  const terceiroJogo = matches.find((m) => m.numero_jogo === 103);
-  const vencFinal = final ? vencedorDoJogo(final as any) : null;
-  if (final?.status === "encerrado" && vencFinal) {
-    const perdedorFinal =
-      final.team_home_id === vencFinal ? final.team_away_id : final.team_home_id;
-    if (vencFinal === teamId) return { label: "🏆 Campeão", cls: "text-success" };
-    if (perdedorFinal === teamId) return { label: "🥈 Vice", cls: "text-success" };
-  }
-  const venc3 = terceiroJogo ? vencedorDoJogo(terceiroJogo as any) : null;
-  if (terceiroJogo?.status === "encerrado" && venc3) {
-    const perdedor3 =
-      terceiroJogo.team_home_id === venc3 ? terceiroJogo.team_away_id : terceiroJogo.team_home_id;
-    if (venc3 === teamId) return { label: "🥉 3º lugar", cls: "text-success" };
-    if (perdedor3 === teamId) return { label: "4º lugar", cls: "text-muted-foreground" };
-  }
-
-  // Último jogo encerrado em que o time perdeu
-  const eliminado = matches
-    .filter((m) => {
-      if (m.numero_jogo == null || m.numero_jogo < 73) return false;
-      if (m.status !== "encerrado") return false;
-      if (m.team_home_id !== teamId && m.team_away_id !== teamId) return false;
-      const v = vencedorDoJogo(m as any);
-      return !!v && v !== teamId;
-    })
-    .sort((a, b) => (b.numero_jogo ?? 0) - (a.numero_jogo ?? 0))[0];
-
-  if (eliminado) {
-    const n = eliminado.numero_jogo!;
-    let fase = "no mata-mata";
-    if (n >= 73 && n <= 88) fase = "no R32";
-    else if (n >= 89 && n <= 96) fase = "nas Oitavas";
-    else if (n >= 97 && n <= 100) fase = "nas Quartas";
-    else if (n >= 101 && n <= 102) fase = "nas Semis";
-    return { label: `Eliminado ${fase}`, cls: "text-destructive" };
-  }
-
-  const apareceNoMataMata = matches.some(
-    (m) =>
-      m.numero_jogo != null &&
-      m.numero_jogo >= 73 &&
-      (m.team_home_id === teamId || m.team_away_id === teamId),
-  );
-
-  if (!apareceNoMataMata) {
-    return { label: "Eliminado na fase de grupos", cls: "text-destructive" };
-  }
-
-  return { label: "Ainda na disputa", cls: "text-primary" };
-}
 
 export function Top4QuotaContent({
   apelido,
