@@ -72,14 +72,15 @@ export type WrappedResult =
   | { status: "indisponivel" }
   | { status: "erro"; message: string };
 
-export function useWrapped() {
+export function useWrapped(userId?: string) {
   return useQuery<WrappedResult>({
-    queryKey: ["wrapped_do_pereba"],
+    queryKey: ["wrapped_do_pereba", userId ?? null],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("wrapped_do_pereba" as any);
+      const args = userId ? ({ p_user_id: userId } as any) : (undefined as any);
+      const { data, error } = await supabase.rpc("wrapped_do_pereba" as any, args);
       if (error) {
         const msg = error.message ?? "";
-        if (msg.includes("wrapped_indisponivel")) {
+        if (msg.includes("wrapped_indisponivel") || msg.includes("forbidden")) {
           return { status: "indisponivel" };
         }
         return { status: "erro", message: msg };
