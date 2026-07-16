@@ -104,6 +104,13 @@ function WrappedStories({ data, onExit, previewApelido }: { data: WrappedData; o
         </p>
         <div className="h-9 w-9" />
       </div>
+      {previewApelido && (
+        <div className="px-3 pb-1">
+          <span className="inline-block rounded-full bg-amber-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+            Preview admin — {previewApelido}
+          </span>
+        </div>
+      )}
 
       {/* Story */}
       <div
