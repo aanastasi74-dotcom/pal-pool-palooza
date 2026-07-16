@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/empty-state";
 import { PremiacaoCard } from "@/components/premiacao-card";
 import { HomeCarouselCollapsible } from "@/components/home-carousel-collapsible";
 import { PesquisaPopup } from "@/components/pesquisa-popup";
+import { WrappedCard } from "@/components/wrapped-card";
 
 
 export const Route = createFileRoute("/app/")({
