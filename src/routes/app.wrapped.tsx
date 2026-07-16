@@ -45,10 +45,10 @@ function WrappedPage() {
     );
   }
 
-  return <WrappedStories data={result.data} onExit={() => navigate({ to: "/app" })} />;
+  return <WrappedStories data={result.data} onExit={() => navigate({ to: "/app" })} previewApelido={isPreview ? result.data.apelido : null} />;
 }
 
-function WrappedStories({ data, onExit }: { data: WrappedData; onExit: () => void }) {
+function WrappedStories({ data, onExit, previewApelido }: { data: WrappedData; onExit: () => void; previewApelido: string | null }) {
   const cards = useMemo(() => buildCards(data), [data]);
   const [idx, setIdx] = useState(0);
 
