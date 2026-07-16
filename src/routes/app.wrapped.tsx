@@ -193,7 +193,7 @@ function C2Estilo({ d }: { d: WrappedData }) {
         )}
         {d.estilo.pct_empates != null && (
           <p>
-            <span className="font-bold">{Math.round(d.estilo.pct_empates * 100)}%</span> dos seus palpites foram empate
+            <span className="font-bold">{Math.round(d.estilo.pct_empates)}%</span> dos seus palpites foram empate
           </p>
         )}
       </div>
