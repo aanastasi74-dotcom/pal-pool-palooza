@@ -58,6 +58,7 @@ function Home() {
 
   return (
     <div className="space-y-8">
+      <WrappedCard />
       <HomeCarouselCollapsible />
       <section className="relative overflow-hidden rounded-3xl bg-hero p-6 text-primary-foreground shadow-glow md:p-10">
         <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-accent/30 blur-3xl" />
