@@ -1851,6 +1851,7 @@ export type Database = {
       }
       snapshot_ranking_diario: { Args: never; Returns: Json }
       vencedor_real: { Args: { p_match_id: string }; Returns: string }
+      wrapped_do_pereba: { Args: { p_user_id?: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never
