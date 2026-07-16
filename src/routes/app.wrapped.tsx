@@ -7,12 +7,17 @@ import { useWrapped, type WrappedData } from "@/lib/queries/wrapped";
 
 export const Route = createFileRoute("/app/wrapped")({
   head: () => ({ meta: [{ title: "Seu Wrapped — Bolão dos Perebas" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    u: typeof s.u === "string" && s.u.length > 0 ? s.u : undefined,
+  }),
   component: WrappedPage,
 });
 
 function WrappedPage() {
   const navigate = useNavigate();
-  const { data: result, isLoading } = useWrapped();
+  const { u: previewUserId } = Route.useSearch();
+  const { data: result, isLoading } = useWrapped(previewUserId);
+  const isPreview = Boolean(previewUserId);
 
   if (isLoading) {
     return (
@@ -40,10 +45,10 @@ function WrappedPage() {
     );
   }
 
-  return <WrappedStories data={result.data} onExit={() => navigate({ to: "/app" })} />;
+  return <WrappedStories data={result.data} onExit={() => navigate({ to: "/app" })} previewApelido={isPreview ? result.data.apelido : null} />;
 }
 
-function WrappedStories({ data, onExit }: { data: WrappedData; onExit: () => void }) {
+function WrappedStories({ data, onExit, previewApelido }: { data: WrappedData; onExit: () => void; previewApelido: string | null }) {
   const cards = useMemo(() => buildCards(data), [data]);
   const [idx, setIdx] = useState(0);
 
@@ -99,6 +104,13 @@ function WrappedStories({ data, onExit }: { data: WrappedData; onExit: () => voi
         </p>
         <div className="h-9 w-9" />
       </div>
+      {previewApelido && (
+        <div className="px-3 pb-1">
+          <span className="inline-block rounded-full bg-amber-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+            Preview admin — {previewApelido}
+          </span>
+        </div>
+      )}
 
       {/* Story */}
       <div
