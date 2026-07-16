@@ -7,12 +7,17 @@ import { useWrapped, type WrappedData } from "@/lib/queries/wrapped";
 
 export const Route = createFileRoute("/app/wrapped")({
   head: () => ({ meta: [{ title: "Seu Wrapped — Bolão dos Perebas" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    u: typeof s.u === "string" && s.u.length > 0 ? s.u : undefined,
+  }),
   component: WrappedPage,
 });
 
 function WrappedPage() {
   const navigate = useNavigate();
-  const { data: result, isLoading } = useWrapped();
+  const { u: previewUserId } = Route.useSearch();
+  const { data: result, isLoading } = useWrapped(previewUserId);
+  const isPreview = Boolean(previewUserId);
 
   if (isLoading) {
     return (
