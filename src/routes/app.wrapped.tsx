@@ -133,7 +133,7 @@ function CardShell({
 }: {
   children: React.ReactNode;
   gradient?: string;
-  innerRef?: React.RefObject<HTMLDivElement>;
+  innerRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
     <div

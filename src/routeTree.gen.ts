@@ -26,6 +26,7 @@ import { Route as DemoPalpitesRouteImport } from './routes/demo.palpites'
 import { Route as DemoJogosRouteImport } from './routes/demo.jogos'
 import { Route as DemoInicioRouteImport } from './routes/demo.inicio'
 import { Route as CadastroTokenRouteImport } from './routes/cadastro.$token'
+import { Route as AppWrappedRouteImport } from './routes/app.wrapped'
 import { Route as AppTimesRouteImport } from './routes/app.times'
 import { Route as AppSimuladorRouteImport } from './routes/app.simulador'
 import { Route as AppRankingRouteImport } from './routes/app.ranking'
@@ -150,6 +151,11 @@ const CadastroTokenRoute = CadastroTokenRouteImport.update({
   id: '/cadastro/$token',
   path: '/cadastro/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppWrappedRoute = AppWrappedRouteImport.update({
+  id: '/wrapped',
+  path: '/wrapped',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppTimesRoute = AppTimesRouteImport.update({
   id: '/times',
@@ -371,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
   '/app/times': typeof AppTimesRoute
+  '/app/wrapped': typeof AppWrappedRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/demo/inicio': typeof DemoInicioRoute
   '/demo/jogos': typeof DemoJogosRoute
@@ -426,6 +433,7 @@ export interface FileRoutesByTo {
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
   '/app/times': typeof AppTimesRoute
+  '/app/wrapped': typeof AppWrappedRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/demo/inicio': typeof DemoInicioRoute
   '/demo/jogos': typeof DemoJogosRoute
@@ -485,6 +493,7 @@ export interface FileRoutesById {
   '/app/ranking': typeof AppRankingRoute
   '/app/simulador': typeof AppSimuladorRoute
   '/app/times': typeof AppTimesRoute
+  '/app/wrapped': typeof AppWrappedRoute
   '/cadastro/$token': typeof CadastroTokenRoute
   '/demo/inicio': typeof DemoInicioRoute
   '/demo/jogos': typeof DemoJogosRoute
@@ -545,6 +554,7 @@ export interface FileRouteTypes {
     | '/app/ranking'
     | '/app/simulador'
     | '/app/times'
+    | '/app/wrapped'
     | '/cadastro/$token'
     | '/demo/inicio'
     | '/demo/jogos'
@@ -600,6 +610,7 @@ export interface FileRouteTypes {
     | '/app/ranking'
     | '/app/simulador'
     | '/app/times'
+    | '/app/wrapped'
     | '/cadastro/$token'
     | '/demo/inicio'
     | '/demo/jogos'
@@ -658,6 +669,7 @@ export interface FileRouteTypes {
     | '/app/ranking'
     | '/app/simulador'
     | '/app/times'
+    | '/app/wrapped'
     | '/cadastro/$token'
     | '/demo/inicio'
     | '/demo/jogos'
@@ -828,6 +840,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/cadastro/$token'
       preLoaderRoute: typeof CadastroTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/wrapped': {
+      id: '/app/wrapped'
+      path: '/wrapped'
+      fullPath: '/app/wrapped'
+      preLoaderRoute: typeof AppWrappedRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/times': {
       id: '/app/times'
@@ -1164,6 +1183,7 @@ interface AppRouteChildren {
   AppRankingRoute: typeof AppRankingRoute
   AppSimuladorRoute: typeof AppSimuladorRoute
   AppTimesRoute: typeof AppTimesRoute
+  AppWrappedRoute: typeof AppWrappedRoute
   AppIndexRoute: typeof AppIndexRoute
   AppBoletimDataRoute: typeof AppBoletimDataRoute
   AppPagamentoLoteLote_idRoute: typeof AppPagamentoLoteLote_idRoute
@@ -1189,6 +1209,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRankingRoute: AppRankingRoute,
   AppSimuladorRoute: AppSimuladorRoute,
   AppTimesRoute: AppTimesRoute,
+  AppWrappedRoute: AppWrappedRoute,
   AppIndexRoute: AppIndexRoute,
   AppBoletimDataRoute: AppBoletimDataRoute,
   AppPagamentoLoteLote_idRoute: AppPagamentoLoteLote_idRoute,
