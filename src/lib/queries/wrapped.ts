@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type WrappedData = {
   apelido: string;
   total_quotas_bolao: number;
+  frase_cronista: string | null;
   abertura: {
     n_quotas: number;
     palpites_feitos: number;
@@ -12,43 +13,59 @@ export type WrappedData = {
   };
   estilo: {
     placar_favorito: string | null;
+    vezes_placar_favorito: number | null;
+    pct_placar_favorito: number | null;
     media_gols_por_palpite: number | null;
     pct_empates: number | null;
   };
   cravadas: {
     total: number;
+    melhor_quota: {
+      quota_numero: number;
+      cravadas: number;
+      palpites: number;
+      pct: number;
+    } | null;
+    media_por_quota: number | null;
+    aproveitamento_medio_pct: number | null;
     ouro: {
       jogo: string;
       placar: string;
+      quota_numero: number | null;
       quotas_que_acertaram: number;
     } | null;
   };
   trajetoria: {
-    quota_numero: number | null;
-    serie: Array<{ d: string; p: number }>;
+    series: Array<{ quota_numero: number; serie: Array<{ d: string; p: number }> }>;
     melhor_posicao: number | null;
     pior_posicao: number | null;
   };
-  top4: {
-    escolhas: string[];
+  top4s: Array<{
+    quota_numero: number;
+    escolhas: string[]; // slot codes like GH1
     peso_no_palpite: number;
     pontos: number;
-  } | null;
+  }>;
   zebra: {
     jogo: string;
     palpite: string;
     real: string;
     peso_do_jogo: number;
+    quota_numero: number | null;
+    pct_perebada_pontuou: number | null;
   } | null;
   ranking: {
     posicao: number | null;
     pontos: number | null;
+    quota_numero: number | null;
     total_quotas: number;
     oficial: boolean;
     premiado_categoria: string | null;
   };
+  quotas_resumo: Array<{ quota_numero: number; posicao: number | null; pontos: number | null }>;
   citacoes_boletim: number;
 };
+
 
 /** Lê o setting wrapped_liberado (jsonb boolean). Se ausente/false, retorna false. */
 export function useWrappedLiberado() {
