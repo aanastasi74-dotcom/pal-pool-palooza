@@ -1456,6 +1456,38 @@ export type Database = {
           },
         ]
       }
+      wrapped_frases: {
+        Row: {
+          atualizado_em: string
+          frase: string | null
+          gerado_em: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          frase?: string | null
+          gerado_em?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          frase?: string | null
+          gerado_em?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wrapped_frases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       vw_capacidade_infra: {
