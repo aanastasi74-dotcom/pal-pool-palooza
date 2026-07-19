@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import * as React from "react";
 import { toast } from "sonner";
-import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil, Mail, Sparkles, Plus } from "lucide-react";
+import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil, Mail, Sparkles, Plus, Flag } from "lucide-react";
 import {
   useBoletinsL1,
   useGerarBoletim,
@@ -49,6 +49,7 @@ function BoletinsAdmin() {
   const isMobile = useIsMobile();
 
   const regulares = (boletins ?? []).filter((b) => (b.tipo ?? "regular") === "regular");
+  const encerramento = (boletins ?? []).filter((b) => b.tipo === "encerramento");
   const extras = (boletins ?? []).filter((b) => b.tipo === "extraordinario");
   const selected = (boletins ?? []).find((b) => b.id === selectedId) ?? null;
 
