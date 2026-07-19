@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import * as React from "react";
 import { toast } from "sonner";
-import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil, Mail, Sparkles, Plus } from "lucide-react";
+import { Newspaper, Wand2, Send, Archive, Share2, Eye, Pencil, Mail, Sparkles, Plus, Flag } from "lucide-react";
 import {
   useBoletinsL1,
   useGerarBoletim,
@@ -49,6 +49,7 @@ function BoletinsAdmin() {
   const isMobile = useIsMobile();
 
   const regulares = (boletins ?? []).filter((b) => (b.tipo ?? "regular") === "regular");
+  const encerramento = (boletins ?? []).filter((b) => b.tipo === "encerramento");
   const extras = (boletins ?? []).filter((b) => b.tipo === "extraordinario");
   const selected = (boletins ?? []).find((b) => b.id === selectedId) ?? null;
 
@@ -124,6 +125,53 @@ function BoletinsAdmin() {
           )}
         </div>
       </div>
+
+      {/* Boletim de Encerramento */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-t border-border pt-6">
+          <div>
+            <div className="flex items-center gap-2">
+              <Flag className="h-4 w-4 text-primary" />
+              <h2 className="font-display text-xl font-extrabold">🏁 Boletim de Encerramento</h2>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Único boletim de encerramento da Copa. Publicado manualmente após a final.
+            </p>
+          </div>
+        </div>
+
+        {encerramento.length === 0 ? (
+          <p className="text-xs text-muted-foreground italic">Nenhum boletim de encerramento ainda.</p>
+        ) : (
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {encerramento.map((b) => (
+              <li key={b.id}>
+                <button
+                  onClick={() => setSelectedId(b.id)}
+                  className={`w-full rounded-2xl border p-3 text-left shadow-card transition ${
+                    selectedId === b.id ? "border-primary bg-primary/5" : "border-border bg-card hover:bg-muted/30"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
+                      🏁 ENCERRAMENTO
+                    </span>
+                    <span className="text-muted-foreground">
+                      {new Date(`${b.data_referencia}T12:00:00`).toLocaleDateString("pt-BR")}
+                    </span>
+                  </div>
+                  <p className="mt-2 line-clamp-1 text-sm font-bold">
+                    {b.titulo_customizado ?? "Boletim de Encerramento"}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                    {(b.publicado_md || b.rascunho_md || "").slice(0, 120)}
+                  </p>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {/* Boletins Extraordinários */}
       <section className="space-y-3">

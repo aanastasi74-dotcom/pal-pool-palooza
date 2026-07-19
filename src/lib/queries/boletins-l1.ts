@@ -7,7 +7,7 @@ const sb = supabase as any;
 export type BoletimL1 = {
   id: string;
   data_referencia: string;
-  tipo: "regular" | "extraordinario";
+  tipo: "regular" | "extraordinario" | "encerramento";
   titulo_customizado: string | null;
   rascunho_md: string | null;
   publicado_md: string | null;
@@ -55,7 +55,7 @@ export function useBoletimPublicadoMaisRecente() {
 
 export function useBoletimPorData(
   dataRef: string | undefined,
-  tipo: "regular" | "extraordinario" = "regular",
+  tipo: "regular" | "extraordinario" | "encerramento" = "regular",
 ) {
   return useQuery({
     queryKey: ["boletim-l1", dataRef, tipo],

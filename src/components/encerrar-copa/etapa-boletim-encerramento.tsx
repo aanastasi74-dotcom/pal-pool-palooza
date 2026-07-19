@@ -55,7 +55,7 @@ export function EtapaBoletimEncerramento() {
                 {boletim.titulo_customizado ?? "Boletim de encerramento"}
               </p>
               <p className="text-xs text-muted-foreground">
-                Data ref: {new Date(boletim.data_referencia).toLocaleDateString("pt-BR")} ·{" "}
+                Data ref: {new Date(`${boletim.data_referencia}T12:00:00`).toLocaleDateString("pt-BR")} ·{" "}
                 {statusLabel[boletim.status] ?? boletim.status}
                 {boletim.publicado_em && (
                   <> · publicado em {new Date(boletim.publicado_em).toLocaleString("pt-BR")}</>
