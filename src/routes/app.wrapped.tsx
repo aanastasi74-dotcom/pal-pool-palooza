@@ -69,7 +69,51 @@ function WrappedStories({
   previewApelido: string | null;
 }) {
   const isMulti = data.abertura.n_quotas > 1;
-  const cards = useMemo(() => buildCards(data, teams, isMulti), [data, teams, isMulti]);
+  const shareRef = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
+
+  const doShare = async () => {
+    if (!shareRef.current || sharing) return;
+    setSharing(true);
+    try {
+      const dataUrl = await toPng(shareRef.current, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: "#0a0a0a",
+      });
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], `wrapped-${data.apelido}.png`, { type: "image/png" });
+      const canShareFile =
+        typeof navigator !== "undefined" &&
+        (navigator as any).canShare &&
+        (navigator as any).canShare({ files: [file] });
+      if (canShareFile) {
+        await (navigator as any).share({
+          files: [file],
+          title: "Meu Wrapped da Copa 2026",
+          text: `Meu resumo do Bolão dos Perebas 2026`,
+        });
+      } else {
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = `wrapped-${data.apelido}.png`;
+        a.click();
+        toast.success("Imagem salva. Compartilha onde quiser.");
+      }
+    } catch (e: any) {
+      if (e?.name !== "AbortError") {
+        toast.error("Não deu pra gerar a imagem agora.");
+      }
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const cards = useMemo(
+    () => buildCards(data, teams, isMulti, doShare, sharing),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data, teams, isMulti, sharing],
+  );
   const [idx, setIdx] = useState(0);
 
   const next = () => setIdx((i) => Math.min(cards.length - 1, i + 1));
@@ -96,7 +140,10 @@ function WrappedStories({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-background">
+    <div
+      className="fixed inset-0 z-50 flex flex-col bg-background"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
       <div className="flex items-center gap-2 px-3 pt-3">
         {cards.map((_, i) => (
           <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
@@ -119,7 +166,14 @@ function WrappedStories({
         <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
           Wrapped · {idx + 1}/{cards.length}
         </p>
-        <div className="h-9 w-9" />
+        <button
+          onClick={doShare}
+          disabled={sharing}
+          className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground shadow-glow disabled:opacity-60"
+          aria-label="Compartilhar"
+        >
+          {sharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
+        </button>
       </div>
       {previewApelido && (
         <div className="px-3 pb-1">
@@ -132,11 +186,25 @@ function WrappedStories({
       <div onClick={handleTap} className="flex-1 cursor-pointer select-none overflow-hidden px-4 pb-6 pt-2">
         <div className="mx-auto h-full max-w-md">{cards[idx]}</div>
       </div>
+
+      {/* Off-screen shareable card — sempre montado pra o botão Share2 da top bar funcionar em qualquer card */}
+      <div
+        aria-hidden
+        style={{ position: "fixed", left: "-10000px", top: 0, width: 380, height: 620, pointerEvents: "none" }}
+      >
+        <ShareableFinalCard d={data} isMulti={isMulti} innerRef={shareRef} />
+      </div>
     </div>
   );
 }
 
-function buildCards(d: WrappedData, teams: Team[], isMulti: boolean): React.ReactNode[] {
+function buildCards(
+  d: WrappedData,
+  teams: Team[],
+  isMulti: boolean,
+  onShare: () => void,
+  sharing: boolean,
+): React.ReactNode[] {
   const cards: React.ReactNode[] = [];
   cards.push(<C1Abertura key="c1" d={d} />);
   cards.push(<C2Estilo key="c2" d={d} />);
@@ -145,8 +213,8 @@ function buildCards(d: WrappedData, teams: Team[], isMulti: boolean): React.Reac
   cards.push(<C5Top4 key="c5" d={d} teams={teams} isMulti={isMulti} />);
   if (d.zebra) cards.push(<C6Zebra key="c6" d={d} isMulti={isMulti} />);
   cards.push(<C7Boletins key="c7" d={d} />);
-  cards.push(<C8Final key="c8" d={d} isMulti={isMulti} />);
-  cards.push(<C9Despedida key="c9" />);
+  cards.push(<C8Final key="c8" d={d} isMulti={isMulti} onShare={onShare} sharing={sharing} />);
+  cards.push(<C9Despedida key="c9" onShare={onShare} sharing={sharing} />);
   return cards;
 }
 
