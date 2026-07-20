@@ -656,87 +656,69 @@ function C7Boletins({ d }: { d: WrappedData }) {
   );
 }
 
-function C8Final({ d, isMulti }: { d: WrappedData; isMulti: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [sharing, setSharing] = useState(false);
+function ShareableFinalCard({
+  d,
+  isMulti,
+  innerRef,
+}: {
+  d: WrappedData;
+  isMulti: boolean;
+  innerRef?: React.RefObject<HTMLDivElement | null>;
+}) {
   const pior = isMulti && d.quotas_resumo.length > 1 ? d.quotas_resumo[d.quotas_resumo.length - 1] : null;
+  return (
+    <CardShell innerRef={innerRef} gradient="from-primary via-accent to-primary">
+      <div>
+        <div className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-80">
+          <Gift className="h-4 w-4" /> Wrapped Bolão dos Perebas
+        </div>
+        <p className="mt-4 font-display text-3xl font-black leading-tight">{d.apelido}</p>
+        <p className="text-sm opacity-90">Copa 2026</p>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <MiniStat
+          label={isMulti ? `Melhor quota${d.ranking.quota_numero != null ? ` #${d.ranking.quota_numero}` : ""}` : "Posição"}
+          valor={d.ranking.posicao != null ? `${d.ranking.posicao}º` : "—"}
+        />
+        <MiniStat label="Pontos" valor={(d.ranking.pontos ?? 0).toLocaleString("pt-BR")} />
+        <MiniStat label="Cravadas" valor={String(d.cravadas.total)} />
+        <MiniStat label="Citações" valor={`${d.citacoes_boletim}x`} />
+      </div>
+      {pior && (
+        <p className="mt-3 text-xs opacity-80">
+          Pior quota: #{pior.quota_numero}
+          {pior.posicao != null && <> — {pior.posicao}º</>}
+        </p>
+      )}
+      {d.ranking.premiado_categoria && (
+        <div className="mt-3 rounded-2xl bg-white/25 p-3 text-center backdrop-blur">
+          <p className="text-[10px] uppercase tracking-widest opacity-80">Premiado</p>
+          <p className="font-display text-lg font-black">{d.ranking.premiado_categoria}</p>
+        </div>
+      )}
+      <p className="mt-auto pt-3 text-center text-xs opacity-80">Copa Feminina 2027 vem aí 🏆</p>
+    </CardShell>
+  );
+}
 
-  const compartilhar = async () => {
-    if (!ref.current) return;
-    setSharing(true);
-    try {
-      const dataUrl = await toPng(ref.current, {
-        pixelRatio: 2,
-        cacheBust: true,
-        backgroundColor: "#0a0a0a",
-      });
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `wrapped-${d.apelido}.png`, { type: "image/png" });
-
-      const canShareFile =
-        typeof navigator !== "undefined" &&
-        (navigator as any).canShare &&
-        (navigator as any).canShare({ files: [file] });
-
-      if (canShareFile) {
-        await (navigator as any).share({
-          files: [file],
-          title: "Meu Wrapped da Copa 2026",
-          text: `Meu resumo do Bolão dos Perebas 2026`,
-        });
-      } else {
-        const a = document.createElement("a");
-        a.href = dataUrl;
-        a.download = `wrapped-${d.apelido}.png`;
-        a.click();
-        toast.success("Imagem salva. Compartilha onde quiser.");
-      }
-    } catch (e: any) {
-      if (e?.name !== "AbortError") {
-        toast.error("Não deu pra gerar a imagem agora.");
-      }
-    } finally {
-      setSharing(false);
-    }
-  };
-
+function C8Final({
+  d,
+  isMulti,
+  onShare,
+  sharing,
+}: {
+  d: WrappedData;
+  isMulti: boolean;
+  onShare: () => void;
+  sharing: boolean;
+}) {
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="flex-1 overflow-hidden">
-        <CardShell innerRef={ref} gradient="from-primary via-accent to-primary">
-          <div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-80">
-              <Gift className="h-4 w-4" /> Wrapped Bolão dos Perebas
-            </div>
-            <p className="mt-4 font-display text-3xl font-black leading-tight">{d.apelido}</p>
-            <p className="text-sm opacity-90">Copa 2026</p>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <MiniStat
-              label={isMulti ? `Melhor quota${d.ranking.quota_numero != null ? ` #${d.ranking.quota_numero}` : ""}` : "Posição"}
-              valor={d.ranking.posicao != null ? `${d.ranking.posicao}º` : "—"}
-            />
-            <MiniStat label="Pontos" valor={(d.ranking.pontos ?? 0).toLocaleString("pt-BR")} />
-            <MiniStat label="Cravadas" valor={String(d.cravadas.total)} />
-            <MiniStat label="Citações" valor={`${d.citacoes_boletim}x`} />
-          </div>
-          {pior && (
-            <p className="mt-3 text-xs opacity-80">
-              Pior quota: #{pior.quota_numero}
-              {pior.posicao != null && <> — {pior.posicao}º</>}
-            </p>
-          )}
-          {d.ranking.premiado_categoria && (
-            <div className="mt-3 rounded-2xl bg-white/25 p-3 text-center backdrop-blur">
-              <p className="text-[10px] uppercase tracking-widest opacity-80">Premiado</p>
-              <p className="font-display text-lg font-black">{d.ranking.premiado_categoria}</p>
-            </div>
-          )}
-          <p className="mt-auto pt-3 text-center text-xs opacity-80">Copa Feminina 2027 vem aí 🏆</p>
-        </CardShell>
+        <ShareableFinalCard d={d} isMulti={isMulti} />
       </div>
       <button
-        onClick={compartilhar}
+        onClick={onShare}
         disabled={sharing}
         className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-60"
       >
@@ -747,7 +729,7 @@ function C8Final({ d, isMulti }: { d: WrappedData; isMulti: boolean }) {
   );
 }
 
-function C9Despedida() {
+function C9Despedida({ onShare, sharing }: { onShare: () => void; sharing: boolean }) {
   return (
     <CardShell gradient="from-primary via-primary to-accent">
       <div>
@@ -766,10 +748,19 @@ function C9Despedida() {
           Em <span className="font-bold">2027</span> tem Copa Feminina, e o bolão estará de volta.
         </p>
         <p className="font-display text-xl font-bold">A gente se vê lá! 🏆</p>
+        <button
+          onClick={onShare}
+          disabled={sharing}
+          className="mt-2 flex items-center justify-center gap-2 self-start rounded-full bg-white/20 px-5 py-3 text-sm font-bold text-primary-foreground backdrop-blur disabled:opacity-60"
+        >
+          {sharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
+          {sharing ? "Gerando..." : "Compartilhar meu Wrapped"}
+        </button>
       </div>
     </CardShell>
   );
 }
+
 
 function BigStat({ valor, label }: { valor: number | string; label: string }) {
   return (
