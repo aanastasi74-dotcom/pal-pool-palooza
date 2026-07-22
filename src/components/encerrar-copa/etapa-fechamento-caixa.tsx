@@ -87,6 +87,7 @@ function LinhaComprovante({ premiado }: { premiado: any }) {
 
   const verComprovante = async () => {
     if (!premiado.comprovante_path) return;
+    const win = window.open("about:blank", "_blank");
     setViewing(true);
     try {
       const { data, error } = await supabase.storage
@@ -94,8 +95,10 @@ function LinhaComprovante({ premiado }: { premiado: any }) {
         .createSignedUrl(premiado.comprovante_path, 60);
       if (error) throw error;
       if (!data?.signedUrl) throw new Error("URL assinada não retornada.");
-      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+      if (win) win.location.href = data.signedUrl;
+      else window.location.assign(data.signedUrl);
     } catch (e: any) {
+      win?.close();
       toast.error(e?.message ?? "Falha ao abrir comprovante.");
     } finally {
       setViewing(false);
