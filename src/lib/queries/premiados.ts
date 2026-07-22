@@ -51,7 +51,7 @@ export function usePremiados() {
       const { data, error } = await (supabase as any)
         .from("premiados")
         .select(
-          "categoria,posicao,quota_id,apelido,numero_quota,user_id,valor_total,valor_bruto,valor_bonus_primeiro,data_notificacao,dados_bancarios_recebidos",
+          "categoria,posicao,quota_id,apelido,numero_quota,user_id,valor_total,valor_bruto,valor_bonus_primeiro,data_notificacao,dados_bancarios_recebidos,pago_em,comprovante_path",
         );
       if (error) throw error;
       const rows = (data ?? []) as PremiadoRow[];
