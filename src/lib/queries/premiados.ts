@@ -21,7 +21,10 @@ export type PremiadoRow = {
   valor_bonus_primeiro: number;
   data_notificacao: string | null;
   dados_bancarios_recebidos: boolean;
+  pago_em: string | null;
+  comprovante_path: string | null;
 };
+
 
 export const CATEGORIAS_ORDER: CategoriaPremiado[] = [
   "primeiro",
