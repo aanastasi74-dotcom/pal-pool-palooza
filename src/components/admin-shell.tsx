@@ -18,6 +18,8 @@ import {
   Crown,
   RefreshCw,
   ClipboardList,
+  Trophy as TrophyIcon,
+
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -44,6 +46,7 @@ const items = [
   { to: "/app/admin/reportes", label: "Reportes", icon: Bug },
   { to: "/app/admin/pesquisas", label: "Pesquisas", icon: ClipboardList },
   { to: "/app/admin/sync", label: "Sync placares", icon: RefreshCw },
+  { to: "/app/admin/champions", label: "Champions 2026/27", icon: TrophyIcon },
 ] as const;
 
 function NavList({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
