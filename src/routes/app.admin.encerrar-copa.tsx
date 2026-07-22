@@ -12,7 +12,9 @@ import { Section } from "@/components/encerrar-copa/section";
 import { EtapaCongelarRanking } from "@/components/encerrar-copa/etapa-congelar-ranking";
 import { EtapaNotificarPremiados } from "@/components/encerrar-copa/etapa-notificar-premiados";
 import { EtapaBoletimEncerramento } from "@/components/encerrar-copa/etapa-boletim-encerramento";
+import { EtapaFechamentoCaixa } from "@/components/encerrar-copa/etapa-fechamento-caixa";
 import { usePremiados } from "@/lib/queries/premiados";
+
 
 export const Route = createFileRoute("/app/admin/encerrar-copa")({
   head: () => ({ meta: [{ title: "Encerrar Copa — Admin" }] }),
