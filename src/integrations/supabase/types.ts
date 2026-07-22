@@ -208,6 +208,32 @@ export type Database = {
           },
         ]
       }
+      champions_interesse: {
+        Row: {
+          atualizado_em: string
+          quotas: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          quotas: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          quotas?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "champions_interesse_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faixas_premiacao: {
         Row: {
           created_at: string | null
@@ -1667,6 +1693,7 @@ export type Database = {
         Returns: Json
       }
       calcular_premiacao: { Args: { p_quotas_ativas: number }; Returns: Json }
+      champions_interesse_total: { Args: never; Returns: Json }
       check_apelido_disponivel: {
         Args: { p_apelido: string }
         Returns: boolean
