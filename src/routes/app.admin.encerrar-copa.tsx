@@ -96,7 +96,12 @@ function EncerrarCopaPage() {
         <Section num={4} label="Boletim de encerramento" disabled={!rankingCongelado}>
           <EtapaBoletimEncerramento />
         </Section>
+
+        <Section num={5} label="💰 Fechamento de Caixa" disabled={!rankingCongelado}>
+          <EtapaFechamentoCaixa />
+        </Section>
       </div>
+
     </div>
   );
 }
