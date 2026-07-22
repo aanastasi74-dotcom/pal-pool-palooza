@@ -41,13 +41,8 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
 
-function fmtDateOnly(iso: string) {
-  // For dates stored as YYYY-MM-DD, use T12:00:00 to avoid TZ shift.
-  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
-    return new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR");
-  }
-  return new Date(iso).toLocaleDateString("pt-BR");
-}
+
+
 
 function LinhaComprovante({ premiado }: { premiado: any }) {
   const qc = useQueryClient();
