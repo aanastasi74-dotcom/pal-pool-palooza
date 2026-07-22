@@ -164,6 +164,50 @@ export type Database = {
           },
         ]
       }
+      caixa_movimentos: {
+        Row: {
+          categoria: string
+          competicao: string
+          criado_em: string
+          criado_por: string | null
+          descricao: string
+          id: string
+          referencia: Json | null
+          tipo: string
+          valor: number
+        }
+        Insert: {
+          categoria: string
+          competicao?: string
+          criado_em?: string
+          criado_por?: string | null
+          descricao: string
+          id?: string
+          referencia?: Json | null
+          tipo: string
+          valor: number
+        }
+        Update: {
+          categoria?: string
+          competicao?: string
+          criado_em?: string
+          criado_por?: string | null
+          descricao?: string
+          id?: string
+          referencia?: Json | null
+          tipo?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caixa_movimentos_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faixas_premiacao: {
         Row: {
           created_at: string | null
@@ -979,10 +1023,12 @@ export type Database = {
         Row: {
           apelido: string
           categoria: string
+          comprovante_path: string | null
           criado_em: string
           dados_bancarios_recebidos: boolean
           data_notificacao: string | null
           numero_quota: number
+          pago_em: string | null
           posicao: number | null
           quota_id: string | null
           user_id: string | null
@@ -993,10 +1039,12 @@ export type Database = {
         Insert: {
           apelido: string
           categoria: string
+          comprovante_path?: string | null
           criado_em?: string
           dados_bancarios_recebidos?: boolean
           data_notificacao?: string | null
           numero_quota: number
+          pago_em?: string | null
           posicao?: number | null
           quota_id?: string | null
           user_id?: string | null
@@ -1007,10 +1055,12 @@ export type Database = {
         Update: {
           apelido?: string
           categoria?: string
+          comprovante_path?: string | null
           criado_em?: string
           dados_bancarios_recebidos?: boolean
           data_notificacao?: string | null
           numero_quota?: number
+          pago_em?: string | null
           posicao?: number | null
           quota_id?: string | null
           user_id?: string | null
