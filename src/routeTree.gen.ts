@@ -37,6 +37,7 @@ import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
 import { Route as AppJogosRouteImport } from './routes/app.jogos'
 import { Route as AppEstadiosRouteImport } from './routes/app.estadios'
 import { Route as AppComprarQuotaRouteImport } from './routes/app.comprar-quota'
+import { Route as AppChampionsRouteImport } from './routes/app.champions'
 import { Route as AppBoletinsRouteImport } from './routes/app.boletins'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppAdminIndexRouteImport } from './routes/app.admin.index'
@@ -60,6 +61,7 @@ import { Route as AppAdminJogosRouteImport } from './routes/app.admin.jogos'
 import { Route as AppAdminEncerrarCopaRouteImport } from './routes/app.admin.encerrar-copa'
 import { Route as AppAdminConvitesRouteImport } from './routes/app.admin.convites'
 import { Route as AppAdminConfiguracoesRouteImport } from './routes/app.admin.configuracoes'
+import { Route as AppAdminChampionsRouteImport } from './routes/app.admin.champions'
 import { Route as AppAdminBoletinsRouteImport } from './routes/app.admin.boletins'
 import { Route as AppAdminAuditoriaRouteImport } from './routes/app.admin.auditoria'
 import { Route as AppPalpitesTop4EstatisticasRouteImport } from './routes/app.palpites_.top4_.estatisticas'
@@ -207,6 +209,11 @@ const AppComprarQuotaRoute = AppComprarQuotaRouteImport.update({
   path: '/comprar-quota',
   getParentRoute: () => AppRoute,
 } as any)
+const AppChampionsRoute = AppChampionsRouteImport.update({
+  id: '/champions',
+  path: '/champions',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBoletinsRoute = AppBoletinsRouteImport.update({
   id: '/boletins',
   path: '/boletins',
@@ -323,6 +330,11 @@ const AppAdminConfiguracoesRoute = AppAdminConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminChampionsRoute = AppAdminChampionsRouteImport.update({
+  id: '/champions',
+  path: '/champions',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminBoletinsRoute = AppAdminBoletinsRouteImport.update({
   id: '/boletins',
   path: '/boletins',
@@ -367,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/regras': typeof RegrasRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/champions': typeof AppChampionsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
@@ -388,6 +401,7 @@ export interface FileRoutesByFullPath {
   '/demo/': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
+  '/app/admin/champions': typeof AppAdminChampionsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
   '/app/admin/convites': typeof AppAdminConvitesRoute
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
@@ -423,6 +437,7 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/regras': typeof RegrasRoute
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/champions': typeof AppChampionsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
@@ -444,6 +459,7 @@ export interface FileRoutesByTo {
   '/demo': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
+  '/app/admin/champions': typeof AppAdminChampionsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
   '/app/admin/convites': typeof AppAdminConvitesRoute
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
@@ -483,6 +499,7 @@ export interface FileRoutesById {
   '/regras': typeof RegrasRoute
   '/app/admin': typeof AppAdminRouteWithChildren
   '/app/boletins': typeof AppBoletinsRoute
+  '/app/champions': typeof AppChampionsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
   '/app/jogos': typeof AppJogosRoute
@@ -504,6 +521,7 @@ export interface FileRoutesById {
   '/demo/': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
+  '/app/admin/champions': typeof AppAdminChampionsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
   '/app/admin/convites': typeof AppAdminConvitesRoute
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
@@ -544,6 +562,7 @@ export interface FileRouteTypes {
     | '/regras'
     | '/app/admin'
     | '/app/boletins'
+    | '/app/champions'
     | '/app/comprar-quota'
     | '/app/estadios'
     | '/app/jogos'
@@ -565,6 +584,7 @@ export interface FileRouteTypes {
     | '/demo/'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
+    | '/app/admin/champions'
     | '/app/admin/configuracoes'
     | '/app/admin/convites'
     | '/app/admin/encerrar-copa'
@@ -600,6 +620,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/regras'
     | '/app/boletins'
+    | '/app/champions'
     | '/app/comprar-quota'
     | '/app/estadios'
     | '/app/jogos'
@@ -621,6 +642,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
+    | '/app/admin/champions'
     | '/app/admin/configuracoes'
     | '/app/admin/convites'
     | '/app/admin/encerrar-copa'
@@ -659,6 +681,7 @@ export interface FileRouteTypes {
     | '/regras'
     | '/app/admin'
     | '/app/boletins'
+    | '/app/champions'
     | '/app/comprar-quota'
     | '/app/estadios'
     | '/app/jogos'
@@ -680,6 +703,7 @@ export interface FileRouteTypes {
     | '/demo/'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
+    | '/app/admin/champions'
     | '/app/admin/configuracoes'
     | '/app/admin/convites'
     | '/app/admin/encerrar-copa'
@@ -918,6 +942,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppComprarQuotaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/champions': {
+      id: '/app/champions'
+      path: '/champions'
+      fullPath: '/app/champions'
+      preLoaderRoute: typeof AppChampionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/boletins': {
       id: '/app/boletins'
       path: '/boletins'
@@ -1079,6 +1110,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminConfiguracoesRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/admin/champions': {
+      id: '/app/admin/champions'
+      path: '/champions'
+      fullPath: '/app/admin/champions'
+      preLoaderRoute: typeof AppAdminChampionsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/admin/boletins': {
       id: '/app/admin/boletins'
       path: '/boletins'
@@ -1127,6 +1165,7 @@ declare module '@tanstack/react-router' {
 interface AppAdminRouteChildren {
   AppAdminAuditoriaRoute: typeof AppAdminAuditoriaRoute
   AppAdminBoletinsRoute: typeof AppAdminBoletinsRoute
+  AppAdminChampionsRoute: typeof AppAdminChampionsRoute
   AppAdminConfiguracoesRoute: typeof AppAdminConfiguracoesRoute
   AppAdminConvitesRoute: typeof AppAdminConvitesRoute
   AppAdminEncerrarCopaRoute: typeof AppAdminEncerrarCopaRoute
@@ -1148,6 +1187,7 @@ interface AppAdminRouteChildren {
 const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminAuditoriaRoute: AppAdminAuditoriaRoute,
   AppAdminBoletinsRoute: AppAdminBoletinsRoute,
+  AppAdminChampionsRoute: AppAdminChampionsRoute,
   AppAdminConfiguracoesRoute: AppAdminConfiguracoesRoute,
   AppAdminConvitesRoute: AppAdminConvitesRoute,
   AppAdminEncerrarCopaRoute: AppAdminEncerrarCopaRoute,
@@ -1173,6 +1213,7 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppBoletinsRoute: typeof AppBoletinsRoute
+  AppChampionsRoute: typeof AppChampionsRoute
   AppComprarQuotaRoute: typeof AppComprarQuotaRoute
   AppEstadiosRoute: typeof AppEstadiosRoute
   AppJogosRoute: typeof AppJogosRoute
@@ -1199,6 +1240,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
   AppBoletinsRoute: AppBoletinsRoute,
+  AppChampionsRoute: AppChampionsRoute,
   AppComprarQuotaRoute: AppComprarQuotaRoute,
   AppEstadiosRoute: AppEstadiosRoute,
   AppJogosRoute: AppJogosRoute,
