@@ -91,8 +91,9 @@ function LinhaComprovante({ premiado }: { premiado: any }) {
     try {
       const { data, error } = await supabase.storage
         .from(BUCKET)
-        .createSignedUrl(premiado.comprovante_path, 300);
+        .createSignedUrl(premiado.comprovante_path, 60);
       if (error) throw error;
+      if (!data?.signedUrl) throw new Error("URL assinada não retornada.");
       window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } catch (e: any) {
       toast.error(e?.message ?? "Falha ao abrir comprovante.");
@@ -140,7 +141,7 @@ function LinhaComprovante({ premiado }: { premiado: any }) {
           className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-50"
         >
           {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-          {uploading ? "Enviando…" : "Enviar comprovante"}
+          {uploading ? "Anexando…" : "Anexar comprovante"}
         </button>
       )}
       <input
@@ -170,6 +171,7 @@ export function EtapaFechamentoCaixa() {
   const saldo = movimentos.reduce((acc, m) => acc + Number(m.valor), 0);
   const fechamento = movimentos.find((m) => m.tipo === "fechamento");
   const todosPagos = premiados.length > 0 && premiados.every((p) => !!p.comprovante_path);
+  const podeZerar = todosPagos && saldo === 0;
 
   const registrarZeragem = async () => {
     setZerando(true);
@@ -293,12 +295,14 @@ export function EtapaFechamentoCaixa() {
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              Habilita quando todos os {premiados.length || 6} premiados tiverem comprovante.
-              {!todosPagos && ` Faltam ${premiados.filter((p) => !p.comprovante_path).length}.`}
+              Habilita quando todos os {premiados.length || 6} premiados tiverem comprovante anexado
+              e o saldo do razão for R$ 0,00.
+              {!todosPagos && ` Faltam ${premiados.filter((p) => !p.comprovante_path).length} comprovantes.`}
+              {todosPagos && saldo !== 0 && ` Saldo atual: ${fmtBRL(saldo)}.`}
             </p>
             <button
               onClick={() => setConfirmOpen(true)}
-              disabled={!todosPagos || zerando}
+              disabled={!podeZerar || zerando}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-50"
             >
               <FileCheck2 className="h-4 w-4" />
