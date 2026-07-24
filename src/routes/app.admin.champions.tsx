@@ -7,6 +7,7 @@ import {
   useChampionsRespostas,
   useChampionsEnvioStatus,
   useDispararManifestacao,
+  useChampionsExternos,
 } from "@/lib/queries/champions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";

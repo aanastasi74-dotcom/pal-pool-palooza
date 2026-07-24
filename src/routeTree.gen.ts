@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as CompletarPerfilRouteImport } from './routes/completar-perfil'
+import { Route as ChampionsRouteImport } from './routes/champions'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
@@ -102,6 +103,11 @@ const DemoRoute = DemoRouteImport.update({
 const CompletarPerfilRoute = CompletarPerfilRouteImport.update({
   id: '/completar-perfil',
   path: '/completar-perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChampionsRoute = ChampionsRouteImport.update({
+  id: '/champions',
+  path: '/champions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -370,6 +376,7 @@ const AppAdminPesquisasIdRoute = AppAdminPesquisasIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
   '/demo': typeof DemoRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -430,6 +437,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
@@ -490,6 +498,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
   '/demo': typeof DemoRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -553,6 +562,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/champions'
     | '/completar-perfil'
     | '/demo'
     | '/esqueci-senha'
@@ -613,6 +623,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/champions'
     | '/completar-perfil'
     | '/esqueci-senha'
     | '/login'
@@ -672,6 +683,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/champions'
     | '/completar-perfil'
     | '/demo'
     | '/esqueci-senha'
@@ -734,6 +746,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ChampionsRoute: typeof ChampionsRoute
   CompletarPerfilRoute: typeof CompletarPerfilRoute
   DemoRoute: typeof DemoRouteWithChildren
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
@@ -793,6 +806,13 @@ declare module '@tanstack/react-router' {
       path: '/completar-perfil'
       fullPath: '/completar-perfil'
       preLoaderRoute: typeof CompletarPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/champions': {
+      id: '/champions'
+      path: '/champions'
+      fullPath: '/champions'
+      preLoaderRoute: typeof ChampionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -1289,6 +1309,7 @@ const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ChampionsRoute: ChampionsRoute,
   CompletarPerfilRoute: CompletarPerfilRoute,
   DemoRoute: DemoRouteWithChildren,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
