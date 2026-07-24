@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Trophy, Send, TestTube2, AlertTriangle } from "lucide-react";
+import { Trophy, Send, TestTube2, AlertTriangle, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   useChampionsTotal,
@@ -8,6 +8,8 @@ import {
   useChampionsEnvioStatus,
   useDispararManifestacao,
   useChampionsExternos,
+  useCadastrosPendentes,
+  useModerarCadastro,
 } from "@/lib/queries/champions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
