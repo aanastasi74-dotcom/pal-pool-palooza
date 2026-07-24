@@ -41,6 +41,14 @@ export function AppShell() {
     return <Navigate to="/completar-perfil" />;
   }
 
+  const aprovacaoStatus = (profile as any)?.aprovacao_status as string | undefined;
+  if (profile && aprovacaoStatus === "pendente") {
+    return <Navigate to="/aguardando-aprovacao" />;
+  }
+  if (profile && aprovacaoStatus === "rejeitada") {
+    return <Navigate to="/cadastro-nao-aprovado" />;
+  }
+
   if (maintenance && !pathname.startsWith("/app/admin")) {
     return <Navigate to="/manutencao" />;
   }
