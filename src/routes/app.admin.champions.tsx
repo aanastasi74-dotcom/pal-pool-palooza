@@ -24,8 +24,11 @@ function AdminChampions() {
   const { data: total } = useChampionsTotal();
   const { data: respostas, isLoading } = useChampionsRespostas();
   const { data: externos, isLoading: loadingExternos } = useChampionsExternos();
+  const { data: pendentes, isLoading: loadingPendentes } = useCadastrosPendentes();
   const { data: envio } = useChampionsEnvioStatus();
   const disparar = useDispararManifestacao();
+  const moderar = useModerarCadastro();
+  const [confirmRejeitar, setConfirmRejeitar] = useState<null | { id: string; nome: string }>(null);
 
   const quotasInternas = total?.quotas_total ?? 0;
   const quotasExternas = (externos ?? []).reduce((s, e) => s + (e.quotas ?? 0), 0);
