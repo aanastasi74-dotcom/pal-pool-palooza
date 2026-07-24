@@ -21,7 +21,6 @@ export const Route = createFileRoute("/app/admin/configuracoes")({
 const defaultPix = { chave: "", banco: "", titular: "", instrucoes: "", valor_quota: 50 };
 const defaultScore = { exato: 12, resultado: 4, gols_vencedor: 2, dif_gols: 2, gols_time: 1 };
 const defaultPeso = { inicial: 10, incremento_dia: 1, final: 50 };
-const defaultBoletim = { hora_envio: "22:00", auto_geracao: true };
 const defaultBoletimL1 = {
   modelo: "claude-sonnet-4-6",
   max_tokens: 1500,
@@ -40,7 +39,6 @@ function Configuracoes() {
   const [pix, setPix] = useState<any>(defaultPix);
   const [score, setScore] = useState<any>(defaultScore);
   const [peso, setPeso] = useState<any>(defaultPeso);
-  const [boletim, setBoletim] = useState<any>(defaultBoletim);
   const [boletimL1, setBoletimL1] = useState<any>(defaultBoletimL1);
   const [lanterninha, setLanterninha] = useState<any>(defaultLanterninha);
   const [copaStart, setCopaStart] = useState<string>(defaultCopaStart);
@@ -51,7 +49,6 @@ function Configuracoes() {
     setPix({ ...defaultPix, ...(settings.pix_config ?? {}) });
     setScore({ ...defaultScore, ...(settings.score_rules ?? {}) });
     setPeso({ ...defaultPeso, ...(settings.peso_progressivo ?? {}) });
-    setBoletim({ ...defaultBoletim, ...(settings.boletim_config ?? {}) });
     setBoletimL1({
       modelo: settings.boletim_modelo ?? defaultBoletimL1.modelo,
       max_tokens: settings.boletim_max_tokens ?? defaultBoletimL1.max_tokens,
@@ -59,8 +56,8 @@ function Configuracoes() {
       system_prompt: settings.boletim_system_prompt ?? defaultBoletimL1.system_prompt,
     });
     setLanterninha({ ...defaultLanterninha, ...(settings.lanterninha_rule ?? {}) });
-    if (settings.copa_start_date) {
-      const raw = typeof settings.copa_start_date === "string" ? settings.copa_start_date : String(settings.copa_start_date);
+    if (settings.copa_data_inicio) {
+      const raw = typeof settings.copa_data_inicio === "string" ? settings.copa_data_inicio : String(settings.copa_data_inicio);
       try {
         setCopaStart(new Date(raw).toISOString().slice(0, 16));
       } catch { setCopaStart(raw.slice(0, 16)); }
@@ -72,13 +69,12 @@ function Configuracoes() {
       update.mutateAsync({ key: "pix_config", value: pix }),
       update.mutateAsync({ key: "score_rules", value: score }),
       update.mutateAsync({ key: "peso_progressivo", value: peso }),
-      update.mutateAsync({ key: "boletim_config", value: boletim }),
       update.mutateAsync({ key: "boletim_modelo", value: boletimL1.modelo }),
       update.mutateAsync({ key: "boletim_max_tokens", value: Number(boletimL1.max_tokens) }),
       update.mutateAsync({ key: "boletim_temperature", value: Number(boletimL1.temperature) }),
       update.mutateAsync({ key: "boletim_system_prompt", value: boletimL1.system_prompt }),
       update.mutateAsync({ key: "lanterninha_rule", value: lanterninha }),
-      update.mutateAsync({ key: "copa_start_date", value: new Date(copaStart).toISOString() }),
+      update.mutateAsync({ key: "copa_data_inicio", value: new Date(copaStart).toISOString() }),
     ]);
     toast.success("Configurações salvas, pereba-admin.");
   };
@@ -172,16 +168,8 @@ function Configuracoes() {
           </AccordionItem>
 
 
-          <AccordionItem value="boletim">
-            <AccordionTrigger>Boletim</AccordionTrigger>
-            <AccordionContent className="space-y-3">
-              <Field label="Hora de envio diário" value={boletim.hora_envio} onChange={(v) => setBoletim({ ...boletim, hora_envio: v })} />
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Geração automática</span>
-                <Switch checked={!!boletim.auto_geracao} onCheckedChange={(v) => setBoletim({ ...boletim, auto_geracao: v })} />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+
+
 
           <AccordionItem value="boletim-ia">
             <AccordionTrigger>Boletim diário (IA)</AccordionTrigger>
