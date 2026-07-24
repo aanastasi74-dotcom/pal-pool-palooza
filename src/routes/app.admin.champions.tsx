@@ -165,6 +165,61 @@ function AdminChampions() {
         )}
       </section>
 
+      <section className="rounded-2xl border border-border bg-card shadow-card">
+        <div className="border-b border-border p-4">
+          <h2 className="font-display text-lg font-bold">Externos (via /champions)</h2>
+          <p className="text-xs text-muted-foreground">
+            Manifestações feitas na página pública por gente de fora da Perebada.
+          </p>
+        </div>
+        {loadingExternos ? (
+          <div className="p-4"><Skeleton className="h-40" /></div>
+        ) : !externos || externos.length === 0 ? (
+          <EmptyState title="Nenhum externo ainda" description="Compartilha o link /champions no WhatsApp." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-2 text-left">Nome</th>
+                  <th className="px-4 py-2 text-left">Email</th>
+                  <th className="px-4 py-2 text-right">Quotas</th>
+                  <th className="px-4 py-2 text-left">Indicado por</th>
+                  <th className="px-4 py-2 text-right">Criado em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {externos.map((e) => (
+                  <tr key={e.id} className="border-t border-border">
+                    <td className="px-4 py-2 font-medium">{e.nome}</td>
+                    <td className="px-4 py-2 text-xs text-muted-foreground">{e.email}</td>
+                    <td className="px-4 py-2 text-right font-bold">{e.quotas}</td>
+                    <td className="px-4 py-2 text-xs">{e.indicado_por ?? <span className="text-muted-foreground">—</span>}</td>
+                    <td className="px-4 py-2 text-right text-xs text-muted-foreground">
+                      {new Date(e.criado_em).toLocaleString("pt-BR")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {rankingIndicadores.length > 0 && (
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
+          <h2 className="font-display text-lg font-bold">Quem indicou mais</h2>
+          <ul className="mt-2 space-y-1 text-sm">
+            {rankingIndicadores.map(([nome, n]) => (
+              <li key={nome} className="flex items-center justify-between border-b border-border/50 py-1.5 last:border-0">
+                <span className="font-medium">{nome}</span>
+                <span className="text-xs text-muted-foreground">{n} indicado{n === 1 ? "" : "s"}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <ConfirmDialog
         open={confirmEnvio}
         onOpenChange={setConfirmEnvio}
