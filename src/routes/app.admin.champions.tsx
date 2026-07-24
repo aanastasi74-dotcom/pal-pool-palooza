@@ -74,10 +74,20 @@ function AdminChampions() {
         </p>
       </header>
 
+      <section className="rounded-2xl border border-primary/40 bg-primary/5 p-4 shadow-card">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Total combinado (internos + externos)</p>
+        <p className="mt-1 font-display text-4xl font-extrabold">
+          {quotasCombinadas} <span className="text-base font-medium text-muted-foreground">/ {total?.quorum ?? 35}</span>
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Internos: <strong>{quotasInternas}</strong> · Externos: <strong>{quotasExternas}</strong>
+        </p>
+      </section>
+
       <section className="grid gap-3 sm:grid-cols-3">
-        <StatCard label="Quotas manifestadas" value={total?.quotas_total ?? 0} />
+        <StatCard label="Quotas internos" value={quotasInternas} />
         <StatCard label="Perebas participando" value={total?.perebas ?? 0} />
-        <StatCard label="Quórum" value={`${total?.quotas_total ?? 0} / ${total?.quorum ?? 35}`} />
+        <StatCard label="Externos manifestados" value={(externos ?? []).length} />
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
