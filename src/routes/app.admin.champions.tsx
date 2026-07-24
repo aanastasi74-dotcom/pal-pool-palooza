@@ -239,9 +239,11 @@ function AdminChampions() {
 
       <section className="rounded-2xl border border-border bg-card shadow-card">
         <div className="border-b border-border p-4">
-          <h2 className="font-display text-lg font-bold">Externos (via /champions)</h2>
+          <h2 className="font-display text-lg font-bold">
+            Manifestações antigas (formulário sem conta)
+          </h2>
           <p className="text-xs text-muted-foreground">
-            Manifestações feitas na página pública por gente de fora da Perebada.
+            Histórico do formulário anterior — hoje o /champions cria conta pendente.
           </p>
         </div>
         {loadingExternos ? (
