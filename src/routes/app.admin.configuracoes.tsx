@@ -69,13 +69,12 @@ function Configuracoes() {
       update.mutateAsync({ key: "pix_config", value: pix }),
       update.mutateAsync({ key: "score_rules", value: score }),
       update.mutateAsync({ key: "peso_progressivo", value: peso }),
-      update.mutateAsync({ key: "boletim_config", value: boletim }),
       update.mutateAsync({ key: "boletim_modelo", value: boletimL1.modelo }),
       update.mutateAsync({ key: "boletim_max_tokens", value: Number(boletimL1.max_tokens) }),
       update.mutateAsync({ key: "boletim_temperature", value: Number(boletimL1.temperature) }),
       update.mutateAsync({ key: "boletim_system_prompt", value: boletimL1.system_prompt }),
       update.mutateAsync({ key: "lanterninha_rule", value: lanterninha }),
-      update.mutateAsync({ key: "copa_start_date", value: new Date(copaStart).toISOString() }),
+      update.mutateAsync({ key: "copa_data_inicio", value: new Date(copaStart).toISOString() }),
     ]);
     toast.success("Configurações salvas, pereba-admin.");
   };
