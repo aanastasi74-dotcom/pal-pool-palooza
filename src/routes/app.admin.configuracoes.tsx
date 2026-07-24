@@ -168,16 +168,8 @@ function Configuracoes() {
           </AccordionItem>
 
 
-          <AccordionItem value="boletim">
-            <AccordionTrigger>Boletim</AccordionTrigger>
-            <AccordionContent className="space-y-3">
-              <Field label="Hora de envio diário" value={boletim.hora_envio} onChange={(v) => setBoletim({ ...boletim, hora_envio: v })} />
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Geração automática</span>
-                <Switch checked={!!boletim.auto_geracao} onCheckedChange={(v) => setBoletim({ ...boletim, auto_geracao: v })} />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+
+
 
           <AccordionItem value="boletim-ia">
             <AccordionTrigger>Boletim diário (IA)</AccordionTrigger>
