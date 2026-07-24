@@ -17,7 +17,9 @@ import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as CompletarPerfilRouteImport } from './routes/completar-perfil'
 import { Route as ChampionsRouteImport } from './routes/champions'
+import { Route as CadastroNaoAprovadoRouteImport } from './routes/cadastro-nao-aprovado'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AguardandoAprovacaoRouteImport } from './routes/aguardando-aprovacao'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -110,9 +112,19 @@ const ChampionsRoute = ChampionsRouteImport.update({
   path: '/champions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CadastroNaoAprovadoRoute = CadastroNaoAprovadoRouteImport.update({
+  id: '/cadastro-nao-aprovado',
+  path: '/cadastro-nao-aprovado',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AguardandoAprovacaoRoute = AguardandoAprovacaoRouteImport.update({
+  id: '/aguardando-aprovacao',
+  path: '/aguardando-aprovacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -375,7 +387,9 @@ const AppAdminPesquisasIdRoute = AppAdminPesquisasIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/aguardando-aprovacao': typeof AguardandoAprovacaoRoute
   '/app': typeof AppRouteWithChildren
+  '/cadastro-nao-aprovado': typeof CadastroNaoAprovadoRoute
   '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
   '/demo': typeof DemoRouteWithChildren
@@ -437,6 +451,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/aguardando-aprovacao': typeof AguardandoAprovacaoRoute
+  '/cadastro-nao-aprovado': typeof CadastroNaoAprovadoRoute
   '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
@@ -497,7 +513,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/aguardando-aprovacao': typeof AguardandoAprovacaoRoute
   '/app': typeof AppRouteWithChildren
+  '/cadastro-nao-aprovado': typeof CadastroNaoAprovadoRoute
   '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
   '/demo': typeof DemoRouteWithChildren
@@ -561,7 +579,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/aguardando-aprovacao'
     | '/app'
+    | '/cadastro-nao-aprovado'
     | '/champions'
     | '/completar-perfil'
     | '/demo'
@@ -623,6 +643,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/aguardando-aprovacao'
+    | '/cadastro-nao-aprovado'
     | '/champions'
     | '/completar-perfil'
     | '/esqueci-senha'
@@ -682,7 +704,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/aguardando-aprovacao'
     | '/app'
+    | '/cadastro-nao-aprovado'
     | '/champions'
     | '/completar-perfil'
     | '/demo'
@@ -745,7 +769,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AguardandoAprovacaoRoute: typeof AguardandoAprovacaoRoute
   AppRoute: typeof AppRouteWithChildren
+  CadastroNaoAprovadoRoute: typeof CadastroNaoAprovadoRoute
   ChampionsRoute: typeof ChampionsRoute
   CompletarPerfilRoute: typeof CompletarPerfilRoute
   DemoRoute: typeof DemoRouteWithChildren
@@ -815,11 +841,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChampionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cadastro-nao-aprovado': {
+      id: '/cadastro-nao-aprovado'
+      path: '/cadastro-nao-aprovado'
+      fullPath: '/cadastro-nao-aprovado'
+      preLoaderRoute: typeof CadastroNaoAprovadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app': {
       id: '/app'
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aguardando-aprovacao': {
+      id: '/aguardando-aprovacao'
+      path: '/aguardando-aprovacao'
+      fullPath: '/aguardando-aprovacao'
+      preLoaderRoute: typeof AguardandoAprovacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -1308,7 +1348,9 @@ const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AguardandoAprovacaoRoute: AguardandoAprovacaoRoute,
   AppRoute: AppRouteWithChildren,
+  CadastroNaoAprovadoRoute: CadastroNaoAprovadoRoute,
   ChampionsRoute: ChampionsRoute,
   CompletarPerfilRoute: CompletarPerfilRoute,
   DemoRoute: DemoRouteWithChildren,

@@ -1,11 +1,13 @@
+// ⚠️ NOTA PRO ADMIN: o signup público desta página exige "Allow new users to sign up"
+// HABILITADO em Authentication → Sign In / Providers no dashboard do Supabase. Se estiver
+// desabilitado (app era só-convite), o signUp retorna erro — habilitar antes de divulgar
+// o link /champions.
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Trophy, Sparkles, CheckCircle2, Info } from "lucide-react";
 import { toast } from "sonner";
-import {
-  useChampionsTotalPublico,
-  useRegistrarInteresseExterno,
-} from "@/lib/queries/champions";
+import { supabase } from "@/integrations/supabase/client";
+import { useChampionsTotalPublico } from "@/lib/queries/champions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
 
@@ -106,8 +108,8 @@ function ChampionsPublicPage() {
             <strong>
               {quorum} quotas manifestadas até {prazoFmt}
             </strong>
-            . Não bateu quórum? Não rola — e ninguém paga nada. Nada é cobrado agora; a manifestação
-            é só um sinal de interesse.
+            . Não bateu quórum? Não rola — e ninguém paga nada. Nada é cobrado agora; a
+            manifestação é só um sinal de interesse.
           </p>
         </section>
 
@@ -149,50 +151,85 @@ function ChampionsPublicPage() {
             </Link>
           </section>
         ) : (
-          <FormExterno prazoEncerrado={prazoEncerrado} prazoFmt={prazoFmt} />
+          <FormCadastro prazoEncerrado={prazoEncerrado} prazoFmt={prazoFmt} />
         )}
 
         <p className="text-center text-xs text-muted-foreground">
-          O Bolão dos Perebas é um grupo fechado de amigos. Manifestar interesse não cria conta —
-          se o bolão confirmar, a entrada é por convite.
+          O Bolão dos Perebas é um grupo fechado de amigos. Criar conta aqui gera um pedido —
+          a entrada oficial é aprovada pela organização.
         </p>
       </main>
     </div>
   );
 }
 
-function FormExterno({
+function FormCadastro({
   prazoEncerrado,
   prazoFmt,
 }: {
   prazoEncerrado: boolean;
   prazoFmt: string;
 }) {
-  const registrar = useRegistrarInteresseExterno();
   const [nome, setNome] = useState("");
+  const [apelido, setApelido] = useState("");
   const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const [quotas, setQuotas] = useState(1);
   const [indicadoPor, setIndicadoPor] = useState("");
-  const [ok, setOk] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [ok, setOk] = useState<null | { needsEmailConfirm: boolean }>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nomeTrim = nome.trim();
-    const emailTrim = email.trim();
+    const apelidoTrim = apelido.trim();
+    const emailTrim = email.trim().toLowerCase();
+    const indicadoTrim = indicadoPor.trim();
     if (nomeTrim.length < 2) return toast.error("Coloca um nome válido.");
+    if (apelidoTrim.length < 2) return toast.error("Coloca um apelido válido.");
+    if (apelidoTrim.length > 20) return toast.error("Apelido no máximo 20 caracteres.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim)) return toast.error("Email inválido.");
+    if (senha.length < 8) return toast.error("Senha precisa ter no mínimo 8 caracteres.");
     if (quotas < 1 || quotas > 5) return toast.error("Escolha de 1 a 5 quotas.");
+    if (indicadoTrim.length < 2) return toast.error("Diz quem te indicou — é o critério de aprovação.");
+
+    setLoading(true);
     try {
-      await registrar.mutateAsync({
-        nome: nomeTrim,
+      const { data, error } = await supabase.auth.signUp({
         email: emailTrim,
-        quotas,
-        indicado_por: indicadoPor,
+        password: senha,
+        options: {
+          data: {
+            origem: "champions_publico",
+            nome: nomeTrim,
+            apelido: apelidoTrim,
+            indicado_por: indicadoTrim,
+            champions_quotas: quotas,
+          },
+        },
       });
-      setOk(true);
-      toast.success("Interesse registrado!");
+      if (error) {
+        const msg = error.message ?? "";
+        if (/already|registered|exists|duplicate/i.test(msg)) {
+          toast.error(
+            "Esse email já tem conta — faz login normal e manifesta em /app/champions.",
+          );
+        } else if (/prazo_encerrado/i.test(msg)) {
+          toast.error("O prazo encerrou em 07/08.");
+        } else if (/signups.*disabled|Signup.*disabled|not allowed/i.test(msg)) {
+          toast.error("Cadastro público desabilitado no momento. Fale com a organização.");
+        } else {
+          toast.error(msg || "Falha ao criar conta.");
+        }
+        return;
+      }
+      const needsEmailConfirm = !data.session;
+      setOk({ needsEmailConfirm });
+      toast.success("Conta criada!");
     } catch (err: any) {
-      toast.error(err?.message ?? "Falha ao registrar.");
+      toast.error(err?.message ?? "Falha ao criar conta.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -200,39 +237,66 @@ function FormExterno({
     return (
       <section className="rounded-2xl border border-primary/40 bg-primary/10 p-5 text-center shadow-card">
         <CheckCircle2 className="mx-auto h-10 w-10 text-primary" />
-        <p className="mt-2 font-display text-lg font-bold">Interesse registrado!</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Se o bolão sair, você recebe o convite por email.
+        <p className="mt-2 font-display text-lg font-bold">
+          Conta criada e interesse registrado!
         </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Sua conta passa pela aprovação da organização (grupo fechado de amigos) — você recebe
+          um email quando for aprovada.
+        </p>
+        {ok.needsEmailConfirm && (
+          <p className="mt-3 rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground">
+            Confirme seu email antes disso: o Supabase mandou um link de confirmação pra{" "}
+            <strong>{email}</strong>.
+          </p>
+        )}
       </section>
     );
   }
 
+  const disabled = prazoEncerrado || loading;
+
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card">
       <div>
-        <h2 className="font-display text-lg font-bold">Manifeste seu interesse</h2>
+        <h2 className="font-display text-lg font-bold">Criar conta e manifestar interesse</h2>
         <p className="text-xs text-muted-foreground">
           {prazoEncerrado
             ? `O prazo encerrou em ${prazoFmt}.`
-            : `Sem cobrança agora — só um sinal de interesse até ${prazoFmt}.`}
+            : `Sem cobrança agora — só um sinal de interesse até ${prazoFmt}. A conta nasce pendente e a organização aprova.`}
         </p>
       </div>
 
       <form onSubmit={submit} className="space-y-3">
-        <div>
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Seu nome
-          </label>
-          <input
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            maxLength={80}
-            disabled={prazoEncerrado || registrar.isPending}
-            required
-            className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
-            placeholder="Ex.: João Silva"
-          />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Seu nome
+            </label>
+            <input
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              maxLength={80}
+              disabled={disabled}
+              required
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+              placeholder="Ex.: João Silva"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Apelido <span className="opacity-60">(máx 20)</span>
+            </label>
+            <input
+              value={apelido}
+              onChange={(e) => setApelido(e.target.value)}
+              maxLength={20}
+              disabled={disabled}
+              required
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+              placeholder="Como te chamam"
+            />
+          </div>
         </div>
         <div>
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -243,10 +307,25 @@ function FormExterno({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             maxLength={120}
-            disabled={prazoEncerrado || registrar.isPending}
+            disabled={disabled}
             required
             className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
             placeholder="voce@email.com"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Senha <span className="opacity-60">(mín 8 caracteres)</span>
+          </label>
+          <input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            minLength={8}
+            disabled={disabled}
+            required
+            className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+            placeholder="********"
           />
         </div>
         <div>
@@ -260,7 +339,7 @@ function FormExterno({
                 <button
                   key={n}
                   type="button"
-                  disabled={prazoEncerrado || registrar.isPending}
+                  disabled={disabled}
                   onClick={() => setQuotas(n)}
                   className={`grid h-12 w-12 place-items-center rounded-xl border text-lg font-bold transition-colors ${
                     ativo
@@ -276,30 +355,34 @@ function FormExterno({
         </div>
         <div>
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Quem te indicou? <span className="opacity-60">(opcional)</span>
+            Quem te indicou? <span className="text-destructive">*</span>
           </label>
           <input
             value={indicadoPor}
             onChange={(e) => setIndicadoPor(e.target.value)}
             maxLength={80}
-            disabled={prazoEncerrado || registrar.isPending}
+            disabled={disabled}
+            required
             className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
             placeholder="apelido do pereba que te chamou"
           />
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            É o critério de aprovação — sem indicação, o pedido é recusado.
+          </p>
         </div>
 
         <button
           type="submit"
-          disabled={prazoEncerrado || registrar.isPending}
+          disabled={disabled}
           className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
-          {registrar.isPending ? "Salvando..." : "Registrar interesse"}
+          {loading ? "Criando conta..." : "Criar conta e manifestar interesse"}
         </button>
 
         <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
           <Info className="mt-0.5 h-3 w-3 shrink-0" />
-          Isso é só uma manifestação de interesse — nada é cobrado agora. A entrada oficial é por
-          convite se o bolão confirmar.
+          Nada é cobrado agora. A conta nasce pendente e a organização aprova — só então você
+          entra no app.
         </p>
       </form>
     </section>

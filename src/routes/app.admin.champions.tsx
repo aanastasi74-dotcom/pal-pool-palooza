@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Trophy, Send, TestTube2, AlertTriangle } from "lucide-react";
+import { Trophy, Send, TestTube2, AlertTriangle, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   useChampionsTotal,
@@ -8,6 +8,8 @@ import {
   useChampionsEnvioStatus,
   useDispararManifestacao,
   useChampionsExternos,
+  useCadastrosPendentes,
+  useModerarCadastro,
 } from "@/lib/queries/champions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
@@ -22,8 +24,11 @@ function AdminChampions() {
   const { data: total } = useChampionsTotal();
   const { data: respostas, isLoading } = useChampionsRespostas();
   const { data: externos, isLoading: loadingExternos } = useChampionsExternos();
+  const { data: pendentes, isLoading: loadingPendentes } = useCadastrosPendentes();
   const { data: envio } = useChampionsEnvioStatus();
   const disparar = useDispararManifestacao();
+  const moderar = useModerarCadastro();
+  const [confirmRejeitar, setConfirmRejeitar] = useState<null | { id: string; nome: string }>(null);
 
   const quotasInternas = total?.quotas_total ?? 0;
   const quotasExternas = (externos ?? []).reduce((s, e) => s + (e.quotas ?? 0), 0);
@@ -129,6 +134,73 @@ function AdminChampions() {
         )}
       </section>
 
+      <section className="rounded-2xl border border-accent/40 bg-accent/5 shadow-card">
+        <div className="border-b border-border p-4">
+          <h2 className="font-display text-lg font-bold">Cadastros pendentes de aprovação</h2>
+          <p className="text-xs text-muted-foreground">
+            Contas criadas via <code>/champions</code> aguardando aprovação da organização.
+          </p>
+        </div>
+        {loadingPendentes ? (
+          <div className="p-4"><Skeleton className="h-40" /></div>
+        ) : !pendentes || pendentes.length === 0 ? (
+          <EmptyState title="Nenhum cadastro pendente" description="Novos pedidos via /champions caem aqui." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-2 text-left">Nome</th>
+                  <th className="px-4 py-2 text-left">Apelido</th>
+                  <th className="px-4 py-2 text-left">Email</th>
+                  <th className="px-4 py-2 text-left">Indicado por</th>
+                  <th className="px-4 py-2 text-right">Quotas</th>
+                  <th className="px-4 py-2 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendentes.map((p) => (
+                  <tr key={p.id} className="border-t border-border">
+                    <td className="px-4 py-2 font-medium">{p.nome}</td>
+                    <td className="px-4 py-2 text-xs">{p.apelido ?? <span className="text-muted-foreground">—</span>}</td>
+                    <td className="px-4 py-2 text-xs text-muted-foreground">{p.email ?? "—"}</td>
+                    <td className="px-4 py-2 text-xs">{p.indicado_por ?? <span className="text-muted-foreground">—</span>}</td>
+                    <td className="px-4 py-2 text-right font-bold">{p.quotas}</td>
+                    <td className="px-4 py-2">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          disabled={moderar.isPending}
+                          onClick={async () => {
+                            try {
+                              await moderar.mutateAsync({ user_id: p.id, acao: "aprovar" });
+                              toast.success(`${p.apelido ?? p.nome} aprovado.`);
+                            } catch (e: any) {
+                              toast.error(e?.message ?? "Falha ao aprovar.");
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                        >
+                          <Check className="h-3 w-3" /> Aprovar
+                        </button>
+                        <button
+                          type="button"
+                          disabled={moderar.isPending}
+                          onClick={() => setConfirmRejeitar({ id: p.id, nome: p.apelido ?? p.nome })}
+                          className="inline-flex items-center gap-1 rounded-full border border-destructive/40 bg-background px-3 py-1 text-xs font-bold text-destructive hover:bg-destructive/10 disabled:opacity-60"
+                        >
+                          <X className="h-3 w-3" /> Rejeitar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       <section className="rounded-2xl border border-border bg-card shadow-card">
         <div className="border-b border-border p-4">
           <h2 className="font-display text-lg font-bold">Respostas</h2>
@@ -167,9 +239,11 @@ function AdminChampions() {
 
       <section className="rounded-2xl border border-border bg-card shadow-card">
         <div className="border-b border-border p-4">
-          <h2 className="font-display text-lg font-bold">Externos (via /champions)</h2>
+          <h2 className="font-display text-lg font-bold">
+            Manifestações antigas (formulário sem conta)
+          </h2>
           <p className="text-xs text-muted-foreground">
-            Manifestações feitas na página pública por gente de fora da Perebada.
+            Histórico do formulário anterior — hoje o /champions cria conta pendente.
           </p>
         </div>
         {loadingExternos ? (
@@ -242,6 +316,25 @@ function AdminChampions() {
         onConfirm={() => {
           setConfirmReenvio(false);
           dispararReal(true);
+        }}
+      />
+      <ConfirmDialog
+        open={!!confirmRejeitar}
+        onOpenChange={(v) => !v && setConfirmRejeitar(null)}
+        title={`Rejeitar cadastro de ${confirmRejeitar?.nome ?? ""}?`}
+        description="A pessoa recebe um email educado orientando a procurar quem a indicou. Essa ação pode ser revertida manualmente no banco."
+        confirmLabel="Rejeitar"
+        destructive
+        onConfirm={async () => {
+          const target = confirmRejeitar;
+          setConfirmRejeitar(null);
+          if (!target) return;
+          try {
+            await moderar.mutateAsync({ user_id: target.id, acao: "rejeitar" });
+            toast.success(`${target.nome} rejeitado.`);
+          } catch (e: any) {
+            toast.error(e?.message ?? "Falha ao rejeitar.");
+          }
         }}
       />
     </div>
