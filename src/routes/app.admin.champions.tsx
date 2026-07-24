@@ -21,8 +21,23 @@ export const Route = createFileRoute("/app/admin/champions")({
 function AdminChampions() {
   const { data: total } = useChampionsTotal();
   const { data: respostas, isLoading } = useChampionsRespostas();
+  const { data: externos, isLoading: loadingExternos } = useChampionsExternos();
   const { data: envio } = useChampionsEnvioStatus();
   const disparar = useDispararManifestacao();
+
+  const quotasInternas = total?.quotas_total ?? 0;
+  const quotasExternas = (externos ?? []).reduce((s, e) => s + (e.quotas ?? 0), 0);
+  const quotasCombinadas = quotasInternas + quotasExternas;
+
+  const indicadores = new Map<string, number>();
+  for (const e of externos ?? []) {
+    const key = (e.indicado_por ?? "").trim();
+    if (!key) continue;
+    indicadores.set(key, (indicadores.get(key) ?? 0) + 1);
+  }
+  const rankingIndicadores = Array.from(indicadores.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
 
   const [confirmEnvio, setConfirmEnvio] = useState(false);
   const [confirmReenvio, setConfirmReenvio] = useState(false);
