@@ -21,7 +21,6 @@ export const Route = createFileRoute("/app/admin/configuracoes")({
 const defaultPix = { chave: "", banco: "", titular: "", instrucoes: "", valor_quota: 50 };
 const defaultScore = { exato: 12, resultado: 4, gols_vencedor: 2, dif_gols: 2, gols_time: 1 };
 const defaultPeso = { inicial: 10, incremento_dia: 1, final: 50 };
-const defaultBoletim = { hora_envio: "22:00", auto_geracao: true };
 const defaultBoletimL1 = {
   modelo: "claude-sonnet-4-6",
   max_tokens: 1500,
