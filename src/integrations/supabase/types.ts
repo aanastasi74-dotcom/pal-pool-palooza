@@ -1138,12 +1138,14 @@ export type Database = {
         Row: {
           aceitou_regras_em: string | null
           apelido: string
+          aprovacao_status: string
           ativo: boolean
           cor: string | null
           created_at: string | null
           email: string
           email_regras_enviado_em: string | null
           id: string
+          indicado_por: string | null
           limite_quotas_custom: number | null
           nome: string
           notificacoes: Json | null
@@ -1155,12 +1157,14 @@ export type Database = {
         Insert: {
           aceitou_regras_em?: string | null
           apelido: string
+          aprovacao_status?: string
           ativo?: boolean
           cor?: string | null
           created_at?: string | null
           email: string
           email_regras_enviado_em?: string | null
           id: string
+          indicado_por?: string | null
           limite_quotas_custom?: number | null
           nome: string
           notificacoes?: Json | null
@@ -1172,12 +1176,14 @@ export type Database = {
         Update: {
           aceitou_regras_em?: string | null
           apelido?: string
+          aprovacao_status?: string
           ativo?: boolean
           cor?: string | null
           created_at?: string | null
           email?: string
           email_regras_enviado_em?: string | null
           id?: string
+          indicado_por?: string | null
           limite_quotas_custom?: number | null
           nome?: string
           notificacoes?: Json | null
