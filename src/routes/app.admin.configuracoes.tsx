@@ -39,7 +39,6 @@ function Configuracoes() {
   const [pix, setPix] = useState<any>(defaultPix);
   const [score, setScore] = useState<any>(defaultScore);
   const [peso, setPeso] = useState<any>(defaultPeso);
-  const [boletim, setBoletim] = useState<any>(defaultBoletim);
   const [boletimL1, setBoletimL1] = useState<any>(defaultBoletimL1);
   const [lanterninha, setLanterninha] = useState<any>(defaultLanterninha);
   const [copaStart, setCopaStart] = useState<string>(defaultCopaStart);
@@ -50,7 +49,6 @@ function Configuracoes() {
     setPix({ ...defaultPix, ...(settings.pix_config ?? {}) });
     setScore({ ...defaultScore, ...(settings.score_rules ?? {}) });
     setPeso({ ...defaultPeso, ...(settings.peso_progressivo ?? {}) });
-    setBoletim({ ...defaultBoletim, ...(settings.boletim_config ?? {}) });
     setBoletimL1({
       modelo: settings.boletim_modelo ?? defaultBoletimL1.modelo,
       max_tokens: settings.boletim_max_tokens ?? defaultBoletimL1.max_tokens,
@@ -58,8 +56,8 @@ function Configuracoes() {
       system_prompt: settings.boletim_system_prompt ?? defaultBoletimL1.system_prompt,
     });
     setLanterninha({ ...defaultLanterninha, ...(settings.lanterninha_rule ?? {}) });
-    if (settings.copa_start_date) {
-      const raw = typeof settings.copa_start_date === "string" ? settings.copa_start_date : String(settings.copa_start_date);
+    if (settings.copa_data_inicio) {
+      const raw = typeof settings.copa_data_inicio === "string" ? settings.copa_data_inicio : String(settings.copa_data_inicio);
       try {
         setCopaStart(new Date(raw).toISOString().slice(0, 16));
       } catch { setCopaStart(raw.slice(0, 16)); }
