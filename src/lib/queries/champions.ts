@@ -173,3 +173,81 @@ export function useDispararManifestacao() {
     },
   });
 }
+
+// Cadastros pendentes (admin)
+export type CadastroPendente = {
+  id: string;
+  nome: string;
+  apelido: string | null;
+  email: string | null;
+  indicado_por: string | null;
+  criado_em: string | null;
+  quotas: number;
+};
+
+export function useCadastrosPendentes() {
+  return useQuery({
+    queryKey: ["champions", "admin", "pendentes"],
+    queryFn: async (): Promise<CadastroPendente[]> => {
+      const { data: profs, error } = await supabase
+        .from("profiles")
+        .select("id, nome, apelido, email, indicado_por, criado_em")
+        .eq("aprovacao_status", "pendente")
+        .order("criado_em", { ascending: false });
+      if (error) throw error;
+      const ids = (profs ?? []).map((p) => p.id);
+      let quotasMap = new Map<string, number>();
+      if (ids.length) {
+        const { data: manifs } = await supabase
+          .from("champions_interesse")
+          .select("user_id, quotas")
+          .in("user_id", ids);
+        for (const m of manifs ?? []) quotasMap.set(m.user_id, m.quotas ?? 0);
+      }
+      return (profs ?? []).map((p) => ({
+        id: p.id,
+        nome: p.nome,
+        apelido: (p as any).apelido ?? null,
+        email: (p as any).email ?? null,
+        indicado_por: (p as any).indicado_por ?? null,
+        criado_em: (p as any).criado_em ?? null,
+        quotas: quotasMap.get(p.id) ?? 0,
+      }));
+    },
+  });
+}
+
+export function useModerarCadastro() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: { user_id: string; acao: "aprovar" | "rejeitar" }) => {
+      const { data, error } = await supabase.functions.invoke("moderar-cadastro", {
+        body: args,
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["champions", "admin", "pendentes"] });
+      qc.invalidateQueries({ queryKey: ["champions"] });
+    },
+  });
+}
+
+// Minha manifestação de quotas (usado na tela de aguardando aprovação)
+export function useMinhaManifestacaoQuotasPendente(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["champions", "minha-quotas", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("champions_interesse")
+        .select("quotas")
+        .eq("user_id", userId!)
+        .maybeSingle();
+      return data?.quotas ?? 0;
+    },
+  });
+}
+
