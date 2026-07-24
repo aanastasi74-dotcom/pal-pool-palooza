@@ -106,7 +106,8 @@ function ChampionsPublicPage() {
             <strong>
               {quorum} quotas manifestadas até {prazoFmt}
             </strong>
-            . Se não bater quórum, a gente devolve tudo e vida que segue.
+            . Não bateu quórum? Não rola — e ninguém paga nada. Nada é cobrado agora; a manifestação
+            é só um sinal de interesse.
           </p>
         </section>
 
