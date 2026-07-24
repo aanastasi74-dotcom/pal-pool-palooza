@@ -191,9 +191,9 @@ export function useCadastrosPendentes() {
     queryFn: async (): Promise<CadastroPendente[]> => {
       const { data: profs, error } = await supabase
         .from("profiles")
-        .select("id, nome, apelido, email, indicado_por, criado_em")
+        .select("id, nome, apelido, email, indicado_por, created_at")
         .eq("aprovacao_status", "pendente")
-        .order("criado_em", { ascending: false });
+        .order("created_at", { ascending: false });
       if (error) throw error;
       const ids = (profs ?? []).map((p) => p.id);
       let quotasMap = new Map<string, number>();
@@ -210,7 +210,7 @@ export function useCadastrosPendentes() {
         apelido: (p as any).apelido ?? null,
         email: (p as any).email ?? null,
         indicado_por: (p as any).indicado_por ?? null,
-        criado_em: (p as any).criado_em ?? null,
+        criado_em: (p as any).created_at ?? null,
         quotas: quotasMap.get(p.id) ?? 0,
       }));
     },
