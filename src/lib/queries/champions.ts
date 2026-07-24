@@ -59,6 +59,69 @@ export function useUpsertManifestacao() {
   });
 }
 
+// Público (sem login)
+export function useChampionsTotalPublico() {
+  return useQuery({
+    queryKey: ["champions", "total-publico"],
+    queryFn: async (): Promise<ChampionsTotal> => {
+      const { data, error } = await supabase.rpc("champions_interesse_total_publico");
+      if (error) throw error;
+      return data as unknown as ChampionsTotal;
+    },
+  });
+}
+
+export type ManifestacaoExternaInput = {
+  nome: string;
+  email: string;
+  quotas: number;
+  indicado_por?: string | null;
+};
+
+export function useRegistrarInteresseExterno() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: ManifestacaoExternaInput) => {
+      const payload = {
+        nome: input.nome.trim(),
+        email: input.email.trim().toLowerCase(),
+        quotas: input.quotas,
+        indicado_por: input.indicado_por?.trim() || null,
+      };
+      const { error } = await supabase.from("champions_interesse_externo").insert(payload);
+      if (error) {
+        if (error.code === "23505" || /duplicate/i.test(error.message)) {
+          throw new Error(
+            "Esse email já manifestou interesse — qualquer ajuste, fala com quem te indicou rsrs",
+          );
+        }
+        if (/prazo_encerrado/i.test(error.message)) {
+          throw new Error("O prazo encerrou em 07/08.");
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["champions", "total-publico"] });
+    },
+  });
+}
+
+// Admin — externos
+export function useChampionsExternos() {
+  return useQuery({
+    queryKey: ["champions", "admin", "externos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("champions_interesse_externo")
+        .select("id, nome, email, quotas, indicado_por, criado_em, atualizado_em")
+        .order("criado_em", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 // Admin
 export function useChampionsRespostas() {
   return useQuery({

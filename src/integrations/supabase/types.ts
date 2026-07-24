@@ -234,6 +234,36 @@ export type Database = {
           },
         ]
       }
+      champions_interesse_externo: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          email: string
+          id: string
+          indicado_por: string | null
+          nome: string
+          quotas: number
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          email: string
+          id?: string
+          indicado_por?: string | null
+          nome: string
+          quotas: number
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          email?: string
+          id?: string
+          indicado_por?: string | null
+          nome?: string
+          quotas?: number
+        }
+        Relationships: []
+      }
       faixas_premiacao: {
         Row: {
           created_at: string | null
@@ -1694,6 +1724,7 @@ export type Database = {
       }
       calcular_premiacao: { Args: { p_quotas_ativas: number }; Returns: Json }
       champions_interesse_total: { Args: never; Returns: Json }
+      champions_interesse_total_publico: { Args: never; Returns: Json }
       check_apelido_disponivel: {
         Args: { p_apelido: string }
         Returns: boolean
