@@ -117,53 +117,6 @@ export type Database = {
           },
         ]
       }
-      bulletins: {
-        Row: {
-          agendado_para: string | null
-          conteudo: string
-          conteudo_original: string | null
-          created_at: string | null
-          data: string
-          id: string
-          publicado_em: string | null
-          publicado_por: string | null
-          status: string
-          titulo: string
-        }
-        Insert: {
-          agendado_para?: string | null
-          conteudo: string
-          conteudo_original?: string | null
-          created_at?: string | null
-          data: string
-          id?: string
-          publicado_em?: string | null
-          publicado_por?: string | null
-          status?: string
-          titulo: string
-        }
-        Update: {
-          agendado_para?: string | null
-          conteudo?: string
-          conteudo_original?: string | null
-          created_at?: string | null
-          data?: string
-          id?: string
-          publicado_em?: string | null
-          publicado_por?: string | null
-          status?: string
-          titulo?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bulletins_publicado_por_fkey"
-            columns: ["publicado_por"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       caixa_movimentos: {
         Row: {
           categoria: string
@@ -802,50 +755,6 @@ export type Database = {
             foreignKeyName: "perfis_personalidade_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      personality_profiles: {
-        Row: {
-          apelido_principal: string
-          apelidos_alternativos: string[] | null
-          created_at: string | null
-          id: string
-          observacoes_admin: string | null
-          participante_id: string | null
-          tags: string[] | null
-          tracos: Json | null
-          updated_at: string | null
-        }
-        Insert: {
-          apelido_principal: string
-          apelidos_alternativos?: string[] | null
-          created_at?: string | null
-          id?: string
-          observacoes_admin?: string | null
-          participante_id?: string | null
-          tags?: string[] | null
-          tracos?: Json | null
-          updated_at?: string | null
-        }
-        Update: {
-          apelido_principal?: string
-          apelidos_alternativos?: string[] | null
-          created_at?: string | null
-          id?: string
-          observacoes_admin?: string | null
-          participante_id?: string | null
-          tags?: string[] | null
-          tracos?: Json | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "personality_profiles_participante_id_fkey"
-            columns: ["participante_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
