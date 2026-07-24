@@ -318,6 +318,25 @@ function AdminChampions() {
           dispararReal(true);
         }}
       />
+      <ConfirmDialog
+        open={!!confirmRejeitar}
+        onOpenChange={(v) => !v && setConfirmRejeitar(null)}
+        title={`Rejeitar cadastro de ${confirmRejeitar?.nome ?? ""}?`}
+        description="A pessoa recebe um email educado orientando a procurar quem a indicou. Essa ação pode ser revertida manualmente no banco."
+        confirmLabel="Rejeitar"
+        destructive
+        onConfirm={async () => {
+          const target = confirmRejeitar;
+          setConfirmRejeitar(null);
+          if (!target) return;
+          try {
+            await moderar.mutateAsync({ user_id: target.id, acao: "rejeitar" });
+            toast.success(`${target.nome} rejeitado.`);
+          } catch (e: any) {
+            toast.error(e?.message ?? "Falha ao rejeitar.");
+          }
+        }}
+      />
     </div>
   );
 }
