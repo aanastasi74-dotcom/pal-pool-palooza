@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { usePersonalityProfiles, useCreatePersonalityProfile, useUpdatePersonalityProfile, useDeletePersonalityProfile } from "@/lib/queries/personality";
 import { useUsuariosAdmin } from "@/lib/queries/profiles";
+import { usePerfisPersonalidade, useSalvarPerfilPersonalidade } from "@/lib/queries/boletins-l1";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Plus, X, Trash2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Plus, X, Trash2, UserCog, Save } from "lucide-react";
 import { toast } from "sonner";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { DataTablePagination } from "@/components/data-table-pagination";
@@ -12,13 +14,32 @@ import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/admin/perfis")({
-  head: () => ({ meta: [{ title: "Admin — Perfis" }] }),
+  head: () => ({ meta: [{ title: "Admin — Perfis de personalidade" }] }),
   component: PerfisAdmin,
 });
 
 type PerfilRow = any;
 
 function PerfisAdmin() {
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="font-display text-3xl font-extrabold">Perfis de personalidade</h1>
+        <p className="mt-1 text-sm text-muted-foreground">A alma da zoeira da perebada.</p>
+      </div>
+      <Tabs defaultValue="editar" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="editar">Editar perfis</TabsTrigger>
+          <TabsTrigger value="resumo">Resumo p/ boletim</TabsTrigger>
+        </TabsList>
+        <TabsContent value="editar"><EditarPerfisSection /></TabsContent>
+        <TabsContent value="resumo"><ResumoBoletimSection /></TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function EditarPerfisSection() {
   const { data, isLoading } = usePersonalityProfiles();
   const [aberto, setAberto] = useState<PerfilRow | null>(null);
 
