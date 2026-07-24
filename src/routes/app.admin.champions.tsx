@@ -134,6 +134,73 @@ function AdminChampions() {
         )}
       </section>
 
+      <section className="rounded-2xl border border-accent/40 bg-accent/5 shadow-card">
+        <div className="border-b border-border p-4">
+          <h2 className="font-display text-lg font-bold">Cadastros pendentes de aprovação</h2>
+          <p className="text-xs text-muted-foreground">
+            Contas criadas via <code>/champions</code> aguardando aprovação da organização.
+          </p>
+        </div>
+        {loadingPendentes ? (
+          <div className="p-4"><Skeleton className="h-40" /></div>
+        ) : !pendentes || pendentes.length === 0 ? (
+          <EmptyState title="Nenhum cadastro pendente" description="Novos pedidos via /champions caem aqui." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-2 text-left">Nome</th>
+                  <th className="px-4 py-2 text-left">Apelido</th>
+                  <th className="px-4 py-2 text-left">Email</th>
+                  <th className="px-4 py-2 text-left">Indicado por</th>
+                  <th className="px-4 py-2 text-right">Quotas</th>
+                  <th className="px-4 py-2 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendentes.map((p) => (
+                  <tr key={p.id} className="border-t border-border">
+                    <td className="px-4 py-2 font-medium">{p.nome}</td>
+                    <td className="px-4 py-2 text-xs">{p.apelido ?? <span className="text-muted-foreground">—</span>}</td>
+                    <td className="px-4 py-2 text-xs text-muted-foreground">{p.email ?? "—"}</td>
+                    <td className="px-4 py-2 text-xs">{p.indicado_por ?? <span className="text-muted-foreground">—</span>}</td>
+                    <td className="px-4 py-2 text-right font-bold">{p.quotas}</td>
+                    <td className="px-4 py-2">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          disabled={moderar.isPending}
+                          onClick={async () => {
+                            try {
+                              await moderar.mutateAsync({ user_id: p.id, acao: "aprovar" });
+                              toast.success(`${p.apelido ?? p.nome} aprovado.`);
+                            } catch (e: any) {
+                              toast.error(e?.message ?? "Falha ao aprovar.");
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                        >
+                          <Check className="h-3 w-3" /> Aprovar
+                        </button>
+                        <button
+                          type="button"
+                          disabled={moderar.isPending}
+                          onClick={() => setConfirmRejeitar({ id: p.id, nome: p.apelido ?? p.nome })}
+                          className="inline-flex items-center gap-1 rounded-full border border-destructive/40 bg-background px-3 py-1 text-xs font-bold text-destructive hover:bg-destructive/10 disabled:opacity-60"
+                        >
+                          <X className="h-3 w-3" /> Rejeitar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       <section className="rounded-2xl border border-border bg-card shadow-card">
         <div className="border-b border-border p-4">
           <h2 className="font-display text-lg font-bold">Respostas</h2>
