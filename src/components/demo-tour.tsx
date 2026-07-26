@@ -567,7 +567,7 @@ function Step3({ tl, lideranca }: { tl: any; lideranca: any[] }) {
       </div>
       {t >= dias.length - 1 && (
         <p className="mt-2 text-center text-[11px] font-bold text-foreground animate-fade-in">
-          A liderança mudou {lideranca.length ? lideranca.length - 1 : 3} vezes. A última, no dia da final.
+          A liderança mudou 4 vezes. A última, no dia da final.
         </p>
       )}
     </>
