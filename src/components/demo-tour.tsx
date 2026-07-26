@@ -431,26 +431,26 @@ function Step1({ jogos, onInteract }: { jogos: any[]; onInteract: () => void }) 
   useEffect(() => {
     let cancel = false;
     (async () => {
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 350));
       if (cancel || userInterrupted) return;
       await moveCursorTo(`[data-c1-edit="${idx}"]`, true);
       if (cancel || userInterrupted) return;
       setPlacares((p) => ({ ...p, [idx]: { ...p[idx], edit: true } }));
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, 250));
       // +1 casa
       await moveCursorTo(`[data-c1-inc-c="${idx}"]`, true);
       if (cancel || userInterrupted) return;
       setPlacares((p) => ({ ...p, [idx]: { ...p[idx], c: 1 } }));
-      await new Promise((r) => setTimeout(r, 350));
+      await new Promise((r) => setTimeout(r, 200));
       await moveCursorTo(`[data-c1-inc-c="${idx}"]`, true);
       if (cancel || userInterrupted) return;
       setPlacares((p) => ({ ...p, [idx]: { ...p[idx], c: 2 } }));
-      await new Promise((r) => setTimeout(r, 350));
+      await new Promise((r) => setTimeout(r, 200));
       // +1 fora
       await moveCursorTo(`[data-c1-inc-f="${idx}"]`, true);
       if (cancel || userInterrupted) return;
       setPlacares((p) => ({ ...p, [idx]: { ...p[idx], f: 1 } }));
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 350));
       // salvar
       await moveCursorTo(`[data-c1-save="${idx}"]`, true);
       if (cancel || userInterrupted) return;
