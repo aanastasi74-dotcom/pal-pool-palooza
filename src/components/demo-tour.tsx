@@ -588,7 +588,7 @@ function Step2({ j, regras }: { j: any; regras: any }) {
     if (!palpites.length) return [];
     const prevCasa = timeline[Math.max(0, idx - 1)]?.casa ?? 0;
     const prevFora = timeline[Math.max(0, idx - 1)]?.fora ?? 0;
-    const ordered = [...palpites].sort((a, b) => a.pos_final - b.pos_final);
+    const ordered = [...palpites].sort((a, b) => a.pos - b.pos);
     return ordered.map((p) => {
       const pts = ended
         ? p.pontos_final
@@ -654,11 +654,11 @@ function Step2({ j, regras }: { j: any; regras: any }) {
             return (
               <div
                 key={`${p.apelido}-${p.quota}`}
-                className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-xs transition-colors duration-300 ${positivo ? "bg-emerald-500/10" : "bg-muted/40"}`}
+                className={`flex items-center justify-between rounded-lg px-2 py-1 text-[11px] transition-colors duration-300 ${positivo ? "bg-emerald-500/10" : "bg-muted/40"}`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="grid h-5 w-5 place-items-center rounded-full bg-background text-[10px] font-black">{p.pos_final}</span>
-                  <span className="font-bold">{p.apelido}<span className="text-muted-foreground"> #{p.quota}</span></span>
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-background text-[10px] font-black">{p.pos}</span>
+                  <span className="font-bold">{p.apelido}<span className="text-muted-foreground"> #{p.quota}{p.ficticio ? " *" : ""}</span></span>
                   <span className="text-muted-foreground tabular-nums">{p.casa}×{p.fora}</span>
                 </div>
                 <div className="relative flex items-center">
@@ -689,8 +689,11 @@ function Step2({ j, regras }: { j: any; regras: any }) {
         </div>
       </div>
       <p className="mt-2 text-[10px] text-muted-foreground">Peso {peso}. O mesmo acerto na estreia valeria {6 * (regras?.peso?.min ?? 10)}.</p>
+      {j?.nota_ilustrativa && (
+        <p className="mt-1 text-[9px] text-muted-foreground/70">{j.nota_ilustrativa}</p>
+      )}
       <p className="mt-1 text-center text-[11px] font-bold text-foreground">
-        Durante 83 minutos, só o quinto colocado pontuava. No apito final, ele perdeu tudo.
+        Por 88 minutos, quem pontuava estava no fim da lista. A Argentina virou — e o bolão virou junto.
       </p>
     </>
   );
