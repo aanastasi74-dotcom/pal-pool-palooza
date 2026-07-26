@@ -49,7 +49,7 @@ function Home() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [boletimText, setBoletimText] = useState<string>("");
   useEffect(() => {
-    if (boletim?.conteudo) setBoletimText(boletim.conteudo);
+    if ((boletim as any)?.conteudo) setBoletimText((boletim as any).conteudo);
   }, [boletim]);
 
   const compartilharWhats = () => {
