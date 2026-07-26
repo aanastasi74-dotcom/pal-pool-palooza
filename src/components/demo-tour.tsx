@@ -90,7 +90,7 @@ function TourInner({ data }: { data: DemoData }) {
     startRef.current = performance.now();
   };
 
-  const stepIcons = [Sparkles, Radio, ListOrdered, Calculator, BookText, Trophy];
+  const stepIcons = [Ticket, Sparkles, Radio, ListOrdered, Calculator, BookText, Trophy];
 
   return (
     <div className="mx-auto w-full max-w-md">
