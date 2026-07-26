@@ -18,6 +18,12 @@ import {
   Check,
   Crown,
   Trophy,
+  Ticket,
+  Hash,
+  Wallet,
+  Upload,
+  CheckCircle2,
+  Lock,
 } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 
