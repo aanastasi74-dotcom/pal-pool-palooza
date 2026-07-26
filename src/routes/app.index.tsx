@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { times } from "@/lib/mock-data";
-import { Sparkles, TrendingUp, Trophy, Pencil, Lightbulb, AlertCircle, CheckCircle2, Newspaper, Info } from "lucide-react";
+import { Sparkles, TrendingUp, Trophy, Pencil, Lightbulb, AlertCircle, CheckCircle2, Newspaper, Info, Lock, ChevronRight } from "lucide-react";
+import { useChampionsTotal } from "@/lib/queries/champions";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
