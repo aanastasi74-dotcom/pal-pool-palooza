@@ -4,6 +4,10 @@ export function translatePgError(err: any): string {
   const code: string = err?.code || err?.details?.code || "";
   const message: string = err?.message || "";
 
+  if (message.includes("copa_2026_arquivada")) {
+    return "Essa competição está encerrada e é somente leitura.";
+  }
+
   // 23514 = check_violation
   if (code === "23514") {
     if (message.includes("placar")) return "Placar deve estar entre 0 e 20.";
