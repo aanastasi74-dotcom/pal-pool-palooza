@@ -203,6 +203,200 @@ function calcPontos(pc: number, pf: number, rc: number, rf: number, peso: number
   return base * peso;
 }
 
+/* ============ Counter animado ============ */
+function useCountUp(value: number, duration = 700, run = true) {
+  const [v, setV] = useState(run ? 0 : value);
+  const fromRef = useRef(run ? 0 : value);
+  useEffect(() => {
+    if (!run) { setV(value); return; }
+    const from = fromRef.current;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setV(from + (value - from) * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else fromRef.current = value;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration, run]);
+  return v;
+}
+function Counter({ to, format, className, run = true, duration }: { to: number; format?: (n: number) => string; className?: string; run?: boolean; duration?: number }) {
+  const v = useCountUp(to, duration ?? 700, run);
+  return <span className={className}>{format ? format(v) : Math.round(v).toLocaleString("pt-BR")}</span>;
+}
+
+/* ============ Step 0 — Quantas quotas você quiser ============ */
+function StepQuotas({ quotas }: { quotas: any }) {
+  const q = quotas ?? {};
+  const valor: number = q.valor ?? 50;
+  const limite: number = q.limite ?? 5;
+  const edicao: string = q.edicao ?? "Copa 2026";
+  const passos: string[] = q.passos ?? [
+    "Escolha quantas quotas quer",
+    "Pague por PIX",
+    "Envie o comprovante",
+    "Aprovado — bom jogo",
+  ];
+  const dist: { n: number; perebas: number }[] = q.distribuicao ?? [];
+  const paradoxo = q.paradoxo ?? { apelido: "ANASTA", quotas: 4, melhor: 11, pior: 108 };
+  const totalQuotas: number = q.total_quotas ?? 111;
+  const totalPerebas: number = q.total_perebas ?? 71;
+
+  const [n, setN] = useState(1);
+  const [userTouched, setUserTouched] = useState(false);
+  const [trilha, setTrilha] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const moveTo = async (sel: string) => {
+        const root = rootRef.current; if (!root) return;
+        const el = root.querySelector<HTMLElement>(sel); if (!el) return;
+        const r = el.getBoundingClientRect(); const rr = root.getBoundingClientRect();
+        setCursor({ x: r.left - rr.left + r.width / 2, y: r.top - rr.top + r.height / 2, visible: true });
+        await new Promise((res) => setTimeout(res, 450));
+      };
+      await new Promise((r) => setTimeout(r, 350));
+      for (let i = 0; i < 3; i++) {
+        if (cancel || userTouched) return;
+        await moveTo('[data-quota-inc]');
+        if (cancel || userTouched) return;
+        setN((v) => Math.min(limite, v + 1));
+        await new Promise((r) => setTimeout(r, 200));
+      }
+      setCursor((c) => ({ ...c, visible: false }));
+    })();
+    return () => { cancel = true; };
+  }, [limite, userTouched]);
+
+  useEffect(() => {
+    const ids: any[] = [];
+    for (let i = 0; i < passos.length; i++) {
+      ids.push(setTimeout(() => setTrilha((v) => Math.max(v, i + 1)), 1200 + i * 450));
+    }
+    return () => ids.forEach(clearTimeout);
+  }, [passos.length]);
+
+  const total = valor * n;
+  const maxDist = Math.max(1, ...dist.map((d) => d.perebas));
+  const passoIcons = [Hash, Wallet, Upload, CheckCircle2];
+
+  return (
+    <>
+      <StepHeader icon={Ticket} badge="Quotas" title="Quantas quotas você quiser" sub={`Até ${limite} por pereba — cada quota joga sozinha.`} />
+      <div ref={rootRef} className="relative mt-3 space-y-3">
+        {/* Bloco A — seletor */}
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Suas quotas</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">R$ {valor} por quota — {edicao}</p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted p-1">
+              <button
+                onClick={(e) => { e.stopPropagation(); setUserTouched(true); setN((v) => Math.max(1, v - 1)); }}
+                className="grid h-8 w-8 place-items-center rounded-full bg-background active:scale-95"
+                aria-label="Menos uma quota"
+              ><Minus className="h-4 w-4" /></button>
+              <span key={n} className="w-8 text-center font-display text-2xl font-black tabular-nums animate-scale-in">{n}</span>
+              <button
+                data-quota-inc
+                onClick={(e) => { e.stopPropagation(); setUserTouched(true); setN((v) => Math.min(limite, v + 1)); }}
+                className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground active:scale-95"
+                aria-label="Mais uma quota"
+              ><Plus className="h-4 w-4" /></button>
+            </div>
+          </div>
+          {/* Cartõezinhos de quota */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {Array.from({ length: n }).map((_, i) => (
+              <div
+                key={i}
+                className="inline-flex items-center gap-1 rounded-lg border border-primary/40 bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary animate-scale-in"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <Ticket className="h-3 w-3" /> #{i + 1}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex items-baseline justify-between border-t border-border pt-3">
+            <span className="text-[11px] text-muted-foreground">Total agora</span>
+            <span className="font-display text-2xl font-black text-primary tabular-nums">
+              R$ <Counter to={total} duration={500} />
+            </span>
+          </div>
+          <p className="mt-1 text-[10px] text-muted-foreground">Limite de {limite} quotas por pereba.</p>
+        </div>
+
+        {/* Bloco B — trilha */}
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Fluxo</p>
+          <div className="grid grid-cols-4 gap-1.5">
+            {passos.map((p, i) => {
+              const Icon = passoIcons[i] ?? Hash;
+              const on = i < trilha;
+              const last = i === passos.length - 1;
+              return (
+                <div
+                  key={i}
+                  className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-center text-[9px] font-bold leading-tight transition-all duration-300 ${
+                    on
+                      ? last
+                        ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                        : "border-primary/50 bg-primary/10 text-primary"
+                      : "border-border bg-muted/30 text-muted-foreground opacity-60"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{p}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bloco C — distribuição real */}
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Como ficou na Copa 2026</p>
+          <div className="space-y-1">
+            {dist.map((d, i) => (
+              <div key={d.n} className="flex items-center gap-2 text-[11px]">
+                <span className="w-14 shrink-0 tabular-nums text-muted-foreground">{d.n} quota{d.n === 1 ? "" : "s"}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary/70 transition-all duration-700"
+                    style={{ width: `${(d.perebas / maxDist) * 100}%`, transitionDelay: `${i * 80}ms` }}
+                  />
+                </div>
+                <span className="w-8 shrink-0 text-right font-black tabular-nums">{d.perebas}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 rounded-lg bg-muted/40 px-2 py-1.5 text-[11px] text-foreground">
+            Mais quotas não é garantia de nada: o <strong>{paradoxo.apelido}</strong> comprou {paradoxo.quotas} e terminou com uma em <strong>{paradoxo.melhor}º</strong> e outra em <strong>{paradoxo.pior}º</strong>.
+          </p>
+          <p className="mt-1 text-center text-[10px] text-muted-foreground">
+            {totalPerebas} perebas · {totalQuotas} quotas na Copa 2026.
+          </p>
+        </div>
+
+        {cursor.visible && (
+          <div
+            className="pointer-events-none absolute z-20 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-primary/30 transition-all duration-500 ease-out"
+            style={{ left: cursor.x, top: cursor.y }}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+
 /* ============ Step 1 — Palpitar leva segundos ============ */
 function Step1({ jogos, onInteract }: { jogos: any[]; onInteract: () => void }) {
   // Encenação no card #2 (index 1 se existir, senão 0)
