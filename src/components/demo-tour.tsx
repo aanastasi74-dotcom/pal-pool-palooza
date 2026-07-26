@@ -610,7 +610,7 @@ function Step4({ regras, comp }: { regras: any; comp: any }) {
             {top4.map((t, i) => (
               <div key={i} className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1 text-xs" style={{ marginLeft: i * 8 }}>
                 <span>{t.janela}</span>
-                <span className="font-display font-bold tabular-nums">{t.eficacia}% <span className="text-muted-foreground">({t.max.toLocaleString("pt-BR")})</span></span>
+                <span className="font-display font-bold tabular-nums">{t.eficacia}{t.max !== 0 ? <span className="text-muted-foreground"> ({t.max.toLocaleString("pt-BR")})</span> : null}</span>
               </div>
             ))}
           </div>
