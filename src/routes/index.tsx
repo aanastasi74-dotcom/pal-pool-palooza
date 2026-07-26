@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import heroImg from "@/assets/hero-bolao.jpg";
 import { Trophy, Users, Wallet, Sparkles, Calendar, ListOrdered, ShieldCheck, Smartphone } from "lucide-react";
 import { HomeMatchCarousel } from "@/components/home-match-carousel";
+import { DemoTour } from "@/components/demo-tour";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
