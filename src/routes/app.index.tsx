@@ -58,10 +58,25 @@ function Home() {
   };
 
   return (
-    <div className="space-y-8">
-      <WrappedCard />
-      <HomeCarouselCollapsible />
-      <section className="relative overflow-hidden rounded-3xl bg-hero p-6 text-primary-foreground shadow-glow md:p-10">
+    <div className="space-y-10">
+      {/* Seção "Bolões e manifestações" — espaço preparado pra receber cards de futuras competições. */}
+      <section>
+        <h2 className="font-display text-xl font-bold">Bolões e manifestações</h2>
+        <div className="mt-4 grid gap-3">
+          <ChampionsManifestacaoCard />
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-xl font-bold">Copa 2026 — encerrada</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-muted-foreground/25 bg-muted/40 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+            <Lock className="h-3 w-3" /> Somente leitura — encerrada em 19/07/2026
+          </span>
+        </div>
+        <WrappedCard />
+        <HomeCarouselCollapsible />
+        <section className="relative overflow-hidden rounded-3xl bg-hero p-6 text-primary-foreground shadow-glow md:p-10">
         <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-accent/30 blur-3xl" />
         <p className="text-xs uppercase tracking-widest opacity-80">Sua posição na perebada</p>
         <div className="mt-2 flex items-end gap-4">
