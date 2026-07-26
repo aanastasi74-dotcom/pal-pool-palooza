@@ -1,3 +1,4 @@
+import { CopaArquivadaBanner } from "@/components/copa-arquivada-banner";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -62,6 +63,7 @@ function AdminQuotasPage() {
 
   return (
     <div className="space-y-4">
+      <CopaArquivadaBanner />
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-5 w-5 text-primary" />
         <h1 className="font-display text-2xl font-extrabold">Quotas — recuperação manual</h1>

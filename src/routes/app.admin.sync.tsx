@@ -1,3 +1,4 @@
+import { CopaArquivadaBanner } from "@/components/copa-arquivada-banner";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,6 +131,7 @@ function SyncPage() {
 
   return (
     <div className="space-y-6">
+      <CopaArquivadaBanner />
       <div>
         <h1 className="font-display text-2xl font-bold">Sincronização de placares</h1>
         <p className="text-sm text-muted-foreground">

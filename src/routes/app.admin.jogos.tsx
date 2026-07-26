@@ -1,3 +1,4 @@
+import { CopaArquivadaBanner } from "@/components/copa-arquivada-banner";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { useMatches, useUpdateMatch } from "@/lib/queries/matches";
@@ -64,6 +65,7 @@ function JogosAdmin() {
 
   return (
     <div className="space-y-5">
+      <CopaArquivadaBanner />
       <div>
         <h1 className="font-display text-3xl font-extrabold">Jogos da Copa</h1>
         <p className="mt-1 text-sm text-muted-foreground">Atualize placares, times de mata-mata e horários.</p>

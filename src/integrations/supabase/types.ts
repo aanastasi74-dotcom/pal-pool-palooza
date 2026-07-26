@@ -1633,6 +1633,7 @@ export type Database = {
         Args: { p_aprovar_n?: number; p_lote_id: string }
         Returns: Json
       }
+      arquivamento_copa_ativo: { Args: never; Returns: boolean }
       ativar_quota_manual: {
         Args: { p_motivo: string; p_quota_id: string }
         Returns: Json

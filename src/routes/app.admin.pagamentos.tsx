@@ -1,3 +1,4 @@
+import { CopaArquivadaBanner } from "@/components/copa-arquivada-banner";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -108,6 +109,7 @@ function Pagamentos() {
 
   return (
     <div className="space-y-5">
+      <CopaArquivadaBanner />
       <div>
         <h1 className="font-display text-3xl font-extrabold">Pagamentos</h1>
         <p className="mt-1 text-sm text-muted-foreground">Conciliação dos Pix da perebada.</p>
