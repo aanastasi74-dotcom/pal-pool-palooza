@@ -592,13 +592,19 @@ function Step2({ j, regras }: { j: any; regras: any }) {
 
   const linhas = useMemo(() => {
     if (!palpites.length) return [];
-    const pts = palpites.map((p) => ({
-      ...p,
-      pts: ended ? p.pontos_final : calcPontos(p.casa, p.fora, cur.casa, cur.fora, peso),
-    }));
-    if (ended) return pts.sort((a, b) => a.pos_final - b.pos_final);
-    return pts.sort((a, b) => b.pts - a.pts || a.pos_final - b.pos_final);
-  }, [palpites, cur.casa, cur.fora, ended, peso]);
+    const prevCasa = timeline[Math.max(0, idx - 1)]?.casa ?? 0;
+    const prevFora = timeline[Math.max(0, idx - 1)]?.fora ?? 0;
+    const ordered = [...palpites].sort((a, b) => a.pos_final - b.pos_final);
+    return ordered.map((p) => {
+      const pts = ended
+        ? p.pontos_final
+        : calcPontos(p.casa, p.fora, cur.casa, cur.fora, peso);
+      const prevPts = idx === 0
+        ? 0
+        : calcPontos(p.casa, p.fora, prevCasa, prevFora, peso);
+      return { ...p, pts, delta: pts - prevPts };
+    });
+  }, [palpites, cur.casa, cur.fora, ended, peso, timeline, idx]);
 
   if (!j) return <div className="p-6 text-center text-sm text-muted-foreground">Sem dados do jogo.</div>;
 
