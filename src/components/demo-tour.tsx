@@ -975,27 +975,87 @@ function Step6({ stats }: { stats: any }) {
       nav({ to: "/champions" });
     }
   };
+
+  const [phase, setPhase] = useState(0);
+  useEffect(() => {
+    setPhase(0);
+    const timers = [
+      setTimeout(() => setPhase(1), 200),   // trofeu
+      setTimeout(() => setPhase(2), 550),   // "2027 tem mais." (palavra a palavra)
+      setTimeout(() => setPhase(3), 1600),  // "Vem aí..."
+      setTimeout(() => setPhase(4), 2100),  // números em cascata
+      setTimeout(() => setPhase(5), 3600),  // pausa, depois bloco Champions
+      setTimeout(() => setPhase(6), 4300),  // botão
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  const titulo = "2027 tem mais.".split(" ");
+  const perebas = stats?.perebas ?? 71;
+  const quotas = stats?.quotas ?? 111;
+  const palpites = stats?.palpites ?? 11042;
+  const nota = String(stats?.nota ?? 9.79).replace(".", ",");
+  const numeros: { label: string; value: string | number }[] = [
+    { label: "perebas", value: perebas },
+    { label: "quotas", value: quotas },
+    { label: "palpites", value: palpites.toLocaleString("pt-BR") },
+    { label: "nota", value: nota },
+  ];
+
   return (
-    <div className="flex h-full flex-col justify-center gap-4 pt-6 animate-fade-in">
+    <div className="flex h-full flex-col justify-center gap-4 pt-6">
       <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/15 to-accent/10 p-5 text-center shadow-sm">
-        <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-hero text-primary-foreground shadow-glow">
+        <div
+          className={`mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-hero text-primary-foreground shadow-glow ${phase >= 1 ? "animate-scale-in drop-shadow-[0_0_18px_hsl(var(--primary)/0.6)]" : "opacity-0"}`}
+        >
           <Trophy className="h-6 w-6" />
         </div>
-        <h3 className="mt-3 font-display text-2xl font-extrabold leading-tight">2027 tem mais.</h3>
-        <p className="mt-1 text-sm">Vem aí a <strong>Copa do Mundo Feminina</strong>.</p>
-        <p className="mt-3 text-[10px] text-muted-foreground">
-          {stats?.perebas ?? 71} perebas · {stats?.quotas ?? 111} quotas · {(stats?.palpites ?? 11042).toLocaleString("pt-BR")} palpites · nota {String(stats?.nota ?? 9.79).replace(".", ",")}
+
+        <h3 className="mt-3 font-display text-2xl font-extrabold leading-tight">
+          {titulo.map((w, i) => (
+            <span
+              key={i}
+              className={`mr-1 inline-block ${phase >= 2 ? "opacity-100 animate-fade-in" : "opacity-0"}`}
+              style={{ animationDelay: `${i * 250}ms`, animationFillMode: "forwards" }}
+            >
+              {w}
+            </span>
+          ))}
+        </h3>
+
+        <p className={`mt-1 text-sm transition-all duration-500 ${phase >= 3 ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+          Vem aí a <strong>Copa do Mundo Feminina</strong>.
         </p>
+
+        <div className="mt-3 grid grid-cols-4 gap-1 text-[10px] text-muted-foreground">
+          {numeros.map((it, i) => (
+            <div
+              key={it.label}
+              className={`flex flex-col items-center gap-0.5 ${phase >= 4 ? "opacity-100 animate-fade-in" : "opacity-0"}`}
+              style={{ animationDelay: `${i * 180}ms`, animationFillMode: "forwards" }}
+            >
+              <span className="font-display text-sm font-black tabular-nums text-foreground">
+                {typeof it.value === "number"
+                  ? <Counter to={it.value} duration={800} run={phase >= 4} />
+                  : it.value}
+              </span>
+              <span>{it.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4 text-center">
+      <div
+        className={`rounded-2xl border border-border bg-card p-4 text-center transition-all duration-700 ${phase >= 5 ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
+      >
         <p className="font-display text-lg font-extrabold">Não aguenta esperar até lá?</p>
         <p className="mt-1 text-xs text-muted-foreground">
           A Champions começa em setembro. Manifeste seu interesse — se a Perebada topar, tem bolão antes.
         </p>
         <button
           onClick={(e) => { e.stopPropagation(); goChampions(); }}
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-hero px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow transition hover:scale-[1.02]"
+          className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-hero px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow transition hover:scale-[1.02] ${phase >= 6 ? "opacity-100 animate-scale-in [animation-iteration-count:1]" : "opacity-0"}`}
+          style={phase >= 6 ? { animation: "scale-in 0.3s ease-out, pulse 3s ease-in-out 0.8s infinite" } : undefined}
         >
           Manifestar interesse na Champions →
         </button>
