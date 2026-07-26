@@ -564,7 +564,7 @@ function StepperMini({ value, onDec, onInc, dataAttr }: { value: number; onDec: 
 /* ============ Step 2 — A virada ============ */
 function Step2({ j, regras }: { j: any; regras: any }) {
   const timeline = (j?.timeline ?? []) as { min: number; casa: number; fora: number; evento: string }[];
-  const palpites = (j?.palpites ?? []) as { apelido: string; quota: number; pos_final: number; casa: number; fora: number; pontos_final: number }[];
+  const palpites = (j?.palpites ?? []) as { apelido: string; quota: number; pos: number; casa: number; fora: number; pontos_final: number; ficticio?: boolean }[];
   const peso: number = j?.peso ?? 36;
   const [idx, setIdx] = useState(0);
   const [ended, setEnded] = useState(false);
