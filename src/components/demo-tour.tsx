@@ -186,20 +186,14 @@ function StepHeader({ icon: Icon, badge, title, sub }: { icon: any; badge: strin
 
 /* ============ Regra de pontuação (client-side) ============ */
 function calcPontos(pc: number, pf: number, rc: number, rf: number, peso: number): number {
-  let base = 0;
   const sign = (n: number) => (n > 0 ? 1 : n < 0 ? -1 : 0);
-  if (pc === rc && pf === rf) base = 12;
-  else {
-    const resultado = sign(pc - pf) === sign(rc - rf);
-    const dif = (pc - pf) === (rc - rf);
-    const gols = pc === rc || pf === rf;
-    if (resultado && dif) base = 6;
-    else if (resultado && gols) base = 5;
-    else if (resultado) base = 4;
-    else if (dif) base = 2;
-    else if (gols) base = 1;
-    else base = 0;
-  }
+  // PORTÃO: sem acertar o resultado, não pontua nada.
+  if (sign(pc - pf) !== sign(rc - rf)) return 0;
+  let base: number;
+  if (pc === rc && pf === rf) base = 12;                 // placar exato
+  else if (pc - pf === rc - rf) base = 6;                // resultado + diferença
+  else if (pc === rc || pf === rf) base = 5;             // resultado + gols de um time
+  else base = 4;                                         // só o resultado
   return base * peso;
 }
 
