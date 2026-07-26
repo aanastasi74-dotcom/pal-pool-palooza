@@ -106,6 +106,22 @@ function Landing() {
         </div>
       </section>
 
+      {/* DEMO INTERATIVA */}
+      <section id="veja-funcionando" className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">Demonstração interativa</p>
+          <h2 className="mt-3 font-display text-3xl font-extrabold text-balance md:text-4xl">
+            Veja o app funcionando — com números reais da Copa 2026.
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            5 passos, dados de verdade. Toque nos placares, veja o ranking mudar, leia a crônica.
+          </p>
+        </div>
+        <div className="mt-10">
+          <DemoTour />
+        </div>
+      </section>
+
       {/* FEATURES */}
       <section id="como-funciona" className="mx-auto max-w-6xl px-4 py-20">
         <div className="mx-auto max-w-2xl text-center">
