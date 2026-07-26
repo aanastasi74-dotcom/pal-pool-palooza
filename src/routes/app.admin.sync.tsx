@@ -131,6 +131,7 @@ function SyncPage() {
 
   return (
     <div className="space-y-6">
+      <CopaArquivadaBanner />
       <div>
         <h1 className="font-display text-2xl font-bold">Sincronização de placares</h1>
         <p className="text-sm text-muted-foreground">

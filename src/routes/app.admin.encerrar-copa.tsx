@@ -52,6 +52,7 @@ function EncerrarCopaPage() {
 
   return (
     <div className="space-y-6">
+      <CopaArquivadaBanner />
       <div className="flex items-center gap-3">
         <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gold text-gold-foreground">
           <Crown className="h-6 w-6" />
