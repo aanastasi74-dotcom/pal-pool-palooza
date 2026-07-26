@@ -141,9 +141,33 @@ function Home() {
           <BoletimCard />
         </div>
       </section>
+      </section>
 
       <PesquisaPopup />
     </div>
+  );
+}
+
+function ChampionsManifestacaoCard() {
+  const { data } = useChampionsTotal();
+  const total = data?.quotas_total ?? 0;
+  const quorum = data?.quorum ?? 35;
+  return (
+    <Link
+      to="/app/champions"
+      className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-glow"
+    >
+      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+        <Trophy className="h-6 w-6" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-display text-base font-bold">Bolão da Champions 2026/27</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {total} de {quorum} quotas manifestadas · prazo 07/08
+        </p>
+      </div>
+      <ChevronRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5" />
+    </Link>
   );
 }
 
