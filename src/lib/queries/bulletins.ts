@@ -6,7 +6,7 @@ export function useBulletins() {
   return useQuery({
     queryKey: ["bulletins"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("bulletins").select("*").order("data", { ascending: false });
+      const { data, error } = await (supabase as any).from("bulletins").select("*").order("data", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -30,7 +30,7 @@ export function useCreateBulletin() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (b: any) => {
-      const { data, error } = await supabase.from("bulletins").insert({ ...b, publicado_por: user?.id ?? null }).select().single();
+      const { data, error } = await (supabase as any).from("bulletins").insert({ ...b, publicado_por: user?.id ?? null }).select().single();
       if (error) throw error;
       return data;
     },
@@ -42,7 +42,7 @@ export function useUpdateBulletin() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: any) => {
-      const { data, error } = await supabase.from("bulletins").update(patch).eq("id", id).select().single();
+      const { data, error } = await (supabase as any).from("bulletins").update(patch).eq("id", id).select().single();
       if (error) throw error;
       return data;
     },
@@ -54,7 +54,7 @@ export function useDeleteBulletin() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("bulletins").delete().eq("id", id);
+      const { error } = await (supabase as any).from("bulletins").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["bulletins"] }),
