@@ -1,3 +1,4 @@
+import { CopaArquivadaBanner } from "@/components/copa-arquivada-banner";
 import { createFileRoute } from "@tanstack/react-router";
 import { Info } from "lucide-react";
 import { PremiacaoCard } from "@/components/premiacao-card";

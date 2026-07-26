@@ -1,3 +1,4 @@
+import { CopaArquivadaBanner } from "@/components/copa-arquivada-banner";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { useMatches, useUpdateMatch } from "@/lib/queries/matches";
