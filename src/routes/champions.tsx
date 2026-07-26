@@ -135,6 +135,16 @@ function ChampionsPublicPage() {
           )}
         </section>
 
+        <section aria-label="Demonstração interativa" className="rounded-2xl border border-border bg-card p-5 shadow-card">
+          <div className="mb-4 text-center">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">Nunca participou?</p>
+            <h2 className="mt-1 font-display text-xl font-extrabold">Veja como o bolão funciona</h2>
+            <p className="mt-1 text-xs text-muted-foreground">5 passos com dados reais da Copa 2026.</p>
+          </div>
+          <DemoTour />
+        </section>
+
+        <div id="champions-cadastro" />
         {isLoading ? (
           <Skeleton className="h-40 rounded-2xl" />
         ) : user ? (
