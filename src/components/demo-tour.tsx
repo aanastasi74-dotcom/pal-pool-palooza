@@ -18,14 +18,20 @@ import {
   Check,
   Crown,
   Trophy,
+  Ticket,
+  Hash,
+  Wallet,
+  Upload,
+  CheckCircle2,
+  Lock,
 } from "lucide-react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 
 /* ============ Tipos locais (RPC como any pra não travar em types stale) ============ */
 type DemoData = any;
 
-const STEP_MS = [11000, 13000, 11000, 10000, 11000, 999999];
-const TOTAL_STEPS = 6;
+const STEP_MS = [9000, 9000, 13000, 11000, 10000, 11000, 999999];
+const TOTAL_STEPS = 7;
 
 function useDemoData() {
   return useQuery<DemoData | null>({
@@ -84,7 +90,7 @@ function TourInner({ data }: { data: DemoData }) {
     startRef.current = performance.now();
   };
 
-  const stepIcons = [Sparkles, Radio, ListOrdered, Calculator, BookText, Trophy];
+  const stepIcons = [Ticket, Sparkles, Radio, ListOrdered, Calculator, BookText, Trophy];
 
   return (
     <div className="mx-auto w-full max-w-md">
@@ -103,12 +109,13 @@ function TourInner({ data }: { data: DemoData }) {
           </div>
 
           <div className="min-h-[620px] px-4 pb-4" onPointerDown={() => setPaused(true)}>
-            {step === 0 && <Step1 jogos={data.jogos_palpite ?? []} onInteract={() => setPaused(true)} />}
-            {step === 1 && <Step2 j={data.jogo_virada} regras={data.regras} />}
-            {step === 2 && <Step3 tl={data.timelapse} lideranca={data.lideranca ?? []} />}
-            {step === 3 && <Step4 regras={data.regras} comp={data.composicao_campeao} />}
-            {step === 4 && <Step5 boletim={data.boletim} stats={data.stats} />}
-            {step === 5 && <Step6 stats={data.stats} />}
+            {step === 0 && <StepQuotas quotas={data.quotas} />}
+            {step === 1 && <Step1 jogos={data.jogos_palpite ?? []} onInteract={() => setPaused(true)} />}
+            {step === 2 && <Step2 j={data.jogo_virada} regras={data.regras} />}
+            {step === 3 && <Step3 tl={data.timelapse} lideranca={data.lideranca ?? []} />}
+            {step === 4 && <Step4 regras={data.regras} comp={data.composicao_campeao} />}
+            {step === 5 && <Step5 boletim={data.boletim} stats={data.stats} />}
+            {step === 6 && <Step6 stats={data.stats} />}
           </div>
         </div>
       </div>
@@ -196,6 +203,200 @@ function calcPontos(pc: number, pf: number, rc: number, rf: number, peso: number
   return base * peso;
 }
 
+/* ============ Counter animado ============ */
+function useCountUp(value: number, duration = 700, run = true) {
+  const [v, setV] = useState(run ? 0 : value);
+  const fromRef = useRef(run ? 0 : value);
+  useEffect(() => {
+    if (!run) { setV(value); return; }
+    const from = fromRef.current;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setV(from + (value - from) * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else fromRef.current = value;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration, run]);
+  return v;
+}
+function Counter({ to, format, className, run = true, duration }: { to: number; format?: (n: number) => string; className?: string; run?: boolean; duration?: number }) {
+  const v = useCountUp(to, duration ?? 700, run);
+  return <span className={className}>{format ? format(v) : Math.round(v).toLocaleString("pt-BR")}</span>;
+}
+
+/* ============ Step 0 — Quantas quotas você quiser ============ */
+function StepQuotas({ quotas }: { quotas: any }) {
+  const q = quotas ?? {};
+  const valor: number = q.valor ?? 50;
+  const limite: number = q.limite ?? 5;
+  const edicao: string = q.edicao ?? "Copa 2026";
+  const passos: string[] = q.passos ?? [
+    "Escolha quantas quotas quer",
+    "Pague por PIX",
+    "Envie o comprovante",
+    "Aprovado — bom jogo",
+  ];
+  const dist: { n: number; perebas: number }[] = q.distribuicao ?? [];
+  const paradoxo = q.paradoxo ?? { apelido: "ANASTA", quotas: 4, melhor: 11, pior: 108 };
+  const totalQuotas: number = q.total_quotas ?? 111;
+  const totalPerebas: number = q.total_perebas ?? 71;
+
+  const [n, setN] = useState(1);
+  const [userTouched, setUserTouched] = useState(false);
+  const [trilha, setTrilha] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const moveTo = async (sel: string) => {
+        const root = rootRef.current; if (!root) return;
+        const el = root.querySelector<HTMLElement>(sel); if (!el) return;
+        const r = el.getBoundingClientRect(); const rr = root.getBoundingClientRect();
+        setCursor({ x: r.left - rr.left + r.width / 2, y: r.top - rr.top + r.height / 2, visible: true });
+        await new Promise((res) => setTimeout(res, 450));
+      };
+      await new Promise((r) => setTimeout(r, 350));
+      for (let i = 0; i < 3; i++) {
+        if (cancel || userTouched) return;
+        await moveTo('[data-quota-inc]');
+        if (cancel || userTouched) return;
+        setN((v) => Math.min(limite, v + 1));
+        await new Promise((r) => setTimeout(r, 200));
+      }
+      setCursor((c) => ({ ...c, visible: false }));
+    })();
+    return () => { cancel = true; };
+  }, [limite, userTouched]);
+
+  useEffect(() => {
+    const ids: any[] = [];
+    for (let i = 0; i < passos.length; i++) {
+      ids.push(setTimeout(() => setTrilha((v) => Math.max(v, i + 1)), 1200 + i * 450));
+    }
+    return () => ids.forEach(clearTimeout);
+  }, [passos.length]);
+
+  const total = valor * n;
+  const maxDist = Math.max(1, ...dist.map((d) => d.perebas));
+  const passoIcons = [Hash, Wallet, Upload, CheckCircle2];
+
+  return (
+    <>
+      <StepHeader icon={Ticket} badge="Quotas" title="Quantas quotas você quiser" sub={`Até ${limite} por pereba — cada quota joga sozinha.`} />
+      <div ref={rootRef} className="relative mt-3 space-y-3">
+        {/* Bloco A — seletor */}
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Suas quotas</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">R$ {valor} por quota — {edicao}</p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted p-1">
+              <button
+                onClick={(e) => { e.stopPropagation(); setUserTouched(true); setN((v) => Math.max(1, v - 1)); }}
+                className="grid h-8 w-8 place-items-center rounded-full bg-background active:scale-95"
+                aria-label="Menos uma quota"
+              ><Minus className="h-4 w-4" /></button>
+              <span key={n} className="w-8 text-center font-display text-2xl font-black tabular-nums animate-scale-in">{n}</span>
+              <button
+                data-quota-inc
+                onClick={(e) => { e.stopPropagation(); setUserTouched(true); setN((v) => Math.min(limite, v + 1)); }}
+                className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground active:scale-95"
+                aria-label="Mais uma quota"
+              ><Plus className="h-4 w-4" /></button>
+            </div>
+          </div>
+          {/* Cartõezinhos de quota */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {Array.from({ length: n }).map((_, i) => (
+              <div
+                key={i}
+                className="inline-flex items-center gap-1 rounded-lg border border-primary/40 bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary animate-scale-in"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <Ticket className="h-3 w-3" /> #{i + 1}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex items-baseline justify-between border-t border-border pt-3">
+            <span className="text-[11px] text-muted-foreground">Total agora</span>
+            <span className="font-display text-2xl font-black text-primary tabular-nums">
+              R$ <Counter to={total} duration={500} />
+            </span>
+          </div>
+          <p className="mt-1 text-[10px] text-muted-foreground">Limite de {limite} quotas por pereba.</p>
+        </div>
+
+        {/* Bloco B — trilha */}
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Fluxo</p>
+          <div className="grid grid-cols-4 gap-1.5">
+            {passos.map((p, i) => {
+              const Icon = passoIcons[i] ?? Hash;
+              const on = i < trilha;
+              const last = i === passos.length - 1;
+              return (
+                <div
+                  key={i}
+                  className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-center text-[9px] font-bold leading-tight transition-all duration-300 ${
+                    on
+                      ? last
+                        ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                        : "border-primary/50 bg-primary/10 text-primary"
+                      : "border-border bg-muted/30 text-muted-foreground opacity-60"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{p}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bloco C — distribuição real */}
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Como ficou na Copa 2026</p>
+          <div className="space-y-1">
+            {dist.map((d, i) => (
+              <div key={d.n} className="flex items-center gap-2 text-[11px]">
+                <span className="w-14 shrink-0 tabular-nums text-muted-foreground">{d.n} quota{d.n === 1 ? "" : "s"}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary/70 transition-all duration-700"
+                    style={{ width: `${(d.perebas / maxDist) * 100}%`, transitionDelay: `${i * 80}ms` }}
+                  />
+                </div>
+                <span className="w-8 shrink-0 text-right font-black tabular-nums">{d.perebas}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 rounded-lg bg-muted/40 px-2 py-1.5 text-[11px] text-foreground">
+            Mais quotas não é garantia de nada: o <strong>{paradoxo.apelido}</strong> comprou {paradoxo.quotas} e terminou com uma em <strong>{paradoxo.melhor}º</strong> e outra em <strong>{paradoxo.pior}º</strong>.
+          </p>
+          <p className="mt-1 text-center text-[10px] text-muted-foreground">
+            {totalPerebas} perebas · {totalQuotas} quotas na Copa 2026.
+          </p>
+        </div>
+
+        {cursor.visible && (
+          <div
+            className="pointer-events-none absolute z-20 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-primary/30 transition-all duration-500 ease-out"
+            style={{ left: cursor.x, top: cursor.y }}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+
 /* ============ Step 1 — Palpitar leva segundos ============ */
 function Step1({ jogos, onInteract }: { jogos: any[]; onInteract: () => void }) {
   // Encenação no card #2 (index 1 se existir, senão 0)
@@ -230,26 +431,26 @@ function Step1({ jogos, onInteract }: { jogos: any[]; onInteract: () => void }) 
   useEffect(() => {
     let cancel = false;
     (async () => {
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 350));
       if (cancel || userInterrupted) return;
       await moveCursorTo(`[data-c1-edit="${idx}"]`, true);
       if (cancel || userInterrupted) return;
       setPlacares((p) => ({ ...p, [idx]: { ...p[idx], edit: true } }));
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, 250));
       // +1 casa
       await moveCursorTo(`[data-c1-inc-c="${idx}"]`, true);
       if (cancel || userInterrupted) return;
       setPlacares((p) => ({ ...p, [idx]: { ...p[idx], c: 1 } }));
-      await new Promise((r) => setTimeout(r, 350));
+      await new Promise((r) => setTimeout(r, 200));
       await moveCursorTo(`[data-c1-inc-c="${idx}"]`, true);
       if (cancel || userInterrupted) return;
       setPlacares((p) => ({ ...p, [idx]: { ...p[idx], c: 2 } }));
-      await new Promise((r) => setTimeout(r, 350));
+      await new Promise((r) => setTimeout(r, 200));
       // +1 fora
       await moveCursorTo(`[data-c1-inc-f="${idx}"]`, true);
       if (cancel || userInterrupted) return;
       setPlacares((p) => ({ ...p, [idx]: { ...p[idx], f: 1 } }));
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 350));
       // salvar
       await moveCursorTo(`[data-c1-save="${idx}"]`, true);
       if (cancel || userInterrupted) return;
@@ -391,13 +592,19 @@ function Step2({ j, regras }: { j: any; regras: any }) {
 
   const linhas = useMemo(() => {
     if (!palpites.length) return [];
-    const pts = palpites.map((p) => ({
-      ...p,
-      pts: ended ? p.pontos_final : calcPontos(p.casa, p.fora, cur.casa, cur.fora, peso),
-    }));
-    if (ended) return pts.sort((a, b) => a.pos_final - b.pos_final);
-    return pts.sort((a, b) => b.pts - a.pts || a.pos_final - b.pos_final);
-  }, [palpites, cur.casa, cur.fora, ended, peso]);
+    const prevCasa = timeline[Math.max(0, idx - 1)]?.casa ?? 0;
+    const prevFora = timeline[Math.max(0, idx - 1)]?.fora ?? 0;
+    const ordered = [...palpites].sort((a, b) => a.pos_final - b.pos_final);
+    return ordered.map((p) => {
+      const pts = ended
+        ? p.pontos_final
+        : calcPontos(p.casa, p.fora, cur.casa, cur.fora, peso);
+      const prevPts = idx === 0
+        ? 0
+        : calcPontos(p.casa, p.fora, prevCasa, prevFora, peso);
+      return { ...p, pts, delta: pts - prevPts };
+    });
+  }, [palpites, cur.casa, cur.fora, ended, peso, timeline, idx]);
 
   if (!j) return <div className="p-6 text-center text-sm text-muted-foreground">Sem dados do jogo.</div>;
 
@@ -436,31 +643,56 @@ function Step2({ j, regras }: { j: any; regras: any }) {
         )}
       </div>
 
-      {/* Lista de palpites */}
+      {/* Lista de palpites — ordem fixa do ranking geral */}
       <div className="mt-3 rounded-2xl border border-border bg-card p-2">
         <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          {ended ? "Pontos finais deste jogo" : "Pontos parciais — ao vivo"}
+          Palpites de todo mundo — ordem do ranking geral
         </p>
         <div className="space-y-1">
-          {linhas.map((p, rank) => (
-            <div
-              key={`${p.apelido}-${p.quota}`}
-              className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1.5 text-xs transition-all duration-500"
-              style={{ transform: `translateY(0)` }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-background text-[10px] font-black">{rank + 1}</span>
-                <span className="font-bold">{p.apelido}<span className="text-muted-foreground"> #{p.quota}</span></span>
-                <span className="text-muted-foreground tabular-nums">{p.casa}×{p.fora}</span>
+          {linhas.map((p) => {
+            const positivo = p.pts > 0;
+            const zerou = p.delta < 0 && p.pts === 0;
+            return (
+              <div
+                key={`${p.apelido}-${p.quota}`}
+                className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-xs transition-colors duration-300 ${positivo ? "bg-emerald-500/10" : "bg-muted/40"}`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-background text-[10px] font-black">{p.pos_final}</span>
+                  <span className="font-bold">{p.apelido}<span className="text-muted-foreground"> #{p.quota}</span></span>
+                  <span className="text-muted-foreground tabular-nums">{p.casa}×{p.fora}</span>
+                </div>
+                <div className="relative flex items-center">
+                  {p.delta > 0 && (
+                    <span
+                      key={`d-${idx}-${p.apelido}-${p.quota}`}
+                      className="pointer-events-none absolute -top-3 right-0 text-[10px] font-black text-emerald-500 animate-fade-in"
+                    >
+                      +{p.delta}
+                    </span>
+                  )}
+                  <span
+                    key={`${idx}-${p.pts}`}
+                    className={`font-display font-black tabular-nums animate-scale-in ${
+                      positivo
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : zerou
+                          ? "text-amber-500"
+                          : "text-muted-foreground"
+                    }`}
+                  >
+                    {p.pts}
+                  </span>
+                </div>
               </div>
-              <span key={p.pts} className={`font-display font-black tabular-nums animate-scale-in ${p.pts > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
-                {p.pts}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <p className="mt-2 text-[10px] text-muted-foreground">Peso {peso}. O mesmo acerto na estreia valeria {6 * (regras?.peso?.min ?? 10)}.</p>
+      <p className="mt-1 text-center text-[11px] font-bold text-foreground">
+        O líder abriu o jogo zerado. O quinto colocado abriu com 216.
+      </p>
     </>
   );
 }
@@ -577,25 +809,38 @@ function Step3({ tl, lideranca }: { tl: any; lideranca: any[] }) {
 /* ============ Step 4 — Transparência ============ */
 function Step4({ regras, comp }: { regras: any; comp: any }) {
   const placar: { caso: string; pts: number }[] = regras?.placar ?? [];
-  const top4: { janela: string; eficacia: number; max: number }[] = regras?.top4 ?? [];
-  const [showTotal, setShowTotal] = useState(false);
+  const top4: { janela: string; eficacia: number | string; max: number }[] = regras?.top4 ?? [];
+  const [phase, setPhase] = useState(0);
   useEffect(() => {
-    setShowTotal(false);
-    const t = setTimeout(() => setShowTotal(true), 3200);
-    return () => clearTimeout(t);
-  }, []);
+    setPhase(0);
+    const timers = [
+      setTimeout(() => setPhase(1), 900 + placar.length * 90),   // placar done → mostra top4
+      setTimeout(() => setPhase(2), 900 + placar.length * 90 + top4.length * 180 + 300), // total pop
+      setTimeout(() => setPhase(3), 900 + placar.length * 90 + top4.length * 180 + 900), // exemplo
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [placar.length, top4.length]);
+
+  const maxTop4 = Math.max(1, ...top4.map((t) => t.max));
 
   return (
     <>
       <StepHeader icon={Calculator} badge="Transparência" title="Cada ponto justificado" sub="Sem caixa-preta." />
       <div className="mt-3 space-y-2">
+        {/* Placar — cascata */}
         <div className="rounded-2xl border border-border bg-card p-3">
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Placar</p>
           <div className="space-y-1">
             {placar.map((l, i) => (
-              <div key={i} className="flex items-center justify-between text-xs">
+              <div
+                key={i}
+                className="flex items-center justify-between text-xs opacity-0 animate-fade-in"
+                style={{ animationDelay: `${i * 90}ms`, animationFillMode: "forwards" }}
+              >
                 <span>{l.caso}</span>
-                <span className="font-display font-black tabular-nums text-primary">{l.pts}</span>
+                <span className="font-display font-black tabular-nums text-primary">
+                  <Counter to={l.pts} duration={600} />
+                </span>
               </div>
             ))}
           </div>
@@ -604,18 +849,42 @@ function Step4({ regras, comp }: { regras: any; comp: any }) {
           </p>
         </div>
 
+        {/* Top 4 escadinha */}
         <div className="rounded-2xl border border-border bg-card p-3">
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 4 · escadinha</p>
-          <div className="space-y-1">
-            {top4.map((t, i) => (
-              <div key={i} className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1 text-xs" style={{ marginLeft: i * 8 }}>
-                <span>{t.janela}</span>
-                <span className="font-display font-bold tabular-nums">{t.eficacia}{t.max !== 0 ? <span className="text-muted-foreground"> ({t.max.toLocaleString("pt-BR")})</span> : null}</span>
-              </div>
-            ))}
+          <div className="space-y-1.5">
+            {top4.map((t, i) => {
+              const on = phase >= 1;
+              const travado = !t.max;
+              const w = travado ? 8 : Math.max(10, (t.max / maxTop4) * 100);
+              const delay = i * 180;
+              return (
+                <div
+                  key={i}
+                  className="relative overflow-hidden rounded-lg bg-muted/40 text-xs opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${delay}ms`, animationFillMode: "forwards" }}
+                >
+                  <div
+                    className={`absolute inset-y-0 left-0 transition-all duration-500 ease-out ${travado ? "bg-muted-foreground/20" : "bg-primary/20"}`}
+                    style={{ width: on ? `${w}%` : "0%", transitionDelay: `${delay + 150}ms` }}
+                  />
+                  <div className="relative flex items-center justify-between px-2 py-1.5">
+                    <span className="flex items-center gap-1.5">
+                      {travado && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      {t.janela}
+                    </span>
+                    <span className="font-display font-bold tabular-nums">
+                      {t.eficacia}
+                      {t.max !== 0 ? <span className="text-muted-foreground"> ({t.max.toLocaleString("pt-BR")})</span> : null}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
+        {/* Composição do campeão */}
         {comp && (
           <div className="rounded-2xl border border-border bg-card p-3">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Como o campeão fez {comp.total?.toLocaleString?.("pt-BR")}</p>
@@ -623,17 +892,28 @@ function Step4({ regras, comp }: { regras: any; comp: any }) {
               <span>{comp.palpites} palpites · {comp.exatos} exatos · {comp.pontuados} pontuados</span>
               <span className="text-muted-foreground">{comp.aproveitamento}%</span>
             </div>
-            <div className={`mt-2 flex items-baseline justify-between border-t border-border pt-2 transition-opacity ${showTotal ? "opacity-100" : "opacity-30"}`}>
+            <div className={`mt-2 flex items-baseline justify-between border-t border-border pt-2 transition-opacity duration-500 ${phase >= 2 ? "opacity-100" : "opacity-20"}`}>
               <span className="text-xs">
-                <span className="font-display font-black">{comp.pontos_placares?.toLocaleString?.("pt-BR")}</span>
+                <span className="font-display font-black">
+                  <Counter to={comp.pontos_placares ?? 0} duration={700} run={phase >= 2} />
+                </span>
                 <span className="text-muted-foreground"> placares </span>
-                + <span className="font-display font-black">{comp.pontos_top4?.toLocaleString?.("pt-BR")}</span>
+                + <span className="font-display font-black">
+                  <Counter to={comp.pontos_top4 ?? 0} duration={700} run={phase >= 2} />
+                </span>
                 <span className="text-muted-foreground"> Top 4</span>
               </span>
-              <span className="font-display text-xl font-black text-primary tabular-nums">= {comp.total?.toLocaleString?.("pt-BR")}</span>
+              <span
+                key={phase >= 2 ? "on" : "off"}
+                className={`font-display text-2xl font-black text-primary tabular-nums ${phase >= 2 ? "animate-scale-in drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" : ""}`}
+              >
+                = {comp.total?.toLocaleString?.("pt-BR")}
+              </span>
             </div>
             {comp.exemplo_jogo && (
-              <p className="mt-2 rounded-lg bg-muted/40 px-2 py-1.5 text-[10px] text-muted-foreground">
+              <p
+                className={`mt-2 rounded-lg bg-muted/40 px-2 py-1.5 text-[10px] text-muted-foreground transition-opacity duration-500 ${phase >= 3 ? "opacity-100 animate-fade-in" : "opacity-0"}`}
+              >
                 Ex: {comp.exemplo_jogo.jogo} — palpitou {comp.exemplo_jogo.palpite} → {comp.exemplo_jogo.regra} × peso {comp.exemplo_jogo.peso} = <strong className="text-foreground">{comp.exemplo_jogo.pontos} pts</strong>
               </p>
             )}
@@ -695,27 +975,87 @@ function Step6({ stats }: { stats: any }) {
       nav({ to: "/champions" });
     }
   };
+
+  const [phase, setPhase] = useState(0);
+  useEffect(() => {
+    setPhase(0);
+    const timers = [
+      setTimeout(() => setPhase(1), 200),   // trofeu
+      setTimeout(() => setPhase(2), 550),   // "2027 tem mais." (palavra a palavra)
+      setTimeout(() => setPhase(3), 1600),  // "Vem aí..."
+      setTimeout(() => setPhase(4), 2100),  // números em cascata
+      setTimeout(() => setPhase(5), 3600),  // pausa, depois bloco Champions
+      setTimeout(() => setPhase(6), 4300),  // botão
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  const titulo = "2027 tem mais.".split(" ");
+  const perebas = stats?.perebas ?? 71;
+  const quotas = stats?.quotas ?? 111;
+  const palpites = stats?.palpites ?? 11042;
+  const nota = String(stats?.nota ?? 9.79).replace(".", ",");
+  const numeros: { label: string; value: string | number }[] = [
+    { label: "perebas", value: perebas },
+    { label: "quotas", value: quotas },
+    { label: "palpites", value: palpites.toLocaleString("pt-BR") },
+    { label: "nota", value: nota },
+  ];
+
   return (
-    <div className="flex h-full flex-col justify-center gap-4 pt-6 animate-fade-in">
+    <div className="flex h-full flex-col justify-center gap-4 pt-6">
       <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/15 to-accent/10 p-5 text-center shadow-sm">
-        <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-hero text-primary-foreground shadow-glow">
+        <div
+          className={`mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-hero text-primary-foreground shadow-glow ${phase >= 1 ? "animate-scale-in drop-shadow-[0_0_18px_hsl(var(--primary)/0.6)]" : "opacity-0"}`}
+        >
           <Trophy className="h-6 w-6" />
         </div>
-        <h3 className="mt-3 font-display text-2xl font-extrabold leading-tight">2027 tem mais.</h3>
-        <p className="mt-1 text-sm">Vem aí a <strong>Copa do Mundo Feminina</strong>.</p>
-        <p className="mt-3 text-[10px] text-muted-foreground">
-          {stats?.perebas ?? 71} perebas · {stats?.quotas ?? 111} quotas · {(stats?.palpites ?? 11042).toLocaleString("pt-BR")} palpites · nota {String(stats?.nota ?? 9.79).replace(".", ",")}
+
+        <h3 className="mt-3 font-display text-2xl font-extrabold leading-tight">
+          {titulo.map((w, i) => (
+            <span
+              key={i}
+              className={`mr-1 inline-block ${phase >= 2 ? "opacity-100 animate-fade-in" : "opacity-0"}`}
+              style={{ animationDelay: `${i * 250}ms`, animationFillMode: "forwards" }}
+            >
+              {w}
+            </span>
+          ))}
+        </h3>
+
+        <p className={`mt-1 text-sm transition-all duration-500 ${phase >= 3 ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+          Vem aí a <strong>Copa do Mundo Feminina</strong>.
         </p>
+
+        <div className="mt-3 grid grid-cols-4 gap-1 text-[10px] text-muted-foreground">
+          {numeros.map((it, i) => (
+            <div
+              key={it.label}
+              className={`flex flex-col items-center gap-0.5 ${phase >= 4 ? "opacity-100 animate-fade-in" : "opacity-0"}`}
+              style={{ animationDelay: `${i * 180}ms`, animationFillMode: "forwards" }}
+            >
+              <span className="font-display text-sm font-black tabular-nums text-foreground">
+                {typeof it.value === "number"
+                  ? <Counter to={it.value} duration={800} run={phase >= 4} />
+                  : it.value}
+              </span>
+              <span>{it.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4 text-center">
+      <div
+        className={`rounded-2xl border border-border bg-card p-4 text-center transition-all duration-700 ${phase >= 5 ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
+      >
         <p className="font-display text-lg font-extrabold">Não aguenta esperar até lá?</p>
         <p className="mt-1 text-xs text-muted-foreground">
           A Champions começa em setembro. Manifeste seu interesse — se a Perebada topar, tem bolão antes.
         </p>
         <button
           onClick={(e) => { e.stopPropagation(); goChampions(); }}
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-hero px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow transition hover:scale-[1.02]"
+          className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-hero px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow transition hover:scale-[1.02] ${phase >= 6 ? "opacity-100 animate-scale-in [animation-iteration-count:1]" : "opacity-0"}`}
+          style={phase >= 6 ? { animation: "scale-in 0.3s ease-out, pulse 3s ease-in-out 0.8s infinite" } : undefined}
         >
           Manifestar interesse na Champions →
         </button>
