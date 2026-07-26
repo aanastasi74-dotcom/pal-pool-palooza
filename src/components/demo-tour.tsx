@@ -642,6 +642,11 @@ function Step2({ j, regras }: { j: any; regras: any }) {
         <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Palpites de todo mundo — ordem do ranking geral
         </p>
+        {linhas.length > 0 && linhas.every((p) => p.pts === 0) && (
+          <p className="mb-1 rounded-lg bg-muted/60 px-2 py-1 text-center text-[10px] font-medium text-muted-foreground animate-fade-in">
+            Ninguém pontuando neste momento.
+          </p>
+        )}
         <div className="space-y-1">
           {linhas.map((p) => {
             const positivo = p.pts > 0;
@@ -685,7 +690,7 @@ function Step2({ j, regras }: { j: any; regras: any }) {
       </div>
       <p className="mt-2 text-[10px] text-muted-foreground">Peso {peso}. O mesmo acerto na estreia valeria {6 * (regras?.peso?.min ?? 10)}.</p>
       <p className="mt-1 text-center text-[11px] font-bold text-foreground">
-        O líder abriu o jogo zerado. O quinto colocado abriu com 216.
+        Durante 83 minutos, só o quinto colocado pontuava. No apito final, ele perdeu tudo.
       </p>
     </>
   );
