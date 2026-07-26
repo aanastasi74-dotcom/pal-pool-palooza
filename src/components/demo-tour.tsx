@@ -809,25 +809,38 @@ function Step3({ tl, lideranca }: { tl: any; lideranca: any[] }) {
 /* ============ Step 4 — Transparência ============ */
 function Step4({ regras, comp }: { regras: any; comp: any }) {
   const placar: { caso: string; pts: number }[] = regras?.placar ?? [];
-  const top4: { janela: string; eficacia: number; max: number }[] = regras?.top4 ?? [];
-  const [showTotal, setShowTotal] = useState(false);
+  const top4: { janela: string; eficacia: number | string; max: number }[] = regras?.top4 ?? [];
+  const [phase, setPhase] = useState(0);
   useEffect(() => {
-    setShowTotal(false);
-    const t = setTimeout(() => setShowTotal(true), 3200);
-    return () => clearTimeout(t);
-  }, []);
+    setPhase(0);
+    const timers = [
+      setTimeout(() => setPhase(1), 900 + placar.length * 90),   // placar done → mostra top4
+      setTimeout(() => setPhase(2), 900 + placar.length * 90 + top4.length * 180 + 300), // total pop
+      setTimeout(() => setPhase(3), 900 + placar.length * 90 + top4.length * 180 + 900), // exemplo
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [placar.length, top4.length]);
+
+  const maxTop4 = Math.max(1, ...top4.map((t) => t.max));
 
   return (
     <>
       <StepHeader icon={Calculator} badge="Transparência" title="Cada ponto justificado" sub="Sem caixa-preta." />
       <div className="mt-3 space-y-2">
+        {/* Placar — cascata */}
         <div className="rounded-2xl border border-border bg-card p-3">
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Placar</p>
           <div className="space-y-1">
             {placar.map((l, i) => (
-              <div key={i} className="flex items-center justify-between text-xs">
+              <div
+                key={i}
+                className="flex items-center justify-between text-xs opacity-0 animate-fade-in"
+                style={{ animationDelay: `${i * 90}ms`, animationFillMode: "forwards" }}
+              >
                 <span>{l.caso}</span>
-                <span className="font-display font-black tabular-nums text-primary">{l.pts}</span>
+                <span className="font-display font-black tabular-nums text-primary">
+                  <Counter to={l.pts} duration={600} />
+                </span>
               </div>
             ))}
           </div>
@@ -836,18 +849,42 @@ function Step4({ regras, comp }: { regras: any; comp: any }) {
           </p>
         </div>
 
+        {/* Top 4 escadinha */}
         <div className="rounded-2xl border border-border bg-card p-3">
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 4 · escadinha</p>
-          <div className="space-y-1">
-            {top4.map((t, i) => (
-              <div key={i} className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1 text-xs" style={{ marginLeft: i * 8 }}>
-                <span>{t.janela}</span>
-                <span className="font-display font-bold tabular-nums">{t.eficacia}{t.max !== 0 ? <span className="text-muted-foreground"> ({t.max.toLocaleString("pt-BR")})</span> : null}</span>
-              </div>
-            ))}
+          <div className="space-y-1.5">
+            {top4.map((t, i) => {
+              const on = phase >= 1;
+              const travado = !t.max;
+              const w = travado ? 8 : Math.max(10, (t.max / maxTop4) * 100);
+              const delay = i * 180;
+              return (
+                <div
+                  key={i}
+                  className="relative overflow-hidden rounded-lg bg-muted/40 text-xs opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${delay}ms`, animationFillMode: "forwards" }}
+                >
+                  <div
+                    className={`absolute inset-y-0 left-0 transition-all duration-500 ease-out ${travado ? "bg-muted-foreground/20" : "bg-primary/20"}`}
+                    style={{ width: on ? `${w}%` : "0%", transitionDelay: `${delay + 150}ms` }}
+                  />
+                  <div className="relative flex items-center justify-between px-2 py-1.5">
+                    <span className="flex items-center gap-1.5">
+                      {travado && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      {t.janela}
+                    </span>
+                    <span className="font-display font-bold tabular-nums">
+                      {t.eficacia}
+                      {t.max !== 0 ? <span className="text-muted-foreground"> ({t.max.toLocaleString("pt-BR")})</span> : null}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
+        {/* Composição do campeão */}
         {comp && (
           <div className="rounded-2xl border border-border bg-card p-3">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Como o campeão fez {comp.total?.toLocaleString?.("pt-BR")}</p>
@@ -855,17 +892,28 @@ function Step4({ regras, comp }: { regras: any; comp: any }) {
               <span>{comp.palpites} palpites · {comp.exatos} exatos · {comp.pontuados} pontuados</span>
               <span className="text-muted-foreground">{comp.aproveitamento}%</span>
             </div>
-            <div className={`mt-2 flex items-baseline justify-between border-t border-border pt-2 transition-opacity ${showTotal ? "opacity-100" : "opacity-30"}`}>
+            <div className={`mt-2 flex items-baseline justify-between border-t border-border pt-2 transition-opacity duration-500 ${phase >= 2 ? "opacity-100" : "opacity-20"}`}>
               <span className="text-xs">
-                <span className="font-display font-black">{comp.pontos_placares?.toLocaleString?.("pt-BR")}</span>
+                <span className="font-display font-black">
+                  <Counter to={comp.pontos_placares ?? 0} duration={700} run={phase >= 2} />
+                </span>
                 <span className="text-muted-foreground"> placares </span>
-                + <span className="font-display font-black">{comp.pontos_top4?.toLocaleString?.("pt-BR")}</span>
+                + <span className="font-display font-black">
+                  <Counter to={comp.pontos_top4 ?? 0} duration={700} run={phase >= 2} />
+                </span>
                 <span className="text-muted-foreground"> Top 4</span>
               </span>
-              <span className="font-display text-xl font-black text-primary tabular-nums">= {comp.total?.toLocaleString?.("pt-BR")}</span>
+              <span
+                key={phase >= 2 ? "on" : "off"}
+                className={`font-display text-2xl font-black text-primary tabular-nums ${phase >= 2 ? "animate-scale-in drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" : ""}`}
+              >
+                = {comp.total?.toLocaleString?.("pt-BR")}
+              </span>
             </div>
             {comp.exemplo_jogo && (
-              <p className="mt-2 rounded-lg bg-muted/40 px-2 py-1.5 text-[10px] text-muted-foreground">
+              <p
+                className={`mt-2 rounded-lg bg-muted/40 px-2 py-1.5 text-[10px] text-muted-foreground transition-opacity duration-500 ${phase >= 3 ? "opacity-100 animate-fade-in" : "opacity-0"}`}
+              >
                 Ex: {comp.exemplo_jogo.jogo} — palpitou {comp.exemplo_jogo.palpite} → {comp.exemplo_jogo.regra} × peso {comp.exemplo_jogo.peso} = <strong className="text-foreground">{comp.exemplo_jogo.pontos} pts</strong>
               </p>
             )}
