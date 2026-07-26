@@ -17,7 +17,7 @@ export function useBulletinDoDia() {
   return useQuery({
     queryKey: ["bulletins", "do-dia"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("bulletins").select("*").in("status", ["agendado", "rascunho", "publicado"])
         .order("created_at", { ascending: false }).limit(1);
       return data?.[0] ?? null;
