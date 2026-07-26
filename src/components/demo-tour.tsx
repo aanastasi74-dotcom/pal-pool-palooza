@@ -807,16 +807,31 @@ function Step3({ tl, lideranca }: { tl: any; lideranca: any[] }) {
 
 /* ============ Step 4 — Transparência ============ */
 function Step4({ regras, comp }: { regras: any; comp: any }) {
-  const placar: { caso: string; pts: number }[] = regras?.placar ?? [];
+  const placar: { caso: string; pts: number; ex?: string }[] = regras?.placar ?? [];
   const top4: { janela: string; eficacia: number | string; max: number }[] = regras?.top4 ?? [];
+  const portao: string = regras?.portao ?? "Errou quem venceu (ou o empate)? Zerou. Não existe ponto parcial.";
   const [phase, setPhase] = useState(0);
+  const [visiblePlacar, setVisiblePlacar] = useState(0);
+  const [visibleTop4, setVisibleTop4] = useState(0);
+
   useEffect(() => {
     setPhase(0);
-    const timers = [
-      setTimeout(() => setPhase(1), 900 + placar.length * 90),   // placar done → mostra top4
-      setTimeout(() => setPhase(2), 900 + placar.length * 90 + top4.length * 180 + 300), // total pop
-      setTimeout(() => setPhase(3), 900 + placar.length * 90 + top4.length * 180 + 900), // exemplo
-    ];
+    setVisiblePlacar(0);
+    setVisibleTop4(0);
+    const timers: any[] = [];
+    // Cascata das linhas de placar (~90ms cada)
+    for (let i = 1; i <= placar.length; i++) {
+      timers.push(setTimeout(() => setVisiblePlacar(i), 300 + i * 90));
+    }
+    const afterPlacar = 300 + placar.length * 90 + 200;
+    timers.push(setTimeout(() => setPhase(1), afterPlacar));
+    // Cascata da escadinha Top 4 (~180ms cada)
+    for (let i = 1; i <= top4.length; i++) {
+      timers.push(setTimeout(() => setVisibleTop4(i), afterPlacar + i * 180));
+    }
+    const afterTop4 = afterPlacar + top4.length * 180 + 300;
+    timers.push(setTimeout(() => setPhase(2), afterTop4));
+    timers.push(setTimeout(() => setPhase(3), afterTop4 + 600));
     return () => timers.forEach(clearTimeout);
   }, [placar.length, top4.length]);
 
@@ -826,46 +841,55 @@ function Step4({ regras, comp }: { regras: any; comp: any }) {
     <>
       <StepHeader icon={Calculator} badge="Transparência" title="Cada ponto justificado" sub="Sem caixa-preta." />
       <div className="mt-3 space-y-2">
-        {/* Placar — cascata */}
+        {/* Portão */}
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] font-bold text-amber-700 dark:text-amber-400">
+          {portao}
+        </div>
+
+        {/* Placar — cascata controlada por estado */}
         <div className="rounded-2xl border border-border bg-card p-3">
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Placar</p>
           <div className="space-y-1">
-            {placar.map((l, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between text-xs opacity-0 animate-fade-in"
-                style={{ animationDelay: `${i * 90}ms`, animationFillMode: "forwards" }}
-              >
-                <span>{l.caso}</span>
-                <span className="font-display font-black tabular-nums text-primary">
-                  <Counter to={l.pts} duration={600} />
-                </span>
-              </div>
-            ))}
+            {placar.map((l, i) => {
+              const zero = l.pts === 0;
+              const shown = i < visiblePlacar;
+              return (
+                <div
+                  key={i}
+                  className={`flex items-center justify-between gap-2 text-xs transition-all duration-300 ${shown ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}
+                >
+                  <span className={`flex flex-col ${zero ? "text-muted-foreground" : ""}`}>
+                    <span>{l.caso}</span>
+                    {l.ex ? <span className="text-[9px] text-muted-foreground/80">{l.ex}</span> : null}
+                  </span>
+                  <span className={`font-display font-black tabular-nums ${zero ? "text-muted-foreground" : "text-primary"}`}>
+                    {l.pts}
+                  </span>
+                </div>
+              );
+            })}
           </div>
           <p className="mt-2 rounded-lg bg-primary/10 px-2 py-1.5 text-[10px] font-medium text-foreground">
             {regras?.peso?.nota ?? "Tudo multiplicado pelo peso do jogo: 10 na estreia, 50 na final."}
           </p>
         </div>
 
-        {/* Top 4 escadinha */}
+        {/* Top 4 escadinha — cascata controlada por estado */}
         <div className="rounded-2xl border border-border bg-card p-3">
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 4 · escadinha</p>
           <div className="space-y-1.5">
             {top4.map((t, i) => {
-              const on = phase >= 1;
               const travado = !t.max;
               const w = travado ? 8 : Math.max(10, (t.max / maxTop4) * 100);
-              const delay = i * 180;
+              const shown = i < visibleTop4;
               return (
                 <div
                   key={i}
-                  className="relative overflow-hidden rounded-lg bg-muted/40 text-xs opacity-0 animate-fade-in"
-                  style={{ animationDelay: `${delay}ms`, animationFillMode: "forwards" }}
+                  className={`relative overflow-hidden rounded-lg bg-muted/40 text-xs transition-all duration-300 ${shown ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}
                 >
                   <div
                     className={`absolute inset-y-0 left-0 transition-all duration-500 ease-out ${travado ? "bg-muted-foreground/20" : "bg-primary/20"}`}
-                    style={{ width: on ? `${w}%` : "0%", transitionDelay: `${delay + 150}ms` }}
+                    style={{ width: shown ? `${w}%` : "0%" }}
                   />
                   <div className="relative flex items-center justify-between px-2 py-1.5">
                     <span className="flex items-center gap-1.5">
@@ -882,6 +906,7 @@ function Step4({ regras, comp }: { regras: any; comp: any }) {
             })}
           </div>
         </div>
+
 
         {/* Composição do campeão */}
         {comp && (
