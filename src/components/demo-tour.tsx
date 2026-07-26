@@ -109,12 +109,13 @@ function TourInner({ data }: { data: DemoData }) {
           </div>
 
           <div className="min-h-[620px] px-4 pb-4" onPointerDown={() => setPaused(true)}>
-            {step === 0 && <Step1 jogos={data.jogos_palpite ?? []} onInteract={() => setPaused(true)} />}
-            {step === 1 && <Step2 j={data.jogo_virada} regras={data.regras} />}
-            {step === 2 && <Step3 tl={data.timelapse} lideranca={data.lideranca ?? []} />}
-            {step === 3 && <Step4 regras={data.regras} comp={data.composicao_campeao} />}
-            {step === 4 && <Step5 boletim={data.boletim} stats={data.stats} />}
-            {step === 5 && <Step6 stats={data.stats} />}
+            {step === 0 && <StepQuotas quotas={data.quotas} />}
+            {step === 1 && <Step1 jogos={data.jogos_palpite ?? []} onInteract={() => setPaused(true)} />}
+            {step === 2 && <Step2 j={data.jogo_virada} regras={data.regras} />}
+            {step === 3 && <Step3 tl={data.timelapse} lideranca={data.lideranca ?? []} />}
+            {step === 4 && <Step4 regras={data.regras} comp={data.composicao_campeao} />}
+            {step === 5 && <Step5 boletim={data.boletim} stats={data.stats} />}
+            {step === 6 && <Step6 stats={data.stats} />}
           </div>
         </div>
       </div>
