@@ -567,7 +567,7 @@ function Step3({ tl, lideranca }: { tl: any; lideranca: any[] }) {
       </div>
       {t >= dias.length - 1 && (
         <p className="mt-2 text-center text-[11px] font-bold text-foreground animate-fade-in">
-          A liderança mudou {lideranca.length ? lideranca.length - 1 : 3} vezes. A última, no dia da final.
+          A liderança mudou 4 vezes. A última, no dia da final.
         </p>
       )}
     </>
@@ -610,7 +610,7 @@ function Step4({ regras, comp }: { regras: any; comp: any }) {
             {top4.map((t, i) => (
               <div key={i} className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1 text-xs" style={{ marginLeft: i * 8 }}>
                 <span>{t.janela}</span>
-                <span className="font-display font-bold tabular-nums">{t.eficacia}% <span className="text-muted-foreground">({t.max.toLocaleString("pt-BR")})</span></span>
+                <span className="font-display font-bold tabular-nums">{t.eficacia}{t.max !== 0 ? <span className="text-muted-foreground"> ({t.max.toLocaleString("pt-BR")})</span> : null}</span>
               </div>
             ))}
           </div>
