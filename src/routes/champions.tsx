@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useChampionsTotalPublico } from "@/lib/queries/champions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
+import { DemoTour } from "@/components/demo-tour";
 
 export const Route = createFileRoute("/champions")({
   head: () => ({
