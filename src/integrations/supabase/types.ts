@@ -117,6 +117,45 @@ export type Database = {
           },
         ]
       }
+      bulletins: {
+        Row: {
+          agendado_para: string | null
+          conteudo: string | null
+          conteudo_original: string | null
+          created_at: string | null
+          data: string | null
+          id: string | null
+          publicado_em: string | null
+          publicado_por: string | null
+          status: string | null
+          titulo: string | null
+        }
+        Insert: {
+          agendado_para?: string | null
+          conteudo?: string | null
+          conteudo_original?: string | null
+          created_at?: string | null
+          data?: string | null
+          id?: string | null
+          publicado_em?: string | null
+          publicado_por?: string | null
+          status?: string | null
+          titulo?: string | null
+        }
+        Update: {
+          agendado_para?: string | null
+          conteudo?: string | null
+          conteudo_original?: string | null
+          created_at?: string | null
+          data?: string | null
+          id?: string | null
+          publicado_em?: string | null
+          publicado_por?: string | null
+          status?: string | null
+          titulo?: string | null
+        }
+        Relationships: []
+      }
       caixa_movimentos: {
         Row: {
           categoria: string
@@ -759,6 +798,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      personality_profiles: {
+        Row: {
+          apelido_principal: string | null
+          apelidos_alternativos: string[] | null
+          created_at: string | null
+          id: string | null
+          observacoes_admin: string | null
+          participante_id: string | null
+          tags: string[] | null
+          tracos: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          apelido_principal?: string | null
+          apelidos_alternativos?: string[] | null
+          created_at?: string | null
+          id?: string | null
+          observacoes_admin?: string | null
+          participante_id?: string | null
+          tags?: string[] | null
+          tracos?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          apelido_principal?: string | null
+          apelidos_alternativos?: string[] | null
+          created_at?: string | null
+          id?: string | null
+          observacoes_admin?: string | null
+          participante_id?: string | null
+          tags?: string[] | null
+          tracos?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       pesquisa_participacao: {
         Row: {
@@ -1650,6 +1725,7 @@ export type Database = {
       compute_default_sigla: { Args: { p_nome: string }; Returns: string }
       congelar_ranking_oficial: { Args: never; Returns: Json }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
+      demo_copa2026: { Args: never; Returns: Json }
       derivar_periodo: { Args: { p_minuto: string }; Returns: string }
       encerrar_lote_por_decisao: {
         Args: { p_lote_id: string; p_motivo: string }
