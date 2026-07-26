@@ -30,8 +30,8 @@ import { useNavigate, useLocation } from "@tanstack/react-router";
 /* ============ Tipos locais (RPC como any pra não travar em types stale) ============ */
 type DemoData = any;
 
-const STEP_MS = [11000, 13000, 11000, 10000, 11000, 999999];
-const TOTAL_STEPS = 6;
+const STEP_MS = [9000, 9000, 13000, 11000, 10000, 11000, 999999];
+const TOTAL_STEPS = 7;
 
 function useDemoData() {
   return useQuery<DemoData | null>({
