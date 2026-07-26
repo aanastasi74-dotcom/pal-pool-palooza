@@ -643,31 +643,56 @@ function Step2({ j, regras }: { j: any; regras: any }) {
         )}
       </div>
 
-      {/* Lista de palpites */}
+      {/* Lista de palpites — ordem fixa do ranking geral */}
       <div className="mt-3 rounded-2xl border border-border bg-card p-2">
         <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          {ended ? "Pontos finais deste jogo" : "Pontos parciais — ao vivo"}
+          Palpites de todo mundo — ordem do ranking geral
         </p>
         <div className="space-y-1">
-          {linhas.map((p, rank) => (
-            <div
-              key={`${p.apelido}-${p.quota}`}
-              className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1.5 text-xs transition-all duration-500"
-              style={{ transform: `translateY(0)` }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-background text-[10px] font-black">{rank + 1}</span>
-                <span className="font-bold">{p.apelido}<span className="text-muted-foreground"> #{p.quota}</span></span>
-                <span className="text-muted-foreground tabular-nums">{p.casa}×{p.fora}</span>
+          {linhas.map((p) => {
+            const positivo = p.pts > 0;
+            const zerou = p.delta < 0 && p.pts === 0;
+            return (
+              <div
+                key={`${p.apelido}-${p.quota}`}
+                className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-xs transition-colors duration-300 ${positivo ? "bg-emerald-500/10" : "bg-muted/40"}`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-background text-[10px] font-black">{p.pos_final}</span>
+                  <span className="font-bold">{p.apelido}<span className="text-muted-foreground"> #{p.quota}</span></span>
+                  <span className="text-muted-foreground tabular-nums">{p.casa}×{p.fora}</span>
+                </div>
+                <div className="relative flex items-center">
+                  {p.delta > 0 && (
+                    <span
+                      key={`d-${idx}-${p.apelido}-${p.quota}`}
+                      className="pointer-events-none absolute -top-3 right-0 text-[10px] font-black text-emerald-500 animate-fade-in"
+                    >
+                      +{p.delta}
+                    </span>
+                  )}
+                  <span
+                    key={`${idx}-${p.pts}`}
+                    className={`font-display font-black tabular-nums animate-scale-in ${
+                      positivo
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : zerou
+                          ? "text-amber-500"
+                          : "text-muted-foreground"
+                    }`}
+                  >
+                    {p.pts}
+                  </span>
+                </div>
               </div>
-              <span key={p.pts} className={`font-display font-black tabular-nums animate-scale-in ${p.pts > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
-                {p.pts}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <p className="mt-2 text-[10px] text-muted-foreground">Peso {peso}. O mesmo acerto na estreia valeria {6 * (regras?.peso?.min ?? 10)}.</p>
+      <p className="mt-1 text-center text-[11px] font-bold text-foreground">
+        O líder abriu o jogo zerado. O quinto colocado abriu com 216.
+      </p>
     </>
   );
 }
