@@ -161,14 +161,17 @@ function Landing() {
           <p className="mt-3 text-sm text-muted-foreground">
             7 passos, dados de verdade. Compre quotas, palpite, acompanhe um jogo virando e veja o ranking se mexer.
           </p>
-          <div className="mt-6">
-            <Link
-              to="/demo"
-              className="inline-flex rounded-full bg-hero px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow transition hover:scale-105"
-            >
-              Abrir demonstração →
-            </Link>
-          </div>
+        </div>
+        <div className="mt-10">
+          <DemoTour />
+        </div>
+        <div className="mt-6 text-center">
+          <Link
+            to="/demo"
+            className="inline-flex rounded-full border border-border px-5 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+          >
+            Abrir em tela cheia →
+          </Link>
         </div>
       </section>
 
