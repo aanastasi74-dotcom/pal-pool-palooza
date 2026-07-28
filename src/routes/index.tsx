@@ -12,6 +12,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { HomeMatchCarousel } from "@/components/home-match-carousel";
+import { DemoTour } from "@/components/demo-tour";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
