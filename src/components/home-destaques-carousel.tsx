@@ -108,19 +108,19 @@ export function HomeDestaquesCarousel() {
                 {c.tipo === "jogo" && (
                   <>
                     <div className="mt-4 flex items-start justify-between gap-3">
-                      <div className="flex w-24 flex-col items-center gap-2">
+                      <div className="flex w-20 shrink-0 flex-col items-center gap-2 sm:w-24">
                         <div className="grid h-14 w-14 place-items-center rounded-full bg-white text-3xl shadow-glow">{c.fc}</div>
-                        <p className="text-center text-sm font-bold leading-tight">{c.casa}</p>
+                        <p className="break-words text-center text-[13px] font-bold leading-tight sm:text-sm">{c.casa}</p>
                       </div>
-                      <div className="text-center">
-                        <p className="font-display text-3xl font-black">{c.placar}</p>
+                      <div className="min-w-0 flex-1 text-center">
+                        <p className="whitespace-nowrap font-display text-2xl font-black sm:text-3xl">{c.placar}</p>
                         {c.detalhe && (
-                          <p className="mt-1 text-[10px] uppercase tracking-widest text-accent">{c.detalhe}</p>
+                          <p className="mt-1 text-[10px] uppercase leading-tight text-accent">{c.detalhe}</p>
                         )}
                       </div>
-                      <div className="flex w-24 flex-col items-center gap-2">
+                      <div className="flex w-20 shrink-0 flex-col items-center gap-2 sm:w-24">
                         <div className="grid h-14 w-14 place-items-center rounded-full bg-white text-3xl shadow-glow">{c.ff}</div>
-                        <p className="text-center text-sm font-bold leading-tight">{c.fora}</p>
+                        <p className="break-words text-center text-[13px] font-bold leading-tight sm:text-sm">{c.fora}</p>
                       </div>
                     </div>
                     <p className="mt-4 font-display font-bold">{c.titulo}</p>
@@ -130,7 +130,7 @@ export function HomeDestaquesCarousel() {
 
                 {c.tipo === "fato" && (
                   <div className="my-4 rounded-2xl bg-accent/15 px-4 py-5 ring-1 ring-accent/30">
-                    <p className="text-center font-display text-3xl font-black text-accent">{c.destaque}</p>
+                    <p className="break-words text-center font-display text-2xl font-black text-accent sm:text-3xl">{c.destaque}</p>
                     <p className="mt-3 text-center font-display font-bold">{c.titulo}</p>
                     <p className="mt-1 text-center text-xs text-white/80">{c.texto}</p>
                   </div>
