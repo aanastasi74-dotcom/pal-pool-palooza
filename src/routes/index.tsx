@@ -93,7 +93,7 @@ function Landing() {
           />
         </div>
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2 md:items-center">
-          <div>
+          <div className="min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
               <Sparkles className="h-3.5 w-3.5" /> Entre amigos · por convite ou indicação
             </span>
@@ -143,7 +143,7 @@ function Landing() {
               </p>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative min-w-0">
             <HomeDestaquesCarousel />
           </div>
         </div>
