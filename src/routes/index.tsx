@@ -144,7 +144,7 @@ function Landing() {
             </div>
           </div>
           <div className="relative">
-            <HomeMatchCarousel />
+            <HomeDestaquesCarousel />
           </div>
         </div>
       </section>
