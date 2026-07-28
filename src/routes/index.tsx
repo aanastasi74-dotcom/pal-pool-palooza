@@ -93,7 +93,7 @@ function Landing() {
           />
         </div>
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2 md:items-center">
-          <div>
+          <div className="min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
               <Sparkles className="h-3.5 w-3.5" /> Entre amigos · por convite ou indicação
             </span>
@@ -124,7 +124,7 @@ function Landing() {
               </a>
             </div>
             <div className="mt-8">
-              <div className="flex gap-6 text-xs uppercase tracking-widest text-white/70">
+              <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs uppercase tracking-wide text-white/70">
                 <div>
                   <p className="font-display text-2xl font-bold text-white">71</p>
                   perebas
@@ -143,7 +143,7 @@ function Landing() {
               </p>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative min-w-0">
             <HomeDestaquesCarousel />
           </div>
         </div>
@@ -222,14 +222,14 @@ function Landing() {
             </ul>
           </div>
           <div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {pontos.map((p) => (
                 <div
                   key={p.label}
-                  className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur"
+                  className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5"
                 >
                   <p className="font-display text-3xl font-black text-accent">{p.valor}</p>
-                  <p className="mt-1 text-xs uppercase tracking-widest text-white/70">{p.label}</p>
+                  <p className="mt-1 text-xs uppercase tracking-wide text-white/70">{p.label}</p>
                 </div>
               ))}
             </div>
@@ -251,13 +251,13 @@ function Landing() {
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
             to="/app"
-            className="inline-flex rounded-full bg-hero px-8 py-4 font-bold text-primary-foreground shadow-glow transition hover:scale-105"
+            className="inline-flex w-full justify-center rounded-full bg-hero px-8 py-4 font-bold text-primary-foreground shadow-glow transition hover:scale-105 sm:w-auto"
           >
             Entrar no bolão
           </Link>
           <Link
             to="/champions"
-            className="inline-flex rounded-full border border-border bg-background px-8 py-4 text-sm font-semibold text-foreground transition hover:bg-muted"
+            className="inline-flex w-full items-center justify-center rounded-full border border-border bg-background px-8 py-4 text-sm font-semibold text-foreground transition hover:bg-muted sm:w-auto"
           >
             Manifestar interesse na Champions →
           </Link>
