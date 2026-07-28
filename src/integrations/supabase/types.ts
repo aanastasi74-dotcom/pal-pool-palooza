@@ -1727,6 +1727,7 @@ export type Database = {
       consume_invite: { Args: { p_token: string }; Returns: boolean }
       demo_copa2026: { Args: never; Returns: Json }
       derivar_periodo: { Args: { p_minuto: string }; Returns: string }
+      destaques_landing: { Args: never; Returns: Json }
       encerrar_lote_por_decisao: {
         Args: { p_lote_id: string; p_motivo: string }
         Returns: Json

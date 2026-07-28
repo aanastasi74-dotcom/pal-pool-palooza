@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
-import { HomeMatchCarousel } from "@/components/home-match-carousel";
+import { HomeDestaquesCarousel } from "@/components/home-destaques-carousel";
 import { DemoTour } from "@/components/demo-tour";
 import { useAuth } from "@/lib/auth-context";
 
@@ -144,7 +144,7 @@ function Landing() {
             </div>
           </div>
           <div className="relative">
-            <HomeMatchCarousel />
+            <HomeDestaquesCarousel />
           </div>
         </div>
       </section>
