@@ -134,6 +134,9 @@ function AdminChampions() {
         )}
       </section>
 
+      <EmailFilmeCard />
+
+
       <section className="rounded-2xl border border-accent/40 bg-accent/5 shadow-card">
         <div className="border-b border-border p-4">
           <h2 className="font-display text-lg font-bold">Cadastros pendentes de aprovação</h2>
