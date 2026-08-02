@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Trophy, Send, TestTube2, AlertTriangle, Check, X } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Trophy, Send, TestTube2, AlertTriangle, Check, X, Film, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useChampionsTotal,
   useChampionsRespostas,
