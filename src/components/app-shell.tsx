@@ -103,6 +103,14 @@ export function AppShell() {
                 </Link>
               );
             })}
+            {!lobbyMode && (
+              <Link
+                to="/app"
+                className="ml-1 rounded-full px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                ← Todos os bolões
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-2">
             <ThemeToggle />
