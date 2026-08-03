@@ -1,0 +1,224 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { times } from "@/lib/mock-data";
+import { Lightbulb, AlertCircle, CheckCircle2, Info, Lock } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useMemo } from "react";
+import { BoletimCard } from "@/components/boletim-card";
+import { calcularEngajamento, isElegivelLanterna, estaNosUltimos25, ENGAJAMENTO_MIN, PONTOS_MIN } from "@/lib/lanterninha";
+import { useRanking } from "@/lib/queries/profiles";
+import { useMatches } from "@/lib/queries/matches";
+import { useMinhasQuotas, useTotalQuotas } from "@/lib/queries/quotas";
+import { useAuth } from "@/lib/auth-context";
+import { PremiacaoCard } from "@/components/premiacao-card";
+import { HomeCarouselCollapsible } from "@/components/home-carousel-collapsible";
+import { PesquisaPopup } from "@/components/pesquisa-popup";
+import { WrappedCard } from "@/components/wrapped-card";
+
+export const Route = createFileRoute("/app/copa2026")({
+  head: () => ({
+    meta: [
+      { title: "Copa do Mundo 2026 — Bolão dos Perebas" },
+      { name: "description", content: "Home da Copa do Mundo 2026: ranking, wrapped, jogos, prêmio e boletins da Perebada." },
+      { property: "og:title", content: "Copa do Mundo 2026 — Bolão dos Perebas" },
+      { property: "og:description", content: "Home da Copa do Mundo 2026: ranking, wrapped, jogos, prêmio e boletins da Perebada." },
+    ],
+  }),
+  component: Copa2026Home,
+});
+
+function Copa2026Home() {
+  const { user } = useAuth();
+  const { data: ranking = [] } = useRanking();
+  const { data: matches = [] } = useMatches();
+  const { data: minhasQuotas = [] } = useMinhasQuotas();
+
+  const proximos = (matches as any[]).filter((m) => m.status !== "encerrado").slice(0, 3);
+
+  const minhaMelhor = useMemo(() => {
+    if (!user) return null;
+    const minhas = (ranking as any[]).filter((r) => r.user_id === user.id);
+    if (!minhas.length) return null;
+    return minhas.reduce((a, b) => ((a.posicao ?? 9999) <= (b.posicao ?? 9999) ? a : b));
+  }, [ranking, user]);
+
+  return (
+    <div className="space-y-10">
+      <div>
+        <h1 className="font-display text-3xl font-extrabold">Copa do Mundo 2026</h1>
+      </div>
+
+      <section className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-xl font-bold">Copa 2026 — encerrada</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-muted-foreground/25 bg-muted/40 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+            <Lock className="h-3 w-3" /> Somente leitura — encerrada em 19/07/2026
+          </span>
+        </div>
+        <WrappedCard />
+        <HomeCarouselCollapsible />
+
+        <section className="relative overflow-hidden rounded-3xl bg-hero p-6 text-primary-foreground shadow-glow md:p-10">
+          <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-accent/30 blur-3xl" />
+          <p className="text-xs uppercase tracking-widest opacity-80">Sua posição na perebada</p>
+          <div className="mt-2 flex items-end gap-4">
+            <p className="font-display text-6xl font-black">
+              {minhaMelhor?.posicao ? `${minhaMelhor.posicao}º` : "—"}
+            </p>
+            <div className="pb-2">
+              <p className="font-display text-2xl font-bold">{(minhaMelhor?.pontos ?? 0).toLocaleString("pt-BR")} pts</p>
+              <p className="text-xs opacity-80">{minhasQuotas.length} quota{minhasQuotas.length === 1 ? "" : "s"}</p>
+            </div>
+          </div>
+          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+            <Stat label="Placares exatos" valor={minhaMelhor ? String(minhaMelhor.pex ?? 0) : "—"} />
+            <Stat
+              label="Jogos pontuados"
+              valor={minhaMelhor ? String((minhaMelhor.pex ?? 0) + (minhaMelhor.rdf ?? 0) + (minhaMelhor.rgm ?? 0) + (minhaMelhor.rgv ?? 0) + (minhaMelhor.res ?? 0)) : "—"}
+            />
+            <StatAproveitamento q={minhaMelhor} />
+          </div>
+        </section>
+
+        <LanternaAviso />
+
+        <section>
+          <SectionHeader title="Próximos jogos" link="/app/jogos" />
+          {proximos.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">Nenhum jogo agendado ainda.</p>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {proximos.map((j) => {
+                const tCasa = times[j.casa] ?? { sigla: j.casa, bandeira: "🏳️", nome: j.casa };
+                const tFora = times[j.fora] ?? { sigla: j.fora, bandeira: "🏳️", nome: j.fora };
+                const dt = new Date(j.data_jogo);
+                return (
+                  <div key={j.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-card">
+                    <div className="flex flex-1 items-center gap-3">
+                      <div className="text-2xl">{tCasa.bandeira}</div>
+                      <div className="text-sm font-semibold">{tCasa.sigla}</div>
+                      <div className="px-2 text-xs text-muted-foreground">×</div>
+                      <div className="text-sm font-semibold">{tFora.sigla}</div>
+                      <div className="text-2xl">{tFora.bandeira}</div>
+                    </div>
+                    <div className="hidden text-xs text-muted-foreground sm:block">{j.fase} · peso {j.peso}</div>
+                    <div className="ml-3 text-right">
+                      <p className="font-display text-sm font-bold">{dt.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</p>
+                      <p className="text-xs text-muted-foreground">{dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section>
+          <SectionHeader title="Prêmio" link="/app/premio" />
+          <div className="mt-4">
+            <PremiacaoCard />
+          </div>
+        </section>
+
+        <section>
+          <SectionHeader title="Boletim" link="/app/boletins" />
+          <div className="mt-4">
+            <BoletimCard />
+          </div>
+        </section>
+      </section>
+
+      <PesquisaPopup />
+    </div>
+  );
+}
+
+function Stat({ label, valor }: { label: string; valor: string }) {
+  return (
+    <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
+      <p className="font-display text-xl font-bold">{valor}</p>
+      <p className="text-[10px] uppercase tracking-widest opacity-80">{label}</p>
+    </div>
+  );
+}
+
+function StatAproveitamento({ q }: { q: any }) {
+  const disputados = q ? (q.jec ?? 0) - (q.npt ?? 0) : 0;
+  const pontuados = q ? (q.pex ?? 0) + (q.rdf ?? 0) + (q.rgm ?? 0) + (q.rgv ?? 0) + (q.res ?? 0) : 0;
+  const valor = disputados > 0 ? `${Math.round((pontuados / disputados) * 100)}%` : "—";
+  return (
+    <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
+      <p className="font-display text-xl font-bold">{valor}</p>
+      <div className="flex items-center justify-center gap-1">
+        <p className="text-[10px] uppercase tracking-widest opacity-80">Aproveitamento</p>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="opacity-80 hover:opacity-100" aria-label="O que é aproveitamento?">
+              <Info className="h-3 w-3" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" className="w-64 text-xs text-foreground">
+            Aproveitamento = jogos onde você pontuou ÷ jogos disputados. Se palpitou em 36 jogos e pontuou em 30, aproveitamento é 83%.
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({ title, link }: { title: string; link: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <h2 className="font-display text-xl font-bold">{title}</h2>
+      <Link to={link} className="text-xs font-semibold text-primary hover:underline">Ver tudo</Link>
+    </div>
+  );
+}
+
+function LanternaAviso() {
+  const { data: minhasQuotas = [] } = useMinhasQuotas();
+  const { data: totalQuotas = 0 } = useTotalQuotas();
+  const quotasNoFundo = (minhasQuotas as any[]).filter((q) => estaNosUltimos25(q.posicao ?? 9999, totalQuotas));
+  if (quotasNoFundo.length === 0) return null;
+  const q = quotasNoFundo.sort((a, b) => (a.posicao ?? 9999) - (b.posicao ?? 9999))[0];
+  const eng = calcularEngajamento(q.palpites_validos ?? 0, q.palpites_possiveis ?? 0);
+  const elegivel = isElegivelLanterna(q);
+  return (
+    <section className={`rounded-3xl border p-5 shadow-card ${elegivel ? "border-success/40 bg-success/5" : "border-accent/40 bg-accent/10"}`}>
+      <div className="flex items-start gap-3">
+        <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${elegivel ? "bg-success/15 text-success" : "bg-accent/30 text-accent-foreground"}`}>
+          <Lightbulb className="h-5 w-5 rotate-180" />
+        </div>
+        <div className="flex-1">
+          <p className="font-display text-sm font-bold">
+            {elegivel
+              ? "Sua quota tá no fundo, mas elegível ao lanterninha. Mantém o ritmo, pereba."
+              : "Sua quota está nos 25% finais. Lanterninha vale 5% do prêmio — mas só pra quem palpitou direito."}
+          </p>
+          <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+            <Criterio
+              ok={eng >= ENGAJAMENTO_MIN}
+              label={`Palpites válidos: ${q.palpites_validos ?? 0}/${q.palpites_possiveis ?? 0} (${(eng * 100).toFixed(0)}%) — mín. ${ENGAJAMENTO_MIN * 100}%`}
+            />
+            <Criterio
+              ok={(q.pontos ?? 0) >= PONTOS_MIN}
+              label={`Pontuação: ${q.pontos ?? 0} — mín. ${PONTOS_MIN}`}
+            />
+          </div>
+          <Link to="/app/perfil" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
+            Ver detalhes
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Criterio({ ok, label }: { ok: boolean; label: string }) {
+  const Icon = ok ? CheckCircle2 : AlertCircle;
+  return (
+    <div className={`flex items-start gap-1 ${ok ? "text-success" : "text-accent-foreground"}`}>
+      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+      <span>{label}</span>
+    </div>
+  );
+}

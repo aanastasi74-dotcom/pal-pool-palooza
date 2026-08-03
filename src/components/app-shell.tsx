@@ -19,8 +19,8 @@ import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { useAuth } from "@/lib/auth-context";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 
-const nav = [
-  { to: "/app", label: "Início", icon: Trophy, exact: true },
+const navCopa = [
+  { to: "/app/copa2026", label: "Início", icon: Trophy, exact: true },
   { to: "/app/jogos", label: "Jogos", icon: CalendarDays, exact: false },
   { to: "/app/palpites", label: "Palpites", icon: Sparkles, exact: false },
   { to: "/app/palpites/top4", label: "Top 4", icon: Award, exact: false },
@@ -28,8 +28,22 @@ const nav = [
   { to: "/app/premio", label: "Prêmio", icon: Coins, exact: false },
 ] as const;
 
+const navLobby = [
+  { to: "/app", label: "Início", icon: Trophy, exact: true },
+  { to: "/app/perfil", label: "Perfil", icon: User, exact: false },
+] as const;
+
+const LOBBY_PREFIXES = ["/app/champions", "/app/feminina", "/app/perfil", "/app/quotas", "/app/pereba"];
+
+function isLobbyRoute(pathname: string) {
+  if (pathname === "/app" || pathname === "/app/") return true;
+  return LOBBY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
 export function AppShell() {
   const { pathname } = useLocation();
+  const lobbyMode = isLobbyRoute(pathname);
+  const nav = lobbyMode ? navLobby : navCopa;
   const navigate = useNavigate();
   const { signOut, isAdmin, profile, isLoading } = useAuth();
   const { data: minhasQuotas = [] } = useMinhasQuotas();
@@ -70,7 +84,7 @@ export function AppShell() {
             </div>
             <div className="leading-tight">
               <p className="font-display text-sm font-bold">Bolão dos Perebas</p>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Copa 2026</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{lobbyMode ? "Plataforma de bolões" : "Copa 2026"}</p>
             </div>
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
@@ -89,6 +103,14 @@ export function AppShell() {
                 </Link>
               );
             })}
+            {!lobbyMode && (
+              <Link
+                to="/app"
+                className="ml-1 rounded-full px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                ← Todos os bolões
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -112,21 +134,25 @@ export function AppShell() {
                 <DropdownMenuItem onClick={() => navigate({ to: "/app/quotas" })}>
                   <Wallet className="mr-2 h-4 w-4" /> Minhas quotas
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/app/boletins" })}>
-                  <Sparkles className="mr-2 h-4 w-4" /> Boletins
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/app/times" })}>
-                  <Globe className="mr-2 h-4 w-4" /> Times da Copa
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/app/estadios" })}>
-                  <Building2 className="mr-2 h-4 w-4" /> Estádios
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/app/simulador" })}>
-                  <Trophy className="mr-2 h-4 w-4" /> Simulador
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/regras" })}>
-                  <FileText className="mr-2 h-4 w-4" /> Regulamento
-                </DropdownMenuItem>
+                {!lobbyMode && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/boletins" })}>
+                      <Sparkles className="mr-2 h-4 w-4" /> Boletins
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/times" })}>
+                      <Globe className="mr-2 h-4 w-4" /> Times da Copa
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/estadios" })}>
+                      <Building2 className="mr-2 h-4 w-4" /> Estádios
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/simulador" })}>
+                      <Trophy className="mr-2 h-4 w-4" /> Simulador
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/regras" })}>
+                      <FileText className="mr-2 h-4 w-4" /> Regulamento
+                    </DropdownMenuItem>
+                  </>
+                )}
                 {isAdmin && (
                   <>
                     <DropdownMenuSeparator />
@@ -150,7 +176,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <PrizeBanner />
+      {!lobbyMode && <PrizeBanner />}
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:py-10">
         <Outlet />

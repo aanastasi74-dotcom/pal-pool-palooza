@@ -132,7 +132,7 @@ function CopaEncerradaCard() {
   return (
     <div className="rounded-3xl border border-border bg-card shadow-card">
       <Link
-        to="/app/ranking"
+        to="/app/copa2026"
         className="group block rounded-t-3xl p-6 transition hover:bg-muted/40"
       >
         <div className="flex items-start gap-4">
