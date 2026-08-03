@@ -176,7 +176,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <PrizeBanner />
+      {!lobbyMode && <PrizeBanner />}
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:py-10">
         <Outlet />
