@@ -19,8 +19,8 @@ import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { useAuth } from "@/lib/auth-context";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 
-const nav = [
-  { to: "/app", label: "Início", icon: Trophy, exact: true },
+const navCopa = [
+  { to: "/app/copa2026", label: "Início", icon: Trophy, exact: true },
   { to: "/app/jogos", label: "Jogos", icon: CalendarDays, exact: false },
   { to: "/app/palpites", label: "Palpites", icon: Sparkles, exact: false },
   { to: "/app/palpites/top4", label: "Top 4", icon: Award, exact: false },
@@ -28,8 +28,22 @@ const nav = [
   { to: "/app/premio", label: "Prêmio", icon: Coins, exact: false },
 ] as const;
 
+const navLobby = [
+  { to: "/app", label: "Início", icon: Trophy, exact: true },
+  { to: "/app/perfil", label: "Perfil", icon: User, exact: false },
+] as const;
+
+const LOBBY_PREFIXES = ["/app/champions", "/app/feminina", "/app/perfil", "/app/quotas", "/app/pereba"];
+
+function isLobbyRoute(pathname: string) {
+  if (pathname === "/app" || pathname === "/app/") return true;
+  return LOBBY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
 export function AppShell() {
   const { pathname } = useLocation();
+  const lobbyMode = isLobbyRoute(pathname);
+  const nav = lobbyMode ? navLobby : navCopa;
   const navigate = useNavigate();
   const { signOut, isAdmin, profile, isLoading } = useAuth();
   const { data: minhasQuotas = [] } = useMinhasQuotas();
