@@ -134,21 +134,25 @@ export function AppShell() {
                 <DropdownMenuItem onClick={() => navigate({ to: "/app/quotas" })}>
                   <Wallet className="mr-2 h-4 w-4" /> Minhas quotas
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/app/boletins" })}>
-                  <Sparkles className="mr-2 h-4 w-4" /> Boletins
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/app/times" })}>
-                  <Globe className="mr-2 h-4 w-4" /> Times da Copa
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/app/estadios" })}>
-                  <Building2 className="mr-2 h-4 w-4" /> Estádios
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/app/simulador" })}>
-                  <Trophy className="mr-2 h-4 w-4" /> Simulador
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/regras" })}>
-                  <FileText className="mr-2 h-4 w-4" /> Regulamento
-                </DropdownMenuItem>
+                {!lobbyMode && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/boletins" })}>
+                      <Sparkles className="mr-2 h-4 w-4" /> Boletins
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/times" })}>
+                      <Globe className="mr-2 h-4 w-4" /> Times da Copa
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/estadios" })}>
+                      <Building2 className="mr-2 h-4 w-4" /> Estádios
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/app/simulador" })}>
+                      <Trophy className="mr-2 h-4 w-4" /> Simulador
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/regras" })}>
+                      <FileText className="mr-2 h-4 w-4" /> Regulamento
+                    </DropdownMenuItem>
+                  </>
+                )}
                 {isAdmin && (
                   <>
                     <DropdownMenuSeparator />
