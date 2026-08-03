@@ -21,13 +21,7 @@ import { Route as CadastroNaoAprovadoRouteImport } from './routes/cadastro-nao-a
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AguardandoAprovacaoRouteImport } from './routes/aguardando-aprovacao'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as DemoTop4RouteImport } from './routes/demo.top4'
-import { Route as DemoRankingRouteImport } from './routes/demo.ranking'
-import { Route as DemoPalpitesRouteImport } from './routes/demo.palpites'
-import { Route as DemoJogosRouteImport } from './routes/demo.jogos'
-import { Route as DemoInicioRouteImport } from './routes/demo.inicio'
 import { Route as CadastroTokenRouteImport } from './routes/cadastro.$token'
 import { Route as AppWrappedRouteImport } from './routes/app.wrapped'
 import { Route as AppTimesRouteImport } from './routes/app.times'
@@ -132,40 +126,10 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoIndexRoute = DemoIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DemoRoute,
-} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
-} as any)
-const DemoTop4Route = DemoTop4RouteImport.update({
-  id: '/top4',
-  path: '/top4',
-  getParentRoute: () => DemoRoute,
-} as any)
-const DemoRankingRoute = DemoRankingRouteImport.update({
-  id: '/ranking',
-  path: '/ranking',
-  getParentRoute: () => DemoRoute,
-} as any)
-const DemoPalpitesRoute = DemoPalpitesRouteImport.update({
-  id: '/palpites',
-  path: '/palpites',
-  getParentRoute: () => DemoRoute,
-} as any)
-const DemoJogosRoute = DemoJogosRouteImport.update({
-  id: '/jogos',
-  path: '/jogos',
-  getParentRoute: () => DemoRoute,
-} as any)
-const DemoInicioRoute = DemoInicioRouteImport.update({
-  id: '/inicio',
-  path: '/inicio',
-  getParentRoute: () => DemoRoute,
 } as any)
 const CadastroTokenRoute = CadastroTokenRouteImport.update({
   id: '/cadastro/$token',
@@ -392,7 +356,7 @@ export interface FileRoutesByFullPath {
   '/cadastro-nao-aprovado': typeof CadastroNaoAprovadoRoute
   '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
-  '/demo': typeof DemoRouteWithChildren
+  '/demo': typeof DemoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
@@ -413,13 +377,7 @@ export interface FileRoutesByFullPath {
   '/app/times': typeof AppTimesRoute
   '/app/wrapped': typeof AppWrappedRoute
   '/cadastro/$token': typeof CadastroTokenRoute
-  '/demo/inicio': typeof DemoInicioRoute
-  '/demo/jogos': typeof DemoJogosRoute
-  '/demo/palpites': typeof DemoPalpitesRoute
-  '/demo/ranking': typeof DemoRankingRoute
-  '/demo/top4': typeof DemoTop4Route
   '/app/': typeof AppIndexRoute
-  '/demo/': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
   '/app/admin/champions': typeof AppAdminChampionsRoute
@@ -455,6 +413,7 @@ export interface FileRoutesByTo {
   '/cadastro-nao-aprovado': typeof CadastroNaoAprovadoRoute
   '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
+  '/demo': typeof DemoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
@@ -474,13 +433,7 @@ export interface FileRoutesByTo {
   '/app/times': typeof AppTimesRoute
   '/app/wrapped': typeof AppWrappedRoute
   '/cadastro/$token': typeof CadastroTokenRoute
-  '/demo/inicio': typeof DemoInicioRoute
-  '/demo/jogos': typeof DemoJogosRoute
-  '/demo/palpites': typeof DemoPalpitesRoute
-  '/demo/ranking': typeof DemoRankingRoute
-  '/demo/top4': typeof DemoTop4Route
   '/app': typeof AppIndexRoute
-  '/demo': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
   '/app/admin/champions': typeof AppAdminChampionsRoute
@@ -518,7 +471,7 @@ export interface FileRoutesById {
   '/cadastro-nao-aprovado': typeof CadastroNaoAprovadoRoute
   '/champions': typeof ChampionsRoute
   '/completar-perfil': typeof CompletarPerfilRoute
-  '/demo': typeof DemoRouteWithChildren
+  '/demo': typeof DemoRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/manutencao': typeof ManutencaoRoute
@@ -539,13 +492,7 @@ export interface FileRoutesById {
   '/app/times': typeof AppTimesRoute
   '/app/wrapped': typeof AppWrappedRoute
   '/cadastro/$token': typeof CadastroTokenRoute
-  '/demo/inicio': typeof DemoInicioRoute
-  '/demo/jogos': typeof DemoJogosRoute
-  '/demo/palpites': typeof DemoPalpitesRoute
-  '/demo/ranking': typeof DemoRankingRoute
-  '/demo/top4': typeof DemoTop4Route
   '/app/': typeof AppIndexRoute
-  '/demo/': typeof DemoIndexRoute
   '/app/admin/auditoria': typeof AppAdminAuditoriaRoute
   '/app/admin/boletins': typeof AppAdminBoletinsRoute
   '/app/admin/champions': typeof AppAdminChampionsRoute
@@ -605,13 +552,7 @@ export interface FileRouteTypes {
     | '/app/times'
     | '/app/wrapped'
     | '/cadastro/$token'
-    | '/demo/inicio'
-    | '/demo/jogos'
-    | '/demo/palpites'
-    | '/demo/ranking'
-    | '/demo/top4'
     | '/app/'
-    | '/demo/'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
     | '/app/admin/champions'
@@ -647,6 +588,7 @@ export interface FileRouteTypes {
     | '/cadastro-nao-aprovado'
     | '/champions'
     | '/completar-perfil'
+    | '/demo'
     | '/esqueci-senha'
     | '/login'
     | '/manutencao'
@@ -666,13 +608,7 @@ export interface FileRouteTypes {
     | '/app/times'
     | '/app/wrapped'
     | '/cadastro/$token'
-    | '/demo/inicio'
-    | '/demo/jogos'
-    | '/demo/palpites'
-    | '/demo/ranking'
-    | '/demo/top4'
     | '/app'
-    | '/demo'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
     | '/app/admin/champions'
@@ -730,13 +666,7 @@ export interface FileRouteTypes {
     | '/app/times'
     | '/app/wrapped'
     | '/cadastro/$token'
-    | '/demo/inicio'
-    | '/demo/jogos'
-    | '/demo/palpites'
-    | '/demo/ranking'
-    | '/demo/top4'
     | '/app/'
-    | '/demo/'
     | '/app/admin/auditoria'
     | '/app/admin/boletins'
     | '/app/admin/champions'
@@ -774,7 +704,7 @@ export interface RootRouteChildren {
   CadastroNaoAprovadoRoute: typeof CadastroNaoAprovadoRoute
   ChampionsRoute: typeof ChampionsRoute
   CompletarPerfilRoute: typeof CompletarPerfilRoute
-  DemoRoute: typeof DemoRouteWithChildren
+  DemoRoute: typeof DemoRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   LoginRoute: typeof LoginRoute
   ManutencaoRoute: typeof ManutencaoRoute
@@ -869,54 +799,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/': {
-      id: '/demo/'
-      path: '/'
-      fullPath: '/demo/'
-      preLoaderRoute: typeof DemoIndexRouteImport
-      parentRoute: typeof DemoRoute
-    }
     '/app/': {
       id: '/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
-    }
-    '/demo/top4': {
-      id: '/demo/top4'
-      path: '/top4'
-      fullPath: '/demo/top4'
-      preLoaderRoute: typeof DemoTop4RouteImport
-      parentRoute: typeof DemoRoute
-    }
-    '/demo/ranking': {
-      id: '/demo/ranking'
-      path: '/ranking'
-      fullPath: '/demo/ranking'
-      preLoaderRoute: typeof DemoRankingRouteImport
-      parentRoute: typeof DemoRoute
-    }
-    '/demo/palpites': {
-      id: '/demo/palpites'
-      path: '/palpites'
-      fullPath: '/demo/palpites'
-      preLoaderRoute: typeof DemoPalpitesRouteImport
-      parentRoute: typeof DemoRoute
-    }
-    '/demo/jogos': {
-      id: '/demo/jogos'
-      path: '/jogos'
-      fullPath: '/demo/jogos'
-      preLoaderRoute: typeof DemoJogosRouteImport
-      parentRoute: typeof DemoRoute
-    }
-    '/demo/inicio': {
-      id: '/demo/inicio'
-      path: '/inicio'
-      fullPath: '/demo/inicio'
-      preLoaderRoute: typeof DemoInicioRouteImport
-      parentRoute: typeof DemoRoute
     }
     '/cadastro/$token': {
       id: '/cadastro/$token'
@@ -1326,26 +1214,6 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
-interface DemoRouteChildren {
-  DemoInicioRoute: typeof DemoInicioRoute
-  DemoJogosRoute: typeof DemoJogosRoute
-  DemoPalpitesRoute: typeof DemoPalpitesRoute
-  DemoRankingRoute: typeof DemoRankingRoute
-  DemoTop4Route: typeof DemoTop4Route
-  DemoIndexRoute: typeof DemoIndexRoute
-}
-
-const DemoRouteChildren: DemoRouteChildren = {
-  DemoInicioRoute: DemoInicioRoute,
-  DemoJogosRoute: DemoJogosRoute,
-  DemoPalpitesRoute: DemoPalpitesRoute,
-  DemoRankingRoute: DemoRankingRoute,
-  DemoTop4Route: DemoTop4Route,
-  DemoIndexRoute: DemoIndexRoute,
-}
-
-const DemoRouteWithChildren = DemoRoute._addFileChildren(DemoRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AguardandoAprovacaoRoute: AguardandoAprovacaoRoute,
@@ -1353,7 +1221,7 @@ const rootRouteChildren: RootRouteChildren = {
   CadastroNaoAprovadoRoute: CadastroNaoAprovadoRoute,
   ChampionsRoute: ChampionsRoute,
   CompletarPerfilRoute: CompletarPerfilRoute,
-  DemoRoute: DemoRouteWithChildren,
+  DemoRoute: DemoRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   LoginRoute: LoginRoute,
   ManutencaoRoute: ManutencaoRoute,
