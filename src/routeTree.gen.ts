@@ -32,6 +32,7 @@ import { Route as AppPremioRouteImport } from './routes/app.premio'
 import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppPalpitesRouteImport } from './routes/app.palpites'
 import { Route as AppJogosRouteImport } from './routes/app.jogos'
+import { Route as AppFemininaRouteImport } from './routes/app.feminina'
 import { Route as AppEstadiosRouteImport } from './routes/app.estadios'
 import { Route as AppComprarQuotaRouteImport } from './routes/app.comprar-quota'
 import { Route as AppChampionsRouteImport } from './routes/app.champions'
@@ -179,6 +180,11 @@ const AppPalpitesRoute = AppPalpitesRouteImport.update({
 const AppJogosRoute = AppJogosRouteImport.update({
   id: '/jogos',
   path: '/jogos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFemininaRoute = AppFemininaRouteImport.update({
+  id: '/feminina',
+  path: '/feminina',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEstadiosRoute = AppEstadiosRouteImport.update({
@@ -367,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/app/champions': typeof AppChampionsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
+  '/app/feminina': typeof AppFemininaRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
   '/app/perfil': typeof AppPerfilRoute
@@ -423,6 +430,7 @@ export interface FileRoutesByTo {
   '/app/champions': typeof AppChampionsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
+  '/app/feminina': typeof AppFemininaRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
   '/app/perfil': typeof AppPerfilRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/app/champions': typeof AppChampionsRoute
   '/app/comprar-quota': typeof AppComprarQuotaRoute
   '/app/estadios': typeof AppEstadiosRoute
+  '/app/feminina': typeof AppFemininaRoute
   '/app/jogos': typeof AppJogosRoute
   '/app/palpites': typeof AppPalpitesRoute
   '/app/perfil': typeof AppPerfilRoute
@@ -542,6 +551,7 @@ export interface FileRouteTypes {
     | '/app/champions'
     | '/app/comprar-quota'
     | '/app/estadios'
+    | '/app/feminina'
     | '/app/jogos'
     | '/app/palpites'
     | '/app/perfil'
@@ -598,6 +608,7 @@ export interface FileRouteTypes {
     | '/app/champions'
     | '/app/comprar-quota'
     | '/app/estadios'
+    | '/app/feminina'
     | '/app/jogos'
     | '/app/palpites'
     | '/app/perfil'
@@ -656,6 +667,7 @@ export interface FileRouteTypes {
     | '/app/champions'
     | '/app/comprar-quota'
     | '/app/estadios'
+    | '/app/feminina'
     | '/app/jogos'
     | '/app/palpites'
     | '/app/perfil'
@@ -874,6 +886,13 @@ declare module '@tanstack/react-router' {
       path: '/jogos'
       fullPath: '/app/jogos'
       preLoaderRoute: typeof AppJogosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/feminina': {
+      id: '/app/feminina'
+      path: '/feminina'
+      fullPath: '/app/feminina'
+      preLoaderRoute: typeof AppFemininaRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/estadios': {
@@ -1164,6 +1183,7 @@ interface AppRouteChildren {
   AppChampionsRoute: typeof AppChampionsRoute
   AppComprarQuotaRoute: typeof AppComprarQuotaRoute
   AppEstadiosRoute: typeof AppEstadiosRoute
+  AppFemininaRoute: typeof AppFemininaRoute
   AppJogosRoute: typeof AppJogosRoute
   AppPalpitesRoute: typeof AppPalpitesRoute
   AppPerfilRoute: typeof AppPerfilRoute
@@ -1191,6 +1211,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppChampionsRoute: AppChampionsRoute,
   AppComprarQuotaRoute: AppComprarQuotaRoute,
   AppEstadiosRoute: AppEstadiosRoute,
+  AppFemininaRoute: AppFemininaRoute,
   AppJogosRoute: AppJogosRoute,
   AppPalpitesRoute: AppPalpitesRoute,
   AppPerfilRoute: AppPerfilRoute,
