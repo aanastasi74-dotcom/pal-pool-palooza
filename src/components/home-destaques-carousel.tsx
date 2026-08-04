@@ -29,7 +29,7 @@ const FALLBACK: Destaques = {
 };
 
 async function fetchDestaques(): Promise<Destaques> {
-  const { data, error } = await (supabase.rpc as any)("destaques_landing");
+  const { data, error } = await supabase.rpc("destaques_landing");
   if (error) throw error;
   return data as Destaques;
 }

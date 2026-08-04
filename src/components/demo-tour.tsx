@@ -37,7 +37,7 @@ function useDemoData() {
   return useQuery<DemoData | null>({
     queryKey: ["demo_copa2026_v2"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("demo_copa2026");
+      const { data, error } = await supabase.rpc("demo_copa2026");
       if (error) throw error;
       return data as DemoData;
     },
