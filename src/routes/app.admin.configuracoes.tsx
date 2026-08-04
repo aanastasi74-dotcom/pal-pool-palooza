@@ -80,7 +80,7 @@ function Configuracoes() {
   };
 
   const snapshot = async () => {
-    const tables = ["profiles", "matches", "quotas", "predictions", "top4_predictions", "payments", "bulletins", "personality_profiles", "invites", "settings", "audit_log", "reports"] as const;
+    const tables = ["profiles", "matches", "quotas", "predictions", "top4_predictions", "payments", "invites", "settings", "audit_log", "reports"] as const;
     const dump: any = { gerado_em: new Date().toISOString() };
     await Promise.all(tables.map(async (t) => {
       const { data } = await (supabase as any).from(t).select("*");

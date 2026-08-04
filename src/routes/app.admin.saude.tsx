@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { usePaymentsAdmin } from "@/lib/queries/payments";
-import { useBulletins } from "@/lib/queries/bulletins";
 import { useAuditLog } from "@/lib/queries/audit";
 import { useRanking } from "@/lib/queries/profiles";
 import { useCapacidadeInfra, type CapacidadeMetrica } from "@/lib/queries/capacidade";
@@ -31,14 +30,12 @@ const corProgress: Record<string, string> = {
 
 function SaudeAdmin() {
   const { data: pays } = usePaymentsAdmin();
-  const { data: boletins } = useBulletins();
   const { data: ranking } = useRanking();
   const { data: audits } = useAuditLog();
   const { data: cap, isLoading: capLoading, refetch: refetchCap, isFetching, dataUpdatedAt } = useCapacidadeInfra();
 
   const ativos = (ranking ?? []).length;
   const pendentes = (pays ?? []).filter((p: any) => p.status === "pendente").length;
-  const naoPublicados = (boletins ?? []).filter((b: any) => b.status !== "publicado").length;
   const alertasCapacidade = (audits ?? [])
     .filter((a: any) => /^alerta_capacidade_/.test(a.acao))
     .slice(0, 10);
@@ -103,7 +100,6 @@ function SaudeAdmin() {
       <div className="grid gap-3 md:grid-cols-3">
         <Metric label="Quotas ativas" valor={ativos} />
         <Metric label="Pagamentos pendentes" valor={pendentes} />
-        <Metric label="Boletins não publicados" valor={naoPublicados} />
       </div>
 
       <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
