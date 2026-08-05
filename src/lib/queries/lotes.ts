@@ -148,7 +148,7 @@ export function useSubmitComprovanteLote() {
         p_comprovante_url: path,
       });
       if (error) throw error;
-      return { loteId, count: (data?.count as number) ?? 0 };
+      return { loteId, count: ((data as { count?: number } | null)?.count) ?? 0 };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["quotas"] });
@@ -213,7 +213,7 @@ export function useApproveLote() {
     mutationFn: async ({ loteId, aprovarN }: { loteId: string; aprovarN?: number }) => {
       const { data, error } = await supabase.rpc("aprovar_lote", {
         p_lote_id: loteId,
-        p_aprovar_n: aprovarN ?? null,
+        p_aprovar_n: aprovarN ?? undefined,
       });
       if (error) throw error;
       // Best-effort email
@@ -222,8 +222,8 @@ export function useApproveLote() {
         .catch(() => {});
       return {
         loteId,
-        aprovadas: (data?.aprovadas as number) ?? 0,
-        rejeitadas: (data?.rejeitadas as number) ?? 0,
+        aprovadas: ((data as { aprovadas?: number } | null)?.aprovadas) ?? 0,
+        rejeitadas: ((data as { rejeitadas?: number } | null)?.rejeitadas) ?? 0,
       };
     },
     onSuccess: () => {
@@ -247,7 +247,7 @@ export function useRejectLote() {
       supabase.functions
         .invoke("send-pagamento-rejeitado-email", { body: { lote_id: loteId, motivo } })
         .catch(() => {});
-      return { loteId, encerrado: !!data?.encerrado };
+      return { loteId, encerrado: !!(data as { encerrado?: boolean } | null)?.encerrado };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lotes"] });

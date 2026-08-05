@@ -425,7 +425,8 @@ function BulkConviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange
           falhas.push({ linha: i + 1, motivo: "Formato inválido (use: Nome, email)" });
           continue;
         }
-        const { data: pode, error: podeErr } = await supabase.rpc("pode_emitir_convite");
+        const { data: podeRaw, error: podeErr } = await supabase.rpc("pode_emitir_convite");
+        const pode = podeRaw as { pode?: boolean; motivo?: string } | null;
         if (podeErr || !pode?.pode) {
           falhas.push({ linha: i + 1, motivo: pode?.motivo ?? "Limite atingido" });
           continue;

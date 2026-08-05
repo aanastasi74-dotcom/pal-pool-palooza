@@ -39,8 +39,9 @@ export function useCreateQuota() {
       }
       const { data: podeBuy, error: errBuy } = await supabase.rpc("pode_comprar_quota", { p_user_id: user!.id });
       if (errBuy) throw errBuy;
-      if (podeBuy && podeBuy.pode === false) {
-        throw new Error(podeBuy.motivo ?? "Você não pode comprar mais quotas no momento.");
+      const pb = podeBuy as { pode?: boolean; motivo?: string } | null;
+      if (pb && pb.pode === false) {
+        throw new Error(pb.motivo ?? "Você não pode comprar mais quotas no momento.");
       }
       // Reaproveita incompleta existente (sem comprovante enviado)
       const { data: incompleta } = await supabase
