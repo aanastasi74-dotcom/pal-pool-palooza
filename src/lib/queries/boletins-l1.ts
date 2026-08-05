@@ -64,7 +64,7 @@ export function useBoletimPorData(
       const { data, error } = await sb
         .from("boletins")
         .select("*")
-        .eq("data_referencia", dataRef)
+        .eq("data_referencia", dataRef!)
         .eq("tipo", tipo)
         .maybeSingle();
       if (error) throw error;

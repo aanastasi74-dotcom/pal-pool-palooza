@@ -241,17 +241,17 @@ export function useAdminResultados(pesquisaId?: string) {
     enabled: !!pesquisaId,
     queryFn: async (): Promise<PesquisaResultados> => {
       const { data, error } = await supabase.rpc("admin_pesquisa_resultados", {
-        p_pesquisa_id: pesquisaId,
+        p_pesquisa_id: pesquisaId!,
       });
       if (error) throw error;
-      return data as PesquisaResultados;
+      return data as unknown as PesquisaResultados;
     },
   });
 }
 
 export async function fetchAdminRespostasFlat(pesquisaId: string): Promise<any[]> {
   const { data, error } = await supabase.rpc("admin_pesquisa_respostas_flat", {
-    p_pesquisa_id: pesquisaId,
+    p_pesquisa_id: pesquisaId!,
   });
   if (error) throw error;
   return (data ?? []) as any[];

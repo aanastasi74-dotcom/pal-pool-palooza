@@ -13,7 +13,7 @@ export function usePerebasCount() {
     queryFn: async (): Promise<PerebasCount> => {
       const { data, error } = await supabase.from("vw_perebas_count").select("*").maybeSingle();
       if (error) throw error;
-      return data ?? { signups: 0, convites_pendentes: 0, total: 0 };
+      return (data as PerebasCount | null) ?? { signups: 0, convites_pendentes: 0, total: 0 };
     },
   });
 }

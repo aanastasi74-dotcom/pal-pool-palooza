@@ -28,9 +28,9 @@ export function useEstatisticasPalpites(match_id?: string, enabled = true) {
     queryKey: ["estatisticas-palpites", match_id],
     enabled: !!match_id && enabled,
     queryFn: async (): Promise<EstatisticasPalpites> => {
-      const { data, error } = await supabase.rpc("get_estatisticas_palpites", { p_match_id: match_id });
+      const { data, error } = await supabase.rpc("get_estatisticas_palpites", { p_match_id: match_id! });
       if (error) throw error;
-      return (data ?? {}) as EstatisticasPalpites;
+      return (data ?? {}) as unknown as EstatisticasPalpites;
     },
   });
 }
@@ -42,11 +42,11 @@ export function useSoVoceAchouMulti(match_id?: string, quota_ids: string[] = [],
       enabled: !!match_id && !!qid && enabled,
       queryFn: async (): Promise<SoVoceAchou & { quota_id: string }> => {
         const { data, error } = await supabase.rpc("get_so_voce_achou", {
-          p_match_id: match_id,
+          p_match_id: match_id!,
           p_quota_id: qid,
         });
         if (error) throw error;
-        return { ...(data ?? { aplicavel: false }), quota_id: qid };
+        return { ...((data ?? { aplicavel: false }) as unknown as SoVoceAchou), quota_id: qid };
       },
     })),
   });
