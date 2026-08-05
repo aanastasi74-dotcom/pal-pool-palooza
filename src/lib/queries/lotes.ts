@@ -34,11 +34,12 @@ export function useCreateOrUpdateLote() {
   return useMutation({
     mutationFn: async (quantidade: number) => {
       if (!user) throw new Error("Não autenticado.");
-      const { data: pode, error: errPode } = await supabase.rpc("pode_comprar_quota", {
+      const { data: podeRaw, error: errPode } = await supabase.rpc("pode_comprar_quota", {
         p_user_id: user.id,
         p_quantidade: quantidade,
       });
       if (errPode) throw errPode;
+      const pode = podeRaw as { pode?: boolean; motivo?: string } | null;
       if (pode?.pode === false) throw new Error(pode.motivo ?? "Não é possível comprar agora.");
 
       // Reuse incompleta lote if exists
