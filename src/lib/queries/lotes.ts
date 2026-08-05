@@ -18,7 +18,7 @@ export function usePodeComprarQuota(quantidade: number) {
     queryKey: ["pode_comprar_quota", user?.id, quantidade],
     enabled: !!user?.id && quantidade >= 1,
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("pode_comprar_quota", {
+      const { data, error } = await supabase.rpc("pode_comprar_quota", {
         p_user_id: user!.id,
         p_quantidade: quantidade,
       });
@@ -34,11 +34,12 @@ export function useCreateOrUpdateLote() {
   return useMutation({
     mutationFn: async (quantidade: number) => {
       if (!user) throw new Error("Não autenticado.");
-      const { data: pode, error: errPode } = await (supabase as any).rpc("pode_comprar_quota", {
+      const { data: podeRaw, error: errPode } = await supabase.rpc("pode_comprar_quota", {
         p_user_id: user.id,
         p_quantidade: quantidade,
       });
       if (errPode) throw errPode;
+      const pode = podeRaw as { pode?: boolean; motivo?: string } | null;
       if (pode?.pode === false) throw new Error(pode.motivo ?? "Não é possível comprar agora.");
 
       // Reuse incompleta lote if exists
@@ -143,12 +144,12 @@ export function useSubmitComprovanteLote() {
       if (upErr) throw upErr;
 
       // I.5.2 — RPC atômica: numera quotas, cria/atualiza payments e atualiza lote.
-      const { data, error } = await (supabase as any).rpc("enviar_comprovante_lote", {
+      const { data, error } = await supabase.rpc("enviar_comprovante_lote", {
         p_lote_id: loteId,
         p_comprovante_url: path,
       });
       if (error) throw error;
-      return { loteId, count: (data?.count as number) ?? 0 };
+      return { loteId, count: ((data as { count?: number } | null)?.count) ?? 0 };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["quotas"] });
@@ -211,9 +212,9 @@ export function useApproveLote() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ loteId, aprovarN }: { loteId: string; aprovarN?: number }) => {
-      const { data, error } = await (supabase as any).rpc("aprovar_lote", {
+      const { data, error } = await supabase.rpc("aprovar_lote", {
         p_lote_id: loteId,
-        p_aprovar_n: aprovarN ?? null,
+        p_aprovar_n: aprovarN ?? undefined,
       });
       if (error) throw error;
       // Best-effort email
@@ -222,8 +223,8 @@ export function useApproveLote() {
         .catch(() => {});
       return {
         loteId,
-        aprovadas: (data?.aprovadas as number) ?? 0,
-        rejeitadas: (data?.rejeitadas as number) ?? 0,
+        aprovadas: ((data as { aprovadas?: number } | null)?.aprovadas) ?? 0,
+        rejeitadas: ((data as { rejeitadas?: number } | null)?.rejeitadas) ?? 0,
       };
     },
     onSuccess: () => {
@@ -239,7 +240,7 @@ export function useRejectLote() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ loteId, motivo }: { loteId: string; motivo: string }) => {
-      const { data, error } = await (supabase as any).rpc("rejeitar_lote", {
+      const { data, error } = await supabase.rpc("rejeitar_lote", {
         p_lote_id: loteId,
         p_motivo: motivo,
       });
@@ -247,7 +248,7 @@ export function useRejectLote() {
       supabase.functions
         .invoke("send-pagamento-rejeitado-email", { body: { lote_id: loteId, motivo } })
         .catch(() => {});
-      return { loteId, encerrado: !!data?.encerrado };
+      return { loteId, encerrado: !!(data as { encerrado?: boolean } | null)?.encerrado };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lotes"] });
@@ -262,7 +263,7 @@ export function useAtivarQuotaManual() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ quotaId, motivo }: { quotaId: string; motivo: string }) => {
-      const { data, error } = await (supabase as any).rpc("ativar_quota_manual", {
+      const { data, error } = await supabase.rpc("ativar_quota_manual", {
         p_quota_id: quotaId,
         p_motivo: motivo,
       });
@@ -283,7 +284,7 @@ export function useEncerrarLotePorDecisao() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ loteId, motivo }: { loteId: string; motivo: string }) => {
-      const { data, error } = await (supabase as any).rpc("encerrar_lote_por_decisao", {
+      const { data, error } = await supabase.rpc("encerrar_lote_por_decisao", {
         p_lote_id: loteId,
         p_motivo: motivo,
       });
@@ -304,7 +305,7 @@ export function useEncerrarQuotaManual() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ quotaId, motivo }: { quotaId: string; motivo: string }) => {
-      const { data, error } = await (supabase as any).rpc("encerrar_quota_manual", {
+      const { data, error } = await supabase.rpc("encerrar_quota_manual", {
         p_quota_id: quotaId,
         p_motivo: motivo,
       });

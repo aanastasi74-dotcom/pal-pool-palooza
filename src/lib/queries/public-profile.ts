@@ -5,7 +5,7 @@ export function useRankingDiario(data?: string) {
   return useQuery({
     queryKey: ["ranking-diario", data ?? "today"],
     queryFn: async () => {
-      const { data: rows, error } = await (supabase as any).rpc(
+      const { data: rows, error } = await supabase.rpc(
         "get_ranking_diario",
         data ? { p_data: data } : {},
       );
@@ -42,7 +42,7 @@ export function usePalpitesPublicosJogos(user_id?: string) {
     queryKey: ["palpites-publicos-jogos", user_id],
     enabled: !!user_id,
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("get_palpites_publicos_jogos", { p_user_id: user_id! });
+      const { data, error } = await supabase.rpc("get_palpites_publicos_jogos", { p_user_id: user_id! });
       if (error) throw error;
       return data ?? [];
     },
@@ -54,7 +54,7 @@ export function usePalpitesPublicosTop4(user_id?: string) {
     queryKey: ["palpites-publicos-top4", user_id],
     enabled: !!user_id,
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("get_palpites_publicos_top4", { p_user_id: user_id! });
+      const { data, error } = await supabase.rpc("get_palpites_publicos_top4", { p_user_id: user_id! });
       if (error) throw error;
       return data ?? [];
     },
@@ -70,7 +70,7 @@ export function useCheckApelido(apelido: string, debounceMs = 500) {
     queryFn: async () => {
       // simple debounce via promise delay; React Query dedupes by key
       await new Promise((r) => setTimeout(r, debounceMs));
-      const { data, error } = await (supabase as any).rpc("check_apelido_disponivel", { p_apelido: trimmed });
+      const { data, error } = await supabase.rpc("check_apelido_disponivel", { p_apelido: trimmed });
       if (error) throw error;
       return data as boolean;
     },

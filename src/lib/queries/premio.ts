@@ -6,8 +6,8 @@ export function usePremio() {
     queryKey: ["premio"],
     queryFn: async () => {
       const [atualRes, potencialRes, qtRes, settingRes] = await Promise.all([
-        (supabase as any).rpc("get_arrecadacao_atual"),
-        (supabase as any).rpc("get_arrecadacao_potencial"),
+        supabase.rpc("get_arrecadacao_atual"),
+        supabase.rpc("get_arrecadacao_potencial"),
         supabase.from("quotas").select("status"),
         supabase.from("settings").select("value").eq("key", "prize_distribution").maybeSingle(),
       ]);

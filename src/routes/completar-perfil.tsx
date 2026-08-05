@@ -51,7 +51,7 @@ function CompletePerfil() {
     debounceRef.current = setTimeout(async () => {
       const target = nome.trim();
       if (!target) { setSigla(""); return; }
-      const { data } = await (supabase as any).rpc("compute_default_sigla", { p_nome: target });
+      const { data } = await supabase.rpc("compute_default_sigla", { p_nome: target });
       setSigla((data ?? "") as string);
     }, 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };

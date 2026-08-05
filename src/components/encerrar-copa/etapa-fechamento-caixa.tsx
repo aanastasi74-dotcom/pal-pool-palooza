@@ -25,7 +25,7 @@ function useMovimentos() {
   return useQuery({
     queryKey: ["caixa_movimentos", COMPETICAO],
     queryFn: async (): Promise<Movimento[]> => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("caixa_movimentos")
         .select("id,tipo,categoria,descricao,valor,criado_em")
         .eq("competicao", COMPETICAO)
@@ -67,7 +67,7 @@ function LinhaComprovante({ premiado }: { premiado: any }) {
         contentType: file.type || undefined,
       });
       if (up.error) throw up.error;
-      const { error: updErr } = await (supabase as any)
+      const { error: updErr } = await supabase
         .from("premiados")
         .update({
           comprovante_path: path,
@@ -179,7 +179,7 @@ export function EtapaFechamentoCaixa() {
   const registrarZeragem = async () => {
     setZerando(true);
     try {
-      const { error } = await (supabase as any).from("caixa_movimentos").insert({
+      const { error } = await supabase.from("caixa_movimentos").insert({
         competicao: COMPETICAO,
         tipo: "fechamento",
         categoria: "zeragem",

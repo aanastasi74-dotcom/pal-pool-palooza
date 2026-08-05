@@ -13,7 +13,7 @@ export function useBoletimEncerramento() {
   return useQuery({
     queryKey: ["boletim-encerramento"],
     queryFn: async (): Promise<BoletimEncerramento | null> => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("boletins")
         .select("id,data_referencia,status,titulo_customizado,publicado_em")
         .eq("tipo", "encerramento")

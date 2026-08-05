@@ -46,7 +46,7 @@ export function useClassificacaoGrupos(grupos: string[]) {
     queries: grupos.map((g) => ({
       queryKey: ["classificacao-grupo", g],
       queryFn: async () => {
-        const { data, error } = await (supabase as any).rpc("get_classificacao_grupo", {
+        const { data, error } = await supabase.rpc("get_classificacao_grupo", {
           p_grupo: g,
         });
         if (error) throw error;

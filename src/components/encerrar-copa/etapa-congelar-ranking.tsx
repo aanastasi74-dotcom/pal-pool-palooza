@@ -19,7 +19,7 @@ export function EtapaCongelarRanking() {
   const congelar = async () => {
     setLoading(true);
     try {
-      const { data, error } = await (supabase as any).rpc("congelar_ranking_oficial");
+      const { data, error } = await supabase.rpc("congelar_ranking_oficial");
       if (error) throw error;
       const result = data as { status?: string };
       if (result?.status === "noop") {

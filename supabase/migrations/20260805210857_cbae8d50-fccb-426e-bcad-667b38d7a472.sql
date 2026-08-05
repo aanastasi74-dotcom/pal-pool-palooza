@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.settings IS 'Settings da plataforma (comentário para sincronizar types — S0.9b, 05/08/2026)';

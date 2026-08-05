@@ -48,7 +48,7 @@ export function usePremiados() {
   return useQuery({
     queryKey: ["premiados"],
     queryFn: async (): Promise<PremiadoRow[]> => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("premiados")
         .select(
           "categoria,posicao,quota_id,apelido,numero_quota,user_id,valor_total,valor_bruto,valor_bonus_primeiro,data_notificacao,dados_bancarios_recebidos,pago_em,comprovante_path",

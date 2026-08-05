@@ -32,15 +32,16 @@ export function useCreateQuota() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async () => {
-      const { data: pode, error: errPode } = await (supabase as any).rpc("pode_criar_quota");
+      const { data: pode, error: errPode } = await supabase.rpc("pode_criar_quota");
       if (errPode) throw errPode;
       if (pode === false) {
         throw new Error("As quotas foram encerradas — a Copa já começou. Boa sorte aos perebas inscritos! 🍀");
       }
-      const { data: podeBuy, error: errBuy } = await (supabase as any).rpc("pode_comprar_quota", { p_user_id: user!.id });
+      const { data: podeBuy, error: errBuy } = await supabase.rpc("pode_comprar_quota", { p_user_id: user!.id });
       if (errBuy) throw errBuy;
-      if (podeBuy && podeBuy.pode === false) {
-        throw new Error(podeBuy.motivo ?? "Você não pode comprar mais quotas no momento.");
+      const pb = podeBuy as { pode?: boolean; motivo?: string } | null;
+      if (pb && pb.pode === false) {
+        throw new Error(pb.motivo ?? "Você não pode comprar mais quotas no momento.");
       }
       // Reaproveita incompleta existente (sem comprovante enviado)
       const { data: incompleta } = await supabase

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
-const sb = supabase as any;
+const sb = supabase;
 
 export type BoletimL1 = {
   id: string;
@@ -64,7 +64,7 @@ export function useBoletimPorData(
       const { data, error } = await sb
         .from("boletins")
         .select("*")
-        .eq("data_referencia", dataRef)
+        .eq("data_referencia", dataRef!)
         .eq("tipo", tipo)
         .maybeSingle();
       if (error) throw error;
