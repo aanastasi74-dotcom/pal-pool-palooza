@@ -35,7 +35,7 @@ export function useUsuariosAdmin() {
   return useQuery({
     queryKey: ["usuarios-admin"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("admin_list_usuarios");
+      const { data, error } = await supabase.rpc("admin_list_usuarios");
       if (error) throw error;
       return (data ?? []).map((p: any) => ({
         ...p,
@@ -74,7 +74,7 @@ export function useRanking() {
   return useQuery({
     queryKey: ["ranking"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("get_ranking_detalhado");
+      const { data, error } = await supabase.rpc("get_ranking_detalhado");
       if (error) throw error;
       return (data ?? []).map((r: any) => ({
         id: r.quota_id,

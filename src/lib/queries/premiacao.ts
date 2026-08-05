@@ -50,7 +50,7 @@ export function usePremiacao() {
         .select("status");
       if (qErr) throw qErr;
       const ativas = (quotas ?? []).filter((q: any) => q.status === "ativa").length;
-      const { data, error } = await (supabase as any).rpc("calcular_premiacao", {
+      const { data, error } = await supabase.rpc("calcular_premiacao", {
         p_quotas_ativas: ativas,
       });
       if (error) throw error;

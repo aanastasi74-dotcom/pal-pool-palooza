@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
-const sb = supabase as any;
+const sb = supabase;
 
 export type BoletimL1 = {
   id: string;

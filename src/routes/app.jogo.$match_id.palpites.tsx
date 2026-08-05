@@ -46,7 +46,7 @@ function usePalpitesJogo(match_id: string, enabled: boolean, aoVivo: boolean) {
     enabled: enabled && !!match_id,
     refetchInterval: aoVivo ? 15000 : false,
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("get_palpites_jogo", {
+      const { data, error } = await supabase.rpc("get_palpites_jogo", {
         p_match_id: match_id,
       });
       if (error) throw error;

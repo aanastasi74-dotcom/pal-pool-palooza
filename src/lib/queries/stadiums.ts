@@ -13,7 +13,7 @@ export function useStadiums() {
   return useQuery({
     queryKey: ["stadiums"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("stadiums")
         .select("*")
         .order("pais", { ascending: true })

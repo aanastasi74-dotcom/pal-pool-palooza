@@ -5,7 +5,7 @@ export function usePodeCriarQuota() {
   return useQuery({
     queryKey: ["copa", "pode_criar_quota"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("pode_criar_quota");
+      const { data, error } = await supabase.rpc("pode_criar_quota");
       if (error) throw error;
       return data as boolean;
     },
@@ -17,7 +17,7 @@ export function useFaseAtualCopa() {
   return useQuery({
     queryKey: ["copa", "fase_atual"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("fase_atual_copa");
+      const { data, error } = await supabase.rpc("fase_atual_copa");
       if (error) throw error;
       return data as string;
     },

@@ -11,7 +11,7 @@ export function usePerebasCount() {
     queryKey: ["perebas-count"],
     refetchInterval: 60_000,
     queryFn: async (): Promise<PerebasCount> => {
-      const { data, error } = await (supabase as any).from("vw_perebas_count").select("*").maybeSingle();
+      const { data, error } = await supabase.from("vw_perebas_count").select("*").maybeSingle();
       if (error) throw error;
       return data ?? { signups: 0, convites_pendentes: 0, total: 0 };
     },
@@ -37,7 +37,7 @@ export function usePodeEmitirConvite() {
   return useQuery({
     queryKey: ["pode-emitir-convite"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("pode_emitir_convite");
+      const { data, error } = await supabase.rpc("pode_emitir_convite");
       if (error) throw error;
       return data as { pode: boolean; motivo?: string; restantes?: number };
     },

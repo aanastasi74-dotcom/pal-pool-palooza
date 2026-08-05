@@ -83,7 +83,7 @@ function Configuracoes() {
     const tables = ["profiles", "matches", "quotas", "predictions", "top4_predictions", "payments", "invites", "settings", "audit_log", "reports"] as const;
     const dump: any = { gerado_em: new Date().toISOString() };
     await Promise.all(tables.map(async (t) => {
-      const { data } = await (supabase as any).from(t).select("*");
+      const { data } = await supabase.from(t).select("*");
       dump[t] = data ?? [];
     }));
     const blob = new Blob([JSON.stringify(dump, null, 2)], { type: "application/json" });

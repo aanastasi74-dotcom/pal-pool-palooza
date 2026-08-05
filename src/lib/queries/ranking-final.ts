@@ -15,7 +15,7 @@ export function useRankingFinal() {
   return useQuery({
     queryKey: ["ranking-final"],
     queryFn: async (): Promise<RankingFinalRow[]> => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("ranking_final")
         .select("quota_id,posicao_oficial,pontos_finais,elegivel_lanterna,apelido,numero_quota,user_id")
         .order("posicao_oficial", { ascending: true });

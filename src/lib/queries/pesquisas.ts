@@ -240,7 +240,7 @@ export function useAdminResultados(pesquisaId?: string) {
     queryKey: ["admin-pesquisa-resultados", pesquisaId],
     enabled: !!pesquisaId,
     queryFn: async (): Promise<PesquisaResultados> => {
-      const { data, error } = await (supabase as any).rpc("admin_pesquisa_resultados", {
+      const { data, error } = await supabase.rpc("admin_pesquisa_resultados", {
         p_pesquisa_id: pesquisaId,
       });
       if (error) throw error;
@@ -250,7 +250,7 @@ export function useAdminResultados(pesquisaId?: string) {
 }
 
 export async function fetchAdminRespostasFlat(pesquisaId: string): Promise<any[]> {
-  const { data, error } = await (supabase as any).rpc("admin_pesquisa_respostas_flat", {
+  const { data, error } = await supabase.rpc("admin_pesquisa_respostas_flat", {
     p_pesquisa_id: pesquisaId,
   });
   if (error) throw error;

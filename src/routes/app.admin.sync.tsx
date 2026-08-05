@@ -59,7 +59,7 @@ function SyncPage() {
   const logs = useQuery({
     queryKey: ["sync_logs"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("sync_logs")
         .select("*")
         .order("executado_em", { ascending: false })
@@ -73,7 +73,7 @@ function SyncPage() {
   const teams = useQuery({
     queryKey: ["teams_codigo_api"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("teams")
         .select("id,nome_pt,bandeira_emoji,codigo_api")
         .order("nome_pt");
@@ -113,7 +113,7 @@ function SyncPage() {
   }
 
   async function saveCodigoApi(teamId: string, codigo: number | null) {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("teams")
       .update({ codigo_api: codigo })
       .eq("id", teamId);

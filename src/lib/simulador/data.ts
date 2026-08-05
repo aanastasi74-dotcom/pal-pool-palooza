@@ -5,7 +5,7 @@ export function useSimMatches() {
   return useQuery({
     queryKey: ["sim", "matches"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("matches")
         .select(
           "id,numero_jogo,fase,data_jogo,status,team_home_id,team_away_id,casa,fora,placar_casa,placar_fora,placar_casa_prorrogacao,placar_fora_prorrogacao,penaltis_casa,penaltis_fora,eventos,estatisticas,home_origem,away_origem,stadium_id",
@@ -24,7 +24,7 @@ export function useFifaRanking() {
   return useQuery({
     queryKey: ["sim", "fifa_ranking"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("fifa_ranking")
         .select("team_id,posicao");
       if (error) throw error;
@@ -40,7 +40,7 @@ export function useAnnexeC() {
   return useQuery({
     queryKey: ["sim", "annexe_c"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("r32_terceiros_combinations")
         .select("*");
       if (error) throw error;
