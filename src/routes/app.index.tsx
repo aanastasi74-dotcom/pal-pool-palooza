@@ -123,7 +123,7 @@ function FemininaCard() {
 const ATALHOS_COPA = [
   { to: "/app/ranking", label: "Ranking", icon: ListOrdered },
   { to: "/app/wrapped", label: "Wrapped", icon: Sparkles },
-  { to: "/app/boletim", label: "Boletins", icon: Newspaper },
+  { to: "/app/boletins", label: "Boletins", icon: Newspaper },
   { to: "/app/jogos", label: "Jogos", icon: CalendarDays },
   { to: "/app/palpites", label: "Palpites", icon: Target },
 ] as const;

@@ -27,6 +27,8 @@ import { PrizeBanner } from "./prize-banner";
 import { BugReportFAB } from "./bug-report-fab";
 import { MaintenanceBanner } from "./maintenance-banner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useReportsAbertosCount } from "@/lib/queries/reports";
+
 
 const items = [
   { to: "/app/admin", label: "Painel financeiro", icon: LayoutDashboard, exact: true },
@@ -49,12 +51,14 @@ const items = [
 ] as const;
 
 function NavList({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
+  const { data: reportesAbertos = 0 } = useReportsAbertosCount();
   return (
     <nav className="flex flex-col gap-1 p-3">
       {items.map((item) => {
         const { to, label, icon: Icon } = item;
         const exact = "exact" in item && item.exact === true;
         const active = exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
+        const badge = to === "/app/admin/reportes" && reportesAbertos > 0 ? reportesAbertos : null;
         return (
           <Link
             key={to}
@@ -65,13 +69,19 @@ function NavList({ pathname, onClick }: { pathname: string; onClick?: () => void
             }`}
           >
             <Icon className="h-4 w-4" />
-            {label}
+            <span className="flex-1">{label}</span>
+            {badge !== null && (
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
+                {badge}
+              </span>
+            )}
           </Link>
         );
       })}
     </nav>
   );
 }
+
 
 export function AdminShell() {
   const { pathname } = useLocation();

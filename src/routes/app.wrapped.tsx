@@ -8,9 +8,8 @@ import { useTeams, type Team } from "@/lib/queries/teams";
 
 export const Route = createFileRoute("/app/wrapped")({
   head: () => ({ meta: [{ title: "Seu Wrapped — Bolão dos Perebas" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    u: typeof s.u === "string" && s.u.length > 0 ? s.u : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { u?: string } =>
+    typeof s.u === "string" && s.u.length > 0 ? { u: s.u } : {},
   component: WrappedPage,
 });
 
