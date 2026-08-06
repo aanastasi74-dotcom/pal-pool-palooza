@@ -13,25 +13,40 @@ export function useReports() {
   });
 }
 
+export function useReportsAbertosCount() {
+  return useQuery({
+    queryKey: ["reports", "abertos-count"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("reports")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "aberto");
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+}
+
 export function useCreateReport() {
   const qc = useQueryClient();
   const { user, profile } = useAuth();
   return useMutation({
     mutationFn: async ({ descricao, severidade, url }: { descricao: string; severidade: string; url?: string }) => {
-      const { data, error } = await supabase.from("reports").insert({
+      const { error } = await supabase.from("reports").insert({
         descricao,
         severidade,
         url: url ?? (typeof window !== "undefined" ? window.location.href : null),
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
         autor_id: user?.id ?? null,
         autor_nome: profile?.nome ?? null,
-      }).select().single();
+      });
       if (error) throw error;
-      return data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["reports"] }),
   });
 }
+
 
 export function useUpdateReportStatus() {
   const qc = useQueryClient();
