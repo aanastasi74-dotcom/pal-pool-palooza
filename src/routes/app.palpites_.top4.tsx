@@ -22,9 +22,8 @@ import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, Command
 
 export const Route = createFileRoute("/app/palpites_/top4")({
   head: () => ({ meta: [{ title: "Top 4 — Bolão dos Perebas" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    q: typeof s.q === "string" ? s.q : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { q?: string } =>
+    typeof s.q === "string" ? { q: s.q } : {},
   component: Top4Page,
 });
 
