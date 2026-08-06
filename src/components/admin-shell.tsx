@@ -27,6 +27,8 @@ import { PrizeBanner } from "./prize-banner";
 import { BugReportFAB } from "./bug-report-fab";
 import { MaintenanceBanner } from "./maintenance-banner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useReportsAbertosCount } from "@/lib/queries/reports";
+
 
 const items = [
   { to: "/app/admin", label: "Painel financeiro", icon: LayoutDashboard, exact: true },
