@@ -505,6 +505,154 @@ function EmailFilmeCard() {
   );
 }
 
+type NogoStatus = {
+  enviado_em: string | null;
+  destinatarios: number;
+  apelidos: string[];
+};
+
+function EmailNogoCard() {
+  const qc = useQueryClient();
+  const [confirmEnviar, setConfirmEnviar] = useState(false);
+  const [confirmForce, setConfirmForce] = useState(false);
+
+  const status = useQuery({
+    queryKey: ["champions", "admin", "nogo"],
+    queryFn: async (): Promise<NogoStatus> => {
+      const { data, error } = await supabase.functions.invoke("enviar-email-nogo", {
+        method: "GET",
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data as NogoStatus;
+    },
+  });
+
+  const disparo = useMutation({
+    mutationFn: async (args: { action: "teste" | "enviar"; force?: boolean }) => {
+      const { data, error } = await supabase.functions.invoke("enviar-email-nogo", {
+        body: args,
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data as any;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["champions", "admin", "nogo"] });
+    },
+  });
+
+  const destinatarios = status.data?.destinatarios ?? 0;
+  const apelidos = status.data?.apelidos ?? [];
+  const enviadoEm = status.data?.enviado_em;
+
+  const enviarTeste = async () => {
+    try {
+      const r = await disparo.mutateAsync({ action: "teste" });
+      toast.success(`Teste enviado para ${r?.enviado_para ?? "seu email"}.`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao enviar teste.");
+    }
+  };
+
+  const enviar = async (force: boolean) => {
+    try {
+      const r = await disparo.mutateAsync({ action: "enviar", force });
+      if (r?.skipped) {
+        toast.info(r?.motivo ?? "Envio já realizado antes.", {
+          action: { label: "Forçar reenvio", onClick: () => setConfirmForce(true) },
+        });
+        return;
+      }
+      const falhas = Array.isArray(r?.falhas) ? r.falhas.length : 0;
+      toast.success(
+        `Disparo concluído: ${r?.sucessos ?? 0} sucesso${r?.sucessos === 1 ? "" : "s"}` +
+          (falhas ? ` · ${falhas} falha${falhas === 1 ? "" : "s"}` : " · sem falhas"),
+      );
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao disparar o e-mail de encerramento.");
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
+      <h2 className="flex items-center gap-2 font-display text-lg font-bold">
+        <MailX className="h-4 w-4 text-primary" /> E-mail de encerramento (NO-GO) — só os 15
+      </h2>
+      {status.isLoading ? (
+        <Skeleton className="mt-3 h-16" />
+      ) : status.isError ? (
+        <p className="mt-2 text-sm text-destructive">
+          Falha ao carregar status: {(status.error as any)?.message ?? "erro desconhecido"}
+        </p>
+      ) : (
+        <>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Destinatários: <strong>{destinatarios}</strong>
+            <br />
+            Status:{" "}
+            {enviadoEm ? (
+              <strong>Enviado em {new Date(enviadoEm).toLocaleString("pt-BR")}</strong>
+            ) : (
+              <strong>Ainda não enviado</strong>
+            )}
+          </p>
+          {apelidos.length > 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">{apelidos.join(" · ")}</p>
+          )}
+        </>
+      )}
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={enviarTeste}
+          disabled={disparo.isPending}
+          className="flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-bold hover:bg-muted disabled:opacity-60"
+        >
+          <TestTube2 className="h-3.5 w-3.5" />
+          Enviar teste (só pra mim)
+        </button>
+        <button
+          type="button"
+          onClick={() => setConfirmEnviar(true)}
+          disabled={disparo.isPending || destinatarios === 0}
+          className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        >
+          <Send className="h-3.5 w-3.5" />
+          Disparar para os 15
+        </button>
+      </div>
+
+      <ConfirmDialog
+        open={confirmEnviar}
+        onOpenChange={setConfirmEnviar}
+        title="Disparar e-mail de encerramento?"
+        description={`Isso enviará o e-mail de agradecimento/encerramento para ${destinatarios} manifestantes. Confirmar?`}
+        confirmLabel="Disparar"
+        destructive={false}
+        onConfirm={() => {
+          setConfirmEnviar(false);
+          enviar(false);
+        }}
+      />
+      <ConfirmDialog
+        open={confirmForce}
+        onOpenChange={setConfirmForce}
+        title="Forçar reenvio?"
+        description={`O e-mail já foi enviado antes. Reenviar para ${destinatarios} manifestantes mesmo assim?`}
+        confirmLabel="Forçar reenvio"
+        destructive
+        onConfirm={() => {
+          setConfirmForce(false);
+          enviar(true);
+        }}
+      />
+    </section>
+  );
+}
+
+
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
