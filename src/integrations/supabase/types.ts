@@ -217,6 +217,81 @@ export type Database = {
         }
         Relationships: []
       }
+      competicoes: {
+        Row: {
+          api_league_id: number | null
+          api_provider: string | null
+          api_season: number | null
+          created_at: string
+          fim: string | null
+          formato: string
+          id: string
+          inicio: string | null
+          inscricoes_ate: string | null
+          limite_quotas_pereba: number | null
+          nome: string
+          nome_curto: string
+          pesquisa_prazo: string | null
+          preco_quota: number | null
+          quorum_quotas: number | null
+          regulamento_congelado_em: string | null
+          regulamento_md: string | null
+          slug: string
+          status: string
+          taxa_admin_tipo: string
+          taxa_admin_valor: number
+          updated_at: string
+        }
+        Insert: {
+          api_league_id?: number | null
+          api_provider?: string | null
+          api_season?: number | null
+          created_at?: string
+          fim?: string | null
+          formato: string
+          id?: string
+          inicio?: string | null
+          inscricoes_ate?: string | null
+          limite_quotas_pereba?: number | null
+          nome: string
+          nome_curto: string
+          pesquisa_prazo?: string | null
+          preco_quota?: number | null
+          quorum_quotas?: number | null
+          regulamento_congelado_em?: string | null
+          regulamento_md?: string | null
+          slug: string
+          status?: string
+          taxa_admin_tipo?: string
+          taxa_admin_valor?: number
+          updated_at?: string
+        }
+        Update: {
+          api_league_id?: number | null
+          api_provider?: string | null
+          api_season?: number | null
+          created_at?: string
+          fim?: string | null
+          formato?: string
+          id?: string
+          inicio?: string | null
+          inscricoes_ate?: string | null
+          limite_quotas_pereba?: number | null
+          nome?: string
+          nome_curto?: string
+          pesquisa_prazo?: string | null
+          preco_quota?: number | null
+          quorum_quotas?: number | null
+          regulamento_congelado_em?: string | null
+          regulamento_md?: string | null
+          slug?: string
+          status?: string
+          taxa_admin_tipo?: string
+          taxa_admin_valor?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       faixas_premiacao: {
         Row: {
           created_at: string | null
@@ -1647,6 +1722,39 @@ export type Database = {
       }
       check_capacidade: { Args: never; Returns: Json }
       cleanup_quotas_incompletas: { Args: never; Returns: number }
+      competicao_por_slug: {
+        Args: { p_slug: string }
+        Returns: {
+          api_league_id: number | null
+          api_provider: string | null
+          api_season: number | null
+          created_at: string
+          fim: string | null
+          formato: string
+          id: string
+          inicio: string | null
+          inscricoes_ate: string | null
+          limite_quotas_pereba: number | null
+          nome: string
+          nome_curto: string
+          pesquisa_prazo: string | null
+          preco_quota: number | null
+          quorum_quotas: number | null
+          regulamento_congelado_em: string | null
+          regulamento_md: string | null
+          slug: string
+          status: string
+          taxa_admin_tipo: string
+          taxa_admin_valor: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "competicoes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       compute_default_sigla: { Args: { p_nome: string }; Returns: string }
       congelar_ranking_oficial: { Args: never; Returns: Json }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
