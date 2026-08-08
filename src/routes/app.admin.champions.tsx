@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trophy, Send, TestTube2, AlertTriangle, Check, X, Film, ExternalLink } from "lucide-react";
+import { Trophy, Send, TestTube2, AlertTriangle, Check, X, Film, ExternalLink, MailX } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -137,6 +137,9 @@ function AdminChampions() {
       </section>
 
       <EmailFilmeCard />
+
+      <EmailNogoCard />
+
 
 
       <section className="rounded-2xl border border-accent/40 bg-accent/5 shadow-card">
