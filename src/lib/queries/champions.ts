@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
+export const CHAMPIONS_COMPETICAO_ID = "c56cd512-7a48-4eac-9fdf-57c51411f5e7";
+
 export type ChampionsTotal = {
   quotas_total: number;
   perebas: number;
@@ -27,8 +29,9 @@ export function useMinhaManifestacao() {
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("champions_interesse")
+        .from("manifestacoes")
         .select("quotas, atualizado_em")
+        .eq("competicao_id", CHAMPIONS_COMPETICAO_ID)
         .eq("user_id", user!.id)
         .maybeSingle();
       if (error) throw error;
@@ -44,11 +47,18 @@ export function useUpsertManifestacao() {
     mutationFn: async (quotas: number) => {
       if (!user) throw new Error("Não autenticado");
       const { error } = await supabase
-        .from("champions_interesse")
-        .upsert({ user_id: user.id, quotas }, { onConflict: "user_id" });
+        .from("manifestacoes")
+        .upsert(
+          { competicao_id: CHAMPIONS_COMPETICAO_ID, user_id: user.id, quotas },
+          { onConflict: "competicao_id,user_id" },
+        );
       if (error) {
-        if (error.message?.includes("prazo_encerrado")) {
-          throw new Error("O prazo da manifestação encerrou em 07/08.");
+        if (
+          error.message?.includes("prazo_encerrado") ||
+          error.code === "42501" ||
+          /row-level security/i.test(error.message ?? "")
+        ) {
+          throw new Error("A manifestação de interesse já está encerrada.");
         }
         throw error;
       }
@@ -71,65 +81,15 @@ export function useChampionsTotalPublico() {
   });
 }
 
-export type ManifestacaoExternaInput = {
-  nome: string;
-  email: string;
-  quotas: number;
-  indicado_por?: string | null;
-};
-
-export function useRegistrarInteresseExterno() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (input: ManifestacaoExternaInput) => {
-      const payload = {
-        nome: input.nome.trim(),
-        email: input.email.trim().toLowerCase(),
-        quotas: input.quotas,
-        indicado_por: input.indicado_por?.trim() || null,
-      };
-      const { error } = await supabase.from("champions_interesse_externo").insert(payload);
-      if (error) {
-        if (error.code === "23505" || /duplicate/i.test(error.message)) {
-          throw new Error(
-            "Esse email já manifestou interesse — qualquer ajuste, fala com quem te indicou rsrs",
-          );
-        }
-        if (/prazo_encerrado/i.test(error.message)) {
-          throw new Error("O prazo encerrou em 07/08.");
-        }
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["champions", "total-publico"] });
-    },
-  });
-}
-
-// Admin — externos
-export function useChampionsExternos() {
-  return useQuery({
-    queryKey: ["champions", "admin", "externos"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("champions_interesse_externo")
-        .select("id, nome, email, quotas, indicado_por, criado_em, atualizado_em")
-        .order("criado_em", { ascending: false });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-}
-
 // Admin
 export function useChampionsRespostas() {
   return useQuery({
     queryKey: ["champions", "admin", "respostas"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("champions_interesse")
+        .from("manifestacoes")
         .select("user_id, quotas, atualizado_em, profiles!inner(apelido, nome)")
+        .eq("competicao_id", CHAMPIONS_COMPETICAO_ID)
         .order("atualizado_em", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Array<{
@@ -199,8 +159,9 @@ export function useCadastrosPendentes() {
       let quotasMap = new Map<string, number>();
       if (ids.length) {
         const { data: manifs } = await supabase
-          .from("champions_interesse")
+          .from("manifestacoes")
           .select("user_id, quotas")
+          .eq("competicao_id", CHAMPIONS_COMPETICAO_ID)
           .in("user_id", ids);
         for (const m of manifs ?? []) quotasMap.set(m.user_id, m.quotas ?? 0);
       }
@@ -242,8 +203,9 @@ export function useMinhaManifestacaoQuotasPendente(userId: string | undefined) {
     enabled: !!userId,
     queryFn: async () => {
       const { data } = await supabase
-        .from("champions_interesse")
+        .from("manifestacoes")
         .select("quotas")
+        .eq("competicao_id", CHAMPIONS_COMPETICAO_ID)
         .eq("user_id", userId!)
         .maybeSingle();
       return data?.quotas ?? 0;
