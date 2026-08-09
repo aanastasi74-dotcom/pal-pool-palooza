@@ -9,7 +9,6 @@ import {
   useChampionsRespostas,
   useChampionsEnvioStatus,
   useDispararManifestacao,
-  useChampionsExternos,
   useCadastrosPendentes,
   useModerarCadastro,
 } from "@/lib/queries/champions";
@@ -25,7 +24,6 @@ export const Route = createFileRoute("/app/admin/champions")({
 function AdminChampions() {
   const { data: total } = useChampionsTotal();
   const { data: respostas, isLoading } = useChampionsRespostas();
-  const { data: externos, isLoading: loadingExternos } = useChampionsExternos();
   const { data: pendentes, isLoading: loadingPendentes } = useCadastrosPendentes();
   const { data: envio } = useChampionsEnvioStatus();
   const disparar = useDispararManifestacao();
@@ -33,18 +31,6 @@ function AdminChampions() {
   const [confirmRejeitar, setConfirmRejeitar] = useState<null | { id: string; nome: string }>(null);
 
   const quotasInternas = total?.quotas_total ?? 0;
-  const quotasExternas = (externos ?? []).reduce((s, e) => s + (e.quotas ?? 0), 0);
-  const quotasCombinadas = quotasInternas + quotasExternas;
-
-  const indicadores = new Map<string, number>();
-  for (const e of externos ?? []) {
-    const key = (e.indicado_por ?? "").trim();
-    if (!key) continue;
-    indicadores.set(key, (indicadores.get(key) ?? 0) + 1);
-  }
-  const rankingIndicadores = Array.from(indicadores.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
 
   const [confirmEnvio, setConfirmEnvio] = useState(false);
   const [confirmReenvio, setConfirmReenvio] = useState(false);
@@ -82,19 +68,15 @@ function AdminChampions() {
       </header>
 
       <section className="rounded-2xl border border-primary/40 bg-primary/5 p-4 shadow-card">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Total combinado (internos + externos)</p>
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Quotas manifestadas</p>
         <p className="mt-1 font-display text-4xl font-extrabold">
-          {quotasCombinadas} <span className="text-base font-medium text-muted-foreground">/ {total?.quorum ?? 35}</span>
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Internos: <strong>{quotasInternas}</strong> · Externos: <strong>{quotasExternas}</strong>
+          {quotasInternas} <span className="text-base font-medium text-muted-foreground">/ {total?.quorum ?? 35}</span>
         </p>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        <StatCard label="Quotas internos" value={quotasInternas} />
+      <section className="grid gap-3 sm:grid-cols-2">
+        <StatCard label="Quotas manifestadas" value={quotasInternas} />
         <StatCard label="Perebas participando" value={total?.perebas ?? 0} />
-        <StatCard label="Externos manifestados" value={(externos ?? []).length} />
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
@@ -244,63 +226,6 @@ function AdminChampions() {
           </div>
         )}
       </section>
-
-      <section className="rounded-2xl border border-border bg-card shadow-card">
-        <div className="border-b border-border p-4">
-          <h2 className="font-display text-lg font-bold">
-            Manifestações antigas (formulário sem conta)
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            Histórico do formulário anterior — hoje o /champions cria conta pendente.
-          </p>
-        </div>
-        {loadingExternos ? (
-          <div className="p-4"><Skeleton className="h-40" /></div>
-        ) : !externos || externos.length === 0 ? (
-          <EmptyState title="Nenhum externo ainda" description="Compartilha o link /champions no WhatsApp." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-2 text-left">Nome</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-right">Quotas</th>
-                  <th className="px-4 py-2 text-left">Indicado por</th>
-                  <th className="px-4 py-2 text-right">Criado em</th>
-                </tr>
-              </thead>
-              <tbody>
-                {externos.map((e) => (
-                  <tr key={e.id} className="border-t border-border">
-                    <td className="px-4 py-2 font-medium">{e.nome}</td>
-                    <td className="px-4 py-2 text-xs text-muted-foreground">{e.email}</td>
-                    <td className="px-4 py-2 text-right font-bold">{e.quotas}</td>
-                    <td className="px-4 py-2 text-xs">{e.indicado_por ?? <span className="text-muted-foreground">—</span>}</td>
-                    <td className="px-4 py-2 text-right text-xs text-muted-foreground">
-                      {new Date(e.criado_em).toLocaleString("pt-BR")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      {rankingIndicadores.length > 0 && (
-        <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
-          <h2 className="font-display text-lg font-bold">Quem indicou mais</h2>
-          <ul className="mt-2 space-y-1 text-sm">
-            {rankingIndicadores.map(([nome, n]) => (
-              <li key={nome} className="flex items-center justify-between border-b border-border/50 py-1.5 last:border-0">
-                <span className="font-medium">{nome}</span>
-                <span className="text-xs text-muted-foreground">{n} indicado{n === 1 ? "" : "s"}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       <ConfirmDialog
         open={confirmEnvio}
