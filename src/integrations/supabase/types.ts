@@ -589,6 +589,48 @@ export type Database = {
         }
         Relationships: []
       }
+      manifestacoes: {
+        Row: {
+          atualizado_em: string
+          competicao_id: string
+          criado_em: string
+          origem: string
+          quotas: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          competicao_id: string
+          criado_em?: string
+          origem?: string
+          quotas: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          competicao_id?: string
+          criado_em?: string
+          origem?: string
+          quotas?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manifestacoes_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manifestacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           alocacao_admin_override: boolean
@@ -1994,6 +2036,7 @@ export type Database = {
       limite_perebas_hard: { Args: never; Returns: number }
       limite_quotas_global_hard: { Args: never; Returns: number }
       limite_quotas_pereba: { Args: { p_user_id: string }; Returns: number }
+      manifestacao_total: { Args: { p_slug: string }; Returns: Json }
       marcar_email_regras_enviado: { Args: never; Returns: string }
       pode_comprar_quota:
         | { Args: { p_user_id: string }; Returns: Json }
