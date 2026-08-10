@@ -58,6 +58,7 @@ import { Route as AppAdminPerfisRouteImport } from './routes/app.admin.perfis'
 import { Route as AppAdminPagamentosRouteImport } from './routes/app.admin.pagamentos'
 import { Route as AppAdminJogosRouteImport } from './routes/app.admin.jogos'
 import { Route as AppAdminEncerrarCopaRouteImport } from './routes/app.admin.encerrar-copa'
+import { Route as AppAdminCopa2026RouteImport } from './routes/app.admin.copa2026'
 import { Route as AppAdminConvitesRouteImport } from './routes/app.admin.convites'
 import { Route as AppAdminConfiguracoesRouteImport } from './routes/app.admin.configuracoes'
 import { Route as AppAdminChampionsRouteImport } from './routes/app.admin.champions'
@@ -314,6 +315,11 @@ const AppAdminEncerrarCopaRoute = AppAdminEncerrarCopaRouteImport.update({
   path: '/encerrar-copa',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminCopa2026Route = AppAdminCopa2026RouteImport.update({
+  id: '/copa2026',
+  path: '/copa2026',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminConvitesRoute = AppAdminConvitesRouteImport.update({
   id: '/convites',
   path: '/convites',
@@ -397,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/champions': typeof AppAdminChampionsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
   '/app/admin/convites': typeof AppAdminConvitesRoute
+  '/app/admin/copa2026': typeof AppAdminCopa2026Route
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
   '/app/admin/jogos': typeof AppAdminJogosRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
@@ -455,6 +462,7 @@ export interface FileRoutesByTo {
   '/app/admin/champions': typeof AppAdminChampionsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
   '/app/admin/convites': typeof AppAdminConvitesRoute
+  '/app/admin/copa2026': typeof AppAdminCopa2026Route
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
   '/app/admin/jogos': typeof AppAdminJogosRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
@@ -516,6 +524,7 @@ export interface FileRoutesById {
   '/app/admin/champions': typeof AppAdminChampionsRoute
   '/app/admin/configuracoes': typeof AppAdminConfiguracoesRoute
   '/app/admin/convites': typeof AppAdminConvitesRoute
+  '/app/admin/copa2026': typeof AppAdminCopa2026Route
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
   '/app/admin/jogos': typeof AppAdminJogosRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
@@ -578,6 +587,7 @@ export interface FileRouteTypes {
     | '/app/admin/champions'
     | '/app/admin/configuracoes'
     | '/app/admin/convites'
+    | '/app/admin/copa2026'
     | '/app/admin/encerrar-copa'
     | '/app/admin/jogos'
     | '/app/admin/pagamentos'
@@ -636,6 +646,7 @@ export interface FileRouteTypes {
     | '/app/admin/champions'
     | '/app/admin/configuracoes'
     | '/app/admin/convites'
+    | '/app/admin/copa2026'
     | '/app/admin/encerrar-copa'
     | '/app/admin/jogos'
     | '/app/admin/pagamentos'
@@ -696,6 +707,7 @@ export interface FileRouteTypes {
     | '/app/admin/champions'
     | '/app/admin/configuracoes'
     | '/app/admin/convites'
+    | '/app/admin/copa2026'
     | '/app/admin/encerrar-copa'
     | '/app/admin/jogos'
     | '/app/admin/pagamentos'
@@ -1082,6 +1094,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminEncerrarCopaRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/admin/copa2026': {
+      id: '/app/admin/copa2026'
+      path: '/copa2026'
+      fullPath: '/app/admin/copa2026'
+      preLoaderRoute: typeof AppAdminCopa2026RouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/admin/convites': {
       id: '/app/admin/convites'
       path: '/convites'
@@ -1154,6 +1173,7 @@ interface AppAdminRouteChildren {
   AppAdminChampionsRoute: typeof AppAdminChampionsRoute
   AppAdminConfiguracoesRoute: typeof AppAdminConfiguracoesRoute
   AppAdminConvitesRoute: typeof AppAdminConvitesRoute
+  AppAdminCopa2026Route: typeof AppAdminCopa2026Route
   AppAdminEncerrarCopaRoute: typeof AppAdminEncerrarCopaRoute
   AppAdminJogosRoute: typeof AppAdminJogosRoute
   AppAdminPagamentosRoute: typeof AppAdminPagamentosRoute
@@ -1176,6 +1196,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminChampionsRoute: AppAdminChampionsRoute,
   AppAdminConfiguracoesRoute: AppAdminConfiguracoesRoute,
   AppAdminConvitesRoute: AppAdminConvitesRoute,
+  AppAdminCopa2026Route: AppAdminCopa2026Route,
   AppAdminEncerrarCopaRoute: AppAdminEncerrarCopaRoute,
   AppAdminJogosRoute: AppAdminJogosRoute,
   AppAdminPagamentosRoute: AppAdminPagamentosRoute,
