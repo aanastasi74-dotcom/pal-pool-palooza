@@ -1,169 +1,147 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { usePaymentsAdmin, useRecentApprovedPayments } from "@/lib/queries/payments";
-import { usePremio } from "@/lib/queries/premio";
-import { Wallet, Clock, CheckCircle2, AlertTriangle, TrendingUp } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
-import { EmptyState } from "@/components/empty-state";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useReportsAbertosCount } from "@/lib/queries/reports";
+import { Users, Activity, ScrollText, Bug, Settings, Lock, Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/app/admin/")({
-  head: () => ({ meta: [{ title: "Admin — Painel financeiro" }] }),
-  component: AdminDashboard,
+  head: () => ({ meta: [{ title: "Admin — Plataforma" }] }),
+  component: AdminPlataforma,
 });
 
-const fmt = (n: number) => `R$ ${Math.round(n).toLocaleString("pt-BR")}`;
+function useCompeticoes() {
+  return useQuery({
+    queryKey: ["competicoes", "admin-lobby"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("competicoes")
+        .select("id, slug, nome, nome_curto, formato, status, inicio, fim, quorum_quotas, preco_quota, created_at")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
 
-function AdminDashboard() {
-  const { data: pays, isLoading } = usePaymentsAdmin();
-  const { data: recent } = useRecentApprovedPayments(5);
-  const { data: premio } = usePremio();
+const statusStyle: Record<string, string> = {
+  arquivada: "bg-muted text-muted-foreground",
+  cancelada: "bg-destructive/15 text-destructive",
+  rascunho: "bg-muted text-muted-foreground",
+  pesquisa: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+  inscricoes: "bg-success/15 text-success",
+  ativa: "bg-success/15 text-success",
+};
 
-  const stats = useMemo(() => {
-    const list = pays ?? [];
-    const aprovados = list.filter((p) => p.status === "aprovado");
-    const pendentes = list.filter((p) => p.status === "pendente");
-    const rejeitados = list.filter((p) => p.status === "rejeitado");
-    const total = aprovados.reduce((s, p) => s + Number(p.valor), 0);
-    const totalPend = pendentes.reduce((s, p) => s + Number(p.valor), 0);
-    const ticket = aprovados.length ? total / aprovados.length : 0;
+const consoleBySlug: Record<string, string> = {
+  copa2026: "/app/admin/copa2026",
+  champions2627: "/app/admin/champions",
+};
 
-    // série de aprovações por dia (últimos 30 dias)
-    const byDate = new Map<string, number>();
-    for (const p of aprovados) {
-      const d = new Date(p.aprovado_em ?? p.created_at ?? Date.now());
-      const key = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-      byDate.set(key, (byDate.get(key) ?? 0) + Number(p.valor));
-    }
-    const evolucao = Array.from(byDate.entries()).map(([data, valor]) => ({ data, valor }));
-    return { aprovados, pendentes, rejeitados, total, totalPend, ticket, evolucao };
-  }, [pays]);
+const fmtData = (d: string | null) => (d ? new Date(d + "T12:00:00").toLocaleDateString("pt-BR") : null);
 
-  const pieData = [
-    { name: "Pago", value: stats.aprovados.length, color: "var(--success)" },
-    { name: "Pendente", value: stats.pendentes.length, color: "var(--accent)" },
-    { name: "Rejeitado", value: stats.rejeitados.length, color: "var(--destructive)" },
-  ];
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-72" />
-        <div className="grid gap-3 md:grid-cols-4">
-          {[0,1,2,3].map((i) => <Skeleton key={i} className="h-24" />)}
-        </div>
-        <Skeleton className="h-64" />
-      </div>
-    );
-  }
+function AdminPlataforma() {
+  const { data: competicoes, isLoading } = useCompeticoes();
+  const { data: reportesAbertos = 0 } = useReportsAbertosCount();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="font-display text-3xl font-extrabold">Resumo da grana da perebada</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Pagamentos, prêmio e o que precisa de atenção.</p>
+        <h1 className="font-display text-3xl font-extrabold">Admin da plataforma</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Competições e ferramentas globais.</p>
       </div>
 
-      {(pays ?? []).length === 0 ? (
-        <EmptyState title="Sem pagamentos por aqui" description="Perebada ainda não pixou." />
-      ) : (
-        <>
-          {stats.pendentes.length > 0 && (
-            <div className="flex items-start gap-3 rounded-2xl border border-accent/40 bg-accent/10 p-4 text-sm">
-              <AlertTriangle className="mt-0.5 h-4 w-4 text-accent" />
-              <div className="flex-1">
-                <p className="font-bold">Tem comprovante esperando</p>
-                <p className="text-xs text-muted-foreground">{stats.pendentes.length} pagamento(s) pendente(s) — ir conciliar agora.</p>
-              </div>
-              <Link to="/app/admin/pagamentos" className="rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground">
-                Ver pagamentos
-              </Link>
-            </div>
-          )}
-
-          <div className="grid gap-3 md:grid-cols-4">
-            <KPI icon={CheckCircle2} label="Total arrecadado" value={fmt(stats.total)} tone="success" />
-            <KPI icon={Clock} label="Total pendente" value={fmt(stats.totalPend)} tone="accent" />
-            <KPI icon={Wallet} label="Quotas pagas" value={`${stats.aprovados.length}`} />
-            <KPI icon={TrendingUp} label="Ticket médio" value={fmt(stats.ticket)} />
+      <section className="space-y-3">
+        <h2 className="font-display text-lg font-bold">Competições</h2>
+        {isLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[0, 1, 2].map((i) => <Skeleton key={i} className="h-32" />)}
           </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-card md:col-span-2">
-              <h3 className="font-display font-bold">Aprovações por dia</h3>
-              <p className="text-xs text-muted-foreground">Por data de aprovação</p>
-              <div className="mt-3 h-56">
-                {stats.evolucao.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">Sem aprovações ainda.</p>
-                ) : (
-                  <ResponsiveContainer>
-                    <AreaChart data={stats.evolucao}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="data" stroke="var(--muted-foreground)" fontSize={11} />
-                      <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                      <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }} />
-                      <Area type="monotone" dataKey="valor" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.2} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-              <h3 className="font-display font-bold">Distribuição</h3>
-              <p className="text-xs text-muted-foreground">Status dos pagamentos</p>
-              <div className="mt-3 h-56">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie data={pieData} dataKey="value" innerRadius={40} outerRadius={70} paddingAngle={4}>
-                      {pieData.map((d) => <Cell key={d.name} fill={d.color} />)}
-                    </Pie>
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {(competicoes ?? []).map((c) => {
+              const to = consoleBySlug[c.slug];
+              const inner = (
+                <>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Trophy className="h-4 w-4 shrink-0 text-primary" />
+                    <p className="min-w-0 font-display text-base font-bold break-words">{c.nome_curto}</p>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                        statusStyle[c.status] ?? "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {c.status === "arquivada" && <Lock className="h-3 w-3" />}
+                      {c.status}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground break-words">{c.nome}</p>
+                  <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                    {fmtData(c.inicio) && <span>Início {fmtData(c.inicio)}</span>}
+                    {fmtData(c.fim) && <span>Fim {fmtData(c.fim)}</span>}
+                    {c.preco_quota != null && <span>Quota R$ {Number(c.preco_quota).toLocaleString("pt-BR")}</span>}
+                    {c.quorum_quotas != null && <span>Quórum {c.quorum_quotas}</span>}
+                  </div>
+                </>
+              );
+              return to ? (
+                <Link
+                  key={c.id}
+                  to={to}
+                  className="rounded-2xl border border-border bg-card p-4 shadow-card transition-colors hover:border-primary/60"
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <div key={c.id} className="rounded-2xl border border-dashed border-border bg-card/50 p-4" title="Console nasce quando sair do rascunho">
+                  {inner}
+                  <p className="mt-2 text-[11px] italic text-muted-foreground">Console nasce quando sair do rascunho.</p>
+                </div>
+              );
+            })}
           </div>
+        )}
+      </section>
 
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold">Últimas aprovações</h3>
-              <Link to="/app/admin/pagamentos" className="text-xs font-bold text-primary hover:underline">Ver todos →</Link>
-            </div>
-            <ul className="mt-3 divide-y divide-border">
-              {(recent ?? []).map((p: any) => (
-                <li key={p.id} className="flex items-center justify-between py-2 text-sm">
-                  <span className="font-semibold">
-                    {p.profile?.apelido ?? p.profile?.nome ?? "—"} {p.quota?.numero ? `#${p.quota.numero}` : ""}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {p.aprovado_em ? new Date(p.aprovado_em).toLocaleString("pt-BR") : "—"} · <b className="text-foreground">{fmt(Number(p.valor))}</b>
-                  </span>
-                </li>
-              ))}
-              {(recent ?? []).length === 0 && <li className="py-2 text-xs text-muted-foreground">Sem aprovações recentes.</li>}
-            </ul>
-            {premio && (
-              <p className="mt-3 text-[11px] text-muted-foreground">
-                Meta atual: {fmt(premio.meta)} · Confirmado: {fmt(premio.total_confirmado)} · Pendente: {fmt(premio.total_pendente)}
-              </p>
-            )}
-          </div>
-        </>
-      )}
+      <section className="space-y-3">
+        <h2 className="font-display text-lg font-bold">Plataforma</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Atalho to="/app/admin/convites" icon={Users} label="Usuários & convites" desc="Cadastros, convites e aprovações." />
+          <Atalho to="/app/admin/saude" icon={Activity} label="Saúde" desc="Diagnóstico do sistema." />
+          <Atalho to="/app/admin/auditoria" icon={ScrollText} label="Auditoria" desc="Histórico de ações administrativas." />
+          <Atalho to="/app/admin/reportes" icon={Bug} label="Reportes" desc="Bugs reportados pela perebada." badge={reportesAbertos} />
+          <Atalho to="/app/admin/configuracoes" icon={Settings} label="Configurações" desc="Chaves e travas globais." />
+        </div>
+      </section>
     </div>
   );
 }
 
-function KPI({ icon: Icon, label, value, tone }: { icon: React.ElementType; label: string; value: string; tone?: "success" | "accent" }) {
-  const colorMap: Record<string, string> = { success: "text-success", accent: "text-accent" };
+function Atalho({
+  to,
+  icon: Icon,
+  label,
+  desc,
+  badge,
+}: {
+  to: string;
+  icon: React.ElementType;
+  label: string;
+  desc: string;
+  badge?: number;
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Icon className={`h-4 w-4 ${tone ? colorMap[tone] : ""}`} />
-        {label}
+    <Link to={to} className="rounded-2xl border border-border bg-card p-4 shadow-card transition-colors hover:border-primary/60">
+      <div className="flex flex-wrap items-center gap-2">
+        <Icon className="h-4 w-4 shrink-0 text-primary" />
+        <span className="min-w-0 font-semibold break-words">{label}</span>
+        {badge != null && badge > 0 && (
+          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
+            {badge}
+          </span>
+        )}
       </div>
-      <p className="mt-2 font-display text-2xl font-black">{value}</p>
-    </div>
+      <p className="mt-1 text-xs text-muted-foreground break-words">{desc}</p>
+    </Link>
   );
 }
