@@ -161,62 +161,6 @@ export type Database = {
           },
         ]
       }
-      champions_interesse: {
-        Row: {
-          atualizado_em: string
-          quotas: number
-          user_id: string
-        }
-        Insert: {
-          atualizado_em?: string
-          quotas: number
-          user_id: string
-        }
-        Update: {
-          atualizado_em?: string
-          quotas?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "champions_interesse_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      champions_interesse_externo: {
-        Row: {
-          atualizado_em: string
-          criado_em: string
-          email: string
-          id: string
-          indicado_por: string | null
-          nome: string
-          quotas: number
-        }
-        Insert: {
-          atualizado_em?: string
-          criado_em?: string
-          email: string
-          id?: string
-          indicado_por?: string | null
-          nome: string
-          quotas: number
-        }
-        Update: {
-          atualizado_em?: string
-          criado_em?: string
-          email?: string
-          id?: string
-          indicado_por?: string | null
-          nome?: string
-          quotas?: number
-        }
-        Relationships: []
-      }
       competicoes: {
         Row: {
           api_league_id: number | null
