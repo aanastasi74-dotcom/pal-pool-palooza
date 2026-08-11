@@ -42,14 +42,15 @@ function isLobbyRoute(pathname: string) {
 
 export function AppShell() {
   const { pathname } = useLocation();
-  const lobbyMode = isLobbyRoute(pathname);
-  const nav = lobbyMode ? navLobby : navCopa;
   const navigate = useNavigate();
   const { signOut, isAdmin, profile, isLoading } = useAuth();
   const { data: minhasQuotas = [] } = useMinhasQuotas();
   const { maintenance } = useMaintenanceMode();
   const nome = profile?.nome ?? "Pereba";
   const sigla = (profile?.sigla ?? profile?.apelido ?? nome).slice(0, 3).toUpperCase();
+
+  // Admin routes are rendered by admin-shell; app-shell must not add its own chrome.
+  const isAdminRoute = pathname === "/app/admin" || pathname.startsWith("/app/admin/");
 
   if (!isLoading && !profile) {
     return <Navigate to="/completar-perfil" />;
@@ -72,6 +73,13 @@ export function AppShell() {
   if (profile && !aceitouRegras && !isAdmin) {
     return <Navigate to="/regras" search={{ force: true }} />;
   }
+
+  if (isAdminRoute) {
+    return <Outlet />;
+  }
+
+  const lobbyMode = isLobbyRoute(pathname);
+  const nav = lobbyMode ? navLobby : navCopa;
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
