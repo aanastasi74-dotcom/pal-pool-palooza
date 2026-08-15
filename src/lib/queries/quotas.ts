@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { COPA2026_COMPETICAO_ID } from "@/lib/competicoes";
 
 // I.5.6 — encerradas escondidas dos dropdowns de palpite/top4 por padrão.
 // Quem precisa ver tudo (página de quotas/perfil) passa { includeEncerradas: true }.
@@ -56,7 +57,7 @@ export function useCreateQuota() {
 
       const { data, error } = await supabase
         .from("quotas")
-        .insert({ user_id: user!.id, numero: null as any, status: "incompleta" as any })
+        .insert({ user_id: user!.id, competicao_id: COPA2026_COMPETICAO_ID, numero: null as any, status: "incompleta" as any })
         .select()
         .single();
       if (error) throw error;

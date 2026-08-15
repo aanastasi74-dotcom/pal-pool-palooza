@@ -86,6 +86,7 @@ export function useCreateOrUpdateLote() {
           .from("lotes_compra")
           .insert({
             user_id: user.id,
+            competicao_id: COPA2026_COMPETICAO_ID,
             quantidade_pedida: quantidade,
             valor_esperado: quantidade * VALOR_QUOTA,
             status: "incompleta",
