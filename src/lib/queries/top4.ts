@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { COPA2026_COMPETICAO_ID } from "@/lib/competicoes";
 
 export function useMyTop4(quota_id?: string) {
   return useQuery({
@@ -23,7 +24,7 @@ export function useUpdateTop4() {
         if (error) throw error;
         return data;
       }
-      const { data, error } = await supabase.from("top4_predictions").insert({ quota_id, posicao_1, posicao_2, posicao_3, posicao_4 }).select().single();
+      const { data, error } = await supabase.from("top4_predictions").insert({ quota_id, competicao_id: COPA2026_COMPETICAO_ID, posicao_1, posicao_2, posicao_3, posicao_4 }).select().single();
       if (error) throw error;
       return data;
     },

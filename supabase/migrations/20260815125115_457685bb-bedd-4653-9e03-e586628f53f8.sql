@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.competicao_settings IS 'Settings por competição (S1.5) — comentário para sincronizar types, 15/08/2026';

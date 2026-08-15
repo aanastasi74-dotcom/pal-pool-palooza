@@ -57,6 +57,7 @@ export type Database = {
       }
       boletins: {
         Row: {
+          competicao_id: string
           created_at: string
           data_referencia: string
           enviado_em: string | null
@@ -74,6 +75,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          competicao_id?: string
           created_at?: string
           data_referencia: string
           enviado_em?: string | null
@@ -91,6 +93,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          competicao_id?: string
           created_at?: string
           data_referencia?: string
           enviado_em?: string | null
@@ -109,6 +112,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "boletins_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "boletins_publicado_por_fkey"
             columns: ["publicado_por"]
             isOneToOne: false
@@ -121,6 +131,7 @@ export type Database = {
         Row: {
           categoria: string
           competicao: string
+          competicao_id: string | null
           criado_em: string
           criado_por: string | null
           descricao: string
@@ -132,6 +143,7 @@ export type Database = {
         Insert: {
           categoria: string
           competicao?: string
+          competicao_id?: string | null
           criado_em?: string
           criado_por?: string | null
           descricao: string
@@ -143,6 +155,7 @@ export type Database = {
         Update: {
           categoria?: string
           competicao?: string
+          competicao_id?: string | null
           criado_em?: string
           criado_por?: string | null
           descricao?: string
@@ -153,10 +166,46 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "caixa_movimentos_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "caixa_movimentos_criado_por_fkey"
             columns: ["criado_por"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competicao_settings: {
+        Row: {
+          competicao_id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          competicao_id: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          competicao_id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competicao_settings_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
             referencedColumns: ["id"]
           },
         ]
@@ -330,6 +379,7 @@ export type Database = {
       }
       frases_do_dia: {
         Row: {
+          competicao_id: string
           created_at: string
           data: string
           frases: string[]
@@ -340,6 +390,7 @@ export type Database = {
           tokens_output: number | null
         }
         Insert: {
+          competicao_id: string
           created_at?: string
           data: string
           frases: string[]
@@ -350,6 +401,7 @@ export type Database = {
           tokens_output?: number | null
         }
         Update: {
+          competicao_id?: string
           created_at?: string
           data?: string
           frases?: string[]
@@ -359,10 +411,19 @@ export type Database = {
           tokens_input?: number | null
           tokens_output?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "frases_do_dia_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       historico_ranking_diario: {
         Row: {
+          competicao_id: string
           criado_em: string
           data_snapshot: string
           id: string
@@ -373,6 +434,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          competicao_id: string
           criado_em?: string
           data_snapshot: string
           id?: string
@@ -383,6 +445,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          competicao_id?: string
           criado_em?: string
           data_snapshot?: string
           id?: string
@@ -393,6 +456,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "historico_ranking_diario_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "historico_ranking_diario_quota_id_fkey"
             columns: ["quota_id"]
@@ -496,6 +566,7 @@ export type Database = {
       }
       lotes_compra: {
         Row: {
+          competicao_id: string
           comprovante_url: string | null
           criado_em: string
           decidido_em: string | null
@@ -508,6 +579,7 @@ export type Database = {
           valor_esperado: number
         }
         Insert: {
+          competicao_id: string
           comprovante_url?: string | null
           criado_em?: string
           decidido_em?: string | null
@@ -520,6 +592,7 @@ export type Database = {
           valor_esperado: number
         }
         Update: {
+          competicao_id?: string
           comprovante_url?: string | null
           criado_em?: string
           decidido_em?: string | null
@@ -531,7 +604,15 @@ export type Database = {
           user_id?: string
           valor_esperado?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lotes_compra_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       manifestacoes: {
         Row: {
@@ -582,6 +663,7 @@ export type Database = {
           away_origem: string | null
           casa: string
           cidade: string | null
+          competicao_id: string
           created_at: string | null
           data_jogo: string
           escalacoes: Json | null
@@ -620,6 +702,7 @@ export type Database = {
           away_origem?: string | null
           casa: string
           cidade?: string | null
+          competicao_id: string
           created_at?: string | null
           data_jogo: string
           escalacoes?: Json | null
@@ -658,6 +741,7 @@ export type Database = {
           away_origem?: string | null
           casa?: string
           cidade?: string | null
+          competicao_id?: string
           created_at?: string | null
           data_jogo?: string
           escalacoes?: Json | null
@@ -692,6 +776,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "matches_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "matches_stadium_id_fkey"
             columns: ["stadium_id"]
             isOneToOne: false
@@ -718,6 +809,7 @@ export type Database = {
         Row: {
           aprovado_em: string | null
           aprovado_por: string | null
+          competicao_id: string
           comprovante_path: string | null
           created_at: string | null
           id: string
@@ -731,6 +823,7 @@ export type Database = {
         Insert: {
           aprovado_em?: string | null
           aprovado_por?: string | null
+          competicao_id: string
           comprovante_path?: string | null
           created_at?: string | null
           id?: string
@@ -744,6 +837,7 @@ export type Database = {
         Update: {
           aprovado_em?: string | null
           aprovado_por?: string | null
+          competicao_id?: string
           comprovante_path?: string | null
           created_at?: string | null
           id?: string
@@ -760,6 +854,13 @@ export type Database = {
             columns: ["aprovado_por"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
             referencedColumns: ["id"]
           },
           {
@@ -962,6 +1063,7 @@ export type Database = {
         Row: {
           abre_em: string
           ativa: boolean
+          competicao_id: string
           criada_em: string
           descricao: string | null
           encerra_em: string
@@ -973,6 +1075,7 @@ export type Database = {
         Insert: {
           abre_em?: string
           ativa?: boolean
+          competicao_id: string
           criada_em?: string
           descricao?: string | null
           encerra_em: string
@@ -984,6 +1087,7 @@ export type Database = {
         Update: {
           abre_em?: string
           ativa?: boolean
+          competicao_id?: string
           criada_em?: string
           descricao?: string | null
           encerra_em?: string
@@ -992,10 +1096,19 @@ export type Database = {
           slug?: string
           titulo?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pesquisas_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       predictions: {
         Row: {
+          competicao_id: string
           created_at: string | null
           id: string
           match_id: string
@@ -1007,6 +1120,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          competicao_id: string
           created_at?: string | null
           id?: string
           match_id: string
@@ -1018,6 +1132,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          competicao_id?: string
           created_at?: string | null
           id?: string
           match_id?: string
@@ -1029,6 +1144,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "predictions_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "predictions_match_id_fkey"
             columns: ["match_id"]
@@ -1049,6 +1171,7 @@ export type Database = {
         Row: {
           apelido: string
           categoria: string
+          competicao_id: string
           comprovante_path: string | null
           criado_em: string
           dados_bancarios_recebidos: boolean
@@ -1065,6 +1188,7 @@ export type Database = {
         Insert: {
           apelido: string
           categoria: string
+          competicao_id: string
           comprovante_path?: string | null
           criado_em?: string
           dados_bancarios_recebidos?: boolean
@@ -1081,6 +1205,7 @@ export type Database = {
         Update: {
           apelido?: string
           categoria?: string
+          competicao_id?: string
           comprovante_path?: string | null
           criado_em?: string
           dados_bancarios_recebidos?: boolean
@@ -1095,6 +1220,13 @@ export type Database = {
           valor_total?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "premiados_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "premiados_quota_id_fkey"
             columns: ["quota_id"]
@@ -1167,6 +1299,7 @@ export type Database = {
       quotas: {
         Row: {
           apelido: string | null
+          competicao_id: string
           created_at: string | null
           elegivel_lanterna: boolean | null
           id: string
@@ -1186,6 +1319,7 @@ export type Database = {
         }
         Insert: {
           apelido?: string | null
+          competicao_id: string
           created_at?: string | null
           elegivel_lanterna?: boolean | null
           id?: string
@@ -1205,6 +1339,7 @@ export type Database = {
         }
         Update: {
           apelido?: string | null
+          competicao_id?: string
           created_at?: string | null
           elegivel_lanterna?: boolean | null
           id?: string
@@ -1223,6 +1358,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "quotas_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "quotas_lote_id_fkey"
             columns: ["lote_id"]
@@ -1281,6 +1423,7 @@ export type Database = {
       ranking_final: {
         Row: {
           apelido: string
+          competicao_id: string
           congelado_em: string
           elegivel_lanterna: boolean
           numero_quota: number
@@ -1291,6 +1434,7 @@ export type Database = {
         }
         Insert: {
           apelido: string
+          competicao_id: string
           congelado_em?: string
           elegivel_lanterna: boolean
           numero_quota: number
@@ -1301,6 +1445,7 @@ export type Database = {
         }
         Update: {
           apelido?: string
+          competicao_id?: string
           congelado_em?: string
           elegivel_lanterna?: boolean
           numero_quota?: number
@@ -1310,6 +1455,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "ranking_final_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ranking_final_quota_id_fkey"
             columns: ["quota_id"]
@@ -1494,6 +1646,7 @@ export type Database = {
       top4_predictions: {
         Row: {
           alterado_em: string | null
+          competicao_id: string
           fase_alteracao: string | null
           id: string
           peso_no_palpite: number
@@ -1506,6 +1659,7 @@ export type Database = {
         }
         Insert: {
           alterado_em?: string | null
+          competicao_id: string
           fase_alteracao?: string | null
           id?: string
           peso_no_palpite?: number
@@ -1518,6 +1672,7 @@ export type Database = {
         }
         Update: {
           alterado_em?: string | null
+          competicao_id?: string
           fase_alteracao?: string | null
           id?: string
           peso_no_palpite?: number
@@ -1530,6 +1685,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "top4_predictions_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "top4_predictions_quota_id_fkey"
             columns: ["quota_id"]
             isOneToOne: true
@@ -1541,6 +1703,7 @@ export type Database = {
       wrapped_frases: {
         Row: {
           atualizado_em: string
+          competicao_id: string
           frase: string | null
           gerado_em: string
           status: string
@@ -1548,6 +1711,7 @@ export type Database = {
         }
         Insert: {
           atualizado_em?: string
+          competicao_id: string
           frase?: string | null
           gerado_em?: string
           status?: string
@@ -1555,6 +1719,7 @@ export type Database = {
         }
         Update: {
           atualizado_em?: string
+          competicao_id?: string
           frase?: string | null
           gerado_em?: string
           status?: string
@@ -1562,9 +1727,16 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "wrapped_frases_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "wrapped_frases_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2000,6 +2172,10 @@ export type Database = {
       }
       resolve_mata_mata_round_of_32: {
         Args: { p_force_admin_override_reset?: boolean }
+        Returns: Json
+      }
+      setting_da_competicao: {
+        Args: { p_key: string; p_slug: string }
         Returns: Json
       }
       snapshot_ranking_diario: { Args: never; Returns: Json }

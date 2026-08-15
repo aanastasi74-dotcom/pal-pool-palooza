@@ -1,0 +1,2 @@
+export const COPA2026_COMPETICAO_ID = "30b0570a-e20c-4d71-a9c0-d26f13002da2";
+export const CHAMPIONS_COMPETICAO_ID = "c56cd512-7a48-4eac-9fdf-57c51411f5e7";

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { COPA2026_COMPETICAO_ID } from "@/lib/competicoes";
 
 export function useMyPredictions(quota_id?: string) {
   return useQuery({
@@ -54,7 +55,7 @@ export function useUpsertPrediction() {
         if (error) throw error;
         return data;
       }
-      const { data, error } = await supabase.from("predictions").insert({ quota_id, match_id, placar_casa, placar_fora }).select().single();
+      const { data, error } = await supabase.from("predictions").insert({ quota_id, match_id, competicao_id: COPA2026_COMPETICAO_ID, placar_casa, placar_fora }).select().single();
       if (error) throw error;
       return data;
     },

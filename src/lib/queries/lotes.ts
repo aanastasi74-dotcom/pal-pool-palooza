@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { COPA2026_COMPETICAO_ID } from "@/lib/competicoes";
 
 const VALOR_QUOTA = 50;
 
@@ -85,6 +86,7 @@ export function useCreateOrUpdateLote() {
           .from("lotes_compra")
           .insert({
             user_id: user.id,
+            competicao_id: COPA2026_COMPETICAO_ID,
             quantidade_pedida: quantidade,
             valor_esperado: quantidade * VALOR_QUOTA,
             status: "incompleta",
