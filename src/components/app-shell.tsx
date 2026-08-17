@@ -96,7 +96,7 @@ export function AppShell() {
             </div>
             <div className="leading-tight">
               <p className="font-display text-sm font-bold">Bolão dos Perebas</p>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{lobbyMode ? "Plataforma de bolões" : "Copa 2026"}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{lobbyMode ? "Plataforma de bolões" : nomeCurtoCopa}</p>
             </div>
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
