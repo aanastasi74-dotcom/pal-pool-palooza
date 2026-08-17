@@ -18,6 +18,7 @@ import { BoasVindasCopaDialog } from "./boas-vindas-copa-dialog";
 import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { useAuth } from "@/lib/auth-context";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
+import { useCompeticoes } from "@/lib/queries/competicoes";
 
 const navCopa = [
   { to: "/app/copa2026", label: "Início", icon: Trophy, exact: true },
