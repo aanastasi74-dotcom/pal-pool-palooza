@@ -12,6 +12,8 @@ import {
   Smartphone,
 } from "lucide-react";
 import { HomeDestaquesCarousel } from "@/components/home-destaques-carousel";
+import { HomeMatchCarousel } from "@/components/home-match-carousel";
+import { useCompeticaoAtiva } from "@/lib/queries/competicoes";
 import { DemoTour } from "@/components/demo-tour";
 import { useAuth } from "@/lib/auth-context";
 
@@ -144,7 +146,7 @@ function Landing() {
             </div>
           </div>
           <div className="relative min-w-0">
-            <HomeDestaquesCarousel />
+            <HeroCarousel />
           </div>
         </div>
       </section>
@@ -310,3 +312,8 @@ const pontos = [
   { valor: "5", label: "Resultado + gols de um time" },
   { valor: "4", label: "Só o resultado" },
 ];
+
+function HeroCarousel() {
+  const { data: ativa } = useCompeticaoAtiva();
+  return ativa ? <HomeMatchCarousel /> : <HomeDestaquesCarousel />;
+}

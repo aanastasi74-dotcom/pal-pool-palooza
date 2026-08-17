@@ -18,6 +18,7 @@ import { BoasVindasCopaDialog } from "./boas-vindas-copa-dialog";
 import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { useAuth } from "@/lib/auth-context";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
+import { useCompeticoes } from "@/lib/queries/competicoes";
 
 const navCopa = [
   { to: "/app/copa2026", label: "Início", icon: Trophy, exact: true },
@@ -45,6 +46,9 @@ export function AppShell() {
   const navigate = useNavigate();
   const { signOut, isAdmin, profile, isLoading } = useAuth();
   const { data: minhasQuotas = [] } = useMinhasQuotas();
+  // S2/S4: rotas por slug quando houver 2ª competição navegável
+  const { data: competicoes = [] } = useCompeticoes();
+  const nomeCurtoCopa = competicoes.find((c) => c.slug === "copa2026")?.nome_curto ?? "Copa 2026";
   const { maintenance } = useMaintenanceMode();
   const nome = profile?.nome ?? "Pereba";
   const sigla = (profile?.sigla ?? profile?.apelido ?? nome).slice(0, 3).toUpperCase();
@@ -92,7 +96,7 @@ export function AppShell() {
             </div>
             <div className="leading-tight">
               <p className="font-display text-sm font-bold">Bolão dos Perebas</p>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{lobbyMode ? "Plataforma de bolões" : "Copa 2026"}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{lobbyMode ? "Plataforma de bolões" : nomeCurtoCopa}</p>
             </div>
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
