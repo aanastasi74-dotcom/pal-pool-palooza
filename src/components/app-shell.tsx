@@ -46,6 +46,9 @@ export function AppShell() {
   const navigate = useNavigate();
   const { signOut, isAdmin, profile, isLoading } = useAuth();
   const { data: minhasQuotas = [] } = useMinhasQuotas();
+  // S2/S4: rotas por slug quando houver 2ª competição navegável
+  const { data: competicoes = [] } = useCompeticoes();
+  const nomeCurtoCopa = competicoes.find((c) => c.slug === "copa2026")?.nome_curto ?? "Copa 2026";
   const { maintenance } = useMaintenanceMode();
   const nome = profile?.nome ?? "Pereba";
   const sigla = (profile?.sigla ?? profile?.apelido ?? nome).slice(0, 3).toUpperCase();
