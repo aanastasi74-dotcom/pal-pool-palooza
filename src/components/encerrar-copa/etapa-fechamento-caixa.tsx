@@ -8,6 +8,7 @@ import { usePremiados, CATEGORIA_META, CategoriaPremiado } from "@/lib/queries/p
 import { useSetting } from "@/lib/queries/settings";
 import { fmtBRL } from "@/lib/queries/premiacao";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { COPA2026_COMPETICAO_ID } from "@/lib/competicoes";
 
 type Movimento = {
   id: string;
@@ -18,7 +19,7 @@ type Movimento = {
   criado_em: string;
 };
 
-const COMPETICAO = "copa_2026";
+const COMPETICAO = COPA2026_COMPETICAO_ID;
 const BUCKET = "comprovantes";
 
 function useMovimentos() {
@@ -28,7 +29,7 @@ function useMovimentos() {
       const { data, error } = await supabase
         .from("caixa_movimentos")
         .select("id,tipo,categoria,descricao,valor,criado_em")
-        .eq("competicao", COMPETICAO)
+        .eq("competicao_id", COMPETICAO)
         .order("criado_em", { ascending: true });
       if (error) throw error;
       return (data ?? []) as Movimento[];
@@ -180,7 +181,7 @@ export function EtapaFechamentoCaixa() {
     setZerando(true);
     try {
       const { error } = await supabase.from("caixa_movimentos").insert({
-        competicao: COMPETICAO,
+        competicao_id: COMPETICAO,
         tipo: "fechamento",
         categoria: "zeragem",
         descricao: "Zeragem do caixa — Copa 2026 encerrada",
