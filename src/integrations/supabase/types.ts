@@ -130,8 +130,7 @@ export type Database = {
       caixa_movimentos: {
         Row: {
           categoria: string
-          competicao: string
-          competicao_id: string | null
+          competicao_id: string
           criado_em: string
           criado_por: string | null
           descricao: string
@@ -142,8 +141,7 @@ export type Database = {
         }
         Insert: {
           categoria: string
-          competicao?: string
-          competicao_id?: string | null
+          competicao_id: string
           criado_em?: string
           criado_por?: string | null
           descricao: string
@@ -154,8 +152,7 @@ export type Database = {
         }
         Update: {
           categoria?: string
-          competicao?: string
-          competicao_id?: string | null
+          competicao_id?: string
           criado_em?: string
           criado_por?: string | null
           descricao?: string
