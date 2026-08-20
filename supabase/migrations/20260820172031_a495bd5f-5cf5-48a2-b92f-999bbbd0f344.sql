@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.caixa_movimentos IS 'Razão financeiro por competição (S1.8: unificado no competicao_id) — sync types 20/08/2026';
