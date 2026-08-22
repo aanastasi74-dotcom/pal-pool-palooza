@@ -100,13 +100,13 @@ function StatAproveitamento({ q }: { q: any }) {
   const pontuados = q ? (q.pex ?? 0) + (q.rdf ?? 0) + (q.rgm ?? 0) + (q.rgv ?? 0) + (q.res ?? 0) : 0;
   const valor = disputados > 0 ? `${Math.round((pontuados / disputados) * 100)}%` : "—";
   return (
-    <div className="rounded-2xl bg-white/15 p-3 backdrop-blur">
+    <div className="rounded-2xl bg-muted/50 p-3">
       <p className="font-display text-xl font-bold">{valor}</p>
       <div className="flex items-center justify-center gap-1">
-        <p className="text-[10px] uppercase tracking-widest opacity-80">Aproveitamento</p>
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Aproveitamento</p>
         <Popover>
           <PopoverTrigger asChild>
-            <button type="button" className="opacity-80 hover:opacity-100" aria-label="O que é aproveitamento?">
+            <button type="button" className="text-muted-foreground hover:text-foreground" aria-label="O que é aproveitamento?">
               <Info className="h-3 w-3" />
             </button>
           </PopoverTrigger>
@@ -119,14 +119,6 @@ function StatAproveitamento({ q }: { q: any }) {
   );
 }
 
-function SectionHeader({ title, link }: { title: string; link: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <h2 className="font-display text-xl font-bold">{title}</h2>
-      <Link to={link} className="text-xs font-semibold text-primary hover:underline">Ver tudo</Link>
-    </div>
-  );
-}
 
 function LanternaAviso() {
   const { data: minhasQuotas = [] } = useMinhasQuotas();
