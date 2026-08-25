@@ -4,6 +4,7 @@ import { Minus, Plus, Lock, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { usePodeComprarQuota, useCreateOrUpdateLote } from "@/lib/queries/lotes";
 import { usePodeCriarQuota } from "@/lib/queries/copa";
+import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
 import { useMaintenanceMode } from "@/hooks/use-maintenance";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,6 +23,8 @@ function ComprarQuotaPage() {
   const { data: pode, isLoading: loadingPode } = usePodeComprarQuota(qtd);
   const createLote = useCreateOrUpdateLote();
   const { readOnly } = useMaintenanceMode();
+  const somenteLeitura = useCopaSomenteLeitura();
+
 
   const max = Math.min(
     MAX_HARD,
@@ -44,6 +47,24 @@ function ComprarQuotaPage() {
   if (loadingCopa || loadingPode) {
     return <Skeleton className="h-72 w-full" />;
   }
+
+  // S2.3 — competição encerrada/arquivada: sem fluxo de compra.
+  if (somenteLeitura) {
+    return (
+      <div className="mx-auto max-w-xl space-y-4">
+        <Link to="/app/quotas" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+          <ArrowLeft className="h-3 w-3" /> Voltar
+        </Link>
+        <div className="flex items-start gap-2 rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            <b>Compra encerrada</b> — a Copa 2026 foi arquivada. Quem sabe na próxima, pereba! 🍀
+          </p>
+        </div>
+      </div>
+    );
+  }
+
 
   // I.5.8 — modo somente-leitura bloqueia novas compras (palpites continuam liberados).
   if (readOnly) {

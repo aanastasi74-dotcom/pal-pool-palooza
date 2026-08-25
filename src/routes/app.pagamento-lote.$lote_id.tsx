@@ -1,11 +1,12 @@
 import { createFileRoute, useParams, useNavigate, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Upload, ArrowLeft } from "lucide-react";
+import { Copy, Upload, ArrowLeft, Lock } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { createStaticPix, hasError } from "@/lib/pix";
 import { useSetting } from "@/lib/queries/settings";
 import { useLote, useSubmitComprovanteLote } from "@/lib/queries/lotes";
+import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { translatePgError } from "@/lib/error-messages";
 
@@ -42,6 +43,7 @@ function PagamentoLote() {
   const { data, isLoading } = useLote(lote_id);
   const submit = useSubmitComprovanteLote();
   const navigate = useNavigate();
+  const somenteLeitura = useCopaSomenteLeitura();
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviado, setEnviado] = useState(false);
 
@@ -93,6 +95,24 @@ function PagamentoLote() {
   };
 
   if (isLoading) return <Skeleton className="h-96 w-full" />;
+
+  // S2.3 — competição encerrada/arquivada: sem envio de comprovante.
+  if (somenteLeitura) {
+    return (
+      <div className="mx-auto max-w-xl space-y-4">
+        <Link to="/app/quotas" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+          <ArrowLeft className="h-3 w-3" /> Voltar
+        </Link>
+        <div className="flex items-start gap-2 rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            <b>Pagamentos encerrados</b> — a Copa 2026 foi arquivada. Não é mais possível enviar comprovantes.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!lote) {
     return (
       <div className="mx-auto max-w-xl space-y-4">

@@ -63,6 +63,14 @@ export function useManifestacaoTotal(slug: string, enabled = true) {
   });
 }
 
+// S2.3: gate de somente-leitura derivado do status no banco (sem hardcode).
+// A mesma tela serve à Copa arquivada e a uma competição ativa.
+export function useCopaSomenteLeitura() {
+  const { data } = useCompeticoes();
+  const status = data?.find((c) => c.slug === "copa2026")?.status;
+  return status === "encerrada" || status === "arquivada";
+}
+
 // S2/S4: rotas por slug quando houver 2ª competição navegável
 const ROTAS: Record<string, string> = {
   copa2026: "/app/copa2026",

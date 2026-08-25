@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/empty-state";
 import { useMatches } from "@/lib/queries/matches";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyPredictions, useAllMyPredictions } from "@/lib/queries/predictions";
+import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
 import { useTeams } from "@/lib/queries/teams";
 import { useStadiums } from "@/lib/queries/stadiums";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -66,6 +67,7 @@ function Jogos() {
   const quotaIds = useMemo(() => (quotas as any[]).map((q) => q.id), [quotas]);
   const { data: minhasPreds = [] } = useMyPredictions(primeiraQuota?.id);
   const { data: allPreds = [] } = useAllMyPredictions(quotaIds);
+  const somenteLeitura = useCopaSomenteLeitura();
 
   const teamMap = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
   const stadiumMap = useMemo(() => new Map(stadiums.map((s) => [s.id, s])), [stadiums]);
@@ -287,7 +289,7 @@ function Jogos() {
                   />
                   {(() => {
                     const palpitesVisiveis = !!j.travado_em && new Date(j.travado_em).getTime() <= Date.now();
-                    const locked = j.status !== "agendado" || palpitesVisiveis;
+                    const locked = j.status !== "agendado" || palpitesVisiveis || somenteLeitura;
                     if (!locked) {
                       return (
                         <div className="flex items-center gap-2">

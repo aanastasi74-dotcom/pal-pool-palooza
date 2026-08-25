@@ -8,6 +8,7 @@ import { useMatches } from "@/lib/queries/matches";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyPredictions, useUpsertPrediction } from "@/lib/queries/predictions";
 import { useMyTop4, useFaseAtual } from "@/lib/queries/top4";
+import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
 import { useTeams } from "@/lib/queries/teams";
 import { useStadiums } from "@/lib/queries/stadiums";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -96,8 +97,10 @@ function Palpites() {
   const { data: top4 } = useMyTop4(quotaId);
   const { data: faseAtual = "antes_copa" } = useFaseAtual();
   const upsert = useUpsertPrediction();
+  const somenteLeitura = useCopaSomenteLeitura();
 
-  const top4Bloqueado = ["oitavas", "quartas", "semis", "final"].includes(faseAtual);
+  const top4Bloqueado =
+    somenteLeitura || ["oitavas", "quartas", "semis", "final"].includes(faseAtual);
   const top4Peso = TOP4_PESO_BY_FASE[faseAtual] ?? null;
   const top4Preenchido = !!(top4 && top4.posicao_1 && top4.posicao_2 && top4.posicao_3 && top4.posicao_4);
 
@@ -412,7 +415,7 @@ function Palpites() {
             </div>
           </div>
 
-          {abertos.length > 0 && (
+          {abertos.length > 0 && !somenteLeitura && (
             <div className="sticky top-2 z-10 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-card/95 p-3 shadow-card backdrop-blur">
               <div className="flex flex-wrap gap-2">
                 <button
@@ -471,6 +474,7 @@ function Palpites() {
                   teamMap={teamMap}
                   stadiumMap={stadiumMap}
                   state={st}
+                  somenteLeitura={somenteLeitura}
                   onStartEdit={() => startEdit(j.id)}
                   onCancel={() => cancelEdit(j.id)}
                   onChange={(partial) => setCardState(j.id, partial)}
@@ -499,6 +503,7 @@ function PalpiteCard({
   teamMap,
   stadiumMap,
   state,
+  somenteLeitura,
   onStartEdit,
   onCancel,
   onChange,
@@ -510,6 +515,7 @@ function PalpiteCard({
   teamMap: Map<string, any>;
   stadiumMap: Map<string, any>;
   state: EditState | undefined;
+  somenteLeitura: boolean;
   onStartEdit: () => void;
   onCancel: () => void;
   onChange: (partial: Partial<EditState>) => void;
@@ -671,6 +677,10 @@ function PalpiteCard({
                 {upsert.isPending ? "Salvando…" : "Salvar palpite"}
               </button>
             </>
+          ) : somenteLeitura ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-4 py-2 text-xs font-bold text-muted-foreground">
+              <Lock className="h-3 w-3" /> {pred ? "Palpite registrado" : "Somente leitura"}
+            </span>
           ) : lockedByTime ? (
             <span
               className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-4 py-2 text-xs font-bold text-muted-foreground"
