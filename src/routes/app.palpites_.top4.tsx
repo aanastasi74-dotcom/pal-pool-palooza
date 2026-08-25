@@ -5,6 +5,7 @@ import { Sparkles, AlertTriangle, Lock, Pencil, X, Users, Copy, Check, ChevronsU
 import { toast } from "sonner";
 import { useMinhasQuotas } from "@/lib/queries/quotas";
 import { useMyTop4, useUpdateTop4, useFaseAtual, useTop4Pontos } from "@/lib/queries/top4";
+import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
 import { useTeams } from "@/lib/queries/teams";
 import { useSetting } from "@/lib/queries/settings";
 import { useRanking } from "@/lib/queries/profiles";
@@ -65,6 +66,7 @@ function Top4Page() {
   const { data: top4, isLoading: loadingT } = useMyTop4(quota?.id);
   const { data: teams = [], isLoading: loadingTeams } = useTeams();
   const update = useUpdateTop4();
+  const somenteLeitura = useCopaSomenteLeitura();
 
   const teamsSorted = useMemo(
     () => [...teams].sort((a, b) => a.nome_pt.localeCompare(b.nome_pt, "pt-BR")),
@@ -77,7 +79,8 @@ function Top4Page() {
 
   const regras = (top4Windows && Array.isArray(top4Windows) && top4Windows.length ? top4Windows : TOP4_REGRA_DEFAULT) as Top4Regra[];
   const regra = getRegraDaFase(faseAtual, regras);
-  const bloqueada = regra.bloqueada;
+  // S2.3: competição encerrada/arquivada força o modo leitura (sem edição), aposta continua exibida.
+  const bloqueada = regra.bloqueada || somenteLeitura;
 
   const [picks, setPicks] = useState<string[]>(["", "", "", ""]);
   const [confirmOpen, setConfirmOpen] = useState(false);
