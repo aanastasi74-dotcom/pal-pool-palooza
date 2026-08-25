@@ -5,6 +5,7 @@ import { estaNosUltimos25, isElegivelLanterna, razaoNaoElegivel } from "@/lib/la
 import { useMinhasQuotas, useTotalQuotas } from "@/lib/queries/quotas";
 import { useMyLotes } from "@/lib/queries/lotes";
 import { usePodeCriarQuota } from "@/lib/queries/copa";
+import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 
@@ -36,6 +37,7 @@ function QuotasPage() {
   const { data: totalQuotas = 0 } = useTotalQuotas();
   const { data: lotes = [] } = useMyLotes();
   const { data: podeCriar = true } = usePodeCriarQuota();
+  const somenteLeitura = useCopaSomenteLeitura();
 
   // Identifica lotes 100% rejeitados pra agrupar visualmente em 1 card único
   const { lotesRejeitadosGroups, quotasIndividuais } = useMemo(() => {
@@ -120,12 +122,14 @@ function QuotasPage() {
                     Rejeitado
                   </span>
                 </div>
-                <button
-                  onClick={() => navigate({ to: "/app/pagamento-lote/$lote_id", params: { lote_id: lote.id } })}
-                  className="mt-3 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
-                >
-                  Reenviar comprovante do lote ({qs.length} quotas)
-                </button>
+                {!somenteLeitura && (
+                  <button
+                    onClick={() => navigate({ to: "/app/pagamento-lote/$lote_id", params: { lote_id: lote.id } })}
+                    className="mt-3 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
+                  >
+                    Reenviar comprovante do lote ({qs.length} quotas)
+                  </button>
+                )}
               </article>
             );
           })}
@@ -151,12 +155,14 @@ function QuotasPage() {
                       <p className="mt-1 text-muted-foreground">
                         Tentativas usadas: {q.tentativas_comprovante ?? 0} de 3
                       </p>
-                      <button
-                        onClick={() => navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } })}
-                        className="mt-2 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground"
-                      >
-                        Enviar novo comprovante
-                      </button>
+                      {!somenteLeitura && (
+                        <button
+                          onClick={() => navigate({ to: "/app/pagamento/$quota_id", params: { quota_id: q.id } })}
+                          className="mt-2 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground"
+                        >
+                          Enviar novo comprovante
+                        </button>
+                      )}
                     </div>
                   )}
                   {q.status === "encerrada" && (

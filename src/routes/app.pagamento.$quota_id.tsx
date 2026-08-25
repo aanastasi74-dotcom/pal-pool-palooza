@@ -1,11 +1,12 @@
-import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useParams, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Upload } from "lucide-react";
+import { Copy, Upload, Lock, ArrowLeft } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { createStaticPix, hasError } from "@/lib/pix";
 import { useSetting } from "@/lib/queries/settings";
 import { useSubmitComprovanteLote } from "@/lib/queries/lotes";
+import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { translatePgError } from "@/lib/error-messages";
@@ -44,6 +45,7 @@ function Pagamento() {
   const { data: pixConfig } = useSetting<PixConfig>("pix_config");
   const submitLote = useSubmitComprovanteLote();
   const navigate = useNavigate();
+  const somenteLeitura = useCopaSomenteLeitura();
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
@@ -115,6 +117,23 @@ function Pagamento() {
 
   const isReenvio = quota?.status === "rejeitada";
   const tentativas = quota?.tentativas_comprovante ?? 0;
+
+  // S2.3 — competição encerrada/arquivada: sem envio de comprovante.
+  if (somenteLeitura) {
+    return (
+      <div className="mx-auto max-w-xl space-y-4">
+        <Link to="/app/quotas" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+          <ArrowLeft className="h-3 w-3" /> Voltar
+        </Link>
+        <div className="flex items-start gap-2 rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            <b>Pagamentos encerrados</b> — a Copa 2026 foi arquivada. Não é mais possível enviar comprovantes.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
