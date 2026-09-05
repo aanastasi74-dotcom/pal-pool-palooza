@@ -1,0 +1,2 @@
+COMMENT ON TABLE public.competicao_papeis IS 'Papéis escopados por competição (admin_competicao, promotor) — S3.1b';
+COMMENT ON TABLE public.indicacoes IS 'Indicações de promotores (convidado→cadastrado→aderiu) — S3.1b';
