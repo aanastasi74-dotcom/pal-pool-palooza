@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { isAdminRole } from "@/lib/roles";
 import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -114,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
-  const isAdmin = !!profile && profile.role === "admin" && profile.ativo === true;
+  const isAdmin = !!profile && isAdminRole(profile.role) && profile.ativo === true;
 
   return (
     <AuthContext.Provider

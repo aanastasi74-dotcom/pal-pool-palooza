@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { z } from "zod";
 import { useInvites, useCreateInvite, useRevokeInvite, useResendInvite } from "@/lib/queries/invites";
 import { useUsuariosAdmin, useToggleAdmin, useToggleAtivo } from "@/lib/queries/profiles";
+import { isAdminRole } from "@/lib/roles";
 import { usePerebasCount, useQuotasGlobalCount, usePodeEmitirConvite, useUpdateLimiteCustom, LIMITE_PEREBAS_HARD, LIMITE_QUOTAS_HARD, colorForPct } from "@/lib/queries/limites";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -173,7 +174,7 @@ function ConvitesUsuarios() {
                     <tr key={u.id} onClick={() => setUsuarioOpen(u)} className="cursor-pointer border-t border-border hover:bg-muted/30">
                       <td className="p-2 font-medium">{u.nome}</td>
                       <td className="p-2 text-xs text-muted-foreground">{u.email}</td>
-                      <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${u.role === "admin" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{u.role}</span></td>
+                      <td className="p-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${isAdminRole(u.role) ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{u.role}</span></td>
                       <td className="p-2 text-right">
                         <span className="font-bold">{ativas}</span>
                         {outras > 0 && (
@@ -217,12 +218,12 @@ function ConvitesUsuarios() {
                 <div className="flex gap-2">
                   <button
                     onClick={async () => {
-                      if (usuarioOpen.role === "admin") setConfirmRemoverAdmin(usuarioOpen);
+                      if (isAdminRole(usuarioOpen.role)) setConfirmRemoverAdmin(usuarioOpen);
                       else { await toggleAdmin.mutateAsync({ user_id: usuarioOpen.id, makeAdmin: true }); toast.success("Promovido a admin."); setUsuarioOpen(null); }
                     }}
                     className="flex-1 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
                   >
-                    {usuarioOpen.role === "admin" ? "Remover admin" : "Tornar admin"}
+                    {isAdminRole(usuarioOpen.role) ? "Remover admin" : "Tornar admin"}
                   </button>
                   <button onClick={() => setConfirmDesativar(usuarioOpen)} className="flex-1 rounded-full border border-border px-4 py-2 text-xs font-bold">
                     {usuarioOpen.ativo ? "Desativar" : "Ativar"}
