@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AdminShell } from "@/components/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
+import { isAdminRole } from "@/lib/roles";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/admin")({
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/app/admin")({
       .eq("id", sess.session.user.id)
       .maybeSingle();
 
-    if (!profile || profile.role !== "admin" || !profile.ativo) {
+    if (!profile || !isAdminRole(profile.role) || !profile.ativo) {
       setTimeout(() => toast.error("Essa área é só pra admin, pereba."), 0);
       throw redirect({ to: "/app" });
     }
