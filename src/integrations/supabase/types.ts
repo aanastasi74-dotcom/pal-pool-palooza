@@ -2258,12 +2258,22 @@ export type Database = {
       limite_quotas_pereba: { Args: { p_user_id: string }; Returns: number }
       manifestacao_total: { Args: { p_slug: string }; Returns: Json }
       marcar_email_regras_enviado: { Args: never; Returns: string }
+      nomear_promotor: {
+        Args: { p_slug: string; p_user_id: string }
+        Returns: Json
+      }
       pode_comprar_quota:
         | { Args: { p_user_id: string }; Returns: Json }
         | { Args: { p_quantidade?: number; p_user_id: string }; Returns: Json }
       pode_criar_quota: { Args: never; Returns: boolean }
       pode_emitir_convite: { Args: never; Returns: Json }
       promote_to_admin: { Args: { p_email: string }; Returns: string }
+      promotor_criar_indicacao: {
+        Args: { p_email: string; p_slug: string }
+        Returns: Json
+      }
+      promotor_painel: { Args: { p_slug: string }; Returns: Json }
+      promotor_revogar_indicacao: { Args: { p_id: string }; Returns: boolean }
       proximo_numero_quota: { Args: { p_user_id: string }; Returns: number }
       recompute_peso_jogos: { Args: never; Returns: undefined }
       rejeitar_lote: {
