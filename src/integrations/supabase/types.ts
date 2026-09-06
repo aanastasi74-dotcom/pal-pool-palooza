@@ -178,6 +178,55 @@ export type Database = {
           },
         ]
       }
+      competicao_papeis: {
+        Row: {
+          competicao_id: string
+          config: Json
+          criado_em: string
+          criado_por: string | null
+          papel: string
+          user_id: string
+        }
+        Insert: {
+          competicao_id: string
+          config?: Json
+          criado_em?: string
+          criado_por?: string | null
+          papel: string
+          user_id: string
+        }
+        Update: {
+          competicao_id?: string
+          config?: Json
+          criado_em?: string
+          criado_por?: string | null
+          papel?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competicao_papeis_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competicao_papeis_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competicao_papeis_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competicao_settings: {
         Row: {
           competicao_id: string
@@ -470,6 +519,61 @@ export type Database = {
           {
             foreignKeyName: "historico_ranking_diario_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicacoes: {
+        Row: {
+          competicao_id: string
+          convertido_em: string | null
+          criado_em: string
+          email_indicado: string
+          id: string
+          promotor_id: string
+          status: string
+          user_id_indicado: string | null
+        }
+        Insert: {
+          competicao_id: string
+          convertido_em?: string | null
+          criado_em?: string
+          email_indicado: string
+          id?: string
+          promotor_id: string
+          status?: string
+          user_id_indicado?: string | null
+        }
+        Update: {
+          competicao_id?: string
+          convertido_em?: string | null
+          criado_em?: string
+          email_indicado?: string
+          id?: string
+          promotor_id?: string
+          status?: string
+          user_id_indicado?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicacoes_competicao_id_fkey"
+            columns: ["competicao_id"]
+            isOneToOne: false
+            referencedRelation: "competicoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_promotor_id_fkey"
+            columns: ["promotor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_user_id_indicado_fkey"
+            columns: ["user_id_indicado"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2146,6 +2250,9 @@ export type Database = {
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
+      is_admin_competicao: { Args: { p_slug: string }; Returns: boolean }
+      is_dono: { Args: never; Returns: boolean }
+      is_promotor: { Args: { p_slug: string }; Returns: boolean }
       limite_perebas_hard: { Args: never; Returns: number }
       limite_quotas_global_hard: { Args: never; Returns: number }
       limite_quotas_pereba: { Args: { p_user_id: string }; Returns: number }
@@ -2196,12 +2303,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2225,11 +2332,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2250,11 +2357,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2275,11 +2382,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2292,11 +2399,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
