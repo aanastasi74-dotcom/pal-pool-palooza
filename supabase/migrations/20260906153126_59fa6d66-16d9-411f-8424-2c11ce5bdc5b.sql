@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.indicacoes IS 'Indicações de promotores (convidado→cadastrado→aderiu) — sync types S3.2a, 06/09/2026';
