@@ -1,21 +1,16 @@
-## Resultado da verificação
+# S3.2b — Promotor e referência no cadastro
 
-**1. Build (`bun run build`):** ✅ PASSA — `✓ built in 13.60s`, exit 0.
-Os erros TS relatados pelo harness são pré-existentes ao S0.8 (types.ts do Supabase desatualizado: falta declarar `bulletins`, `personality_profiles`, `audit_log`, e campo `conteudo` em `bulletins`). Não bloqueiam o build de produção.
+## Implementação
+- Criar hooks tipados para consultar o painel do promotor e registrar indicações pelas RPCs existentes.
+- Exibir, abaixo de cada competição elegível do lobby (`pesquisa`, `inscricoes` ou `ativa`), um card somente para promotores autenticados, com métricas, incentivo, cópia do link e cadastro de e-mail.
+- Tratar `nao_e_promotor` como ausência silenciosa e mapear os erros previstos do convite para mensagens em português.
+- Capturar `ref` e `comp` nas páginas públicas, persistir em `sessionStorage` e incluir `ref_codigo` e `ref_competicao` no cadastro público da Champions.
 
-**2. Banner nas 6 rotas admin:** ✅ todas corretas — `<CopaArquivadaBanner />` fica sempre como primeiro filho do `<div>` raiz do `return` do componente principal:
+## Regras preservadas
+- Nenhuma rota nova, alteração administrativa, DemoTour, vitrine da Copa ou regra de banco.
+- Copa arquivada e competições em rascunho não consultam nem mostram o card.
+- Usuários deslogados nunca consultam nem veem o card.
 
-- `app.admin.jogos.tsx` (L68)
-- `app.admin.sync.tsx` (L134)
-- `app.admin.encerrar-copa.tsx` (L55)
-- `app.admin.premiacao.tsx` (L20)
-- `app.admin.pagamentos.tsx` (L112, dentro de `Pagamentos`; o return do sub-componente `DetalhePagamento` na L278 corretamente não recebeu banner)
-- `app.admin.quotas.tsx` (L66)
-
-Nenhum solto, nenhum duplicado, nenhum fora de return.
-
-**3. JSX de `src/routes/app.index.tsx`:** ✅ balanceado — 7 `<section>` × 7 `</section>`. As duas `</section>` consecutivas (L143-144) fecham o `<section>` "Boletim" (L138) e o `<section>` externo "Copa 2026 — encerrada" (L70). Build confirma.
-
-## Conclusão
-
-Nada precisa ser corrigido no escopo do S0.8. Se você quiser, posso propor um plano separado para regenerar `src/integrations/supabase/types.ts` e resolver os erros de type-check pré-existentes — não afetam o build, mas poluem o IDE.
+## Validação
+- Rodar o typecheck e conferir os diagnósticos do preview.
+- Fazer smoke test do lobby e do cadastro, incluindo resposta `ok:false / nao_e_promotor` sem card nem erro visível.
