@@ -15,6 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { PromotoresSection } from "@/components/admin/promotores-section";
 
 export const Route = createFileRoute("/app/admin/champions")({
   head: () => ({ meta: [{ title: "Admin — Champions 2026/27" }] }),
@@ -78,6 +79,8 @@ function AdminChampions() {
         <StatCard label="Quotas manifestadas" value={quotasInternas} />
         <StatCard label="Perebas participando" value={total?.perebas ?? 0} />
       </section>
+
+      <PromotoresSection slug="champions2627" />
 
       <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
         <h2 className="font-display text-lg font-bold">Envio de email</h2>
