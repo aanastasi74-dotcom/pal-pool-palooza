@@ -3,7 +3,7 @@
 // desabilitado (app era só-convite), o signUp retorna erro — habilitar antes de divulgar
 // o link /champions.
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trophy, Sparkles, CheckCircle2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { useChampionsTotalPublico } from "@/lib/queries/champions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
 import { DemoTour } from "@/components/demo-tour";
+import { captureReferral } from "@/lib/referral";
 
 export const Route = createFileRoute("/champions")({
   head: () => ({
@@ -46,6 +47,10 @@ function ChampionsPublicPage() {
   const quorum = total?.quorum ?? 35;
   const quotasTotal = total?.quotas_total ?? 0;
   const pct = Math.min(100, Math.round((quotasTotal / quorum) * 100));
+
+  useEffect(() => {
+    captureReferral("champions2627");
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -206,6 +211,7 @@ function FormCadastro({
 
     setLoading(true);
     try {
+      const referral = captureReferral("champions2627");
       const { data, error } = await supabase.auth.signUp({
         email: emailTrim,
         password: senha,
@@ -216,6 +222,12 @@ function FormCadastro({
             apelido: apelidoTrim,
             indicado_por: indicadoTrim,
             champions_quotas: quotas,
+            ...(referral
+              ? {
+                  ref_codigo: referral.codigo,
+                  ref_competicao: referral.competicao ?? "champions2627",
+                }
+              : {}),
           },
         },
       });
