@@ -1,6 +1,7 @@
 # Roadmap
 
-- [x] Criar hooks do painel e convite do promotor com tratamento silencioso de `nao_e_promotor`.
-- [x] Adicionar card do promotor somente a competições elegíveis no lobby autenticado.
-- [x] Persistir `ref`/`comp` e enviá-los no cadastro público da Champions.
-- [x] Rodar typecheck e smoke tests, incluindo retorno `ok:false`.
+- [ ] Locate the reusable competition admin console insertion point.
+- [ ] Add promoter listing, nomination, and confirmed removal.
+- [ ] Add competition-scoped incentive and invitation-limit settings.
+- [ ] Enforce archived competition read-only behavior.
+- [ ] Run typecheck, build diagnostics, and admin smoke checks.
