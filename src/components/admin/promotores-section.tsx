@@ -62,7 +62,7 @@ export function PromotoresSection({ slug }: { slug: string }) {
       toast.success(`Promotor nomeado. Código: ${resultado.codigo}`);
     } catch (e) {
       const codigo = e instanceof Error ? e.message : "";
-      toast.error(ERROS_NOMEACAO[codigo] ?? codigo || "Não foi possível nomear o promotor");
+      toast.error(ERROS_NOMEACAO[codigo] ?? (codigo || "Não foi possível nomear o promotor"));
     }
   };
 
