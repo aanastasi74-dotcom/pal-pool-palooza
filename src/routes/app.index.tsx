@@ -1,7 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trophy, ChevronRight, Lock, Sparkles, ListOrdered, Newspaper, CalendarDays, Target } from "lucide-react";
+import { useState } from "react";
+import { Trophy, ChevronRight, Lock, Sparkles, ListOrdered, Newspaper, CalendarDays, Target, Copy, Mail } from "lucide-react";
+import { toast } from "sonner";
 import { useProfile } from "@/lib/queries/profiles";
+import { useCriarIndicacao, usePromotorPainel } from "@/lib/queries/promotor";
 import { PesquisaPopup } from "@/components/pesquisa-popup";
+import { Button } from "@/components/ui/button";
 import {
   useCompeticoes,
   useManifestacaoTotal,
@@ -92,7 +96,9 @@ function Badge({ tone, children }: { tone: "amber" | "success" | "muted"; childr
 
 function CompeticaoFuturaCard({ competicao: c }: { competicao: Competicao }) {
   const emPesquisa = c.status === "pesquisa";
+  const elegivelPromotor = ["pesquisa", "inscricoes", "ativa"].includes(c.status);
   const { data: manifest } = useManifestacaoTotal(c.slug, emPesquisa);
+  const { data: painel } = usePromotorPainel(c.slug, elegivelPromotor);
   const total = manifest?.quotas_total ?? 0;
   const quorum = manifest?.quorum ?? c.quorum_quotas ?? 0;
   const pct = quorum > 0 ? Math.min(100, Math.round((total / quorum) * 100)) : 0;
@@ -102,10 +108,11 @@ function CompeticaoFuturaCard({ competicao: c }: { competicao: Competicao }) {
   const destaque = c.status !== "rascunho";
 
   return (
-    <Link
-      to={competicaoRota(c.slug) as string}
-      className="group block rounded-3xl border border-border bg-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-glow"
-    >
+    <div className="space-y-3">
+      <Link
+        to={competicaoRota(c.slug) as string}
+        className="group block rounded-3xl border border-border bg-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-glow"
+      >
       <div className="flex items-start gap-4">
         <div
           className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${
@@ -138,7 +145,105 @@ function CompeticaoFuturaCard({ competicao: c }: { competicao: Competicao }) {
         </div>
         <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5" />
       </div>
-    </Link>
+      </Link>
+      {painel && <PromotorCard competicao={c} painel={painel} />}
+    </div>
+  );
+}
+
+const ERROS_CONVITE: Record<string, string> = {
+  email_ja_indicado: "Esse e-mail já foi indicado",
+  limite_atingido: "Você atingiu o limite de convites",
+  email_invalido: "E-mail inválido",
+  competicao_fechada: "As inscrições não estão abertas",
+  nao_e_promotor: "Você não é promotor desta competição",
+};
+
+function PromotorCard({
+  competicao,
+  painel,
+}: {
+  competicao: Competicao;
+  painel: NonNullable<ReturnType<typeof usePromotorPainel>["data"]>;
+}) {
+  const [email, setEmail] = useState("");
+  const criarIndicacao = useCriarIndicacao(competicao.slug);
+
+  const copiarLink = async () => {
+    const rotaPublica = competicao.slug === "champions2627" ? "/champions" : "/";
+    const url = new URL(rotaPublica, window.location.origin);
+    url.searchParams.set("ref", painel.codigo);
+    if (rotaPublica === "/") url.searchParams.set("comp", competicao.slug);
+    await navigator.clipboard.writeText(url.toString());
+    toast.success("Link copiado!");
+  };
+
+  const convidar = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const emailLimpo = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpo) || emailLimpo.length > 255) {
+      toast.error("E-mail inválido");
+      return;
+    }
+
+    try {
+      await criarIndicacao.mutateAsync(emailLimpo);
+      setEmail("");
+      toast.success("Convite registrado. Agora envie seu link para essa pessoa.");
+    } catch (error) {
+      const codigo = error instanceof Error ? error.message : "";
+      toast.error(ERROS_CONVITE[codigo] ?? "Não foi possível registrar o convite");
+    }
+  };
+
+  return (
+    <aside className="rounded-2xl border border-primary/30 bg-primary/5 p-4" aria-label={`Promoção de ${competicao.nome_curto}`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="font-display font-bold">Você é promotor da {competicao.nome_curto}</p>
+          <p className="text-xs text-muted-foreground">Compartilhe seu link ou registre quem você convidou.</p>
+        </div>
+        <Button type="button" variant="outline" size="sm" onClick={copiarLink}>
+          <Copy /> Copiar meu link
+        </Button>
+      </div>
+
+      <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+        {[
+          ["Convidados", painel.convidados],
+          ["Cadastrados", painel.cadastrados],
+          ["Aderiram", painel.aderiram],
+        ].map(([rotulo, valor]) => (
+          <div key={rotulo} className="rounded-lg border border-border bg-background p-2">
+            <dt className="text-[11px] text-muted-foreground">{rotulo}</dt>
+            <dd className="font-display text-lg font-bold">{valor}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {painel.incentivo.tipo !== "nenhum" && (
+        <p className="mt-3 text-sm">
+          Incentivo acumulado: <strong>{painel.incentivo.valor_acumulado.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong>
+        </p>
+      )}
+
+      <form onSubmit={convidar} className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <label className="sr-only" htmlFor={`email-promotor-${competicao.id}`}>E-mail do convidado</label>
+        <input
+          id={`email-promotor-${competicao.id}`}
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          maxLength={255}
+          required
+          placeholder="amigo@email.com"
+          className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        />
+        <Button type="submit" size="sm" disabled={criarIndicacao.isPending}>
+          <Mail /> {criarIndicacao.isPending ? "Registrando..." : "Convidar por e-mail"}
+        </Button>
+      </form>
+    </aside>
   );
 }
 

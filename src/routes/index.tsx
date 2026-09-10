@@ -16,6 +16,7 @@ import { HomeMatchCarousel } from "@/components/home-match-carousel";
 import { useCompeticaoAtiva } from "@/lib/queries/competicoes";
 import { DemoTour } from "@/components/demo-tour";
 import { useAuth } from "@/lib/auth-context";
+import { captureReferral } from "@/lib/referral";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,6 +44,10 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const navigate = useNavigate();
   const { user, profile, isLoading } = useAuth();
+
+  useEffect(() => {
+    captureReferral();
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
