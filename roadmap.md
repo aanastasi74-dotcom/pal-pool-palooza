@@ -1,7 +1,7 @@
 # Roadmap
 
-- [ ] Locate the reusable competition admin console insertion point.
-- [ ] Add promoter listing, nomination, and confirmed removal.
-- [ ] Add competition-scoped incentive and invitation-limit settings.
-- [ ] Enforce archived competition read-only behavior.
-- [ ] Run typecheck, build diagnostics, and admin smoke checks.
+- [x] Locate the reusable competition admin console insertion point.
+- [x] Add promoter listing, nomination, and confirmed removal.
+- [x] Add competition-scoped incentive and invitation-limit settings.
+- [x] Enforce archived competition read-only behavior.
+- [x] Run typecheck, build diagnostics, and admin smoke checks.
