@@ -19,7 +19,12 @@ const painelSchema = z.discriminatedUnion("ok", [
 ]);
 
 const conviteSchema = z.discriminatedUnion("ok", [
-  z.object({ ok: z.literal(true), id: z.string().uuid() }),
+  z.object({
+    ok: z.literal(true),
+    id: z.string().uuid(),
+    email_enviado: z.boolean().optional(),
+    aviso: z.string().optional(),
+  }),
   z.object({ ok: z.literal(false), erro: z.string() }),
 ]);
 
@@ -52,9 +57,8 @@ export function useCriarIndicacao(slug: string) {
   return useMutation({
     mutationFn: async (email: string) => {
       const emailValidado = emailSchema.parse(email).toLowerCase();
-      const { data, error } = await supabase.rpc("promotor_criar_indicacao", {
-        p_slug: slug,
-        p_email: emailValidado,
+      const { data, error } = await supabase.functions.invoke("enviar-convite-promotor", {
+        body: { slug, email: emailValidado },
       });
       if (error) throw error;
 
