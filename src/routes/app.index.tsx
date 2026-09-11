@@ -187,9 +187,15 @@ function PromotorCard({
     }
 
     try {
-      await criarIndicacao.mutateAsync(emailLimpo);
+      const resultado = await criarIndicacao.mutateAsync(emailLimpo);
       setEmail("");
-      toast.success("Convite registrado. Agora envie seu link para essa pessoa.");
+      if (resultado.ok && resultado.email_enviado) {
+        toast.success("Convite enviado por e-mail! 📬");
+      } else if (resultado.ok && resultado.aviso === "email_falhou") {
+        toast.success("Convite registrado, mas o e-mail falhou — envie seu link direto pra pessoa");
+      } else {
+        toast.success("Convite registrado. Agora envie seu link para essa pessoa.");
+      }
     } catch (error) {
       const codigo = error instanceof Error ? error.message : "";
       toast.error(ERROS_CONVITE[codigo] ?? "Não foi possível registrar o convite");
