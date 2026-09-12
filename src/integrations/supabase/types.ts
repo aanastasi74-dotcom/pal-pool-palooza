@@ -2255,7 +2255,12 @@ export type Database = {
       is_promotor: { Args: { p_slug: string }; Returns: boolean }
       limite_perebas_hard: { Args: never; Returns: number }
       limite_quotas_global_hard: { Args: never; Returns: number }
-      limite_quotas_pereba: { Args: { p_user_id: string }; Returns: number }
+      limite_quotas_pereba:
+        | { Args: { p_user_id: string }; Returns: number }
+        | {
+            Args: { p_competicao_id: string; p_user_id: string }
+            Returns: number
+          }
       manifestacao_total: { Args: { p_slug: string }; Returns: Json }
       marcar_email_regras_enviado: { Args: never; Returns: string }
       nomear_promotor: {
@@ -2274,7 +2279,12 @@ export type Database = {
       }
       promotor_painel: { Args: { p_slug: string }; Returns: Json }
       promotor_revogar_indicacao: { Args: { p_id: string }; Returns: boolean }
-      proximo_numero_quota: { Args: { p_user_id: string }; Returns: number }
+      proximo_numero_quota:
+        | { Args: { p_user_id: string }; Returns: number }
+        | {
+            Args: { p_competicao_id: string; p_user_id: string }
+            Returns: number
+          }
       recompute_peso_jogos: { Args: never; Returns: undefined }
       rejeitar_lote: {
         Args: { p_lote_id: string; p_motivo: string }
