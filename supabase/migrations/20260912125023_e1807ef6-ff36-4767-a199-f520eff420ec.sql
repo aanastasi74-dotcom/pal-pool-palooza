@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.lotes_compra IS 'Lotes de compra de quotas — máquina multi-competição desde S3.3a, sync types 12/09/2026';
