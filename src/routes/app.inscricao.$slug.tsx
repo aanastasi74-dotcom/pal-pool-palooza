@@ -32,7 +32,19 @@ function InscricaoPage() {
     if (disponivel > 0) setQtd((v) => Math.min(Math.max(1, v), disponivel));
   }, [disponivel]);
 
-  if (isLoading || !data) return <Skeleton className="h-96 w-full" />;
+  if (isLoading) return <Skeleton className="h-96 w-full" />;
+  if (!data) {
+    return (
+      <div className="mx-auto max-w-xl space-y-4">
+        <Link to="/app" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+          <ArrowLeft className="h-3 w-3" /> Voltar pro lobby
+        </Link>
+        <div className="rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+          Competição não encontrada ou indisponível para inscrição.
+        </div>
+      </div>
+    );
+  }
 
   const { competicao, loteAberto, jaTem, limite } = data;
   const preco = Number(competicao.preco_quota ?? 0);
