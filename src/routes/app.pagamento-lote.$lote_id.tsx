@@ -17,7 +17,11 @@ export const Route = createFileRoute("/app/pagamento-lote/$lote_id")({
 
 const ALLOWED_MIME = ["image/png", "image/jpeg", "image/jpg", "application/pdf"];
 const MAX_SIZE = 5 * 1024 * 1024;
-const VALOR_QUOTA = 50;
+const VALOR_QUOTA_FALLBACK = 50;
+
+function brl(v: number) {
+  return Number(v).toFixed(2).replace(".", ",");
+}
 
 type PixConfig = {
   chave?: string;
@@ -43,13 +47,18 @@ function PagamentoLote() {
   const { data, isLoading } = useLote(lote_id);
   const submit = useSubmitComprovanteLote();
   const navigate = useNavigate();
-  const somenteLeitura = useCopaSomenteLeitura();
+  const { data: competicoes = [] } = useCompeticoes();
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviado, setEnviado] = useState(false);
 
   const lote = data?.lote;
+  // S3.3b — a tela é genérica: competição, preço e destino vêm do próprio lote.
+  const competicao = competicoes.find((c) => c.id === (lote as any)?.competicao_id);
+  const somenteLeitura = competicao?.status === "encerrada" || competicao?.status === "arquivada";
+  const precoQuota = Number(competicao?.preco_quota ?? VALOR_QUOTA_FALLBACK);
+  const voltarPara = competicao && competicao.slug !== "copa2026" ? `/app/inscricao/${competicao.slug}` : "/app/quotas";
   const quantidade = lote?.quantidade_pedida ?? data?.quotas.length ?? 1;
-  const valorTotal = (lote?.valor_esperado ?? quantidade * VALOR_QUOTA) as number;
+  const valorTotal = (lote?.valor_esperado ?? quantidade * precoQuota) as number;
 
   const chave = pixConfig?.chave ?? "PLACEHOLDER";
   const beneficiario = pixConfig?.beneficiario ?? pixConfig?.titular ?? "BOLAO PEREBAS";
