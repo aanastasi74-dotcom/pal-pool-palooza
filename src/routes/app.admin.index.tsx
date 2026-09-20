@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useReportsAbertosCount } from "@/lib/queries/reports";
+import { useLotesAguardandoPorCompeticao } from "@/lib/queries/admin-lotes";
 import { Users, Activity, ScrollText, Bug, Settings, Lock, Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -43,6 +44,7 @@ const fmtData = (d: string | null) => (d ? new Date(d + "T12:00:00").toLocaleDat
 function AdminPlataforma() {
   const { data: competicoes, isLoading } = useCompeticoes();
   const { data: reportesAbertos = 0 } = useReportsAbertosCount();
+  const { data: lotesAguardando = {} } = useLotesAguardandoPorCompeticao();
 
   return (
     <div className="space-y-8">
