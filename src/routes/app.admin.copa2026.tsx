@@ -13,6 +13,7 @@ import {
   Lock,
 } from "lucide-react";
 import { PromotoresSection } from "@/components/admin/promotores-section";
+import { LotesAprovacaoSection } from "@/components/admin/lotes-aprovacao-section";
 
 export const Route = createFileRoute("/app/admin/copa2026")({
   head: () => ({ meta: [{ title: "Admin — Copa 2026" }] }),
@@ -67,6 +68,8 @@ function ConsoleCopa2026() {
           </Link>
         ))}
       </div>
+
+      <LotesAprovacaoSection slug="copa2026" />
 
       <PromotoresSection slug="copa2026" />
     </div>

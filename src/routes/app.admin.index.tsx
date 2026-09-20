@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useReportsAbertosCount } from "@/lib/queries/reports";
+import { useLotesAguardandoPorCompeticao } from "@/lib/queries/admin-lotes";
 import { Users, Activity, ScrollText, Bug, Settings, Lock, Trophy } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -43,6 +44,7 @@ const fmtData = (d: string | null) => (d ? new Date(d + "T12:00:00").toLocaleDat
 function AdminPlataforma() {
   const { data: competicoes, isLoading } = useCompeticoes();
   const { data: reportesAbertos = 0 } = useReportsAbertosCount();
+  const { data: lotesAguardando = {} } = useLotesAguardandoPorCompeticao();
 
   return (
     <div className="space-y-8">
@@ -74,6 +76,14 @@ function AdminPlataforma() {
                       {c.status === "arquivada" && <Lock className="h-3 w-3" />}
                       {c.status}
                     </span>
+                    {(lotesAguardando[c.id] ?? 0) > 0 && (
+                      <span
+                        className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground"
+                        title="Lotes aguardando aprovação"
+                      >
+                        {lotesAguardando[c.id]}
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground break-words">{c.nome}</p>
                   <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
