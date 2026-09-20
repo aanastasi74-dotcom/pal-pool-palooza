@@ -34,7 +34,7 @@ const navLobby = [
   { to: "/app/perfil", label: "Perfil", icon: User, exact: false },
 ] as const;
 
-const LOBBY_PREFIXES = ["/app/champions", "/app/feminina", "/app/perfil", "/app/quotas", "/app/pereba"];
+const LOBBY_PREFIXES = ["/app/champions", "/app/feminina", "/app/perfil", "/app/quotas", "/app/pereba", "/app/inscricao"];
 
 function isLobbyRoute(pathname: string) {
   if (pathname === "/app" || pathname === "/app/") return true;

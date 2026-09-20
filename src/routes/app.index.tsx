@@ -94,6 +94,28 @@ function Badge({ tone, children }: { tone: "amber" | "success" | "muted"; childr
   );
 }
 
+function InscricaoCta({ competicao: c }: { competicao: Competicao }) {
+  const { data: profile } = useProfile();
+  if (!profile) return null;
+  if (profile.aprovacao_status === "pendente") {
+    return (
+      <p className="rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        <b>Cadastro em análise</b> — assim que for aprovado você garante suas quotas aqui.
+      </p>
+    );
+  }
+  if (profile.aprovacao_status === "rejeitada" || profile.aprovacao_status === "rejeitado") return null;
+  return (
+    <Link
+      to="/app/inscricao/$slug"
+      params={{ slug: c.slug }}
+      className="inline-flex w-full items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow transition hover:opacity-90"
+    >
+      Garantir minhas quotas
+    </Link>
+  );
+}
+
 function CompeticaoFuturaCard({ competicao: c }: { competicao: Competicao }) {
   const emPesquisa = c.status === "pesquisa";
   const elegivelPromotor = ["pesquisa", "inscricoes", "ativa"].includes(c.status);
@@ -146,6 +168,7 @@ function CompeticaoFuturaCard({ competicao: c }: { competicao: Competicao }) {
         <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5" />
       </div>
       </Link>
+      {c.status === "inscricoes" && <InscricaoCta competicao={c} />}
       {painel && <PromotorCard competicao={c} painel={painel} />}
     </div>
   );

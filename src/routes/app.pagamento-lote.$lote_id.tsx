@@ -6,7 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { createStaticPix, hasError } from "@/lib/pix";
 import { useSetting } from "@/lib/queries/settings";
 import { useLote, useSubmitComprovanteLote } from "@/lib/queries/lotes";
-import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
+import { useCompeticoes } from "@/lib/queries/competicoes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { translatePgError } from "@/lib/error-messages";
 
@@ -17,7 +17,11 @@ export const Route = createFileRoute("/app/pagamento-lote/$lote_id")({
 
 const ALLOWED_MIME = ["image/png", "image/jpeg", "image/jpg", "application/pdf"];
 const MAX_SIZE = 5 * 1024 * 1024;
-const VALOR_QUOTA = 50;
+const VALOR_QUOTA_FALLBACK = 50;
+
+function brl(v: number) {
+  return Number(v).toFixed(2).replace(".", ",");
+}
 
 type PixConfig = {
   chave?: string;
@@ -43,13 +47,18 @@ function PagamentoLote() {
   const { data, isLoading } = useLote(lote_id);
   const submit = useSubmitComprovanteLote();
   const navigate = useNavigate();
-  const somenteLeitura = useCopaSomenteLeitura();
+  const { data: competicoes = [] } = useCompeticoes();
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviado, setEnviado] = useState(false);
 
   const lote = data?.lote;
+  // S3.3b — a tela é genérica: competição, preço e destino vêm do próprio lote.
+  const competicao = competicoes.find((c) => c.id === (lote as any)?.competicao_id);
+  const somenteLeitura = competicao?.status === "encerrada" || competicao?.status === "arquivada";
+  const precoQuota = Number(competicao?.preco_quota ?? VALOR_QUOTA_FALLBACK);
+  const voltarPara = competicao && competicao.slug !== "copa2026" ? `/app/inscricao/${competicao.slug}` : "/app/quotas";
   const quantidade = lote?.quantidade_pedida ?? data?.quotas.length ?? 1;
-  const valorTotal = (lote?.valor_esperado ?? quantidade * VALOR_QUOTA) as number;
+  const valorTotal = (lote?.valor_esperado ?? quantidade * precoQuota) as number;
 
   const chave = pixConfig?.chave ?? "PLACEHOLDER";
   const beneficiario = pixConfig?.beneficiario ?? pixConfig?.titular ?? "BOLAO PEREBAS";
@@ -88,7 +97,7 @@ function PagamentoLote() {
       }
       setEnviado(true);
       toast.success(`Comprovante de ${res.count} quota(s) enviado! Aguarda aprovação.`);
-      setTimeout(() => navigate({ to: "/app/quotas" }), 1500);
+      setTimeout(() => navigate({ to: voltarPara as string }), 1500);
     } catch (e: any) {
       toast.error(translatePgError(e));
     }
@@ -100,13 +109,14 @@ function PagamentoLote() {
   if (somenteLeitura) {
     return (
       <div className="mx-auto max-w-xl space-y-4">
-        <Link to="/app/quotas" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+        <Link to={voltarPara as string} className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <ArrowLeft className="h-3 w-3" /> Voltar
         </Link>
         <div className="flex items-start gap-2 rounded-2xl border border-border bg-muted/40 p-4 text-sm">
           <Lock className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
-            <b>Pagamentos encerrados</b> — a Copa 2026 foi arquivada. Não é mais possível enviar comprovantes.
+            <b>Pagamentos encerrados</b> — {competicao?.nome_curto ?? "esta competição"} foi encerrada. Não é mais
+            possível enviar comprovantes.
           </p>
         </div>
       </div>
@@ -116,7 +126,7 @@ function PagamentoLote() {
   if (!lote) {
     return (
       <div className="mx-auto max-w-xl space-y-4">
-        <Link to="/app/quotas" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+        <Link to={voltarPara as string} className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <ArrowLeft className="h-3 w-3" /> Voltar
         </Link>
         <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
@@ -133,12 +143,13 @@ function PagamentoLote() {
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
-        <Link to="/app/quotas" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+        <Link to={voltarPara as string} className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <ArrowLeft className="h-3 w-3" /> Voltar
         </Link>
         <h1 className="mt-2 font-display text-3xl font-extrabold">Pagar via Pix</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {quantidade} {quantidade === 1 ? "quota" : "quotas"} × R$ 50,00 = <b>R$ {totalFmt}</b>
+        {competicao && <p className="mt-1 text-xs font-semibold text-primary">{competicao.nome_curto}</p>}
+        <p className="mt-1 break-words text-sm text-muted-foreground">
+          {quantidade} {quantidade === 1 ? "quota" : "quotas"} × R$ {brl(precoQuota)} = <b>R$ {totalFmt}</b>
         </p>
         {isReenvio && (
           <div className="mt-3 rounded-xl border border-accent/40 bg-accent/10 p-3 text-xs">
