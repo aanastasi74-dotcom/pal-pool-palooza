@@ -168,6 +168,7 @@ function CompeticaoFuturaCard({ competicao: c }: { competicao: Competicao }) {
         <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5" />
       </div>
       </Link>
+      {c.status === "inscricoes" && <InscricaoCta competicao={c} />}
       {painel && <PromotorCard competicao={c} painel={painel} />}
     </div>
   );
