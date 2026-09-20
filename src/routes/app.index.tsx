@@ -94,6 +94,28 @@ function Badge({ tone, children }: { tone: "amber" | "success" | "muted"; childr
   );
 }
 
+function InscricaoCta({ competicao: c }: { competicao: Competicao }) {
+  const { data: profile } = useProfile();
+  if (!profile) return null;
+  if (profile.aprovacao_status === "pendente") {
+    return (
+      <p className="rounded-2xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        <b>Cadastro em análise</b> — assim que for aprovado você garante suas quotas aqui.
+      </p>
+    );
+  }
+  if (profile.aprovacao_status !== "aprovado") return null;
+  return (
+    <Link
+      to="/app/inscricao/$slug"
+      params={{ slug: c.slug }}
+      className="inline-flex w-full items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-glow transition hover:opacity-90"
+    >
+      Garantir minhas quotas
+    </Link>
+  );
+}
+
 function CompeticaoFuturaCard({ competicao: c }: { competicao: Competicao }) {
   const emPesquisa = c.status === "pesquisa";
   const elegivelPromotor = ["pesquisa", "inscricoes", "ativa"].includes(c.status);

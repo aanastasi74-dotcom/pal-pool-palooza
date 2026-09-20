@@ -45,6 +45,7 @@ import { Route as AppPerebaUser_idRouteImport } from './routes/app.pereba.$user_
 import { Route as AppPalpitesTop4RouteImport } from './routes/app.palpites_.top4'
 import { Route as AppPagamentoQuota_idRouteImport } from './routes/app.pagamento.$quota_id'
 import { Route as AppPagamentoLoteLote_idRouteImport } from './routes/app.pagamento-lote.$lote_id'
+import { Route as AppInscricaoSlugRouteImport } from './routes/app.inscricao.$slug'
 import { Route as AppBoletimDataRouteImport } from './routes/app.boletim.$data'
 import { Route as AppAdminSyncRouteImport } from './routes/app.admin.sync'
 import { Route as AppAdminSaudeRouteImport } from './routes/app.admin.saude'
@@ -249,6 +250,11 @@ const AppPagamentoLoteLote_idRoute = AppPagamentoLoteLote_idRouteImport.update({
   path: '/pagamento-lote/$lote_id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInscricaoSlugRoute = AppInscricaoSlugRouteImport.update({
+  id: '/inscricao/$slug',
+  path: '/inscricao/$slug',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBoletimDataRoute = AppBoletimDataRouteImport.update({
   id: '/boletim/$data',
   path: '/boletim/$data',
@@ -417,6 +423,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/admin/sync': typeof AppAdminSyncRoute
   '/app/boletim/$data': typeof AppBoletimDataRoute
+  '/app/inscricao/$slug': typeof AppInscricaoSlugRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
@@ -476,6 +483,7 @@ export interface FileRoutesByTo {
   '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/admin/sync': typeof AppAdminSyncRoute
   '/app/boletim/$data': typeof AppBoletimDataRoute
+  '/app/inscricao/$slug': typeof AppInscricaoSlugRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites/top4': typeof AppPalpitesTop4Route
@@ -538,6 +546,7 @@ export interface FileRoutesById {
   '/app/admin/saude': typeof AppAdminSaudeRoute
   '/app/admin/sync': typeof AppAdminSyncRoute
   '/app/boletim/$data': typeof AppBoletimDataRoute
+  '/app/inscricao/$slug': typeof AppInscricaoSlugRoute
   '/app/pagamento-lote/$lote_id': typeof AppPagamentoLoteLote_idRoute
   '/app/pagamento/$quota_id': typeof AppPagamentoQuota_idRoute
   '/app/palpites_/top4': typeof AppPalpitesTop4Route
@@ -601,6 +610,7 @@ export interface FileRouteTypes {
     | '/app/admin/saude'
     | '/app/admin/sync'
     | '/app/boletim/$data'
+    | '/app/inscricao/$slug'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
@@ -660,6 +670,7 @@ export interface FileRouteTypes {
     | '/app/admin/saude'
     | '/app/admin/sync'
     | '/app/boletim/$data'
+    | '/app/inscricao/$slug'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites/top4'
@@ -721,6 +732,7 @@ export interface FileRouteTypes {
     | '/app/admin/saude'
     | '/app/admin/sync'
     | '/app/boletim/$data'
+    | '/app/inscricao/$slug'
     | '/app/pagamento-lote/$lote_id'
     | '/app/pagamento/$quota_id'
     | '/app/palpites_/top4'
@@ -1003,6 +1015,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPagamentoLoteLote_idRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/inscricao/$slug': {
+      id: '/app/inscricao/$slug'
+      path: '/inscricao/$slug'
+      fullPath: '/app/inscricao/$slug'
+      preLoaderRoute: typeof AppInscricaoSlugRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/boletim/$data': {
       id: '/app/boletim/$data'
       path: '/boletim/$data'
@@ -1236,6 +1255,7 @@ interface AppRouteChildren {
   AppWrappedRoute: typeof AppWrappedRoute
   AppIndexRoute: typeof AppIndexRoute
   AppBoletimDataRoute: typeof AppBoletimDataRoute
+  AppInscricaoSlugRoute: typeof AppInscricaoSlugRoute
   AppPagamentoLoteLote_idRoute: typeof AppPagamentoLoteLote_idRoute
   AppPagamentoQuota_idRoute: typeof AppPagamentoQuota_idRoute
   AppPalpitesTop4Route: typeof AppPalpitesTop4Route
@@ -1265,6 +1285,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppWrappedRoute: AppWrappedRoute,
   AppIndexRoute: AppIndexRoute,
   AppBoletimDataRoute: AppBoletimDataRoute,
+  AppInscricaoSlugRoute: AppInscricaoSlugRoute,
   AppPagamentoLoteLote_idRoute: AppPagamentoLoteLote_idRoute,
   AppPagamentoQuota_idRoute: AppPagamentoQuota_idRoute,
   AppPalpitesTop4Route: AppPalpitesTop4Route,
