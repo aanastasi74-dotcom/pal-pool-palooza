@@ -104,7 +104,7 @@ function InscricaoCta({ competicao: c }: { competicao: Competicao }) {
       </p>
     );
   }
-  if (profile.aprovacao_status !== "aprovado") return null;
+  if (profile.aprovacao_status === "rejeitada" || profile.aprovacao_status === "rejeitado") return null;
   return (
     <Link
       to="/app/inscricao/$slug"
