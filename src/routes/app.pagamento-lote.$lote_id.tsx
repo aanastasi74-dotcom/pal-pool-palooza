@@ -6,7 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { createStaticPix, hasError } from "@/lib/pix";
 import { useSetting } from "@/lib/queries/settings";
 import { useLote, useSubmitComprovanteLote } from "@/lib/queries/lotes";
-import { useCopaSomenteLeitura } from "@/lib/queries/competicoes";
+import { useCompeticoes } from "@/lib/queries/competicoes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { translatePgError } from "@/lib/error-messages";
 
