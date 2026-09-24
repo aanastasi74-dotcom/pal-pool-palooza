@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.caixa_movimentos IS 'Ledger financeiro por competição — incentivos de promotor desde S3.4a, sync types 24/09/2026';
