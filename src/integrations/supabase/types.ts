@@ -1967,6 +1967,7 @@ export type Database = {
         Args: { p_aprovar_n?: number; p_lote_id: string }
         Returns: Json
       }
+      apurar_incentivos: { Args: { p_slug: string }; Returns: Json }
       arquivamento_copa_ativo: { Args: never; Returns: boolean }
       ativar_quota_manual: {
         Args: { p_motivo: string; p_quota_id: string }
@@ -2253,6 +2254,15 @@ export type Database = {
       is_admin_competicao: { Args: { p_slug: string }; Returns: boolean }
       is_dono: { Args: never; Returns: boolean }
       is_promotor: { Args: { p_slug: string }; Returns: boolean }
+      lancar_incentivo_promotor: {
+        Args: {
+          p_descricao?: string
+          p_promotor_id: string
+          p_slug: string
+          p_valor: number
+        }
+        Returns: Json
+      }
       limite_perebas_hard: { Args: never; Returns: number }
       limite_quotas_global_hard: { Args: never; Returns: number }
       limite_quotas_pereba:
