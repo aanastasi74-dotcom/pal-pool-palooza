@@ -19,6 +19,7 @@ import {
   RefreshCw,
   ClipboardList,
   Home,
+  Landmark,
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -38,6 +39,7 @@ type NavItem = {
 const plataformaItems: NavItem[] = [
   { to: "/app/admin", label: "Início", icon: Home, exact: true },
   { to: "/app/admin/convites", label: "Usuários & convites", icon: Users },
+  { to: "/app/admin/financeiro", label: "Financeiro", icon: Landmark },
   { to: "/app/admin/saude", label: "Saúde", icon: Activity },
   { to: "/app/admin/auditoria", label: "Auditoria", icon: ScrollText },
   { to: "/app/admin/reportes", label: "Reportes", icon: Bug },
@@ -61,6 +63,7 @@ const copaItems: NavItem[] = [
 
 const plataformaPaths = [
   "/app/admin/convites",
+  "/app/admin/financeiro",
   "/app/admin/saude",
   "/app/admin/auditoria",
   "/app/admin/reportes",

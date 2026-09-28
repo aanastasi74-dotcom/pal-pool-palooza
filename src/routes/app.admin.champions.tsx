@@ -15,6 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { IncentivosSection } from "@/components/admin/incentivos-section";
 import { PromotoresSection } from "@/components/admin/promotores-section";
 import { LotesAprovacaoSection } from "@/components/admin/lotes-aprovacao-section";
 
@@ -84,6 +85,8 @@ function AdminChampions() {
       <LotesAprovacaoSection slug="champions2627" />
 
       <PromotoresSection slug="champions2627" />
+
+      <IncentivosSection slug="champions2627" />
 
       <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
         <h2 className="font-display text-lg font-bold">Envio de email</h2>

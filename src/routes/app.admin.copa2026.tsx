@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Lock,
 } from "lucide-react";
+import { IncentivosSection } from "@/components/admin/incentivos-section";
 import { PromotoresSection } from "@/components/admin/promotores-section";
 import { LotesAprovacaoSection } from "@/components/admin/lotes-aprovacao-section";
 
@@ -72,6 +73,8 @@ function ConsoleCopa2026() {
       <LotesAprovacaoSection slug="copa2026" />
 
       <PromotoresSection slug="copa2026" />
+
+      <IncentivosSection slug="copa2026" />
     </div>
   );
 }
