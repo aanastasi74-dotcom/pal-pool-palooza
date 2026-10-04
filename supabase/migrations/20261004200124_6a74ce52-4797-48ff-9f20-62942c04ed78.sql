@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.competicoes IS 'Competições e ciclo de vida — cancelamento com devolução assistida desde S3.5a, sync types 04/10/2026';
