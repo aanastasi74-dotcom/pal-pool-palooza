@@ -1974,6 +1974,10 @@ export type Database = {
         Returns: Json
       }
       calcular_premiacao: { Args: { p_quotas_ativas: number }; Returns: Json }
+      cancelar_competicao: {
+        Args: { p_motivo: string; p_slug: string }
+        Returns: Json
+      }
       champions_interesse_total: { Args: never; Returns: Json }
       champions_interesse_total_publico: { Args: never; Returns: Json }
       check_apelido_disponivel: {
@@ -2021,6 +2025,7 @@ export type Database = {
       demo_copa2026: { Args: never; Returns: Json }
       derivar_periodo: { Args: { p_minuto: string }; Returns: string }
       destaques_landing: { Args: never; Returns: Json }
+      devolucoes_pendentes: { Args: { p_slug: string }; Returns: Json }
       encerrar_lote_por_decisao: {
         Args: { p_lote_id: string; p_motivo: string }
         Returns: Json
@@ -2296,6 +2301,15 @@ export type Database = {
             Returns: number
           }
       recompute_peso_jogos: { Args: never; Returns: undefined }
+      registrar_devolucao: {
+        Args: {
+          p_descricao?: string
+          p_slug: string
+          p_user_id: string
+          p_valor: number
+        }
+        Returns: Json
+      }
       rejeitar_lote: {
         Args: { p_lote_id: string; p_motivo: string }
         Returns: Json
