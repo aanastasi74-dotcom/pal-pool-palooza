@@ -62,7 +62,9 @@ function AdminPlataforma() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {(competicoes ?? []).map((c) => {
-              const to = consoleBySlug[c.slug];
+              const to =
+                consoleBySlug[c.slug] ??
+                (c.status !== "rascunho" ? `/app/admin/competicao/${c.slug}` : undefined);
               const inner = (
                 <>
                   <div className="flex flex-wrap items-center gap-2">
