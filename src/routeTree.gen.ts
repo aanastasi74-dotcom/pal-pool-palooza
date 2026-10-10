@@ -70,6 +70,7 @@ import { Route as AppPalpitesTop4EstatisticasRouteImport } from './routes/app.pa
 import { Route as AppJogoMatch_idPalpitesRouteImport } from './routes/app.jogo.$match_id.palpites'
 import { Route as AppJogoMatch_idDetalhesRouteImport } from './routes/app.jogo.$match_id.detalhes'
 import { Route as AppAdminPesquisasIdRouteImport } from './routes/app.admin.pesquisas_.$id'
+import { Route as AppAdminCompeticaoSlugRouteImport } from './routes/app.admin.competicao.$slug'
 
 const RegrasRoute = RegrasRouteImport.update({
   id: '/regras',
@@ -378,6 +379,11 @@ const AppAdminPesquisasIdRoute = AppAdminPesquisasIdRouteImport.update({
   path: '/pesquisas/$id',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminCompeticaoSlugRoute = AppAdminCompeticaoSlugRouteImport.update({
+  id: '/competicao/$slug',
+  path: '/competicao/$slug',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -437,6 +443,7 @@ export interface FileRoutesByFullPath {
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin/': typeof AppAdminIndexRoute
+  '/app/admin/competicao/$slug': typeof AppAdminCompeticaoSlugRoute
   '/app/admin/pesquisas/$id': typeof AppAdminPesquisasIdRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
@@ -498,6 +505,7 @@ export interface FileRoutesByTo {
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin': typeof AppAdminIndexRoute
+  '/app/admin/competicao/$slug': typeof AppAdminCompeticaoSlugRoute
   '/app/admin/pesquisas/$id': typeof AppAdminPesquisasIdRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
@@ -562,6 +570,7 @@ export interface FileRoutesById {
   '/app/pereba/$user_id': typeof AppPerebaUser_idRoute
   '/app/pesquisa/$slug': typeof AppPesquisaSlugRoute
   '/app/admin/': typeof AppAdminIndexRoute
+  '/app/admin/competicao/$slug': typeof AppAdminCompeticaoSlugRoute
   '/app/admin/pesquisas_/$id': typeof AppAdminPesquisasIdRoute
   '/app/jogo/$match_id/detalhes': typeof AppJogoMatch_idDetalhesRoute
   '/app/jogo/$match_id/palpites': typeof AppJogoMatch_idPalpitesRoute
@@ -627,6 +636,7 @@ export interface FileRouteTypes {
     | '/app/pereba/$user_id'
     | '/app/pesquisa/$slug'
     | '/app/admin/'
+    | '/app/admin/competicao/$slug'
     | '/app/admin/pesquisas/$id'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
@@ -688,6 +698,7 @@ export interface FileRouteTypes {
     | '/app/pereba/$user_id'
     | '/app/pesquisa/$slug'
     | '/app/admin'
+    | '/app/admin/competicao/$slug'
     | '/app/admin/pesquisas/$id'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
@@ -751,6 +762,7 @@ export interface FileRouteTypes {
     | '/app/pereba/$user_id'
     | '/app/pesquisa/$slug'
     | '/app/admin/'
+    | '/app/admin/competicao/$slug'
     | '/app/admin/pesquisas_/$id'
     | '/app/jogo/$match_id/detalhes'
     | '/app/jogo/$match_id/palpites'
@@ -1202,6 +1214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminPesquisasIdRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/admin/competicao/$slug': {
+      id: '/app/admin/competicao/$slug'
+      path: '/competicao/$slug'
+      fullPath: '/app/admin/competicao/$slug'
+      preLoaderRoute: typeof AppAdminCompeticaoSlugRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
   }
 }
 
@@ -1226,6 +1245,7 @@ interface AppAdminRouteChildren {
   AppAdminSaudeRoute: typeof AppAdminSaudeRoute
   AppAdminSyncRoute: typeof AppAdminSyncRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
+  AppAdminCompeticaoSlugRoute: typeof AppAdminCompeticaoSlugRoute
   AppAdminPesquisasIdRoute: typeof AppAdminPesquisasIdRoute
 }
 
@@ -1250,6 +1270,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminSaudeRoute: AppAdminSaudeRoute,
   AppAdminSyncRoute: AppAdminSyncRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,
+  AppAdminCompeticaoSlugRoute: AppAdminCompeticaoSlugRoute,
   AppAdminPesquisasIdRoute: AppAdminPesquisasIdRoute,
 }
 

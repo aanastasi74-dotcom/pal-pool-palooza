@@ -28,6 +28,7 @@ import { BugReportFAB } from "./bug-report-fab";
 import { MaintenanceBanner } from "./maintenance-banner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useReportsAbertosCount } from "@/lib/queries/reports";
+import { useCompeticaoStatus } from "@/lib/queries/admin-cancelamento";
 
 type NavItem = {
   to: string;
@@ -69,6 +70,7 @@ const plataformaPaths = [
   "/app/admin/reportes",
   "/app/admin/configuracoes",
   "/app/admin/champions",
+  "/app/admin/competicao",
 ];
 
 function isPlataforma(pathname: string) {
@@ -109,11 +111,23 @@ function NavList({ pathname, onClick }: { pathname: string; onClick?: () => void
 }
 
 
+function ModoLabelCompeticao({ slug }: { slug: string }) {
+  const { data } = useCompeticaoStatus(slug);
+  return <>Admin — {data?.nome_curto ?? "Competição"}</>;
+}
+
 export function AdminShell() {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const plataforma = isPlataforma(pathname);
-  const modoLabel = plataforma ? "Admin — Plataforma" : "Admin — Copa 2026 (arquivada)";
+  const slugGenerico = pathname.match(/^\/app\/admin\/competicao\/([^/]+)/)?.[1];
+  const modoLabel: React.ReactNode = slugGenerico ? (
+    <ModoLabelCompeticao slug={slugGenerico} />
+  ) : plataforma ? (
+    "Admin — Plataforma"
+  ) : (
+    "Admin — Copa 2026 (arquivada)"
+  );
 
   return (
     <div className="min-h-screen bg-background">
