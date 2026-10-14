@@ -136,7 +136,7 @@ export function useRejeitarLote(slug: string) {
       return { emailOk, encerrado: !!(data as { encerrado?: boolean } | null)?.encerrado };
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-lotes", slug] });
+      qc.invalidateQueries({ queryKey: ["admin-lotes"] });
       qc.invalidateQueries({ queryKey: ["lotes"] });
       qc.invalidateQueries({ queryKey: ["quotas"] });
       qc.invalidateQueries({ queryKey: ["payments"] });
