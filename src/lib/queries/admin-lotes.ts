@@ -116,10 +116,12 @@ export function useAprovarLote(slug: string) {
       return { emailOk, aprovadas: resumo?.aprovadas ?? 0, rejeitadas: resumo?.rejeitadas ?? 0 };
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-lotes", slug] });
+      qc.invalidateQueries({ queryKey: ["admin-lotes"] });
       qc.invalidateQueries({ queryKey: ["lotes"] });
       qc.invalidateQueries({ queryKey: ["quotas"] });
       qc.invalidateQueries({ queryKey: ["payments"] });
+      // Aprovar lote gera entrada no caixa — o consolidado precisa refletir.
+      qc.invalidateQueries({ queryKey: ["admin-financeiro"] });
     },
   });
 }
@@ -134,7 +136,7 @@ export function useRejeitarLote(slug: string) {
       return { emailOk, encerrado: !!(data as { encerrado?: boolean } | null)?.encerrado };
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-lotes", slug] });
+      qc.invalidateQueries({ queryKey: ["admin-lotes"] });
       qc.invalidateQueries({ queryKey: ["lotes"] });
       qc.invalidateQueries({ queryKey: ["quotas"] });
       qc.invalidateQueries({ queryKey: ["payments"] });
