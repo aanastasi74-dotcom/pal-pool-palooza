@@ -177,6 +177,9 @@ export function useSalvarPromotorSettings(slug: string, competicaoId: string | u
       );
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-promotores", slug] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-promotores", slug] });
+      queryClient.invalidateQueries({ queryKey: ["admin-incentivos", slug] });
+    },
   });
 }
