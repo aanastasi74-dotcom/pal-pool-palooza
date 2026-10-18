@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { executarRegistroDevolucao, incentivoParaSalvar, incentivoSchema, validarComprovanteDevolucao } from "./admin-financial-rules";
 
-const incentivo = { tipo: "comissao" as const, valor_por_adesao: 10, gatilho: "quota_paga" as const };
+const incentivo = { tipo: "comissao", valor_por_adesao: 10, gatilho: "quota_paga" };
 
 describe("promoter caps", () => {
   test("unlimited omits teto in the saved object and parses back", () => {
@@ -33,7 +33,7 @@ describe("refund receipts", () => {
     expect(() => validarComprovanteDevolucao({ type: "application/pdf", size: 5 * 1024 * 1024 + 1 })).toThrow();
   });
   test("successful registration follows upload then email", async () => {
-    const calls: string[] = [];
+    const calls = [];
     const result = await executarRegistroDevolucao({
       upload: async () => { calls.push("upload"); return "receipt.pdf"; },
       registrar: async () => { calls.push("rpc"); return { saldoRestante: 20 }; },
