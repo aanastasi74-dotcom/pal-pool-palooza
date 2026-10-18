@@ -9,7 +9,7 @@ const apuracaoSchema = z.object({
     .object({
       tipo: z.string(),
       valor_por_adesao: z.coerce.number().default(0),
-      teto: z.coerce.number().default(0),
+      teto: z.coerce.number().nullish(),
       gatilho: z.string().optional(),
     })
     .nullish(),

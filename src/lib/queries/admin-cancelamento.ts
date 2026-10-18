@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { brl } from "@/lib/queries/admin-financeiro";
+import { executarRegistroDevolucao, validarComprovanteDevolucao } from "@/lib/queries/admin-financial-rules";
 
 export const STATUS_CANCELAVEIS = ["pesquisa", "inscricoes", "ativa"];
 
@@ -77,21 +78,42 @@ export function useCancelarCompeticao(slug: string) {
 export function useRegistrarDevolucao(slug: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (v: { userId: string; valor: number; descricao?: string }) => {
-      const { data, error } = await supabase.rpc("registrar_devolucao", {
-        p_slug: slug,
-        p_user_id: v.userId,
-        p_valor: v.valor,
-        p_descricao: v.descricao?.trim() || undefined,
+    mutationFn: async (v: { userId: string; valor: number; comprovante: File; descricao?: string }) => {
+      const extensao = validarComprovanteDevolucao(v.comprovante);
+      if (!Number.isFinite(v.valor) || v.valor <= 0) throw new Error("Informe um valor maior que zero");
+      const registro = await executarRegistroDevolucao({
+        upload: async () => {
+          const path = `devolucoes/${slug}/${v.userId}-${Date.now()}.${extensao}`;
+          const { error } = await supabase.storage.from("comprovantes-pix").upload(path, v.comprovante, {
+            cacheControl: "3600", upsert: false, contentType: v.comprovante.type,
+          });
+          if (error) throw new Error(`Não foi possível enviar o comprovante: ${error.message}`);
+          return path;
+        },
+        registrar: async () => {
+          const { data, error } = await supabase.rpc("registrar_devolucao", {
+            p_slug: slug,
+            p_user_id: v.userId,
+            p_valor: v.valor,
+            p_descricao: v.descricao?.trim() || undefined,
+          });
+          if (error) throw error;
+          const r = (data ?? {}) as { ok?: boolean; erro?: string; saldo_a_devolver?: number; saldo_restante?: number };
+          if (!r.ok) {
+            let m = msg(r.erro, "Não foi possível registrar a devolução");
+            if (r.erro === "excede_saldo" && r.saldo_a_devolver != null) m += ` (saldo: ${brl(Number(r.saldo_a_devolver))})`;
+            throw new Error(m);
+          }
+          return { saldoRestante: Number(r.saldo_restante ?? 0) };
+        },
+        enviarEmail: async (comprovantePath) => {
+          const { data, error } = await supabase.functions.invoke("enviar-email-devolucao", {
+            body: { slug, user_id: v.userId, valor: v.valor, comprovante_path: comprovantePath },
+          });
+          if (error || !(data as { ok?: boolean } | null)?.ok) throw new Error("Falha ao enviar e-mail de devolução");
+        },
       });
-      if (error) throw error;
-      const r = (data ?? {}) as { ok?: boolean; erro?: string; saldo_a_devolver?: number; saldo_restante?: number };
-      if (!r.ok) {
-        let m = msg(r.erro, "Não foi possível registrar a devolução");
-        if (r.erro === "excede_saldo" && r.saldo_a_devolver != null) m += ` (saldo: ${brl(Number(r.saldo_a_devolver))})`;
-        throw new Error(m);
-      }
-      return { saldoRestante: Number(r.saldo_restante ?? 0) };
+      return { ...registro.resultado, emailEnviado: registro.emailEnviado };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-devolucoes", slug] });

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AlertTriangle, ChevronDown, Mail, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { brl } from "@/lib/queries/admin-financeiro";
+import { COMPROVANTE_ACCEPT, validarComprovanteDevolucao } from "@/lib/queries/admin-financial-rules";
 import {
   type Devolucao,
   JaEnviadoError,
@@ -127,6 +128,7 @@ function ChecklistDevolucoes({ slug }: { slug: string }) {
   const enviar = useEnviarEmailCancelamento(slug);
   const [alvo, setAlvo] = useState<Devolucao | null>(null);
   const [valor, setValor] = useState("");
+  const [comprovante, setComprovante] = useState<File | null>(null);
   const [motivoEmail, setMotivoEmail] = useState("");
   const [confirmEmail, setConfirmEmail] = useState(false);
   const [confirmForce, setConfirmForce] = useState(false);
@@ -140,9 +142,13 @@ function ChecklistDevolucoes({ slug }: { slug: string }) {
     if (!Number.isFinite(v) || v <= 0) return toast.error("Informe um valor maior que zero");
     if (v > alvo.saldo_a_devolver + 0.001) return toast.error(`O valor excede o saldo (${brl(alvo.saldo_a_devolver)})`);
     try {
-      const r = await registrar.mutateAsync({ userId: alvo.user_id, valor: v });
-      toast.success(`Devolução de ${brl(v)} registrada. Saldo restante: ${brl(r.saldoRestante)}.`);
+      validarComprovanteDevolucao(comprovante);
+      if (!comprovante) return;
+      const r = await registrar.mutateAsync({ userId: alvo.user_id, valor: v, comprovante });
+      if (r.emailEnviado) toast.success("Devolução registrada e pereba avisado por e-mail (comprovante anexado)");
+      else toast.warning("Devolução registrada, mas o e-mail falhou");
       setAlvo(null);
+      setComprovante(null);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível registrar");
     }
@@ -209,9 +215,10 @@ function ChecklistDevolucoes({ slug }: { slug: string }) {
                       onClick={() => {
                         setAlvo(d);
                         setValor(d.saldo_a_devolver.toFixed(2));
+                        setComprovante(null);
                       }}
                     >
-                      Registrar devolução
+                      Registrar devolução feita
                     </Button>
                   )}
                 </li>
@@ -240,15 +247,35 @@ function ChecklistDevolucoes({ slug }: { slug: string }) {
             <DialogTitle>Registrar devolução</DialogTitle>
             <DialogDescription>
               {alvo?.apelido ?? alvo?.nome} — saldo {alvo ? brl(alvo.saldo_a_devolver) : ""}
+              <span className="mt-2 block">Anexe o comprovante do PIX que você JÁ FEZ — o registro entra no caixa e o pereba recebe o e-mail com o comprovante.</span>
             </DialogDescription>
           </DialogHeader>
-          <Input inputMode="decimal" value={valor} onChange={(e) => setValor(e.target.value)} />
+          <label className="space-y-1 text-sm">
+            <span>Valor devolvido (R$)</span>
+            <Input inputMode="decimal" value={valor} disabled={registrar.isPending} onChange={(e) => setValor(e.target.value)} />
+          </label>
+          <label className="min-w-0 space-y-1 text-sm">
+            <span>Comprovante do PIX (obrigatório)</span>
+            <Input type="file" accept={COMPROVANTE_ACCEPT} disabled={registrar.isPending} onChange={(e) => {
+              const file = e.target.files?.[0] ?? null;
+              setComprovante(null);
+              if (!file) return;
+              try {
+                validarComprovanteDevolucao(file);
+                setComprovante(file);
+              } catch (error) {
+                e.target.value = "";
+                toast.error(error instanceof Error ? error.message : "Comprovante inválido");
+              }
+            }} />
+            <span className="block text-xs text-muted-foreground">PNG, JPG ou PDF · até 5 MB</span>
+          </label>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAlvo(null)} disabled={registrar.isPending}>
               Cancelar
             </Button>
-            <Button onClick={salvar} disabled={registrar.isPending}>
-              {registrar.isPending ? "Salvando..." : "Registrar"}
+            <Button onClick={salvar} disabled={!comprovante || registrar.isPending}>
+              {registrar.isPending ? "Salvando..." : "Registrar devolução feita"}
             </Button>
           </DialogFooter>
         </DialogContent>

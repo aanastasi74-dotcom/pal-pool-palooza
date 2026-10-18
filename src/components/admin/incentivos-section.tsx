@@ -108,7 +108,7 @@ export function IncentivosSection({ slug }: { slug: string }) {
                   <td className="py-2 text-right">
                     {!somenteLeitura && (
                       <Button size="sm" disabled={p.saldo_a_lancar <= 0} onClick={() => abrir(p)}>
-                        Lançar
+                        Registrar pagamento
                       </Button>
                     )}
                   </td>
@@ -122,18 +122,18 @@ export function IncentivosSection({ slug }: { slug: string }) {
       {data?.incentivo && tipo !== "nenhum" && (
         <p className="border-t border-border pt-3 text-xs text-muted-foreground">
           Incentivo: <strong>{TIPO_LABEL[tipo] ?? tipo}</strong> · {brl(data.incentivo.valor_por_adesao)} por adesão · teto{" "}
-          {data.incentivo.teto > 0 ? brl(data.incentivo.teto) : "sem teto"}
+          {data.incentivo.teto == null ? "sem teto" : brl(data.incentivo.teto)}
         </p>
       )}
 
       <Dialog open={!!alvo} onOpenChange={(o) => !o && setAlvo(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Lançar incentivo — {alvo?.apelido}</DialogTitle>
+            <DialogTitle>{quotaExtra ? "Registrar quota bonificada" : "Registrar pagamento"} — {alvo?.apelido}</DialogTitle>
             <DialogDescription>
               {quotaExtra
-                ? "Registro contábil de quota bonificada (valor R$ 0). Nenhum dinheiro sai do caixa."
-                : `Saída no caixa da competição. Saldo a lançar: ${brl(alvo?.saldo_a_lancar ?? 0)}.`}
+                ? "Registro contábil de quota bonificada (valor R$ 0). Registre aqui uma quota JÁ BONIFICADA — nenhum dinheiro sai do caixa."
+                : `Registre aqui um pagamento JÁ FEITO — o lançamento entra no caixa como dinheiro que já saiu. Saldo a lançar: ${brl(alvo?.saldo_a_lancar ?? 0)}.`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -151,7 +151,7 @@ export function IncentivosSection({ slug }: { slug: string }) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setAlvo(null)}>Cancelar</Button>
             <Button onClick={confirmar} disabled={lancar.isPending}>
-              {lancar.isPending ? "Lançando…" : "Confirmar lançamento"}
+              {lancar.isPending ? "Registrando…" : quotaExtra ? "Registrar quota bonificada" : "Registrar pagamento"}
             </Button>
           </DialogFooter>
         </DialogContent>

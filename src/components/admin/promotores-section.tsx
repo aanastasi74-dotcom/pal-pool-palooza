@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -71,8 +72,12 @@ export function PromotoresSection({ slug }: { slug: string }) {
       toast.error("O limite deve ser um número inteiro entre 1 e 1000");
       return;
     }
-    if (incentivo.valor_por_adesao < 0 || incentivo.teto < 0) {
+    if (incentivo.valor_por_adesao < 0 || (incentivo.teto !== undefined && incentivo.teto < 0)) {
       toast.error("Valores do incentivo não podem ser negativos");
+      return;
+    }
+    if (incentivo.teto !== undefined && !Number.isInteger(incentivo.teto)) {
+      toast.error("O teto deve ser um número inteiro");
       return;
     }
     try {
@@ -177,13 +182,22 @@ export function PromotoresSection({ slug }: { slug: string }) {
               <SelectContent>{TIPOS.map((tipo) => <SelectItem key={tipo.value} value={tipo.value}>{tipo.label}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
-          <Field label="Valor por adesão">
-            <Input type="number" min="0" step="0.01" value={incentivo.valor_por_adesao} disabled={somenteLeitura} onChange={(e) => setIncentivo((atual) => ({ ...atual, valor_por_adesao: Number(e.target.value) }))} />
+          <Field label="Valor por adesão" help="quanto o promotor ganha por amigo que paga quota">
+            <Input type="number" min="0" step="0.01" value={incentivo.valor_por_adesao} disabled={somenteLeitura || incentivo.tipo === "nenhum"} onChange={(e) => setIncentivo((atual) => ({ ...atual, valor_por_adesao: Number(e.target.value) }))} />
           </Field>
-          <Field label="Teto">
-            <Input type="number" min="0" step="0.01" value={incentivo.teto} disabled={somenteLeitura} onChange={(e) => setIncentivo((atual) => ({ ...atual, teto: Number(e.target.value) }))} />
-          </Field>
-          <Field label="Limite de convites">
+          <div className="space-y-2">
+            <Field label="Teto" help="máximo acumulado por promotor nesta competição">
+              <Input type="number" min="0" step="1" value={incentivo.teto ?? ""} disabled={somenteLeitura || incentivo.tipo === "nenhum" || incentivo.teto === undefined} onChange={(e) => setIncentivo((atual) => ({ ...atual, teto: Number(e.target.value) }))} />
+            </Field>
+            <label className="flex items-center gap-2 text-xs">
+              <Checkbox checked={incentivo.teto === undefined} disabled={somenteLeitura || incentivo.tipo === "nenhum"} onCheckedChange={(checked) => setIncentivo((atual) => {
+                const { teto: _teto, ...semTeto } = atual;
+                return checked === true ? semTeto : { ...semTeto, teto: 0 };
+              })} />
+              Sem teto
+            </label>
+          </div>
+          <Field label="Limite de convites" help="convites pendentes que cada promotor pode ter">
             <Input type="number" min="1" max="1000" step="1" value={limite} disabled={somenteLeitura} onChange={(e) => setLimite(Number(e.target.value))} />
           </Field>
         </div>
@@ -213,6 +227,6 @@ export function PromotoresSection({ slug }: { slug: string }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="space-y-1 text-xs font-semibold"><span>{label}</span>{children}</label>;
+function Field({ label, help, children }: { label: string; help?: string; children: React.ReactNode }) {
+  return <label className="block space-y-1 text-xs font-semibold"><span>{label}</span>{children}{help && <span className="block font-normal text-muted-foreground">{help}</span>}</label>;
 }
