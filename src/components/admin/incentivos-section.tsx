@@ -122,7 +122,7 @@ export function IncentivosSection({ slug }: { slug: string }) {
       {data?.incentivo && tipo !== "nenhum" && (
         <p className="border-t border-border pt-3 text-xs text-muted-foreground">
           Incentivo: <strong>{TIPO_LABEL[tipo] ?? tipo}</strong> · {brl(data.incentivo.valor_por_adesao)} por adesão · teto{" "}
-          {data.incentivo.teto > 0 ? brl(data.incentivo.teto) : "sem teto"}
+          {data.incentivo.teto == null ? "sem teto" : brl(data.incentivo.teto)}
         </p>
       )}
 
