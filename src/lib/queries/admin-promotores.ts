@@ -1,18 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { incentivoSchema, incentivoParaSalvar } from "@/lib/queries/admin-financial-rules";
+
+export { incentivoSchema } from "@/lib/queries/admin-financial-rules";
 
 const nomearSchema = z.discriminatedUnion("ok", [
   z.object({ ok: z.literal(true), codigo: z.string().min(1) }),
   z.object({ ok: z.literal(false), erro: z.string() }),
 ]);
-
-export const incentivoSchema = z.object({
-  tipo: z.enum(["desconto_quota", "quota_extra", "comissao", "nenhum"]),
-  valor_por_adesao: z.number().nonnegative().finite(),
-  teto: z.number().nonnegative().finite(),
-  gatilho: z.literal("quota_paga"),
-});
 
 export type PromotorIncentivo = z.infer<typeof incentivoSchema>;
 
@@ -167,7 +163,7 @@ export function useSalvarPromotorSettings(slug: string, competicaoId: string | u
     mutationFn: async ({ limiteConvites, incentivo }: { limiteConvites: number; incentivo: PromotorIncentivo }) => {
       if (!competicaoId) throw new Error("Competição não encontrada");
       const limite = z.number().int().min(1).max(1000).parse(limiteConvites);
-      const incentivoValidado = incentivoSchema.parse(incentivo);
+      const incentivoValidado = incentivoParaSalvar(incentivo);
       const { error } = await supabase.from("competicao_settings").upsert(
         [
           { competicao_id: competicaoId, key: "promotor_limite_convites", value: limite },
