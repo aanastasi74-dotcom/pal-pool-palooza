@@ -423,6 +423,30 @@ export type Database = {
           },
         ]
       }
+      formatos: {
+        Row: {
+          codigo: string
+          config: Json
+          criado_em: string
+          disponivel: boolean
+          nome: string
+        }
+        Insert: {
+          codigo: string
+          config?: Json
+          criado_em?: string
+          disponivel?: boolean
+          nome: string
+        }
+        Update: {
+          codigo?: string
+          config?: Json
+          criado_em?: string
+          disponivel?: boolean
+          nome?: string
+        }
+        Relationships: []
+      }
       frases_do_dia: {
         Row: {
           competicao_id: string
@@ -2022,6 +2046,7 @@ export type Database = {
       compute_default_sigla: { Args: { p_nome: string }; Returns: string }
       congelar_ranking_oficial: { Args: never; Returns: Json }
       consume_invite: { Args: { p_token: string }; Returns: boolean }
+      criar_competicao: { Args: { p_payload: Json }; Returns: Json }
       demo_copa2026: { Args: never; Returns: Json }
       derivar_periodo: { Args: { p_minuto: string }; Returns: string }
       destaques_landing: { Args: never; Returns: Json }
@@ -2253,6 +2278,10 @@ export type Database = {
       }
       get_so_voce_achou: {
         Args: { p_match_id: string; p_quota_id: string }
+        Returns: Json
+      }
+      importar_jogos: {
+        Args: { p_jogos: Json; p_slug: string; p_substituir?: boolean }
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
