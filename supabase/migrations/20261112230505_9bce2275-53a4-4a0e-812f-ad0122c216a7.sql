@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.formatos IS 'Catálogo de formatos de competição (S4.2)';
