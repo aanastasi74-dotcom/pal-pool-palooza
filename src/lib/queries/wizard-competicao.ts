@@ -43,6 +43,15 @@ export function useScoreRulesWizard() {
   });
 }
 
+export async function slugCompeticaoJaExiste(slug: string) {
+  const { count, error } = await supabase
+    .from("competicoes")
+    .select("id", { count: "exact", head: true })
+    .eq("slug", slug);
+  if (error) throw error;
+  return (count ?? 0) > 0;
+}
+
 export function useCriarCompeticaoWizard() {
   const queryClient = useQueryClient();
   return useMutation({

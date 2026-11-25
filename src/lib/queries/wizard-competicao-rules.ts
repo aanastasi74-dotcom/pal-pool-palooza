@@ -1,5 +1,3 @@
-import { incentivoParaSalvar } from "@/lib/queries/admin-financial-rules";
-
 export type FormatoWizard = {
   codigo: string;
   nome: string;
@@ -150,12 +148,11 @@ export function montarPayloadWizard(form: WizardCompeticaoForm, scoreRules: Reco
     teaser_no_lobby: form.teaserNoLobby,
   };
   if (form.permitePromotores) {
-    settings.promotor_incentivo = incentivoParaSalvar({
+    settings.promotor_incentivo = {
       tipo: form.incentivoTipo,
-      valor_por_adesao: Number(form.incentivoValor),
-      gatilho: "quota_paga",
+      valor: Number(form.incentivoValor),
       ...(form.semTeto ? {} : { teto: Number(form.incentivoTeto) }),
-    });
+    };
     settings.promotor_limite_convites = Number(form.limiteConvites);
   }
   return { competicao, settings };

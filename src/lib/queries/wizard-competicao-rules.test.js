@@ -54,12 +54,25 @@ describe("wizard settings payload", () => {
     }, scoreRules);
     const incentivo = payload.settings.promotor_incentivo;
     expect(Object.hasOwn(incentivo, "teto")).toBe(false);
-    expect(incentivo.valor_por_adesao).toBe(10);
+    expect(incentivo).toEqual({ tipo: "comissao", valor: 10 });
     expect(payload.settings.promotor_limite_convites).toBe(30);
   });
   test("a zero cap remains present", () => {
     const payload = montarPayloadWizard({ ...formValido, permitePromotores: true, semTeto: false, incentivoTeto: "0" }, scoreRules);
     expect(payload.settings.promotor_incentivo.teto).toBe(0);
+  });
+  test("promoter incentive has exactly tipo, valor and optional teto", () => {
+    const payload = montarPayloadWizard({
+      ...formValido,
+      permitePromotores: true,
+      incentivoTipo: "comissao",
+      incentivoValor: "5",
+      incentivoTeto: "10",
+      semTeto: false,
+    }, scoreRules);
+    const incentivo = payload.settings.promotor_incentivo;
+    expect(incentivo).toEqual({ tipo: "comissao", valor: 5, teto: 10 });
+    expect(Object.keys(incentivo).sort()).toEqual(["teto", "tipo", "valor"]);
   });
 });
 

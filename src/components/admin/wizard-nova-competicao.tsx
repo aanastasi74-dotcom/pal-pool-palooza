@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import { useCriarCompeticaoWizard, useFormatosWizard, useScoreRulesWizard, WizardCompeticaoError } from "@/lib/queries/wizard-competicao";
+import { slugCompeticaoJaExiste, useCriarCompeticaoWizard, useFormatosWizard, useScoreRulesWizard, WizardCompeticaoError } from "@/lib/queries/wizard-competicao";
 import {
   gerarSlug,
   montarPayloadWizard,
@@ -29,6 +29,7 @@ const ERROS_RPC: Record<string, { mensagem: string; etapa: number }> = {
   preco_invalido: { mensagem: "O preço da quota deve ser maior que zero.", etapa: 1 },
   sem_permissao: { mensagem: "Sua conta não tem permissão para criar competições.", etapa: 5 },
 };
+const MENSAGEM_SLUG_DUPLICADO = "Já existe uma competição com esse identificador";
 
 const ROTULOS_SCORE: Record<string, string> = {
   exato: "Placar exato (cravada)",
@@ -59,6 +60,8 @@ export function WizardNovaCompeticao() {
   const [maiorEtapa, setMaiorEtapa] = useState(0);
   const [form, setForm] = useState<WizardCompeticaoForm>(wizardFormInicial);
   const [slugEditado, setSlugEditado] = useState(false);
+  const [slugDuplicado, setSlugDuplicado] = useState("");
+  const [verificandoSlug, setVerificandoSlug] = useState(false);
   const [erroEtapa, setErroEtapa] = useState("");
   const { data: formatos = [], isLoading: carregandoFormatos, error: erroFormatos, refetch: recarregarFormatos } = useFormatosWizard();
   const { data: scoreRules, isLoading: carregandoScore, error: erroScore, refetch: recarregarScore } = useScoreRulesWizard();
@@ -66,11 +69,13 @@ export function WizardNovaCompeticao() {
 
   function atualizar<K extends keyof WizardCompeticaoForm>(chave: K, valor: WizardCompeticaoForm[K]) {
     setForm((atual) => ({ ...atual, [chave]: valor }));
+    if (chave === "slug") setSlugDuplicado("");
     setErroEtapa("");
   }
 
   function atualizarNome(nome: string) {
     setForm((atual) => ({ ...atual, nome, slug: slugEditado ? atual.slug : gerarSlug(nome) }));
+    if (!slugEditado) setSlugDuplicado("");
     setErroEtapa("");
   }
 
@@ -80,8 +85,30 @@ export function WizardNovaCompeticao() {
     return !erro;
   }
 
-  function avancar() {
+  async function verificarSlug() {
+    const slug = form.slug;
+    if (erroSlug(slug)) return false;
+    setVerificandoSlug(true);
+    try {
+      const existe = await slugCompeticaoJaExiste(slug);
+      setSlugDuplicado(existe ? slug : "");
+      if (existe) {
+        setErroEtapa(MENSAGEM_SLUG_DUPLICADO);
+      } else {
+        setErroEtapa((atual) => atual === MENSAGEM_SLUG_DUPLICADO ? "" : atual);
+      }
+      return !existe;
+    } catch {
+      setErroEtapa("Não foi possível verificar o identificador. Tente novamente.");
+      return false;
+    } finally {
+      setVerificandoSlug(false);
+    }
+  }
+
+  async function avancar() {
     if (!validar()) return;
+    if (etapa === 0 && !(await verificarSlug())) return;
     const proxima = Math.min(etapa + 1, ETAPAS.length - 1);
     setEtapa(proxima);
     setMaiorEtapa((atual) => Math.max(atual, proxima));
@@ -116,11 +143,12 @@ export function WizardNovaCompeticao() {
     } catch (erro) {
       const codigo = erro instanceof WizardCompeticaoError ? erro.codigo : "desconhecido";
       const mapeado = ERROS_RPC[codigo];
-      toast.error(mapeado?.mensagem ?? (erro instanceof Error ? erro.message : "Não foi possível criar a competição."));
+      const mensagem = mapeado?.mensagem ?? (erro instanceof Error ? erro.message : "Não foi possível criar a competição.");
+      toast.error(mensagem);
+      setErroEtapa(mensagem);
       if (mapeado) {
         setEtapa(mapeado.etapa);
         setMaiorEtapa((atual) => Math.max(atual, mapeado.etapa));
-        setErroEtapa(mapeado.mensagem);
       }
     }
   }
@@ -169,8 +197,21 @@ export function WizardNovaCompeticao() {
               <Input id="wizard-nome-curto" value={form.nomeCurto} onChange={(event) => atualizar("nomeCurto", event.target.value)} placeholder="Ex.: Feminina 2027" />
             </WizardField>
             <WizardField id="wizard-slug" label="Identificador (slug)" required help="Usado no endereço. Letras minúsculas, números e _; nunca hífen.">
-              <Input id="wizard-slug" className="font-mono" aria-invalid={form.slug !== "" && !!erroSlug(form.slug)} aria-describedby="wizard-slug-erro" value={form.slug} onChange={(event) => { setSlugEditado(true); atualizar("slug", event.target.value); }} placeholder="feminina2027" />
-              {form.slug !== "" && erroSlug(form.slug) && <p id="wizard-slug-erro" role="alert" className="text-xs font-medium text-destructive">{erroSlug(form.slug)}</p>}
+              <Input
+                id="wizard-slug"
+                className="font-mono"
+                aria-invalid={form.slug !== "" && (!!erroSlug(form.slug) || slugDuplicado === form.slug)}
+                aria-describedby="wizard-slug-erro"
+                value={form.slug}
+                onChange={(event) => { setSlugEditado(true); atualizar("slug", event.target.value); }}
+                onBlur={() => { if (!erroSlug(form.slug)) void verificarSlug(); }}
+                placeholder="feminina2027"
+              />
+              {form.slug !== "" && (erroSlug(form.slug) || slugDuplicado === form.slug) && (
+                <p id="wizard-slug-erro" role="alert" className="text-xs font-medium text-destructive">
+                  {erroSlug(form.slug) ?? MENSAGEM_SLUG_DUPLICADO}
+                </p>
+              )}
             </WizardField>
             <div className="flex items-start justify-between gap-4 rounded-xl border border-border p-3 sm:col-span-2">
               <label htmlFor="wizard-teaser" className="text-sm font-semibold">Mostrar card 'Em breve' no lobby enquanto rascunho?</label>
@@ -330,7 +371,9 @@ export function WizardNovaCompeticao() {
           <Button type="button" variant="outline" className="flex-1 sm:flex-none" onClick={() => irPara(etapa - 1)} disabled={etapa === 0 || criar.isPending}><ArrowLeft /> Voltar</Button>
           <div className="flex-1 sm:hidden" />
           {etapa < ETAPAS.length - 1 ? (
-            <Button type="button" className="flex-1 sm:flex-none" onClick={avancar} disabled={etapa === 0 && (carregandoFormatos || !!erroSlug(form.slug))}>Avançar <ArrowRight /></Button>
+            <Button type="button" className="flex-1 sm:flex-none" onClick={avancar} disabled={etapa === 0 && (carregandoFormatos || !!erroSlug(form.slug) || slugDuplicado === form.slug)}>
+              Avançar {verificandoSlug && etapa === 0 ? <Loader2 className="animate-spin" /> : <ArrowRight />}
+            </Button>
           ) : (
             <Button type="button" className="flex-1 sm:flex-none" onClick={criarCompeticao} disabled={criar.isPending || !scoreRules}>
               {criar.isPending ? <Loader2 className="animate-spin" /> : <Plus />} {criar.isPending ? "Criando..." : "Criar competição"}
