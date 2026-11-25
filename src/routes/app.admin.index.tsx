@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useReportsAbertosCount } from "@/lib/queries/reports";
 import { useLotesAguardandoPorCompeticao } from "@/lib/queries/admin-lotes";
-import { Users, Activity, ScrollText, Bug, Settings, Lock, Trophy } from "lucide-react";
+import { Users, Activity, ScrollText, Bug, Settings, Lock, Trophy, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/app/admin/")({
   head: () => ({ meta: [{ title: "Admin — Plataforma" }] }),
@@ -54,7 +55,12 @@ function AdminPlataforma() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-display text-lg font-bold">Competições</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-bold">Competições</h2>
+          <Button asChild size="sm">
+            <Link to="/app/admin/nova-competicao"><Plus /> Nova competição</Link>
+          </Button>
+        </div>
         {isLoading ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-32" />)}

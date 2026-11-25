@@ -57,6 +57,7 @@ import { Route as AppAdminPesquisasRouteImport } from './routes/app.admin.pesqui
 import { Route as AppAdminPerfisPersonalidadeRouteImport } from './routes/app.admin.perfis-personalidade'
 import { Route as AppAdminPerfisRouteImport } from './routes/app.admin.perfis'
 import { Route as AppAdminPagamentosRouteImport } from './routes/app.admin.pagamentos'
+import { Route as AppAdminNovaCompeticaoRouteImport } from './routes/app.admin.nova-competicao'
 import { Route as AppAdminJogosRouteImport } from './routes/app.admin.jogos'
 import { Route as AppAdminFinanceiroRouteImport } from './routes/app.admin.financeiro'
 import { Route as AppAdminEncerrarCopaRouteImport } from './routes/app.admin.encerrar-copa'
@@ -313,6 +314,11 @@ const AppAdminPagamentosRoute = AppAdminPagamentosRouteImport.update({
   path: '/pagamentos',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminNovaCompeticaoRoute = AppAdminNovaCompeticaoRouteImport.update({
+  id: '/nova-competicao',
+  path: '/nova-competicao',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminJogosRoute = AppAdminJogosRouteImport.update({
   id: '/jogos',
   path: '/jogos',
@@ -425,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
   '/app/admin/financeiro': typeof AppAdminFinanceiroRoute
   '/app/admin/jogos': typeof AppAdminJogosRoute
+  '/app/admin/nova-competicao': typeof AppAdminNovaCompeticaoRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
@@ -487,6 +494,7 @@ export interface FileRoutesByTo {
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
   '/app/admin/financeiro': typeof AppAdminFinanceiroRoute
   '/app/admin/jogos': typeof AppAdminJogosRoute
+  '/app/admin/nova-competicao': typeof AppAdminNovaCompeticaoRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
@@ -552,6 +560,7 @@ export interface FileRoutesById {
   '/app/admin/encerrar-copa': typeof AppAdminEncerrarCopaRoute
   '/app/admin/financeiro': typeof AppAdminFinanceiroRoute
   '/app/admin/jogos': typeof AppAdminJogosRoute
+  '/app/admin/nova-competicao': typeof AppAdminNovaCompeticaoRoute
   '/app/admin/pagamentos': typeof AppAdminPagamentosRoute
   '/app/admin/perfis': typeof AppAdminPerfisRoute
   '/app/admin/perfis-personalidade': typeof AppAdminPerfisPersonalidadeRoute
@@ -618,6 +627,7 @@ export interface FileRouteTypes {
     | '/app/admin/encerrar-copa'
     | '/app/admin/financeiro'
     | '/app/admin/jogos'
+    | '/app/admin/nova-competicao'
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
@@ -680,6 +690,7 @@ export interface FileRouteTypes {
     | '/app/admin/encerrar-copa'
     | '/app/admin/financeiro'
     | '/app/admin/jogos'
+    | '/app/admin/nova-competicao'
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
@@ -744,6 +755,7 @@ export interface FileRouteTypes {
     | '/app/admin/encerrar-copa'
     | '/app/admin/financeiro'
     | '/app/admin/jogos'
+    | '/app/admin/nova-competicao'
     | '/app/admin/pagamentos'
     | '/app/admin/perfis'
     | '/app/admin/perfis-personalidade'
@@ -1123,6 +1135,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminPagamentosRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/app/admin/nova-competicao': {
+      id: '/app/admin/nova-competicao'
+      path: '/nova-competicao'
+      fullPath: '/app/admin/nova-competicao'
+      preLoaderRoute: typeof AppAdminNovaCompeticaoRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/app/admin/jogos': {
       id: '/app/admin/jogos'
       path: '/jogos'
@@ -1234,6 +1253,7 @@ interface AppAdminRouteChildren {
   AppAdminEncerrarCopaRoute: typeof AppAdminEncerrarCopaRoute
   AppAdminFinanceiroRoute: typeof AppAdminFinanceiroRoute
   AppAdminJogosRoute: typeof AppAdminJogosRoute
+  AppAdminNovaCompeticaoRoute: typeof AppAdminNovaCompeticaoRoute
   AppAdminPagamentosRoute: typeof AppAdminPagamentosRoute
   AppAdminPerfisRoute: typeof AppAdminPerfisRoute
   AppAdminPerfisPersonalidadeRoute: typeof AppAdminPerfisPersonalidadeRoute
@@ -1259,6 +1279,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminEncerrarCopaRoute: AppAdminEncerrarCopaRoute,
   AppAdminFinanceiroRoute: AppAdminFinanceiroRoute,
   AppAdminJogosRoute: AppAdminJogosRoute,
+  AppAdminNovaCompeticaoRoute: AppAdminNovaCompeticaoRoute,
   AppAdminPagamentosRoute: AppAdminPagamentosRoute,
   AppAdminPerfisRoute: AppAdminPerfisRoute,
   AppAdminPerfisPersonalidadeRoute: AppAdminPerfisPersonalidadeRoute,

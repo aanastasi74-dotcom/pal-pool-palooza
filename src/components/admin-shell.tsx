@@ -71,6 +71,7 @@ const plataformaPaths = [
   "/app/admin/configuracoes",
   "/app/admin/champions",
   "/app/admin/competicao",
+  "/app/admin/nova-competicao",
 ];
 
 function isPlataforma(pathname: string) {
