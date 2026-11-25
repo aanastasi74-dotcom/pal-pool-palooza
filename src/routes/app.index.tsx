@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   useCompeticoes,
   useManifestacaoTotal,
+  useTeasersLobby,
   competicaoRota,
   nomeCurtoTitulo,
   type Competicao,
@@ -37,7 +38,12 @@ function Home() {
   const { data: profile } = useProfile();
   const { data: competicoes = [] } = useCompeticoes();
 
-  const futuros = competicoes.filter((c) => FUTUROS.includes(c.status));
+  const { data: teasers } = useTeasersLobby();
+
+  // Drafts stay hidden unless the competition opts in via the teaser_no_lobby setting.
+  const futuros = competicoes.filter(
+    (c) => FUTUROS.includes(c.status) && (c.status !== "rascunho" || !!teasers?.has(c.id)),
+  );
   const encerrados = competicoes.filter((c) => ENCERRADOS.includes(c.status));
 
   return (

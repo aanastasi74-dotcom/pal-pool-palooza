@@ -14,6 +14,8 @@ import {
   montarPayloadWizard,
   validarEtapaWizard,
   wizardFormInicial,
+  erroSlug,
+  AJUDA_INCENTIVO,
   type IncentivoTipoWizard,
   type WizardCompeticaoForm,
 } from "@/lib/queries/wizard-competicao-rules";
@@ -167,8 +169,13 @@ export function WizardNovaCompeticao() {
               <Input id="wizard-nome-curto" value={form.nomeCurto} onChange={(event) => atualizar("nomeCurto", event.target.value)} placeholder="Ex.: Feminina 2027" />
             </WizardField>
             <WizardField id="wizard-slug" label="Identificador (slug)" required help="Usado no endereço. Letras minúsculas, números e _; nunca hífen.">
-              <Input id="wizard-slug" className="font-mono" value={form.slug} onChange={(event) => { setSlugEditado(true); atualizar("slug", event.target.value); }} placeholder="feminina2027" />
+              <Input id="wizard-slug" className="font-mono" aria-invalid={form.slug !== "" && !!erroSlug(form.slug)} aria-describedby="wizard-slug-erro" value={form.slug} onChange={(event) => { setSlugEditado(true); atualizar("slug", event.target.value); }} placeholder="feminina2027" />
+              {form.slug !== "" && erroSlug(form.slug) && <p id="wizard-slug-erro" role="alert" className="text-xs font-medium text-destructive">{erroSlug(form.slug)}</p>}
             </WizardField>
+            <div className="flex items-start justify-between gap-4 rounded-xl border border-border p-3 sm:col-span-2">
+              <label htmlFor="wizard-teaser" className="text-sm font-semibold">Mostrar card 'Em breve' no lobby enquanto rascunho?</label>
+              <Switch id="wizard-teaser" checked={form.teaserNoLobby} onCheckedChange={(valor) => atualizar("teaserNoLobby", valor)} />
+            </div>
             <WizardField id="wizard-formato" label="Formato" required>
               {carregandoFormatos ? <Skeleton className="h-9 w-full" /> : (
                 <Select value={form.formato} onValueChange={(valor) => atualizar("formato", valor)}>
@@ -265,7 +272,7 @@ export function WizardNovaCompeticao() {
                     </SelectContent>
                   </Select>
                 </WizardField>
-                <WizardField id="wizard-incentivo-valor" label="Valor por adesão" help={form.incentivoTipo === "quota_extra" ? "O lançamento contábil usa valor zero" : "Quanto o promotor ganha por adesão"}>
+                <WizardField id="wizard-incentivo-valor" label="Valor por adesão" help={AJUDA_INCENTIVO[form.incentivoTipo]}>
                   <Input id="wizard-incentivo-valor" type="number" min="0" step="0.01" value={form.incentivoValor} onChange={(event) => atualizar("incentivoValor", event.target.value)} />
                 </WizardField>
                 <div className="space-y-2">
@@ -323,7 +330,7 @@ export function WizardNovaCompeticao() {
           <Button type="button" variant="outline" className="flex-1 sm:flex-none" onClick={() => irPara(etapa - 1)} disabled={etapa === 0 || criar.isPending}><ArrowLeft /> Voltar</Button>
           <div className="flex-1 sm:hidden" />
           {etapa < ETAPAS.length - 1 ? (
-            <Button type="button" className="flex-1 sm:flex-none" onClick={avancar} disabled={etapa === 0 && carregandoFormatos}>Avançar <ArrowRight /></Button>
+            <Button type="button" className="flex-1 sm:flex-none" onClick={avancar} disabled={etapa === 0 && (carregandoFormatos || !!erroSlug(form.slug))}>Avançar <ArrowRight /></Button>
           ) : (
             <Button type="button" className="flex-1 sm:flex-none" onClick={criarCompeticao} disabled={criar.isPending || !scoreRules}>
               {criar.isPending ? <Loader2 className="animate-spin" /> : <Plus />} {criar.isPending ? "Criando..." : "Criar competição"}

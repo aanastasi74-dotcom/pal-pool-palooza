@@ -28,6 +28,7 @@ export type WizardCompeticaoForm = {
   incentivoTeto: string;
   semTeto: boolean;
   limiteConvites: string;
+  teaserNoLobby: boolean;
 };
 
 export const wizardFormInicial: WizardCompeticaoForm = {
@@ -50,6 +51,20 @@ export const wizardFormInicial: WizardCompeticaoForm = {
   incentivoTeto: "0",
   semTeto: false,
   limiteConvites: "30",
+  teaserNoLobby: false,
+};
+
+export const SLUG_REGEX = /^[a-z0-9_]+$/;
+export const MENSAGEM_SLUG_INVALIDO = "Use só letras minúsculas, números e _ — sem hífen, espaço ou acento";
+
+export function erroSlug(slug: string) {
+  return SLUG_REGEX.test(slug) ? null : MENSAGEM_SLUG_INVALIDO;
+}
+
+export const AJUDA_INCENTIVO: Record<IncentivoTipoWizard, string> = {
+  comissao: "R$ por convidado que aderir (pagar quota)",
+  desconto_quota: "R$ de desconto na própria quota do promotor",
+  quota_extra: "A cada X adesões de convidados, o promotor ganha 1 quota grátis — o valor é o X",
 };
 
 export function gerarSlug(nome: string) {
@@ -75,7 +90,8 @@ export function validarEtapaWizard(
 ) {
   if (etapa === 0) {
     if (!form.nome.trim() || !form.nomeCurto.trim()) return "Preencha o nome e o nome curto.";
-    if (!/^[a-z0-9_]+$/.test(form.slug)) return "O identificador deve usar apenas letras minúsculas, números e sublinhado (_), sem hífen.";
+    const slugInvalido = erroSlug(form.slug);
+    if (slugInvalido) return slugInvalido;
     const formato = formatos.find((item) => item.codigo === form.formato);
     if (!formato?.disponivel) return "Selecione um formato disponível.";
     if (form.inicio && form.fim && form.fim < form.inicio) return "A data de fim deve ser posterior ou igual à data de início.";
@@ -131,6 +147,7 @@ export function montarPayloadWizard(form: WizardCompeticaoForm, scoreRules: Reco
   const settings: Record<string, unknown> = {
     score_rules: scoreRules,
     permite_promotor: form.permitePromotores,
+    teaser_no_lobby: form.teaserNoLobby,
   };
   if (form.permitePromotores) {
     settings.promotor_incentivo = incentivoParaSalvar({

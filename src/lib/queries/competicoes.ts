@@ -38,6 +38,21 @@ export function useCompeticoes() {
   });
 }
 
+export function useTeasersLobby() {
+  return useQuery({
+    queryKey: ["competicoes", "teaser_no_lobby"],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<Set<string>> => {
+      const { data, error } = await supabase
+        .from("competicao_settings")
+        .select("competicao_id, value")
+        .eq("key", "teaser_no_lobby");
+      if (error) throw error;
+      return new Set((data ?? []).filter((s) => s.value === true).map((s) => s.competicao_id));
+    },
+  });
+}
+
 export function useCompeticaoAtiva() {
   const { data, ...rest } = useCompeticoes();
   return { ...rest, data: data?.find((c) => c.status === "ativa") };

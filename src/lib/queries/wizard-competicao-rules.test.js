@@ -62,3 +62,17 @@ describe("wizard settings payload", () => {
     expect(payload.settings.promotor_incentivo.teto).toBe(0);
   });
 });
+
+describe("wizard fixes S4.3", () => {
+  test("payload slug is the typed slug value", () => {
+    const payload = montarPayloadWizard({ ...formValido, slug: "testegate_2027" }, scoreRules);
+    expect(payload.competicao.slug).toBe("testegate_2027");
+  });
+  test("hyphen or uppercase slug shows the inline message", () => {
+    expect(validarEtapaWizard(0, { ...formValido, slug: "Fem-2027" }, formato, scoreRules)).toBe("Use só letras minúsculas, números e _ — sem hífen, espaço ou acento");
+  });
+  test("teaser_no_lobby defaults to false and follows the toggle", () => {
+    expect(montarPayloadWizard(formValido, scoreRules).settings.teaser_no_lobby).toBe(false);
+    expect(montarPayloadWizard({ ...formValido, teaserNoLobby: true }, scoreRules).settings.teaser_no_lobby).toBe(true);
+  });
+});
